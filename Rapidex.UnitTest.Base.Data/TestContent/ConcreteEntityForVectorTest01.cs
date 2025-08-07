@@ -1,0 +1,15 @@
+﻿//using Rapidex.Data.FieldTypes;
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+
+//using System.Text;
+//using System.Threading.Tasks;
+
+//namespace Rapidex.UnitTest.Data.TestContent;
+//internal class ConcreteEntityForVectorTest01 : DbConcreteEntityBase
+//{
+//    public string Name { get; set; }
+
+//    public Vector Vector01 { get; set; }
+//}

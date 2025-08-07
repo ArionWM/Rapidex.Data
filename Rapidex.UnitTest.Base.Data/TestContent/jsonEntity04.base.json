@@ -1,0 +1,27 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myJsonEntity04",
+  "dbPrefix": "utest",
+  "primaryKey": "Id",
+  "fields": [
+    {
+      "name": "Id",
+      "type": "long"
+    },
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    {
+      "name": "ChangeField",
+      "type": "int"
+    }
+
+
+
+
+  ]
+
+}

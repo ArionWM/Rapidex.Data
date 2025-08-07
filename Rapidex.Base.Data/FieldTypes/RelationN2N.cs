@@ -1,0 +1,233 @@
+﻿using Rapidex.Data.Metadata.Relations;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static Rapidex.Data.RelationOne2N;
+
+namespace Rapidex.Data
+{
+    public class RelationN2N : RelationBase, ILazy
+    {
+        public class VirtualRelationN2NDbFieldMetadata : Metadata.Columns.VirtualDbFieldMetadata
+        {
+            public string TargetEntityName { get; set; }
+            public IDbEntityMetadata TargetEntityMetadata { get; set; }
+            public string JunctionEntityName { get; set; } = JunctionHelper.DEFAULT_JUNCTION_ENTITY_NAME;
+
+            public string JunctionSourceFieldName { get; set; }
+            public string JunctionTargetFieldName { get; set; }
+
+            //Kendine referans?
+
+            //public IDbEntityMetadata TargetEntityMetadata { get; set; }
+
+            public VirtualRelationN2NDbFieldMetadata()
+            {
+
+            }
+
+            public VirtualRelationN2NDbFieldMetadata(IDbFieldMetadata source, string targetEntityName)
+            {
+                this.Name = source.Name;
+                this.Caption = source.Caption ?? targetEntityName;
+                this.TargetEntityName = targetEntityName;
+
+                this.ParentMetadata = source.ParentMetadata;
+
+                this.JunctionSourceFieldName = this.ParentMetadata.Name.ToFriendly();
+                this.JunctionTargetFieldName = this.TargetEntityName.ToFriendly();
+
+                this.IsPersisted = false;
+                this.Type = source.Type;
+
+                this.BaseType = typeof(RelationN2N); //Kullanılmayan değer
+                this.DbType = DbFieldType.Binary; //Kullanılmayan değer
+                this.SkipDirectLoad = true;
+                this.SkipDirectSet = true;
+                this.SkipDbVersioning = true;
+
+                this.ValueSetter = (entity, fieldName, value, applyToEntity) =>
+                {
+                    throw new NotSupportedException();
+                };
+
+                this.ValueGetterUpper = (entity, fieldName) =>
+                {
+                    return BasicBaseDataType.GetValueUpperSt(entity, fieldName);
+                };
+
+                this.ValueGetterLower = (entity, fieldName) =>
+                {
+                    return null;
+                };
+
+            }
+
+            public override void Setup(IDbEntityMetadata parentMetadata)
+            {
+                base.Setup(parentMetadata);
+            }
+
+            public override void GetDefinitionData(IDbSchemaScope scope, ref ItemDefinitionExtraData data, bool placeOptions)
+            {
+                base.GetDefinitionData(scope, ref data, placeOptions);
+                data.Target = this.TargetEntityName;
+                data.Type = "relationN2N";
+                data.AddData("reference", this.TargetEntityName);
+                data.AddData("junction", null); //GenericJunction
+
+                string relationInfo = $"{this.ParentMetadata.Name}/@parentId/{this.Name}";
+                data.AddData("filter", $"releated = {relationInfo}");
+                data.AddData("relationInfo", relationInfo);
+
+                if (this.TargetEntityMetadata != null)
+                {
+                    //HasPicture?
+                    string behaviorNames = this.TargetEntityMetadata.Behaviors.Join(",");
+                    data.Data.Set("targetBehaviors", behaviorNames);
+                }
+            }
+        }
+
+        public virtual string TargetEntityName { get; protected set; }
+
+        /// <summary>
+        /// Birim testlerinde ClearCache sonrasında otomatik toparlanması için
+        /// </summary>
+        public virtual string TargetEntityConcreteTypeName { get; protected set; }
+
+
+        public override string TypeName => "relationN2N";
+        public override Type BaseType => typeof(RelationN2N);
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void SetContentCriteria(IQueryCriteria query, Action<IQueryCriteria> additionalCriterias = null)
+        {
+            var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
+            var parentEntity = this.GetParent();
+
+            JunctionHelper.SetEntitiesCriteria(parentEntity._Scope, fm, parentEntity, query, additionalCriterias);
+        }
+
+        public override IEntityLoadResult GetContent(Action<IQueryCriteria> additionalCriteria = null)
+        {
+            var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
+            var parentEntity = this.GetParent();
+
+            IEntityLoadResult res = JunctionHelper.GetEntities(parentEntity._Scope, fm, parentEntity, additionalCriteria).Result;
+            return res;
+        }
+
+        public override object GetSerializationData(EntitySerializationOptions options)
+        {
+            IEntityLoadResult? loadResult = (IEntityLoadResult)((ILazy)this).GetContent();
+            if (loadResult == null)
+                return null;
+
+            if (options.IncludeNestedEntities)
+            {
+                ObjDictionary data = new ObjDictionary();
+                data["_description"] = "Nested content available";
+                return data;
+            }
+
+            IEntitySerializationDataCreator dataCreator = Common.ServiceProvider?.GetRapidexService<IEntitySerializationDataCreator>();
+            if (dataCreator == null)
+            { //WARN: Kötü bir çözüm, bu seviyede DI kullanılmıyor idi, nasıl çözebiliriz?
+                dataCreator = new EntitySerializationDataCreator();
+            }
+
+            var parentEntity = this.GetParent();
+            var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
+            ItemDefinitionExtraData exData = new ItemDefinitionExtraData();
+            fm.GetDefinitionData(parentEntity._Scope, ref exData, true);
+
+            EntitySerializationOptions nestedOptions = options;
+            nestedOptions.IncludeNestedEntities = false;
+            nestedOptions.IncludeTypeName = true;
+            var entityData = dataCreator.ConvertToListData(loadResult, nestedOptions, exData.Data, null);
+
+            return entityData;
+        }
+
+        public override object SetWithSerializationData(string memberName, object value)
+        {
+            throw new NotImplementedException("!!!!");
+        }
+
+        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager metadataManager, IDbFieldMetadata self, ObjDictionary values)
+        {
+            string referencedEntity = values.Value<string>("reference", true);
+            this.TargetEntityName = referencedEntity;
+
+            VirtualRelationN2NDbFieldMetadata fm = new VirtualRelationN2NDbFieldMetadata(self, this.TargetEntityName);
+
+            JunctionHelper.AddJunctionFields(fm);
+
+            IDbEntityMetadata refMetadata = metadataManager.Get(this.TargetEntityName);
+            fm.TargetEntityMetadata = refMetadata;
+
+            return fm;
+        }
+
+        public override void Add(IEntity detailEntity)
+        {
+            //TODO: validate detailEntityType
+
+            IDataType _this = this;
+            IEntity parent = this.GetParent();
+            var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
+
+            JunctionHelper.AddRelation(_this.Parent._Scope, fm, parent, detailEntity, true);
+        }
+
+        public void Remove(IEntity detailEntity)
+        {
+            IDataType _this = this;
+            IEntity parent = this.GetParent();
+            var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
+
+            JunctionHelper.RemoveRelation(_this.Parent._Scope, fm, parent, detailEntity, true);
+        }
+    }
+
+    public class RelationN2N<TEntity> : RelationN2N where TEntity : IConcreteEntity
+    {
+        public override string TypeName => "relationN2NConcrete";
+        public override Type BaseType => typeof(RelationN2N<>);
+
+        public RelationN2N()
+        {
+            Type referenceType = typeof(TEntity);
+            this.TargetEntityName = referenceType.Name;
+            this.TargetEntityConcreteTypeName = referenceType.FullName;
+        }
+
+        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager metadataManager, IDbFieldMetadata self, ObjDictionary values)
+        {
+            values.Set("reference", typeof(TEntity).Name);
+            IDbFieldMetadata fm = base.SetupMetadata(metadataManager, self, values);
+            fm.Type = this.GetType();
+            return fm;
+        }
+
+        public virtual new IEntityLoadResult<TEntity> GetContent(Action<IQueryCriteria> additionalCriteria = null)
+        {
+            IEntityLoadResult details = (IEntityLoadResult)((ILazy)this).GetContent();
+            IEntityLoadResult<TEntity> cdetails = details.CastTo<TEntity>();
+            return cdetails;
+        }
+
+        public void Add(TEntity detailEntity)
+        {
+            base.Add(detailEntity);
+        }
+
+    }
+}

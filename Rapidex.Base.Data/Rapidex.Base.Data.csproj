@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<RootNamespace>Rapidex.Data</RootNamespace>
+		<AssemblyName>Rapidex.Data</AssemblyName>
+		<LangVersion>Latest</LangVersion>
+		<PlatformTarget>x64</PlatformTarget>
+		<NoWarn>1701;1702;1591;1572;1573;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS1584;CS1658</NoWarn>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="..\RapidexAssemblyInfo.cs" Link="RapidexAssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  
+	  <PackageReference Include="SqlKata" Version="4.0.1" />
+	  <PackageReference Include="Superpower" Version="3.1.0" />
+	  <PackageReference Include="System.Text.Json" Version="9.0.3" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Rapidex-Base-Common\Rapidex.Base.Common.SignalHub\Rapidex.Base.Common.SignalHub.csproj" />
+	  <ProjectReference Include="..\..\Rapidex-Base-Common\Rapidex.Base.Common\Rapidex.Base.Common.csproj" />
+	</ItemGroup>
+</Project>

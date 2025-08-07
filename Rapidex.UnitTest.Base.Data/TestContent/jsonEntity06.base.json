@@ -1,0 +1,68 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myJsonEntity06",
+  "dbPrefix": "utest",
+  "primaryKey": "Id",
+  "fields": [
+    {
+      "name": "Id",
+      "type": "long"
+    },
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "PlannedTimes",
+      "type": "dateTimeStartEnd"
+    },
+    {
+      "name": "Tags",
+      "type": "tags"
+    },
+    {
+      "name": "ConcreteReference01",
+      "type": "reference",
+      "reference": "ConcreteEntity02"
+    },
+    {
+      "name": "Email",
+      "type": "email"
+    },
+    {
+      "name": "MobilePhone",
+      "type": "Phone"
+    },
+    {
+      "name": "Picture",
+      "type": "image"
+    },
+    {
+      "name": "Description",
+      "type": "text"
+    },
+    {
+      "name": "Price",
+      "type": "Currency"
+    },
+    {
+      "name": "Details01",
+      "type": "relationOne2N",
+      "reference": "myJsonEntity04"
+    }
+
+
+
+  ]
+
+}

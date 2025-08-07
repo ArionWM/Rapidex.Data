@@ -1,0 +1,19 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myJsonEntity11",
+  "dbPrefix": "utest",
+  "primaryKey": "Id",
+  "fields": [
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "Relation01",
+      "type": "relationN2N",
+      "reference": "myJsonEntity10"
+    }
+  ]
+}

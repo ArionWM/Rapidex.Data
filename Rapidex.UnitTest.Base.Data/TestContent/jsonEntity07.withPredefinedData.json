@@ -1,0 +1,83 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myJsonEntity07",
+  "dbPrefix": "utest",
+  //"primaryKey": "Id", //Bilerek Id alanı eklenmedi
+  "fields": [
+    //Bilerek Id ve DbVersion alanı eklenmedi
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "PlannedTimes",
+      "type": "dateTimeStartEnd"
+    },
+    {
+      "name": "Tags",
+      "type": "tags"
+    },
+    {
+      "name": "ConcreteReference01",
+      "type": "reference",
+      "reference": "ConcreteEntity01"
+    },
+    {
+      "name": "Email",
+      "type": "email"
+    },
+    {
+      "name": "MobilePhone",
+      "type": "Phone"
+    },
+    {
+      "name": "Picture",
+      "type": "image"
+    },
+    {
+      "name": "Description",
+      "type": "text"
+    },
+    {
+      "name": "Price",
+      "type": "Currency"
+    }
+  ],
+  "data": {
+    "forceAllValues": false,
+    "values": [
+      {
+        "Id": 1,
+        "Subject": "Meeting 1",
+        "StartTime": "2016-01-01T10:00:00",
+        "EndTime": "2016-01-01T11:00:00",
+        "Email": "test@test.com",
+        "MobilePhone": "1234567890",
+        "Price": 100.00,
+        "Description": "Meeting 1 Description"
+      },
+      {
+        "Id": 3,
+        "Subject": "Meeting 2",
+        "StartTime": "2016-01-01T10:00:00",
+        "EndTime": "2016-01-01T11:00:00",
+        "Email": "test@test.com",
+        "MobilePhone": "587877458",
+        "Price": 333,
+        "Description": "Meeting 2 Description"
+      }
+
+    ]
+
+  }
+}

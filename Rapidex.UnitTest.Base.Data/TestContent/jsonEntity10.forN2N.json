@@ -1,0 +1,14 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myJsonEntity10",
+  "dbPrefix": "utest",
+  "primaryKey": "Id",
+  "fields": [
+    {
+      "name": "Name",
+      "type": "string"
+    }
+  ]
+}

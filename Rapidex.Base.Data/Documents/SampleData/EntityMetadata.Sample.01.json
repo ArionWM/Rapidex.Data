@@ -1,0 +1,100 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myEntity",
+  "dbPrefix": "smpl",
+  "primaryKey": "Id",
+  "caption": "Subject",
+  "fields": [
+    {
+      "name": "Id",
+      "type": "long"
+    },
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "PlannedTimes",
+      "type": "dateTimeStartEnd"
+    },
+    {
+      "name": "Tags",
+      "type": "tags"
+    },
+    {
+      "name": "Status",
+      "type": "flowStatus" //<--- !!!!
+    },
+    {
+      "name": "Priority",
+      "type": "enum",
+      "reference": "priority"
+    },
+    {
+      "name": "AssignedTo",
+      "type": "reference",
+      "reference": "user"
+    },
+    {
+      "name": "IsImportant",
+      "type": "bool"
+    },
+    {
+      "name": "Description",
+      "type": "RichText",
+      "format": "markdown"
+    },
+    {
+      "name": "Picture",
+      "type": "image"
+    },
+    {
+      "name": "Attachments",
+      "type": "files"
+    },
+    {
+      "name": "Notes",
+      "type": "notes" //<--- ?????
+    },
+    {
+      "name": "TotalAmount",
+      "type": "decimal",
+      "skipVersioning": true
+    },
+    {
+      "name": "Team",
+      "type": "relationN2N",
+      "reference": "user"
+    },
+    {
+      "name": "ReleatedAssets",
+      "type": "relationN2N",
+      "reference": "asset"
+    },
+    {
+      "name": "SubTasks",
+      "type": "relationOne2N",
+      "reference": "task",
+      "inverseReference": "ParentTask"
+    },
+    {
+      "name": "Releateds",
+      "type": "relationN2NMultiple",
+      "reference": "any" //<---- ?
+    }
+
+
+
+  ]
+
+}

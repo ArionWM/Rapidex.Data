@@ -1,0 +1,41 @@
+{
+  "type": "EnumDefinition",
+  "name": "Rank",
+  "version": 1,
+
+  "tenant": 1234,
+  "workspace": "base",
+
+  "values": [
+    {
+      "name": "Gold",
+      "color": "#FFD700",
+      "icon": "fa/trophy",
+      "id": 1,
+      "isActive": true,
+      "sealed": true,
+      "description": "The highest rank"
+    },
+    {
+      "name": "Silver",
+      "color": "#C0C0C0",
+      "icon": "fa/abc",
+      "id": 2,
+      "isActive": true,
+      "sealed": true,
+      "description": "The second highest rank"
+
+    },
+    {
+      "name": "Bronze",
+      "color": "#CD7F32",
+      "icon": "fa/leaf",
+      "id": 3,
+      "isActive": true,
+      "sealed": false,
+      "description": "The third highest rank"
+    }
+  ]
+
+
+}

@@ -1,0 +1,24 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myJsonEntity09",
+  "dbPrefix": "utest",
+  "primaryKey": "Id",
+  "onlyBase": true,
+  "fields": [
+    {
+      "name": "Id",
+      "type": "long"
+    },
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    
+
+
+
+  ]
+
+}

@@ -1,0 +1,47 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myJsonEntity02",
+  "dbPrefix": "utest",
+  //"primaryKey": "Id", //Bilerek kaldırıldı
+  "fields": [
+    //Bilerek Id alanı eklenmedi
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "PlannedTimes",
+      "type": "dateTimeStartEnd"
+    },
+    {
+      "name": "Tags",
+      "type": "tags"
+    },
+    {
+      "name": "ConcreteReference01",
+      "type": "reference",
+      "reference": "ConcreteEntity02"
+    },
+    {
+      "name": "ConcreteReference02",
+      "type": "reference",
+      "reference": "ConcreteEntity01"
+    }
+  ],
+  "behaviors": [
+    "HasTags",
+    "TestBehavior1"
+
+  ]
+
+}

@@ -1,0 +1,164 @@
+﻿using Rapidex.Data;
+
+using Rapidex.UnitTest.Data.Fixtures;
+using Rapidex.UnitTest.Data.TestContent;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Rapidex.UnitTest.Data.TestBase
+{
+    public abstract class TableStructureTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
+    {
+        protected TableStructureTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+        {
+        }
+
+        protected abstract string[] GetTableNamesInSchema(IDbSchemaScope schemaScope);
+
+        [Fact]
+        public virtual void Structure_01_CreateTable_FromJson()
+        {
+            this.Fixture.ClearCaches();
+
+            var dbScope = Database.Scopes.Db();
+
+
+            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity03.base.json");
+            Database.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
+            dbScope.Structure.DropEntity("myJsonEntity03");
+
+            var em = Database.Metadata.Get("myJsonEntity03");
+            dbScope.Structure.ApplyEntityStructure(em);
+
+            //... Provider specific overrides ...
+        }
+
+        [Fact]
+        public virtual void Structure_02_CreateTable_FromConcrete()
+        {
+            this.Fixture.ClearCaches();
+
+
+            var dbScope = Database.Scopes.Db();
+
+            dbScope.ReAddReCreate<ConcreteEntity01>();
+
+
+            //... Provider specific overrides ...
+        }
+
+        [Fact]
+        public virtual void Structure_03_AddColumnInRuntime()
+        {
+            this.Fixture.ClearCaches();
+
+            var dbScope = Database.Scopes.Db();
+
+            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
+            Database.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
+
+            dbScope.Structure.DropEntity("myJsonEntity04");
+
+            var em = Database.Metadata.Get("myJsonEntity04");
+            dbScope.Structure.ApplyEntityStructure(em);
+
+        }
+
+
+        [Fact]
+        public virtual void Structure_04_PrematureTablesRaiseException()
+        {
+            this.Fixture.ClearCaches();
+
+            try
+            {
+                string tableName = RandomHelper.RandomText(10);
+
+                //((Rapidex.Data.Scopes.DbScopeManager)Database.Scopes).ClearCache();
+
+                var dbScope = Database.Scopes.Db();
+                Database.Metadata.AddPremature(tableName);
+
+                Assert.Throws<InvalidOperationException>(() => dbScope.Structure.ApplyAllStructure());
+            }
+            finally
+            {
+                this.Fixture.ClearCaches();
+            }
+        }
+
+
+        [Fact]
+        public virtual void Structure_05_RuntimeModify()
+        {
+            this.Fixture.ClearCaches();
+
+            var dbScope = Database.Scopes.Db();
+
+            Database.Metadata.Remove("myJsonEntity04");
+
+            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
+            Database.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
+            dbScope.Structure.DropEntity("myJsonEntity04");
+
+            var em = Database.Metadata.Get("myJsonEntity04");
+
+
+            dbScope.Structure.ApplyEntityStructure(em);
+
+        }
+
+        [Fact]
+        public virtual void Structure_06_OnlyBaseTables_Concrete()
+        {
+            this.Fixture.ClearCaches();
+
+            var dbScope = Database.Scopes.Db();
+
+            var em = Database.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
+
+            var baseSchema = dbScope.Schema("base");
+            baseSchema.Structure.DropEntity<ConcreteOnlyBaseEntity01>();
+            baseSchema.Structure.ApplyAllStructure();
+
+            var schema02 = dbScope.AddSchemaIfNotExists("schema02");
+            schema02.Structure.DropEntity<ConcreteOnlyBaseEntity01>();
+            schema02.Structure.ApplyAllStructure();
+
+            var tableNames = this.GetTableNamesInSchema(baseSchema);
+            Assert.Contains(schema02.Structure.CheckObjectName(em.TableName), tableNames);
+
+            var tableNames02 = this.GetTableNamesInSchema(schema02);
+            Assert.DoesNotContain(schema02.Structure.CheckObjectName(em.TableName), tableNames02);
+        }
+
+        [Fact]
+        public virtual void Structure_07_OnlyBaseTables_Json()
+        {
+            this.Fixture.ClearCaches();
+
+            var dbScope = Database.Scopes.Db();
+            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity09.OnlyBase.json");
+            var em = Database.Metadata.AddFromJson(content);
+
+            var baseSchema = dbScope.Schema("base");
+            baseSchema.Structure.DropEntity("myJsonEntity09");
+            baseSchema.Structure.ApplyAllStructure();
+
+            var schema02 = dbScope.AddSchemaIfNotExists("schema02");
+            schema02.Structure.DropEntity("myJsonEntity09");
+            schema02.Structure.ApplyAllStructure();
+
+            var tableNames = this.GetTableNamesInSchema(baseSchema);
+            Assert.Contains(schema02.Structure.CheckObjectName(em.TableName), tableNames);
+
+            var tableNames02 = this.GetTableNamesInSchema(schema02);
+            Assert.DoesNotContain(schema02.Structure.CheckObjectName(em.TableName), tableNames02);
+        }
+
+    }
+}

@@ -1,0 +1,73 @@
+{
+  "type": "EntityDefinition",
+  "version": 1,
+
+  "name": "myJsonEntity01",
+  "dbPrefix": "utest",
+  "primaryKey": "Id",
+  "fields": [
+    {
+      "name": "Id",
+      "type": "long"
+    },
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "PlannedTimes",
+      "type": "dateTimeStartEnd"
+    },
+    {
+      "name": "Tags",
+      "type": "tags"
+    },
+    {
+      "name": "AssignedTo",
+      "type": "reference",
+      "reference": "user"
+    },
+    {
+      "name": "IsImportant",
+      "type": "bool"
+    },
+    {
+      "name": "Picture",
+      "type": "image"
+    },
+    {
+      "name": "TotalAmount",
+      "type": "decimal"
+    },
+    {
+      "name": "UnitPrice",
+      "type": "currency"
+    },
+    {
+      "name": "TotalPrice",
+      "type": "currency",
+      "skipVersioning": true
+    }
+  ],
+  "views": {
+    "listStyles": [
+      "CardView",
+      "Kanban",
+      "Calendar",
+      "Gantt",
+      "Map",
+      "Timeline",
+      "Grid"
+    ],
+    "defaultListingStyle": "CardView"
+
+  }
+}
