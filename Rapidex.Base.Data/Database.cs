@@ -14,8 +14,6 @@ namespace Rapidex.Data
     {
         private static Type MetadataFactoryType { get; set; }
 
-        [Obsolete("", true)]
-        internal static ConcreteEntityMapper ConcreteEntityMapper { get; private set; } //TODO: iptal edilecek, içeriği EntityMapper'a taşınacak
         public static IPredefinedValueProcessor PredefinedValues { get; private set; }
         public static DbEntityFactory EntityFactory { get; private set; } //Internal olmalı ancak DbDataModificationManager ların erişmesi lazım ?
         public static DbConfigurationManager Configuration { get; private set; }

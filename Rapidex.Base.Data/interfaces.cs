@@ -231,6 +231,11 @@ namespace Rapidex.Data
 
     public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanlı olsa? İlk katman kolayca serileşebilecek bir DTO, ikinci katmanda metotlar + filtreler?
     {
+    
+
+        /// <summary>
+        /// For multi module applications, this is the module name
+        /// </summary>
         string ModuleName { get; set; }
         string Prefix { get; set; }
         string TableName { get; internal set; }

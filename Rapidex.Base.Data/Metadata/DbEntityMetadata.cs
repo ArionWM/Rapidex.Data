@@ -102,7 +102,7 @@ namespace Rapidex.Data.Metadata
         public DbEntityMetadata(string name, string module = null, string prefix = null)
         {
             this.Name = name;
-            this.ModuleName = module;
+            this.ModuleName = module ?? CommonConstants.MODULE_COMMON;
             this.Prefix = prefix?.Trim()?.TrimEnd('_');
             this.TableName = this.Prefix.IsNullOrEmpty() ? this.Name : $"{this.Prefix}_{this.Name}";
             this.Fields = new DbFieldMetadataList(this);

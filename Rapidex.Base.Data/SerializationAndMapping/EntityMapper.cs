@@ -215,22 +215,6 @@ public class EntityMapper
             to.SetValue(fm.Name, val);
         }
 
-        //var values = from.GetAllValues();
-
-        //foreach (var kv in values)
-        //{
-        //    IDbFieldMetadata fm = em.Fields[kv.Key];
-        //    object val = kv.Value;
-
-
-        //    if (val is IDataType dt)
-        //    {
-        //        val = dt.CloneFor(to, fm);
-        //    }
-
-        //    to[kv.Key] = val;
-        //}
-
         this.EnsureAdvancedDataTypes(to);
 
         return to;
@@ -399,27 +383,6 @@ public class EntityMapper
         concEntity.DbVersion = source.DbVersion;
 
         this.Copy(source, concEntity);
-
-
-        /*
-            object val = fm.ValueGetterUpper(from, fm.Name);
-
-            if (val is IDataType dt)
-            {
-                val = dt.CloneFor(to, fm);
-            }
-
-            to.SetValue(fm.Name, val);             
-         */
-
-        //TypeParameterList typeParameterList = this.GetMapping(conctType);
-
-        //foreach (var prop in typeParameterList.Properties)
-        //{
-        //    var value = source.GetValue(prop.Name);
-
-        //    concEntity.SetValue(prop.Name, value);
-        //}
 
         concEntity.EnsureDataTypeInitialization();
 
