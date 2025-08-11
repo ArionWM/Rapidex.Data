@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rapidex.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
-namespace Rapidex.Data.Implementers;
+namespace Rapidex.Data.Metadata.Implementers;
 
 internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
 {
@@ -48,15 +49,13 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
     {
         var updateRes = new UpdateResult();
 
-        ModuleMetadataImplementer mmi = host as ModuleMetadataImplementer;
-        IApplicationModuleDefinition moduleDef = mmi?.ModuleDefinition;
-        if (moduleDef == null)
-            throw new Exception("Module definition not available");
-
-        IDbEntityMetadata em = Database.Metadata.Get(this.Name);
+        IDbEntityMetadata em = host.Parent.Get(this.Name);
         if (em == null)
         {
-            em = Database.Metadata.EntityMetadataFactory.Create(this.Name, moduleDef.NavigationName, moduleDef.TablePrefix);
+            //em = Database.Metadata.EntityMetadataFactory.Create(this.Name, moduleDef.NavigationName, moduleDef.TablePrefix);
+            em = Database.Metadata.EntityMetadataFactory.Create(this.Name, host.ModuleName);
+            host.Parent.Add(em);
+
             Database.Metadata.Add(em);
 
             updateRes.Added(em);
@@ -87,11 +86,11 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
         foreach (object added in ures.AddedItems)
             if (added is IDbEntityMetadata aem)
             {
-                moduleDef.Entities.Add(aem);
+                host.Parent.Add(em);
             }
 
-        moduleDef.Entities.Add(em);
-
+        //moduleDef.Entities.Add(em);
+        target = em;
         Database.Metadata.Check(em);
 
         foreach (IEntityBehaviorDefinition behaviorDef in em.BehaviorDefinitions.List)

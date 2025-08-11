@@ -120,7 +120,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
         if (em.OnlyBaseSchema && this.ParentScope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME) //?? acaba?
             throw new InvalidOperationException($"Entity '{em.Name}' only create for base schema");
 
-        IEntity entity = Database.EntityFactory.Create(this.ParentScope, em, true);
+        IEntity entity = Database.EntityFactory.Create(em, this.ParentScope, true);
 
         entity = entity.PublishOnNew().Result ?? entity;
 

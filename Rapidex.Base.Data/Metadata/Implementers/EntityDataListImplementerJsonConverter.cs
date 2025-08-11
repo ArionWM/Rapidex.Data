@@ -7,7 +7,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Implementers;
+namespace Rapidex.Data.Metadata.Implementers;
 
 internal class EntityDataListImplementerJsonConverter : JsonConverter<EntityDataListImplementer>
 {
@@ -46,7 +46,7 @@ internal class EntityDataListImplementerJsonConverter : JsonConverter<EntityData
                 EntityDataListImplementer imp = content;
                 return imp;
             case JsonTokenType.StartObject:
-                JsonNode node = JsonObject.Parse(ref reader);
+                JsonNode node = JsonNode.Parse(ref reader);
                 JsonObject obj = node.As<JsonObject>();
 
                 //DataListImplementer dobj = JsonSerializer.Deserialize<DataListImplementer>(obj);

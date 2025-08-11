@@ -1,5 +1,6 @@
 ﻿using Rapidex;
 using Rapidex.Data.Entities;
+using Rapidex.Data.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,6 +28,9 @@ namespace Rapidex.Data.Scopes
         public string DefaultSchemaName => defaultSchemaName;
 
         public string SchemaName => baseScope.SchemaName;
+
+
+        public IDbMetadataContainer Metadata { get; protected set; }
 
         public IDbScope ParentDbScope => this;
         public IDbProvider DbProvider => dbProvider;
@@ -59,6 +63,8 @@ namespace Rapidex.Data.Scopes
 
         protected void Initialize()
         {
+            this.Metadata = new DbMetadataContainer();
+
             var structureManager = this.DbProvider.GetStructureProvider();
             if (!structureManager.IsDatabaseAvailable(this.DatabaseName))
             {

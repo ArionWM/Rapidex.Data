@@ -229,9 +229,20 @@ namespace Rapidex.Data
     }
 
 
+    public interface IDbEntityMetadataValidator
+    {
+        /// <summary>
+        /// Validate entity metadata
+        /// </summary>
+        /// <param name="em"></param>
+        /// <returns>True if valid</returns>
+        IValidationResult Validate(IDbEntityMetadata em);
+
+    }
+
     public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanlı olsa? İlk katman kolayca serileşebilecek bir DTO, ikinci katmanda metotlar + filtreler?
     {
-    
+
 
         /// <summary>
         /// For multi module applications, this is the module name
@@ -331,6 +342,7 @@ namespace Rapidex.Data
         IDbEntityMetadata Create(string entityName, string module = null, string prefix = null);
     }
 
+    [Obsolete("Use DbScope.Metadata instead")]
     public interface IDbEntityMetadataManager : IManager
     {
         IFieldMetadataFactory FieldMetadataFactory { get; }
@@ -377,9 +389,22 @@ namespace Rapidex.Data
     }
 
 
+    public interface IDbMetadataContainer
+    {
+        //IDbScope DbScope { get; }
+        ComponentDictionary<IDbEntityMetadata> Entities { get; }
 
+        /// <summary>
+        /// Predefined data for entity / module activation
+        /// </summary>
+        List<IEntity> Data { get; }
 
+        List<IEntity> DemoData { get; }
 
+        void Add(IDbEntityMetadata em);
+
+        IDbEntityMetadata Get(string entityName);
+    }
 
 
 
@@ -532,8 +557,8 @@ namespace Rapidex.Data
     public interface IDataTestHelper
     {
         void DropAllTablesInDatabase(string connectionString);
-        
-        
+
+
     }
 
     public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader
@@ -759,7 +784,11 @@ namespace Rapidex.Data
 
         string[] Schemas { get; }
 
+        
+
         IDbSchemaScope Base { get; }
+
+        IDbMetadataContainer Metadata { get; }  
 
         IDbSchemaScope AddSchemaIfNotExists(string schemaName = null, long id = DatabaseConstants.DEFAULT_EMPTY_ID);
 

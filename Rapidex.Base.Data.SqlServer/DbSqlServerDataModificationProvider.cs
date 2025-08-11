@@ -202,7 +202,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider
         EntityUpdateResult result = new EntityUpdateResult();
 
 
-        TemplateInfo info = Database.EntityFactory.GetTemplate(this.ParentScope, em);
+        TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
         //Request ids ...
         int requiredIdCount = entities.Count(ent => (long)ent.GetId() < 1);
@@ -281,7 +281,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider
 
         EntityUpdateResult result = new EntityUpdateResult();
 
-        TemplateInfo info = Database.EntityFactory.GetTemplate(this.ParentScope, em);
+        TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
         //Request ids ...
         int requiredIdCount = entities.Count(ent => (long)ent.GetId() < 1);

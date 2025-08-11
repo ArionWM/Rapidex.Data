@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Rapidex.Data
 {
+    //TODO: Rename or refactor
     public class ItemDefinitionExtraData : IJsonOnDeserialized
     {
         public string Type { get; set; }

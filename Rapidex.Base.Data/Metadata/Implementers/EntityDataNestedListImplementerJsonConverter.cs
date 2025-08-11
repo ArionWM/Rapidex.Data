@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Implementers;
+namespace Rapidex.Data.Metadata.Implementers;
 
 internal class EntityDataNestedListImplementerJsonConverter : JsonConverter<EntityDataNestedListImplementer>
 {
@@ -46,7 +46,7 @@ internal class EntityDataNestedListImplementerJsonConverter : JsonConverter<Enti
                 EntityDataNestedListImplementer imp = content;
                 return imp;
             case JsonTokenType.StartObject:
-                JsonNode node = JsonObject.Parse(ref reader);
+                JsonNode node = JsonNode.Parse(ref reader);
                 JsonObject obj = node.ShouldSupportTo<JsonObject>();
 
                 //DataNestedListImplementer dobj = JsonSerializer.Deserialize<DataNestedListImplementer>(obj);
@@ -54,7 +54,7 @@ internal class EntityDataNestedListImplementerJsonConverter : JsonConverter<Enti
                 EntityDataNestedListImplementer dobj = obj.Deserialize<EntityDataNestedListImplementer>(InternalJsonSerializerOptions);
                 return dobj;
             case JsonTokenType.StartArray:
-                JsonArray array = JsonObject.Parse(ref reader) as JsonArray;
+                JsonArray array = JsonNode.Parse(ref reader) as JsonArray;
 
                 EntityDataNestedListImplementer imp2 = new EntityDataNestedListImplementer();
                 foreach (JsonObject item in array)

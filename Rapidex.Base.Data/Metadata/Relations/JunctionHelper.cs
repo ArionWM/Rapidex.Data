@@ -160,7 +160,7 @@ namespace Rapidex.Data.Metadata.Relations
                 throw new ArgumentNullException("Entity A or Entity B cannot be null");
 
             return AddRelation(dbSchema, fm, entityA.GetId().As<long>(), entityB.GetId().As<long>(), directSave);
-            
+
         }
 
         public static async Task<IPartialEntity> RemoveRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBId, bool directSave)
@@ -194,7 +194,7 @@ namespace Rapidex.Data.Metadata.Relations
                 }
                 else
                 {
-                    IPartialEntity entForDelete = Database.EntityFactory.CreatePartial(dbSchema, jEm, false, true).NotNull(); //TODO: PartialEntityFactory kullanılacak
+                    IPartialEntity entForDelete = Database.EntityFactory.CreatePartial(jEm, dbSchema, false, true).NotNull(); //TODO: PartialEntityFactory kullanılacak
                     entForDelete.SetId(entForDelete.GetId());
 
                     return entForDelete;

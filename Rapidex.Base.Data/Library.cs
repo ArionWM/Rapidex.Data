@@ -1,13 +1,14 @@
-﻿using Rapidex.Data.Query;
+﻿using Rapidex.Data.Configuration;
 using Rapidex.Data.Entities;
+using Rapidex.Data.FieldTypes;
+using Rapidex.Data.Metadata.Implementers;
+using Rapidex.Data.Parsing;
+using Rapidex.Data.Query;
+using Rapidex.SignalHub;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Rapidex.Data.FieldTypes;
-using Rapidex.Data.Configuration;
-using Rapidex.Data.Parsing;
-using Rapidex.SignalHub;
 
 
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Data")]
@@ -32,6 +33,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 
         services.AddTransientForProd<IEntitySerializationDataCreator, EntitySerializationDataCreator>();
         services.AddTransientForProd<IPredefinedValueProcessor, PredefinedValueProcessor>();
+        services.AddTransientForProd<IImplementHost, DefaultMetadataImplementHost>();
     }
 
     public override void SetupMetadata(IServiceCollection services)

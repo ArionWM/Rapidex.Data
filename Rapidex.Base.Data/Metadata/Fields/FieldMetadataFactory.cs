@@ -114,7 +114,9 @@ namespace Rapidex.Data.Metadata
                 fm.Type = type;
 
                 IDataType dt = TypeHelper.CreateInstance<IDataType>(type);
-                IDbFieldMetadata processedFm = dt.NotNull($"Can't create type '{type.Name}'").SetupMetadata(this._parent, fm, values);
+                IDbFieldMetadata processedFm = dt
+                    .NotNull($"Can't create type '{type.Name}'")
+                    .SetupMetadata(this._parent, fm, values);
 
                 if (dt.SkipDirectLoad.HasValue)
                     processedFm.SkipDirectLoad = dt.SkipDirectLoad.Value;

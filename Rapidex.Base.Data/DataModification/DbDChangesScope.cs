@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Text;
 using System.Threading;
+using System.Xml;
 using static Rapidex.Data.DbEntityFactory;
 using static Rapidex.Data.Reference;
 
@@ -265,7 +266,7 @@ namespace Rapidex.Data.DataModification
             if (entity._IsNew)
             {
                 var em = entity.GetMetadata();
-                TemplateInfo info = Database.EntityFactory.GetTemplate(entity._Scope, em);
+                TemplateInfo info = Database.EntityFactory.GetTemplate(em, entity._Scope);
 
                 long oldId = (long)entity.GetId();
                 if (entity.HasPrematureId())

@@ -1,4 +1,5 @@
 ﻿
+using Rapidex.Data.Scopes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,35 +20,35 @@ namespace Rapidex.Data
         protected ReaderWriterLockSlim _templateLock = new ReaderWriterLockSlim();
 
 
-        protected DbEntity Create(IDbSchemaScope scope, IDbEntityMetadata entityMetadata)
+        protected DbEntity Create(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
         {
             DbEntity dbEntity = new DbEntity();
             dbEntity._Scope = scope;
             dbEntity._TypeName = entityMetadata.Name;
-            dbEntity._DbName = scope.ParentDbScope.Name;
-            dbEntity._SchemaName = scope.SchemaName;
+            dbEntity._DbName = scope?.ParentDbScope.Name;
+            dbEntity._SchemaName = scope?.SchemaName;
             dbEntity.Id = DatabaseConstants.DEFAULT_EMPTY_ID;
             dbEntity.ExternalId = null;
             dbEntity.DbVersion = 0;
             return dbEntity;
         }
 
-        protected PartialEntity CreatePartial(IDbSchemaScope scope, IDbEntityMetadata entityMetadata)
+        protected PartialEntity CreatePartial(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
         {
             PartialEntity dbEntity = new PartialEntity();
             dbEntity._Scope = scope;
             dbEntity._TypeName = entityMetadata.Name;
-            dbEntity._DbName = scope.ParentDbScope.Name;
-            dbEntity._SchemaName = scope.SchemaName;
+            dbEntity._DbName = scope?.ParentDbScope.Name;
+            dbEntity._SchemaName = scope?.SchemaName;
             dbEntity.Id = DatabaseConstants.DEFAULT_EMPTY_ID;
             dbEntity.ExternalId = null;
             dbEntity.DbVersion = 0;
             return dbEntity;
         }
 
-        protected TemplateInfo CreateTemplate(IDbSchemaScope scope, IDbEntityMetadata entityMetadata)
+        protected TemplateInfo CreateTemplate(IDbEntityMetadata entityMetadata, IDbSchemaScope scope)
         {
-            DbEntity dbEntity = this.Create(scope, entityMetadata);
+            DbEntity dbEntity = this.Create(entityMetadata, scope);
 
             TemplateInfo templateInfo = new TemplateInfo();
             templateInfo.Entity = dbEntity;
@@ -61,24 +62,24 @@ namespace Rapidex.Data
             return templateInfo;
         }
 
-        protected IEntity CreateConcrete(IDbSchemaScope scope, IDbEntityMetadata entityMetadata)
+        protected IEntity CreateConcrete(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
         {
             Type concreteType = Common.Assembly.FindType(entityMetadata.ConcreteTypeName);
             IEntity dbEntity = TypeHelper.CreateInstance<IEntity>(concreteType);
 
             dbEntity._Scope = scope;
             dbEntity._TypeName = entityMetadata.Name;
-            dbEntity._DbName = scope.ParentDbScope.Name;
-            dbEntity._SchemaName = scope.SchemaName;
+            dbEntity._DbName = scope?.ParentDbScope.Name;
+            dbEntity._SchemaName = scope?.SchemaName;
             dbEntity.SetId(0L);
             dbEntity.ExternalId = null;
             dbEntity.DbVersion = 0;
             return dbEntity;
         }
 
-        protected TemplateInfo CreateConcreteTemplate(IDbSchemaScope scope, IDbEntityMetadata entityMetadata)
+        protected TemplateInfo CreateConcreteTemplate(IDbEntityMetadata entityMetadata, IDbSchemaScope scope)
         {
-            IEntity dbEntity = this.CreateConcrete(scope, entityMetadata);
+            IEntity dbEntity = this.CreateConcrete(entityMetadata, scope);
 
             TemplateInfo templateInfo = new TemplateInfo();
             templateInfo.Entity = dbEntity;
@@ -92,22 +93,22 @@ namespace Rapidex.Data
             return templateInfo;
         }
 
-        public TemplateInfo GetTemplate(IDbSchemaScope dbScope, IDbEntityMetadata em)
+        public TemplateInfo GetTemplate(IDbEntityMetadata em, IDbSchemaScope dbScope)
         {
             string key = dbScope.ParentDbScope.Name + "." + dbScope.SchemaName + "." + em.Name;
 
             _templateLock.EnterUpgradeableReadLock();
             try
             {
-                if (this.Templates.ContainsKey(key) == false)
+                if (!this.Templates.ContainsKey(key))
                 {
                     _templateLock.EnterWriteLock();
                     try
                     {
                         if (em.ConcreteTypeName.IsNullOrEmpty())
-                            this.Templates.Add(key, this.CreateTemplate(dbScope, em));
+                            this.Templates.Add(key, this.CreateTemplate(em, dbScope));
                         else
-                            this.Templates.Add(key, this.CreateConcreteTemplate(dbScope, em));
+                            this.Templates.Add(key, this.CreateConcreteTemplate(em, dbScope));
                     }
                     finally
                     {
@@ -123,7 +124,7 @@ namespace Rapidex.Data
             }
         }
 
-        public IEntity Create(IDbSchemaScope dbScope, IDbEntityMetadata em, bool forNew)
+        public IEntity Create(IDbEntityMetadata em, IDbSchemaScope? dbScope, bool forNew)
         {
             em.NotNull();
 
@@ -131,18 +132,20 @@ namespace Rapidex.Data
 
             if (em.ConcreteTypeName.IsNullOrEmpty())
             {
-                newEntity = this.Create(dbScope, em);
+                newEntity = this.Create(em, dbScope);
             }
             else
             {
-                newEntity = this.CreateConcrete(dbScope, em);
+                newEntity = this.CreateConcrete(em, dbScope);
             }
 
-            ((IEntity)newEntity)._Metadata = em;
+            newEntity._Metadata = em;
 
             if (forNew)
             {
-                TemplateInfo templateInfo = GetTemplate(dbScope, em);
+                dbScope.NotNull("Scope required for new entitites");
+
+                TemplateInfo templateInfo = GetTemplate(em, dbScope);
 
                 newEntity._IsNew = true;
                 long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext();
@@ -158,24 +161,24 @@ namespace Rapidex.Data
         public IEntity Create<T>(IDbSchemaScope dbScope, bool forNew) where T : IConcreteEntity
         {
             IDbEntityMetadata em = Database.Metadata.Get<T>();
-            return this.Create(dbScope, em, forNew);
+            return this.Create(em, dbScope, forNew);
         }
 
 
         //TODO: Test, pEntity.Values boş olmalı 
-        public IPartialEntity CreatePartial(IDbSchemaScope dbScope, IDbEntityMetadata em, bool forNew, bool forDeleted)
+        public IPartialEntity CreatePartial(IDbEntityMetadata em, IDbSchemaScope dbScope, bool forNew, bool forDeleted)
         {
             em.NotNull();
 
             IPartialEntity newEntity = null;
 
-            newEntity = this.CreatePartial(dbScope, em);
+            newEntity = this.CreatePartial(em, dbScope);
 
-            ((IPartialEntity)newEntity)._Metadata = em;
+            newEntity._Metadata = em;
 
             if (forNew)
             {
-                TemplateInfo templateInfo = GetTemplate(dbScope, em);
+                TemplateInfo templateInfo = GetTemplate(em, dbScope);
 
                 newEntity._IsNew = true;
                 long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext();

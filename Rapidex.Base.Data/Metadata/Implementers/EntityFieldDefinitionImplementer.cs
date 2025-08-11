@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
-namespace Rapidex.Data.Implementers;
+namespace Rapidex.Data.Metadata.Implementers;
 
 internal class EntityFieldDefinitionImplementer : Dictionary<string, object>, IImplementer<IDbFieldMetadata>
 {
@@ -66,7 +66,7 @@ internal class EntityFieldDefinitionImplementer : Dictionary<string, object>, II
 
         EntityDefinitionImplementer entDefImplementer = (EntityDefinitionImplementer)parentImplementer;
 
-        IDbEntityMetadata em = (IDbEntityMetadata)Database.Metadata.Get(entDefImplementer.Name);
+        IDbEntityMetadata em = Database.Metadata.Get(entDefImplementer.Name);
         em.NotNull($"Entity metadata not found with '{entDefImplementer.Name}'");
         IDbFieldMetadata fm = em.Fields.Get(this.Name);
         if (fm == null)

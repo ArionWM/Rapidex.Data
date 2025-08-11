@@ -166,7 +166,7 @@ public class EntityMapper
     public IEntity Clone(IEntity from, IDbSchemaScope targetScope = null)
     {
         var em = from.GetMetadata();
-        IEntity clone = Database.EntityFactory.Create(this.Parent, em, false);
+        IEntity clone = Database.EntityFactory.Create(em, this.Parent, false);
 
         if (targetScope == null)
         {
@@ -249,7 +249,7 @@ public class EntityMapper
 
     public IEntity MapToNew(IDbEntityMetadata em, DataRow from)
     {
-        IEntity instance = Database.EntityFactory.Create(this.Parent, em, false);
+        IEntity instance = Database.EntityFactory.Create(em, this.Parent, false);
         return this.Map(em, from, instance);
     }
 
@@ -330,7 +330,7 @@ public class EntityMapper
 
     public IEntity MapToNew(IDbEntityMetadata em, IDictionary<string, object> from)
     {
-        IEntity instance = Database.EntityFactory.Create(this.Parent, em, true);
+        IEntity instance = Database.EntityFactory.Create(em, this.Parent, true);
         return this.Map(em, from, instance);
     }
 

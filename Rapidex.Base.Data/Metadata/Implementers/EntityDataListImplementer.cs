@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Rapidex.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Implementers;
+namespace Rapidex.Data.Metadata.Implementers;
 /// <summary>
 /// Ayrı duran ve !data ile işaretlenmiş olan veri listesi
 /// </summary>
@@ -27,23 +28,23 @@ internal class EntityDataListImplementer : IImplementer, IEmptyCheckObject
 
     public virtual IUpdateResult Implement(IImplementHost host, IImplementer parentImplementer, ref object target)
     {
-        ModuleMetadataImplementer mmi = host as ModuleMetadataImplementer;
-        var moduleDef = mmi.ModuleDefinition;
+        //ModuleMetadataImplementer mmi = host as ModuleMetadataImplementer;
+        //var moduleDef = mmi.ModuleDefinition;
 
-        IList<IEntity> entityList = null;
-        switch (target)
-        {
-            case IList<IEntity> list:
-                entityList = list;
-                break;
-            case IApplicationModuleDefinition mdef:
-                entityList = moduleDef.Data;
-                break;
-            default:
-                throw new InvalidOperationException($"Target type '{target.GetType().Name}' is not supported.");
-        }
+        //IList<IEntity> entityList = null;
+        //switch (target)
+        //{
+        //    case IList<IEntity> list:
+        //        entityList = list;
+        //        break;
+        //    case IApplicationModuleDefinition mdef:
+        //        entityList = moduleDef.Data;
+        //        break;
+        //    default:
+        //        throw new InvalidOperationException($"Target type '{target.GetType().Name}' is not supported.");
+        //}
 
-        entityList.NotNull();
+        //entityList.NotNull();
 
         UpdateResult ures = new UpdateResult();
 
@@ -52,16 +53,12 @@ internal class EntityDataListImplementer : IImplementer, IEmptyCheckObject
             object entityObj = null;
             imp.Implement(host, this, ref entityObj);
             IEntity entity = entityObj.ShouldSupportTo<IEntity>();
-            ures.Added(entity);
-            entityList.Add(entity);
-        }
 
-        foreach (IEntity ent in entityList.ToArray())
-        {
-            if (moduleDef.Data.Any(aent => aent.IsEqual(ent)))
+            if (host.Parent.Data.Any(aent => aent.IsEqual(entity)))
                 continue;
 
-            moduleDef.Data.Add(ent);
+            ures.Added(entity);
+            host.Parent.Data.Add(entity);
         }
 
         this.Implemented = true;

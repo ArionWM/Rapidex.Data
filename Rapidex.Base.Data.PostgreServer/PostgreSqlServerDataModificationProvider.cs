@@ -194,7 +194,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         EntityUpdateResult result = new EntityUpdateResult();
 
-        TemplateInfo info = Database.EntityFactory.GetTemplate(this.ParentScope, em);
+        TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
         string schemaName = PostgreHelper.CheckObjectName(this.ParentScope.SchemaName);
 
         int requiredIdCount = entities.Count(ent => (long)ent.GetId() < 1);
@@ -269,7 +269,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         EntityUpdateResult result = new EntityUpdateResult();
 
-        TemplateInfo info = Database.EntityFactory.GetTemplate(this.ParentScope, em);
+        TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
         int requiredIdCount = entities.Count(ent => (long)ent.GetId() < 1);
         long[] ids = new long[0];

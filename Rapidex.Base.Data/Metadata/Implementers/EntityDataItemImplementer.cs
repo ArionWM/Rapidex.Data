@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Implementers;
+namespace Rapidex.Data.Metadata.Implementers;
 internal class EntityDataItemImplementer : Dictionary<string, object>, IImplementer
 {
     public string[] SupportedTags => null;
@@ -16,15 +16,15 @@ internal class EntityDataItemImplementer : Dictionary<string, object>, IImplemen
 
     public IUpdateResult Implement(IImplementHost host, IImplementer parentImplementer, ref object target)
     {
-        ModuleMetadataImplementer mmi = host as ModuleMetadataImplementer;
         string entityName = this.Get("entity").ToString();
 
-        var em = Database.Metadata.Get(entityName).NotNull($"Entity not found with: '{entityName}'");
+        var em = host.Parent.Get(entityName).NotNull($"Entity not found with: '{entityName}'");
 
         UpdateResult ures = new UpdateResult();
 
         //Dikkat scoped entity oluşturuyor, bunu uygular iken scope'ları kaldırmalı ya da dikkate almamalı !!
-        IEntity entity = mmi.DbScope.Mapper.MapToNew(em, this);
+        IEntity entity = Database.EntityFactory.Create(em, null, false);
+        //host.DbScope.Mapper.MapToNew(em, this);
         ures.Added(entity);
         target = entity;
 

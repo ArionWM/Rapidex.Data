@@ -30,6 +30,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Base.Common.SignalH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Base.Common.Logging.SerilogImp.Core8", "..\Rapidex-Base-Common\Rapidex.Base.Common.Logging.Serilog\Rapidex.Base.Common.Logging.SerilogImp.Core8.csproj", "{33CCFF31-33F0-03EC-77BF-8FB4FA6A9AAC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Sample.Data.Basics", "_samples\Rapidex.Sample.Data.Basics\Rapidex.Sample.Data.Basics.csproj", "{0E98197D-AC04-46E8-9FAE-02B69EBBB06C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,9 +80,16 @@ Global
 		{33CCFF31-33F0-03EC-77BF-8FB4FA6A9AAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33CCFF31-33F0-03EC-77BF-8FB4FA6A9AAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33CCFF31-33F0-03EC-77BF-8FB4FA6A9AAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7BA78EAA-AAC5-488A-9D07-61F6CB6F437A}

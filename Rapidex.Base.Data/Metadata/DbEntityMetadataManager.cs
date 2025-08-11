@@ -12,6 +12,7 @@ using System.Xml;
 
 namespace Rapidex.Data.Metadata;
 
+[Obsolete("Use DbScope.Metadata instead")]
 internal class DbEntityMetadataManager : IDbEntityMetadataManager
 {
     protected bool setupOk = false;
