@@ -12,7 +12,7 @@ using System.Xml;
 
 namespace Rapidex.Data.Metadata;
 
-[Obsolete("Use DbScope.Metadata instead")]
+[Obsolete("Use DbScope.Metadata instead", true)]
 internal class DbEntityMetadataManager : IDbEntityMetadataManager
 {
     protected bool setupOk = false;
@@ -29,14 +29,14 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
     public DbEntityMetadataManager()
     {
         this.EntityMetadataFactory = new DbEntityMetadataFactoryBase(); //Şimdilik ..
-        this.FieldMetadataFactory = new FieldMetadataFactory(this);
+        //this.FieldMetadataFactory = new FieldMetadataFactory(this);
         this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory();
     }
 
     public DbEntityMetadataManager(IDbEntityMetadataFactory mFactory)
     {
         this.EntityMetadataFactory = mFactory;
-        this.FieldMetadataFactory = new FieldMetadataFactory(this);
+        //this.FieldMetadataFactory = new FieldMetadataFactory(this);
         this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory();
     }
 

@@ -8,10 +8,10 @@ namespace Rapidex.Data
     {
         public override string TypeName => "phone";
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             self.DbProperties.Length = 50; 
-            return base.SetupMetadata(containerManager, self, values);
+            return base.SetupMetadata(container, self, values);
         }
 
         public override IValidationResult Validate()

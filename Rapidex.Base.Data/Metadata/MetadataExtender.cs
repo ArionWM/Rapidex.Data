@@ -9,12 +9,14 @@ namespace Rapidex.Data;
 
 public static class MetadataExtender
 {
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static IDbEntityMetadata Get<T>(this IDbEntityMetadataManager mman) where T : IConcreteEntity
     {
         Type type = typeof(T);
         return mman.Get(type.Name);
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static M Get<T, M>(this IDbEntityMetadataManager mman)
         where T : IConcreteEntity
         where M : IDbEntityMetadata
@@ -29,13 +31,21 @@ public static class MetadataExtender
         return mman.Get(type.Name);
     }
 
+    public static IDbEntityMetadata AddPremature(this IDbMetadataContainer mman, string entityName)
+    {
+        throw new NotImplementedException();
+    }
+
     public static IDbEntityMetadata GetMetadata(this IEntity ent)
     {
         ent.NotNull();
 
-        IDbEntityMetadata em = ent._Metadata ?? Database.Metadata.Get(ent._TypeName);
+        IDbEntityMetadata em = ent._Metadata ?? ent._Scope.ParentDbScope.Metadata.Get(ent._TypeName);
+        //Database.Metadata.Get(ent._TypeName);
         return em;
     }
+
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static IDbEntityMetadata AddIfNotExist(this IDbEntityMetadataManager emman, Type concreteType, string module = null, string prefix = null)
     {
         emman.NotNull();
@@ -56,6 +66,7 @@ public static class MetadataExtender
         return em;
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static IDbEntityMetadata AddIfNotExist<T>(this IDbEntityMetadataManager emman, string module = null, string prefix = null) where T : IConcreteEntity
     {
         emman.NotNull();
@@ -76,11 +87,13 @@ public static class MetadataExtender
         return em;
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     internal static IDbEntityMetadata CheckAndGet<T>(this IDbEntityMetadataManager mman) where T : IConcreteEntity
     {
         return mman.AddIfNotExist<T>();
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static void AddIfNotExist(this IDbEntityMetadataManager emman, IDbEntityMetadata em)
     {
         emman.NotNull();
@@ -92,6 +105,7 @@ public static class MetadataExtender
         }
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static M AddIfNotExist<T, M>(this IDbEntityMetadataManager mman)
        where T : IConcreteEntity
        where M : IDbEntityMetadata
@@ -100,7 +114,7 @@ public static class MetadataExtender
         return (M)mman.AddIfNotExist<T>();
     }
 
-
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static DbFieldMetadataList AddfNotExist(this DbFieldMetadataList fields, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
     {
 
@@ -109,12 +123,14 @@ public static class MetadataExtender
         return fields;
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static DbFieldMetadataList AddfNotExist<T>(this DbFieldMetadataList fields, string name, string caption, Action<IDbFieldMetadata> set = null) //where T : IDataType
     {
         fields.AddfNotExist(name, typeof(T), caption, set);
         return fields;
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static DbFieldMetadataList AddfNotExist(this DbFieldMetadataList fields, string name, string type, string caption, ObjDictionary values = null, Action<IDbFieldMetadata> set = null)
     {
 
@@ -129,9 +145,8 @@ public static class MetadataExtender
         return fields;
     }
 
-    
 
-
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, string type, ObjDictionary values = null)
     {
         //IDbSchemaScope scope = Database.Scopes.Db(em.DbName).Schema(em.SchemaName);
@@ -141,6 +156,7 @@ public static class MetadataExtender
         return fm;
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static IDbFieldMetadata AddFieldIfNotExist<T>(this IDbEntityMetadata em, string name, ObjDictionary values = null)
     {
         //IDbSchemaScope scope = Database.Scopes.Db(em.DbName).Schema(em.SchemaName);
@@ -150,6 +166,7 @@ public static class MetadataExtender
         return fm;
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
     {
         IDbFieldMetadata fm = Database.Metadata.FieldMetadataFactory.CreateType(em, type, name, null);
@@ -158,6 +175,7 @@ public static class MetadataExtender
         return fm;
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static void Remove(this IDbEntityMetadataManager emman, string name)
     {
         IDbEntityMetadata em = emman.Get(name);
@@ -167,6 +185,7 @@ public static class MetadataExtender
         }
     }
 
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public static void Remove<T>(this IDbEntityMetadataManager emman) where T : IConcreteEntity
     {
         emman.Remove(typeof(T).Name);

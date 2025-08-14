@@ -342,7 +342,7 @@ namespace Rapidex.Data
         IDbEntityMetadata Create(string entityName, string module = null, string prefix = null);
     }
 
-    [Obsolete("Use DbScope.Metadata instead")]
+    [Obsolete("Use DbScope.Metadata instead", true)]
     public interface IDbEntityMetadataManager : IManager
     {
         IFieldMetadataFactory FieldMetadataFactory { get; }
@@ -784,11 +784,11 @@ namespace Rapidex.Data
 
         string[] Schemas { get; }
 
-        
+
 
         IDbSchemaScope Base { get; }
 
-        IDbMetadataContainer Metadata { get; }  
+        IDbMetadataContainer Metadata { get; }
 
         IDbSchemaScope AddSchemaIfNotExists(string schemaName = null, long id = DatabaseConstants.DEFAULT_EMPTY_ID);
 
@@ -990,7 +990,7 @@ namespace Rapidex.Data
         /// </summary>
         /// <param name="self"></param>
         /// <returns></returns>
-        IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values);
+        IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values);
 
         IValidationResult Validate();
     }
@@ -1002,7 +1002,7 @@ namespace Rapidex.Data
     }
 
 
-
+    [Obsolete("//TODO: To Metadata.Data ...")]
     public interface IPredefinedValueProcessor
     {
         void Register(IDbEntityMetadata em, bool @override, params ObjDictionary[] entityValues);

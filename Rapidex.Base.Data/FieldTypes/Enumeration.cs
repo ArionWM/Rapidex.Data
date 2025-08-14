@@ -48,9 +48,9 @@ namespace Rapidex.Data
             }
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
-            IDbFieldMetadata fm = base.SetupMetadata(containerManager, self, values);
+            IDbFieldMetadata fm = base.SetupMetadata(container, self, values);
 
             ReferenceDbFieldMetadata rfm = (ReferenceDbFieldMetadata)fm;
             rfm.DefinitionDataCallback = Enumeration.EnumDefinitionDataFiller;
@@ -125,14 +125,14 @@ namespace Rapidex.Data
 
         public T EnumValue { get { return (T)Enum.ToObject(typeof(T), Convert.ToInt32(this.Value)); } }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             Database.Metadata.AddFromEnum<T>();
 
             this.ReferencedEntity = typeof(T).Name;
 
             values.Set("reference", this.ReferencedEntity);
-            IDbFieldMetadata fm = base.SetupMetadata(containerManager, self, values);
+            IDbFieldMetadata fm = base.SetupMetadata(container, self, values);
             fm.Type = this.GetType();
             return fm;
         }

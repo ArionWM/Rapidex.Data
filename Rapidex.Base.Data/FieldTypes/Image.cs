@@ -20,9 +20,9 @@ namespace Rapidex.Data
             throw new NotImplementedException();
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
-            var fm = base.SetupMetadata(containerManager, self, values);
+            var fm = base.SetupMetadata(container, self, values);
             fm.TypeName = this.TypeName;
             return fm;
         }

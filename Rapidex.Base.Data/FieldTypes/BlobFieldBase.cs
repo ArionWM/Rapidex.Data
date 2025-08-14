@@ -33,10 +33,10 @@ namespace Rapidex.Data
             return fsr.Content;
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             values.Set("reference", typeof(BlobRecord).Name);
-            IDbFieldMetadata fm = base.SetupMetadata(containerManager, self, values);
+            IDbFieldMetadata fm = base.SetupMetadata(container, self, values);
             fm.Type = this.GetType();
             return fm;
         }

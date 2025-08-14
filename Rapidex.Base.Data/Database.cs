@@ -15,6 +15,8 @@ namespace Rapidex.Data
         public static IPredefinedValueProcessor PredefinedValues { get; private set; }
         public static DbEntityFactory EntityFactory { get; private set; } //Internal olmalı ancak DbDataModificationManager ların erişmesi lazım ?
         public static DbConfigurationManager Configuration { get; private set; }
+
+        [Obsolete("Use DbScope.Metadata instead", true)]
         public static IDbEntityMetadataManager Metadata { get; private set; }
         public static IDbScopeManager Scopes { get; private set; }
         public static IDbThreadScopeManager Current { get; private set; }
@@ -25,17 +27,17 @@ namespace Rapidex.Data
             Configuration = new DbConfigurationManager();
             EntityFactory = new DbEntityFactory();
             //ConcreteEntityMapper = new ConcreteEntityMapper(); //KAldırılacak ve tek bir mapper'a geçilecek
-            Metadata = new DbEntityMetadataManager(); //TODO: To services
+            //Metadata = new DbEntityMetadataManager(); //TODO: To services
             PredefinedValues = new PredefinedValueProcessor(); //TODO: To Metadata.Data ...
         }
 
-        public static void SetMetadataFactory<T>() where T : IDbEntityMetadataFactory
-        {
-            Type metadataFactoryType = typeof(T);
+        //public static void SetMetadataFactory<T>() where T : IDbEntityMetadataFactory
+        //{
+        //    Type metadataFactoryType = typeof(T);
 
-            IDbEntityMetadataFactory dbEntityMetadataFactory = TypeHelper.CreateInstance<IDbEntityMetadataFactory>(metadataFactoryType);
-            Metadata.SetEntityMetadataFactory(dbEntityMetadataFactory);
-        }
+        //    IDbEntityMetadataFactory dbEntityMetadataFactory = TypeHelper.CreateInstance<IDbEntityMetadataFactory>(metadataFactoryType);
+        //    Metadata.SetEntityMetadataFactory(dbEntityMetadataFactory);
+        //}
 
         /// <summary>
         /// Load configuration and prepare for work
@@ -50,7 +52,7 @@ namespace Rapidex.Data
 
             Database.Configuration.Setup();
 
-            Database.Metadata.Setup(services);
+            //Database.Metadata.Setup(services);
 
         }
 

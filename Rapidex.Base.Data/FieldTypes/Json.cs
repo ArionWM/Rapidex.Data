@@ -9,10 +9,10 @@ namespace Rapidex.Data
     {
         public override string TypeName => "json";
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             self.DbProperties.Length = -1; //Max
-            return base.SetupMetadata(containerManager, self, values);
+            return base.SetupMetadata(container, self, values);
         }
 
         public override IValidationResult Validate()

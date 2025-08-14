@@ -177,7 +177,7 @@ namespace Rapidex.Data
 
 
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager metadataManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             BasicBaseDataTypeConverter converter = new BasicBaseDataTypeConverter();
             Common.Converter.Register(converter);
@@ -193,11 +193,11 @@ namespace Rapidex.Data
 
             fm.ReferencedEntity = this.ReferencedEntity;
 
-            IDbEntityMetadata refMetadata = metadataManager.Get(this.ReferencedEntity);
+            IDbEntityMetadata refMetadata = container.Get(this.ReferencedEntity);
             if (refMetadata == null)
             {
-                metadataManager.AddPremature(this.ReferencedEntity);
-                refMetadata = metadataManager.Get(this.ReferencedEntity);
+                container.AddPremature(this.ReferencedEntity);
+                refMetadata = container.Get(this.ReferencedEntity);
                 //refMetadata.ConcreteTypeName = this.ReferencedEntityConcreteTypeName;
             }
 
@@ -270,9 +270,9 @@ namespace Rapidex.Data
             return (DbEntity)entity;
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
-            return base.SetupMetadata(containerManager, self, values);
+            return base.SetupMetadata(container, self, values);
         }
     }
 
@@ -293,12 +293,12 @@ namespace Rapidex.Data
             throw new NotImplementedException();
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             Type referenceType = typeof(T);
             this.ReferencedEntityConcreteTypeName = referenceType.FullName;
             values.Set("reference", referenceType.Name);
-            IDbFieldMetadata fm = base.SetupMetadata(containerManager, self, values);
+            IDbFieldMetadata fm = base.SetupMetadata(container, self, values);
             fm.Type = this.GetType();
             return fm;
         }

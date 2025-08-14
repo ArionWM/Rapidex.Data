@@ -130,7 +130,7 @@ namespace Rapidex.Data
             }
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             BasicBaseDataTypeConverter converter = new BasicBaseDataTypeConverter();
             Common.Converter.Register(converter);

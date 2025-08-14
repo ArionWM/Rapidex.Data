@@ -158,18 +158,18 @@ public class RelationOne2N : RelationBase, ILazy
         throw new NotImplementedException("!!!!");
     }
 
-    public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager metadataManager, IDbFieldMetadata self, ObjDictionary values)
+    public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
     {
         string referencedEntity = values.Value<string>("reference", true);
         this.ReferencedEntityName = referencedEntity;
 
         VirtualRelationOne2NDbFieldMetadata fm = new VirtualRelationOne2NDbFieldMetadata(self, this.ReferencedEntityName);
 
-        IDbEntityMetadata refMetadata = metadataManager.Get(this.ReferencedEntityName);
+        IDbEntityMetadata refMetadata = container.Get(this.ReferencedEntityName);
         if (refMetadata == null)
         {
-            metadataManager.AddPremature(this.ReferencedEntityName);
-            refMetadata = metadataManager.Get(this.ReferencedEntityName);
+            container.AddPremature(this.ReferencedEntityName);
+            refMetadata = container.Get(this.ReferencedEntityName);
             //refMetadata.ConcreteTypeName = this.ReferencedEntityConcreteTypeName;
         }
 
@@ -211,10 +211,10 @@ public class RelationOne2N<TEntity> : RelationOne2N where TEntity : IConcreteEnt
         this.ReferencedEntityConcreteTypeName = referenceType.FullName;
     }
 
-    public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+    public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
     {
         values.Set("reference", typeof(TEntity).Name);
-        IDbFieldMetadata fm = base.SetupMetadata(containerManager, self, values);
+        IDbFieldMetadata fm = base.SetupMetadata(container, self, values);
         fm.Type = this.GetType();
         return fm;
     }

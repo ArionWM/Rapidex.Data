@@ -161,7 +161,7 @@ namespace Rapidex.Data
             throw new NotImplementedException("!!!!");
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager metadataManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             string referencedEntity = values.Value<string>("reference", true);
             this.TargetEntityName = referencedEntity;
@@ -170,7 +170,7 @@ namespace Rapidex.Data
 
             JunctionHelper.AddJunctionFields(fm);
 
-            IDbEntityMetadata refMetadata = metadataManager.Get(this.TargetEntityName);
+            IDbEntityMetadata refMetadata = container.Get(this.TargetEntityName);
             fm.TargetEntityMetadata = refMetadata;
 
             return fm;
@@ -209,10 +209,10 @@ namespace Rapidex.Data
             this.TargetEntityConcreteTypeName = referenceType.FullName;
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager metadataManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             values.Set("reference", typeof(TEntity).Name);
-            IDbFieldMetadata fm = base.SetupMetadata(metadataManager, self, values);
+            IDbFieldMetadata fm = base.SetupMetadata(container, self, values);
             fm.Type = this.GetType();
             return fm;
         }

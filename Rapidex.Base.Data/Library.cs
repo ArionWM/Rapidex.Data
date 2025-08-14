@@ -1,6 +1,7 @@
 ﻿using Rapidex.Data.Configuration;
 using Rapidex.Data.Entities;
 using Rapidex.Data.FieldTypes;
+using Rapidex.Data.Metadata;
 using Rapidex.Data.Metadata.Implementers;
 using Rapidex.Data.Parsing;
 using Rapidex.Data.Query;
@@ -28,19 +29,20 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 
     public override void SetupServices(IServiceCollection services)
     {
+        services.AddSingletonForProd<IDbEntityMetadataFactory, DbEntityMetadataFactoryBase>();
         services.AddTransientForProd<IDbCriteriaParser, FilterTextParser>();
         services.AddTransientForProd<FilterTextParser, FilterTextParser>();
 
         services.AddTransientForProd<IEntitySerializationDataCreator, EntitySerializationDataCreator>();
         services.AddTransientForProd<IPredefinedValueProcessor, PredefinedValueProcessor>();
         services.AddTransientForProd<IImplementHost, DefaultMetadataImplementHost>();
+
+        FieldTypeJsonConverterBDT.Register();
     }
 
     public override void SetupMetadata(IServiceCollection services)
     {
-        FieldTypeJsonConverterBDT.Register();
-
-        Database.Metadata.AddIfNotExist<SchemaInfo>()
+        emContainer.AddIfNotExist<SchemaInfo>()
             .MarkOnlyBaseSchema();
     }
 

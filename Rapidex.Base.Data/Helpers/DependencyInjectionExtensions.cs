@@ -20,15 +20,16 @@ public static class DependencyInjectionExtensions
         Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration);
 
         Rapidex.Common.Assembly.SetupAssemblyServices(services);
-        Rapidex.Common.Assembly.SetupAssemblyMetadata(services);
-
         Database.Setup(services);
     }
 
     public static void StartRapidexDataLevel(this IServiceProvider sp)
     {
         Rapidex.Common.Start(sp);
+        
+        Rapidex.Common.Assembly.SetupAssemblyMetadata(services);
+
         Rapidex.Data.Database.Start(sp);
-        Rapidex.Common.Assembly.StartAssemblyMetadata(sp);
+        Rapidex.Common.Assembly.StartAssemblies(sp);
     }
 }

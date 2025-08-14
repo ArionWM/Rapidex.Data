@@ -49,7 +49,7 @@ namespace Rapidex.Data
 
         }
 
-        public virtual IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public virtual IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             if (self.BaseType != null && !self.DbType.HasValue)
             {
@@ -177,13 +177,13 @@ namespace Rapidex.Data
             this.Value = value.As<TBasicDataType>();
         }
 
-        public override IDbFieldMetadata SetupMetadata(IDbEntityMetadataManager containerManager, IDbFieldMetadata self, ObjDictionary values)
+        public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             BasicBaseDataTypeConverter converter = new BasicBaseDataTypeConverter();
             Common.Converter.Register(converter);
 
             self.BaseType = typeof(TBasicDataType);
-            return base.SetupMetadata(containerManager, self, values);
+            return base.SetupMetadata(container, self, values);
         }
 
         public override object GetSerializationData(EntitySerializationOptions options)
