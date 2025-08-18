@@ -73,7 +73,7 @@ internal class EntityFieldDefinitionImplementer : Dictionary<string, object>, II
         {
             ObjDictionary dict = new ObjDictionary();
             dict.Set(this);
-            fm = em.AddFieldIfNotExist(host.FieldMetadataFactory, this.Name, this.Type, dict);
+            fm = em.AddFieldIfNotExist(this.Name, this.Type, dict);
 
             ures.Added(fm);
         }

@@ -21,8 +21,10 @@ public class DefaultEmptyFixture : ICoreTestFixture
         this.Init();
     }
 
-    protected virtual void SetupInternal(IServiceCollection services)
+    protected virtual void Setup(IServiceCollection services)
     {
+        Rapidex.Library commonLib = new Rapidex.Library();
+        commonLib.SetupServices(services);
     }
 
     public virtual void Init()
@@ -41,7 +43,7 @@ public class DefaultEmptyFixture : ICoreTestFixture
 
         this.Configuration = Rapidex.Common.Configuration;
 
-        this.SetupInternal(builder.Services);
+        this.Setup(builder.Services);
 
         IHost host = builder.Build();
         this.ServiceProvider = host.Services;

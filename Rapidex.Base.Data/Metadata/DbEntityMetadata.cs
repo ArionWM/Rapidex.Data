@@ -118,12 +118,12 @@ namespace Rapidex.Data.Metadata
             return this.Name;
         }
 
-        public void AddFieldIfNotExist(IDbFieldMetadata column)
-        {
-            column.ParentMetadata = this;
-            this.Fields.AddIfNotExist(column);
-            column.Setup(this);
-        }
+        //public void AddFieldIfNotExist(IDbFieldMetadata column)
+        //{
+        //    column.ParentMetadata = this;
+        //    this.Fields.AddIfNotExist(column);
+        //    column.Setup(this);
+        //}
 
         public void AddField(IDbFieldMetadata column)
         {
@@ -136,7 +136,7 @@ namespace Rapidex.Data.Metadata
         {
             IUpdateResult ures = behavior.SetupMetadata(this);
             if (checkMetadata)
-                Database.Metadata.Check(this);
+                this.Check();
 
             return ures;
         }
@@ -205,7 +205,7 @@ namespace Rapidex.Data.Metadata
                 ures.MergeWith(this.ApplyBehavior(behavior, false));
             }
 
-            Database.Metadata.Check(this);
+            this.Check();
 
             return ures;
         }

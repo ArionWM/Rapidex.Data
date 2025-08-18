@@ -70,7 +70,7 @@ namespace Rapidex.Data
 
             if (value is string strEnum)
             {
-                var em = Database.Metadata.Get(this.ReferencedEntity);
+                var em = entity._Metadata.Parent.Parent.Metadata.Get(this.ReferencedEntity);
                 if (em != null)
                 {
                     //ConcreteTypeName kullanmıyoruz, ConcreteTypeName sadece ConcreteEntity sınıfından türeyenler için
@@ -127,7 +127,7 @@ namespace Rapidex.Data
 
         public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
-            Database.Metadata.AddFromEnum<T>();
+            container.AddEnum<T>();
 
             this.ReferencedEntity = typeof(T).Name;
 

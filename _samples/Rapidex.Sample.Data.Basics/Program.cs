@@ -7,27 +7,33 @@ using Rapidex.Sample.Data.Basics.ConcreteEntitites;
 
 Console.WriteLine("This is single database basic application");
 
-//This mini sample .. You can use Host eg buil
+//This mini sample .. You can use Host eg build
 ServiceCollection services = new();
 
 // Configure Serilog for logging
 services.UseSerilog(Path.Combine(AppContext.BaseDirectory, "Logs"));
 
-// Init Rapidex infrastructure
-Rapidex.Common.Setup(AppContext.BaseDirectory, AppContext.BaseDirectory, services);
+services.AddRapidexDataLevel(); //<- Add Rapidex services
 
-Database.Setup(services);
+//If we not use IRapidexAssemblyDefinition class, we can add manually own assemblies
+Common.Assembly.Add(typeof(Program).Assembly);
+
 //......
 
 var serviceProvider = services.BuildServiceProvider();
-Rapidex.Common.Start(serviceProvider);
+
+//......
+
+serviceProvider.StartRapidexDataLevel(); //<- Start Rapidex infrastructure
 
 
 // Lets access database
 var dbScope = Database.Scopes.AddMainDbIfNotExists();
 
-
-dbScope.Metadata.AddJson("myJsonContent");
-dbScope.Metadata.ScanDefinitions("myDefinitionsFolder");
-dbScope.Metadata.Add<MyEntity1>();
+//Scan and add metadata from definitions
+dbScope.Metadata.ScanDefinitions(@".\App_Content\MyAppDefinitions");
 dbScope.Metadata.ScanConcreteDefinitions();
+
+// Or you can add metadata manually
+dbScope.Metadata.AddJson("myJsonContent");
+dbScope.Metadata.AddIfNotExist<MyEntity1>();

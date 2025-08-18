@@ -8,9 +8,13 @@ using YamlDotNet.Serialization;
 
 namespace Rapidex.Data;
 
-//TODO: Not possible for this level, must remove and use another approach.
 
-
+/// <summary>
+/// Add metadata definitions to host
+/// </summary>
+/// <see cref="ImplementerExtender"/>
+/// <see cref="ImplementerExtender.ScanConcreteDefinitions(Rapidex.Data.IDbMetadataContainer)"/>
+/// <see cref="ImplementerExtender.ScanDefinitions(Rapidex.Data.IDbMetadataContainer, string)"/>
 public interface IMetadataImplementHost
 {
     string ModuleName { get; }
@@ -23,6 +27,7 @@ public interface IMetadataImplementHost
 
     IUpdateResult AddJson(string json);
     IUpdateResult AddYaml(string yaml);
+    IUpdateResult AddConcrete(Type type);
 }
 
 //See: JsonImplementerInterfaceConverter

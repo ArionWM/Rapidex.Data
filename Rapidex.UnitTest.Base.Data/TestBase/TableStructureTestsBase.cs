@@ -28,10 +28,10 @@ namespace Rapidex.UnitTest.Data.TestBase
 
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity03.base.json");
-            Database.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
+            dbScope.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
             dbScope.Structure.DropEntity("myJsonEntity03");
 
-            var em = Database.Metadata.Get("myJsonEntity03");
+            var em = dbScope.Metadata.Get("myJsonEntity03");
             dbScope.Structure.ApplyEntityStructure(em);
 
             //... Provider specific overrides ...
@@ -59,11 +59,11 @@ namespace Rapidex.UnitTest.Data.TestBase
             var dbScope = Database.Scopes.Db();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
-            Database.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
+            dbScope.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
 
             dbScope.Structure.DropEntity("myJsonEntity04");
 
-            var em = Database.Metadata.Get("myJsonEntity04");
+            var em = dbScope.Metadata.Get("myJsonEntity04");
             dbScope.Structure.ApplyEntityStructure(em);
 
         }
@@ -81,7 +81,7 @@ namespace Rapidex.UnitTest.Data.TestBase
                 //((Rapidex.Data.Scopes.DbScopeManager)Database.Scopes).ClearCache();
 
                 var dbScope = Database.Scopes.Db();
-                Database.Metadata.AddPremature(tableName);
+                dbScope.Metadata.AddPremature(tableName);
 
                 Assert.Throws<InvalidOperationException>(() => dbScope.Structure.ApplyAllStructure());
             }
@@ -99,13 +99,13 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             var dbScope = Database.Scopes.Db();
 
-            Database.Metadata.Remove("myJsonEntity04");
+            dbScope.Metadata.Remove("myJsonEntity04");
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
-            Database.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
+            dbScope.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
             dbScope.Structure.DropEntity("myJsonEntity04");
 
-            var em = Database.Metadata.Get("myJsonEntity04");
+            var em = dbScope.Metadata.Get("myJsonEntity04");
 
 
             dbScope.Structure.ApplyEntityStructure(em);
@@ -119,7 +119,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             var dbScope = Database.Scopes.Db();
 
-            var em = Database.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
+            var em = dbScope.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
 
             var baseSchema = dbScope.Schema("base");
             baseSchema.Structure.DropEntity<ConcreteOnlyBaseEntity01>();
@@ -143,7 +143,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             var dbScope = Database.Scopes.Db();
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity09.OnlyBase.json");
-            var em = Database.Metadata.AddFromJson(content);
+            var em = dbScope.Metadata.AddFromJson(content);
 
             var baseSchema = dbScope.Schema("base");
             baseSchema.Structure.DropEntity("myJsonEntity09");

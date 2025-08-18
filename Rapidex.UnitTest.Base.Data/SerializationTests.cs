@@ -26,8 +26,10 @@ public class SerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public async Task Serialization_01()
     {
-        Database.Metadata.AddIfNotExist<ConcreteEntity04>(); //Master
-        Database.Metadata.AddIfNotExist<ConcreteEntity03>(); //Detail
+        var db = Database.Scopes.AddMainDbIfNotExists();
+
+        db.Metadata.AddIfNotExist<ConcreteEntity04>(); //Master
+        db.Metadata.AddIfNotExist<ConcreteEntity03>(); //Detail
 
         var dbscope = Database.Scopes.AddMainDbIfNotExists();
         dbscope.Structure.DropEntity<ConcreteEntity03>();
@@ -99,13 +101,14 @@ public class SerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Serialization_01_RawJsonSerialization()
     {
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
-        var dbscope = Database.Scopes.Db();
+        var db = Database.Scopes.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
+
         //var dbscope = Database.Scopes.AddMainDbIfNotExists();
         //dbscope.Structure.DropEntity<ConcreteEntity01>();
         //dbscope.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01 = dbscope.New<ConcreteEntity01>();
+        ConcreteEntity01 ent01 = db.New<ConcreteEntity01>();
         ent01.Name = "ent01";
         ent01.CreditLimit1 = 1234;
         ent01.Description = "desc 01";
@@ -115,7 +118,7 @@ public class SerializationTests : DbDependedTestsBase<DbSqlServerProvider>
         string json01 = ent01.ToJson();
         Assert.NotNull(json01);
 
-        ConcreteEntity01 ent = json01.FromJson<ConcreteEntity01>(dbscope);
+        ConcreteEntity01 ent = json01.FromJson<ConcreteEntity01>(db);
         Assert.NotNull(ent);
         Assert.Equal("ent01", ent.Name);
         Assert.Equal(1234, ent.CreditLimit1.Value);
@@ -125,7 +128,8 @@ public class SerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Serialization_02_RawJsonDeserialization()
     {
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
+        var db = Database.Scopes.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
 
         //var dbscope = Database.Scopes.AddMainDbIfNotExists();
         //dbscope.Structure.DropEntity<ConcreteEntity01>();

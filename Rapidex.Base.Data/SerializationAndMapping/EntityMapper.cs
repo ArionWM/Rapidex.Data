@@ -356,7 +356,7 @@ public class EntityMapper
 
     public static IDictionary<string, object> MapToDict(IEntity entity)
     {
-        var em = entity.GetMetadata() ?? Database.Metadata.Get(entity.GetType().Name);
+        var em = entity.GetMetadata() ?? entity._Scope.ParentDbScope.Metadata.Get(entity.GetType().Name);
         em.NotNull();
         return EntityMapper.MapToDict(em, entity);
     }

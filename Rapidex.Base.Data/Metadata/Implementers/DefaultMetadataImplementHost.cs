@@ -47,4 +47,15 @@ internal class DefaultMetadataImplementHost : IMetadataImplementHost
 
         return ures;
     }
+
+    public IUpdateResult AddConcrete(Type type)
+    {
+        UpdateResult ures = new();
+        EntityMetadataBuilderFromConcrete cmi = new(this.Parent, Database.EntityMetadataFactory, Database.FieldMetadataFactory);
+        var em = cmi.Add(type);
+        ures.Added(em);
+        return ures;
+    }
+
+
 }

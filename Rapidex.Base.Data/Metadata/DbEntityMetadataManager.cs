@@ -1,7 +1,6 @@
 ﻿
 using Rapidex.Base.Common.Assemblies;
 using Rapidex.Data.Entities;
-using Rapidex.Data.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -24,7 +23,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
     public IFieldMetadataFactory FieldMetadataFactory { get; }
     public IDbEntityMetadataFactory EntityMetadataFactory { get; protected set; }
 
-    public EnumerationDefinitionFactory EnumerationDefinitionFactory { get; }
+    public EntityMetadataBuilderFromEnum EnumerationDefinitionFactory { get; }
 
     public DbEntityMetadataManager()
     {
@@ -121,7 +120,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
                     Type enumType = field.Type.GetGenericArguments()[0];
                     //Log.Debug(string.Format("Enumeration field: {0} / {1} / {}", em.Name, field.Name, enumType.Name));
 
-                    this.EnumerationDefinitionFactory.Apply(enumType);
+                    this.EnumerationDefinitionFactory.Add(enumType);
                 }
             }
         }
@@ -140,9 +139,9 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
     public virtual void Check(IDbEntityMetadata em)
     {
-        em.Fields.AddfNotExist<long>(this.FieldMetadataFactory, CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<string>(this.FieldMetadataFactory, CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<int>(this.FieldMetadataFactory, CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<long>(CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<string>(CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<int>(CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
         em.PrimaryKey = em.Fields.Get(CommonConstants.FIELD_ID, true);
 
         em.TableName = em.Prefix.IsNullOrEmpty() ? em.Name : $"{em.Prefix}_{em.Name}";
@@ -153,11 +152,10 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
     internal virtual void ScanLibrariesForConcreteDefinitions()
     {
-        this.AddIfNotExist<SchemaInfo>();
-        this.AddIfNotExist<BlobRecord>();
-        //this.AddIfNotExist<References>();
-        this.AddIfNotExist<GenericJunction>();
-        this.AddIfNotExist<TagRecord>();
+        //this.AddIfNotExist<SchemaInfo>();
+        //this.AddIfNotExist<BlobRecord>();
+        //this.AddIfNotExist<GenericJunction>();
+        //this.AddIfNotExist<TagRecord>();
 
         Log.Debug("Database", "Metadata; Scanning libraries for concrete definitions");
         var types = Common.Assembly.FindDerivedClassTypesWithAssemblyInfo<IConcreteEntity>();
@@ -246,7 +244,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
     public virtual IDbEntityMetadata AddFromEnum<TEnum>(string module = null, string prefix = null, Action<Enum, ObjDictionary> callb = null) where TEnum : System.Enum
     {
-        return this.EnumerationDefinitionFactory.Apply(typeof(TEnum), module, prefix, callb);
+        return this.EnumerationDefinitionFactory.Add(typeof(TEnum), module, prefix, callb);
     }
 
     protected virtual IDbFieldMetadata AddXmlField(IDbEntityMetadata em, XmlElement fmElement)
@@ -326,7 +324,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
         if (em.Fields.Get(primaryKeyFieldName) == null)
         {
-            em.Fields.AddfNotExist<long>(this.FieldMetadataFactory, primaryKeyFieldName, CommonConstants.FIELD_ID);
+            em.Fields.AddIfNotExist<long>(primaryKeyFieldName, CommonConstants.FIELD_ID);
         }
 
         this.Add(em);
@@ -353,7 +351,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
     protected virtual IDbEntityMetadata AddEnumFromJson(JsonNode jnode, string module = null)
     {
-        return this.EnumerationDefinitionFactory.Apply(jnode, module);
+        return this.EnumerationDefinitionFactory.AddFromJson(jnode, module);
     }
 
     public virtual IDbEntityMetadata AddFromJson(string json, string module = null)

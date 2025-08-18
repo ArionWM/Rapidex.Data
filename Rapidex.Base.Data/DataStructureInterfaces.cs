@@ -279,7 +279,7 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
 
     ComponentDictionary<IPredefinedFilter> Filters { get; }
 
-    void AddFieldIfNotExist(IDbFieldMetadata column);
+    //void AddFieldIfNotExist(IDbFieldMetadata column);
     void AddField(IDbFieldMetadata column);
 
 

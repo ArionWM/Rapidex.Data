@@ -24,19 +24,21 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         this.Init();
     }
 
-    protected override void SetupInternal(IServiceCollection services)
+    protected override void Setup(IServiceCollection services)
     {
-        base.SetupInternal(services);
+        base.Setup(services);
 
-        Rapidex.SignalHub.Library mhLib = new Rapidex.SignalHub.Library();
-        mhLib.SetupServices(services);
+        services.AddRapidexDataLevel();
 
-        Rapidex.Data.Library module = new Rapidex.Data.Library();
-        module.SetupMetadata(services);
+        //Rapidex.SignalHub.Library mhLib = new Rapidex.SignalHub.Library();
+        //mhLib.SetupServices(services);
 
-        module.SetupServices(services);
+        //Rapidex.Data.Library dataModule = new Rapidex.Data.Library();
+        //dataModule.SetupMetadata(services);
 
-        Database.Setup(services);
+        //dataModule.SetupServices(services);
+
+        //Database.Setup(services);
 
     }
 
@@ -57,34 +59,23 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         if (initialized)
             return;
 
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
-        //Database.SetMetadataFactory<AppLevelEntityMetadataFactory>();
+        this.Setup(builder.Services);
 
-        base.Init();
-
-
-        Rapidex.SignalHub.Library mhLib = new Rapidex.SignalHub.Library();
-        mhLib.Start(this.ServiceProvider);
-
-        Rapidex.Data.Library module = new Rapidex.Data.Library();
-        module.Start(this.ServiceProvider);
-
+        //??
         DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
         DbProviderFactory dbManagersFactory = new DbProviderFactory();
         IDbProvider provider = dbManagersFactory.CreateProvider(connectionInfo);
         this.DropAllTablesInDatabase(provider, false);
 
+        IHost host = builder.Build();
+        this.ServiceProvider = host.Services;
+
+        this.ServiceProvider.StartRapidexDataLevel();
+
+
         var dbScope = Database.Scopes.AddMainDbIfNotExists();
-
-        Database.Metadata.AddIfNotExist<SchemaInfo>()
-            .MarkOnlyBaseSchema();
-        Database.Metadata.AddIfNotExist<BlobRecord>();
-        Database.Metadata.AddIfNotExist<TagRecord>();
-        Database.Metadata.AddIfNotExist<GenericJunction>();
-        //Database.Metadata.AddIfNotExist<Contact>();
-        //Database.Metadata.AddIfNotExist<Department>();
-        //Database.Metadata.AddIfNotExist<TenantRecord>();
-
         dbScope.Structure.ApplyAllStructure();
 
 
@@ -109,26 +100,14 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         //InMemCache clear
         //Common caches clear
         ((Rapidex.Data.Scopes.DbScopeManager)Database.Scopes).ClearCache();
-        ((IDbEntityMetadataManager)Database.Metadata).Clear();
+        //((IDbEntityMetadataManager)Database.Metadata).Clear();
         Database.PredefinedValues.Clear();
-        Database.Metadata.Setup(null);
+        //Database.Metadata.Setup(null);
 
         var db = Database.Scopes.AddMainDbIfNotExists();
 
 
     }
 
-    //public virtual void DropDatabase(string databaseName)
-    //{
-    //    DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
-    //    SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
-
-    //    DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
-    //    //ALTER DATABASE [MyDB] SET AUTO_CLOSE OFF 
-    //    //ALTER DATABASE Sales SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    //    connection.Execute($"IF EXISTS(select * FROM master..sysdatabases where [name] ='{databaseName}') ALTER DATABASE {databaseName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE");
-    //    connection.Execute($"IF EXISTS(select * FROM master..sysdatabases where [name] ='{databaseName}') ALTER DATABASE {databaseName} SET AUTO_CLOSE OFF");
-    //    connection.Execute($"DROP DATABASE IF EXISTS {databaseName} "); //WITH ROLLBACK IMMEDIATE;
-    //}
-
+    
 }

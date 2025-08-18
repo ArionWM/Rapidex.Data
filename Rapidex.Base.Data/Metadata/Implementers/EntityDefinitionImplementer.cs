@@ -52,12 +52,9 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
         IDbEntityMetadata em = host.Parent.Get(this.Name);
         if (em == null)
         {
-            //em = Database.Metadata.EntityMetadataFactory.Create(this.Name, moduleDef.NavigationName, moduleDef.TablePrefix);
-            em = Database.Metadata.EntityMetadataFactory.Create(this.Name, host.ModuleName);
+            //em = Database.EntityMetadataFactory.Create(this.Name, moduleDef.NavigationName, moduleDef.TablePrefix);
+            em = Database.EntityMetadataFactory.Create(this.Name, host.ModuleName);
             host.Parent.Add(em);
-
-            Database.Metadata.Add(em);
-
             updateRes.Added(em);
         }
         else
@@ -91,7 +88,7 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
 
         //moduleDef.Entities.Add(em);
         target = em;
-        Database.Metadata.Check(em);
+        em.Check();
 
         foreach (IEntityBehaviorDefinition behaviorDef in em.BehaviorDefinitions.List)
         {

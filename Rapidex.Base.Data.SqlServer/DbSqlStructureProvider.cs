@@ -186,13 +186,13 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 			throw new InvalidOperationException("Parent scope is null");
 		}
 
-		var allEms = Database.Metadata.GetAll();
+		var allEms = scope.ParentDbScope.Metadata.GetAll();
 		foreach (var em in allEms)
 		{
 			em.ApplyBehaviors();
 		}
 
-		allEms = Database.Metadata.GetAll();
+		allEms = scope.ParentDbScope.Metadata.GetAll();
 		foreach (var em in allEms)
 		{
 			if (em.OnlyBaseSchema && scope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)

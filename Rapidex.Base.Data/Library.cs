@@ -49,5 +49,10 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
     {
         scope.Metadata.AddIfNotExist<SchemaInfo>()
             .MarkOnlyBaseSchema();
+
+        scope.Metadata.AddIfNotExist<SchemaInfo>();
+        scope.Metadata.AddIfNotExist<BlobRecord>();
+        scope.Metadata.AddIfNotExist<GenericJunction>();
+        scope.Metadata.AddIfNotExist<TagRecord>();
     }
 }

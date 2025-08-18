@@ -38,7 +38,7 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
         
         var dbScope = Database.Scopes.Db();
 
-        var em = Database.Metadata.ReAdd<ConcreteEntityWithoutBehavior01>() as IDbEntityMetadata;
+        var em = dbScope.ParentDbScope.Metadata.ReAdd<ConcreteEntityWithoutBehavior01>() as IDbEntityMetadata;
 
         em.AddBehavior<TestBehavior1>(false, true);
         em.AddBehavior<TestBehavior1>(false, true);

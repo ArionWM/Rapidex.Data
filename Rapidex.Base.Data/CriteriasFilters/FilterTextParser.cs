@@ -88,7 +88,7 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
         string entityId = parts[1];
         string fieldName = parts[2];
 
-        var em = Database.Metadata.Get(entityName);
+        var em = query.Schema.ParentDbScope.Metadata.Get(entityName);
         em.NotNull($"Metadata for '{entityName}' not found");
 
         var fm = em.Fields.Get(fieldName, false);

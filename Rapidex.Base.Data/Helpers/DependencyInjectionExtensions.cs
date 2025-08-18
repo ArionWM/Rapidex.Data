@@ -20,7 +20,7 @@ public static class DependencyInjectionExtensions
         Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration);
 
         Rapidex.Common.Assembly.SetupAssemblyServices(services);
-        Database.Setup(services);
+        Rapidex.Data.Database.Setup(services);
     }
 
     public static void StartRapidexDataLevel(this IServiceProvider sp)

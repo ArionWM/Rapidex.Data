@@ -1,5 +1,4 @@
 ﻿using Mapster.Utils;
-using Rapidex.Data;
 using Rapidex.Data.Metadata;
 using System;
 using System.Collections.Generic;
@@ -8,21 +7,12 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
 
-namespace Rapidex.Data.Enumerations;
+namespace Rapidex.Data;
 
-internal class EnumerationDefinitionFactory
+internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
 {
-    //public IDbEntityMetadataFactory EntityMetadataFactory { get; } //??
-
-    internal IDbMetadataContainer Parent { get; }
-    internal IDbEntityMetadataFactory EntityMetadataFactory { get; }
-    internal IFieldMetadataFactory FieldMetadataFactory { get; }
-
-    public EnumerationDefinitionFactory(IDbMetadataContainer parent, IDbEntityMetadataFactory emf, IFieldMetadataFactory fmf)
+    public EntityMetadataBuilderFromEnum(IDbMetadataContainer parent, IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory) : base(parent, dbEntityMetadataFactory, fieldMetadataFactory)
     {
-        this.Parent = parent.NotNull();
-        this.EntityMetadataFactory = emf.NotNull();
-        this.FieldMetadataFactory = fmf.NotNull();
     }
 
 
@@ -66,15 +56,15 @@ internal class EnumerationDefinitionFactory
 
         IDbEntityMetadata bem = em.ShouldSupportTo<IDbEntityMetadata>($"Entity metadata '{em.Name}' should be IDbEntityMetadata");
 
-        em.Fields.AddfNotExist<long>(this.FieldMetadataFactory, CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<string>(this.FieldMetadataFactory, CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<int>(this.FieldMetadataFactory, CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<string>(this.FieldMetadataFactory, "Name", "Name");
-        em.Fields.AddfNotExist<string>(this.FieldMetadataFactory, "Description", "Description");
-        em.Fields.AddfNotExist<Color>(this.FieldMetadataFactory, "Color", "Color");
-        em.Fields.AddfNotExist<bool>(this.FieldMetadataFactory, "IsArchived", "IsArchived"); // aslında ArchiveEntity ile ekleniyor
-        em.Fields.AddfNotExist<bool>(this.FieldMetadataFactory, "Sealed", "Sealed");
-        em.Fields.AddfNotExist<string>(this.FieldMetadataFactory, "Icon", "Icon");
+        em.Fields.AddIfNotExist<long>(CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<string>(CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<int>(CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<string>("Name", "Name");
+        em.Fields.AddIfNotExist<string>("Description", "Description");
+        em.Fields.AddIfNotExist<Color>("Color", "Color");
+        em.Fields.AddIfNotExist<bool>("IsArchived", "IsArchived"); // aslında ArchiveEntity ile ekleniyor
+        em.Fields.AddIfNotExist<bool>("Sealed", "Sealed");
+        em.Fields.AddIfNotExist<string>("Icon", "Icon");
 
         bem.AddBehavior("ArchiveEntity", true, false); //Diğer kitaplıkta kaldı?
         bem.AddBehavior("DefinitionEntity", true, false); //Diğer kitaplıkta kaldı?
@@ -82,24 +72,15 @@ internal class EnumerationDefinitionFactory
         return em;
     }
 
-    public IDbEntityMetadata CreateMetadata<TEnum>(string module = null, string prefix = null) where TEnum : Enum
+    public IDbEntityMetadata Add<TEnum>(string module = null, string prefix = null) where TEnum : Enum
     {
         Type type = typeof(TEnum);
         IDbEntityMetadata em = CreateMetadata(typeof(TEnum).Name, module, prefix);
-        //em.ConcreteTypeName = type.FullName;
         return em;
     }
-
-    public IDbEntityMetadata CreateMetadata(Type enumType, string module = null, string prefix = null)
+    public IDbEntityMetadata Add(Enum enumeration, string module = null, string prefix = null)
     {
-        IDbEntityMetadata em = CreateMetadata(enumType.Name, module, prefix);
-        //em.ConcreteTypeName = enumType.FullName;
-        return em;
-    }
-
-    public IDbEntityMetadata CreateMetadata(Enum enumeration, string module = null, string prefix = null)
-    {
-        return CreateMetadata(enumeration.GetType(), module, prefix);
+        return Add(enumeration.GetType(), module, prefix);
     }
 
     public IDbEntityMetadata CreateMetadataFromJson(string jsonDefinition)
@@ -107,12 +88,12 @@ internal class EnumerationDefinitionFactory
         throw new NotImplementedException();
     }
 
-    public IDbEntityMetadata Apply(Type enumType, string module = null, string prefix = null, Action<Enum, ObjDictionary> callb = null)
+    public IDbEntityMetadata Add(Type enumType, string module = null, string prefix = null, Action<Enum, ObjDictionary> callb = null)
     {
         IDbEntityMetadata em = this.Parent.Get(enumType.Name);
         if (em == null || em.IsPremature)
         {
-            em = this.CreateMetadata(enumType, module, prefix);
+            em = CreateMetadata(enumType.Name, module, prefix);
             this.Parent.AddIfNotExist(em);
         }
         else
@@ -146,7 +127,7 @@ internal class EnumerationDefinitionFactory
         return result.ToArray();
     }
 
-    public IDbEntityMetadata Apply(JsonNode json, string module = null)
+    public IDbEntityMetadata AddFromJson(JsonNode json, string module = null)
     {
         string name = json["name"].GetValue<string>();
         if (module.IsNullOrEmpty())
@@ -166,7 +147,7 @@ internal class EnumerationDefinitionFactory
         return em;
     }
 
-    public IDbEntityMetadata Apply(string json)
+    public IDbEntityMetadata AddFromJson(string json)
     {
         JsonDocumentOptions opt = new JsonDocumentOptions()
         {
@@ -174,7 +155,7 @@ internal class EnumerationDefinitionFactory
             AllowTrailingCommas = true
         };
 
-        JsonNode jdoc = JsonObject.Parse(json, null, opt);
+        JsonNode jdoc = JsonNode.Parse(json, null, opt);
         string type = jdoc["type"].GetValue<string>();
 
         if (type.ToLowerInvariant() != "enumdefinition")
@@ -184,7 +165,7 @@ internal class EnumerationDefinitionFactory
         if (version > 1)
             throw new NotSupportedException($"Schema version '{version}' is not supported");
 
-        return this.Apply(jdoc);
+        return this.AddFromJson(jdoc);
     }
 
 

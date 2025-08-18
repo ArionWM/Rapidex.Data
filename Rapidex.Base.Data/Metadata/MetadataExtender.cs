@@ -1,4 +1,5 @@
 ﻿using Rapidex.Base.Common.Assemblies;
+using Rapidex.Data.Metadata;
 using Rapidex.Data.Metadata.Implementers;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ public static class MetadataExtender
         return em;
     }
 
-    public static IDbEntityMetadata AddIfNotExist(this IDbMetadataContainer mContainer, IDbEntityMetadata em) 
+    public static IDbEntityMetadata AddIfNotExist(this IDbMetadataContainer mContainer, IDbEntityMetadata em)
     {
         var _em = mContainer.Get(em.Name);
         if (_em == null || _em.IsPremature)
@@ -79,7 +80,7 @@ public static class MetadataExtender
 
 
 
-    
+
     public static void Remove(this IDbMetadataContainer emman, string name)
     {
         IDbEntityMetadata em = emman.Get(name);
@@ -89,19 +90,20 @@ public static class MetadataExtender
         }
     }
 
-    
+
+    public static IDbEntityMetadata ReAdd<T>(this IDbMetadataContainer emman, string module = null, string prefix = null) where T : IConcreteEntity
+    {
+        emman.Remove<T>();
+        IDbEntityMetadata metadata = emman.AddIfNotExist<T>(module, prefix);
+        return metadata;
+
+    }
+
     public static void Remove<T>(this IDbMetadataContainer emman) where T : IConcreteEntity
     {
         emman.Remove(typeof(T).Name);
     }
 
-    //public static IDbEntityMetadata UpdateOwner(this IDbEntityMetadata em, IRapidexAssemblyDefinition module)
-    //{
-    //    em.ModuleName = module.NavigationName;
-    //    em.Prefix = module.DatabaseEntityPrefix;
-
-    //    return em;
-    //}
 
     public static IDbEntityMetadata MarkShowInSettings(this IDbEntityMetadata em, bool onlyDeveloperMode) //TODO: Ui level'a taşınacak ..
     {
@@ -148,33 +150,24 @@ public static class MetadataExtender
         return emman.GetModuleOwnedDefinitions(module.NavigationName);
     }
 
-
-
-
-
-
-    
-    public static DbFieldMetadataList AddIfNotExist(this DbFieldMetadataList fields, IFieldMetadataFactory fieldMetadataFactory, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
+    public static DbFieldMetadataList AddIfNotExist(this DbFieldMetadataList fields, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
     {
 
-        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, null);
+        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, null);
         fields.AddIfNotExist(fm);
         return fields;
     }
 
-    
-    public static DbFieldMetadataList AddfNotExist<T>(this DbFieldMetadataList fields, IFieldMetadataFactory fieldMetadataFactory, string name, string caption, Action<IDbFieldMetadata> set = null) //where T : IDataType
+
+    public static DbFieldMetadataList AddIfNotExist<T>(this DbFieldMetadataList fields, string name, string caption, Action<IDbFieldMetadata> set = null) //where T : IDataType
     {
-        fields.AddIfNotExist(fieldMetadataFactory, name, typeof(T), caption, set);
+        fields.AddIfNotExist(name, typeof(T), caption, set);
         return fields;
     }
 
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static DbFieldMetadataList AddfNotExist(this DbFieldMetadataList fields, IFieldMetadataFactory fieldMetadataFactory, string name, string type, string caption, ObjDictionary values = null, Action<IDbFieldMetadata> set = null)
+    public static DbFieldMetadataList AddIfNotExist(this DbFieldMetadataList fields, string name, string type, string caption, ObjDictionary values = null, Action<IDbFieldMetadata> set = null)
     {
-
-
-        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, values);
+        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, values);
         if (caption.IsNOTNullOrEmpty())
         {
             fm.Caption = caption;
@@ -184,28 +177,39 @@ public static class MetadataExtender
         return fields;
     }
 
-
-    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, IFieldMetadataFactory fieldMetadataFactory, string name, string type, ObjDictionary values = null)
+    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, IDbFieldMetadata fm)
     {
-        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(em, type, name, values);
-        em.AddFieldIfNotExist(fm);
-        return fm;
-    }
-
-    public static IDbFieldMetadata AddFieldIfNotExist<T>(this IDbEntityMetadata em, IFieldMetadataFactory fieldMetadataFactory, string name, ObjDictionary values = null)
-    {
-        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(em, typeof(T), name, values);
-        em.AddFieldIfNotExist(fm);
+        em.Fields.AddIfNotExist(fm);
         return fm;
     }
 
 
-    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, IFieldMetadataFactory fieldMetadataFactory, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
+    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, string type, ObjDictionary values = null)
     {
-        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(em, type, name, null);
+        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(em, type, name, values);
+        em.AddFieldIfNotExist(fm);
+        return fm;
+    }
+
+    public static IDbFieldMetadata AddFieldIfNotExist<T>(this IDbEntityMetadata em, string name, ObjDictionary values = null)
+    {
+        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(em, typeof(T), name, values);
+        em.AddFieldIfNotExist(fm);
+        return fm;
+    }
+
+
+    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
+    {
+        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(em, type, name, null);
         set?.Invoke(fm);
         em.Fields.AddIfNotExist(fm);
         return fm;
     }
 
+    internal static void Check(this IDbEntityMetadata em)
+    {
+        EntityMetadataBuilderFromConcrete mb = new(em.Parent, Database.EntityMetadataFactory, Database.FieldMetadataFactory);
+        mb.Check(em);
+    }
 }

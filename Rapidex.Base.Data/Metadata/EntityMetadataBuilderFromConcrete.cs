@@ -11,10 +11,6 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.Metadata;
 internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
 {
-    //public EntityMetadataBuilderFromConcrete(IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory) : base(dbEntityMetadataFactory, fieldMetadataFactory)
-    //{
-    //}
-
     public EntityMetadataBuilderFromConcrete(IDbMetadataContainer parent, IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory) : base(parent, dbEntityMetadataFactory, fieldMetadataFactory)
     {
     }

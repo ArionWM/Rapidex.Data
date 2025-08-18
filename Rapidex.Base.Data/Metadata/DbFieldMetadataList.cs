@@ -24,6 +24,8 @@ namespace Rapidex.Data
             else
             {
                 this.Add(fm.Name, fm);
+                fm.ParentMetadata = this.EntityMetadata;
+                fm.Setup(this.EntityMetadata);
             }
             return this;
 

@@ -95,6 +95,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
     public override void Structure_03_AddColumnInRuntime()
     {
         base.Structure_03_AddColumnInRuntime();
+        var dbScope = Database.Scopes.Db();
 
         using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
 
@@ -113,7 +114,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
         dv.RowFilter = "COLUMN_NAME = 'AddedField'";
         Assert.Empty(dv);
 
-        var em = Database.Metadata.Get("myJsonEntity04");
+        var em = dbScope.Metadata.Get("myJsonEntity04");
         em.AddFieldIfNotExist<int>("AddedField");
         Database.Scopes.Db().Base.Structure.ApplyEntityStructure(em);
 
@@ -131,6 +132,8 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
     {
         base.Structure_05_RuntimeModify();
 
+        var dbScope = Database.Scopes.Db();
+
         using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
 
         DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
@@ -148,7 +151,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
         dv.RowFilter = "COLUMN_NAME = 'AddedField'";
         Assert.Empty(dv);
 
-        var em = Database.Metadata.Get("myJsonEntity04");
+        var em = dbScope.Metadata.Get("myJsonEntity04");
         var fm = em.Fields["ChangeField"];
 
         columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
