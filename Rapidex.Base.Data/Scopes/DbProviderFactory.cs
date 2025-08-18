@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace Rapidex.Data.Scopes;
 
-internal class DbManagersFactory
+internal class DbProviderFactory
 {
     public IDbProvider CreateProvider(string name, string connectionString = null)
     {

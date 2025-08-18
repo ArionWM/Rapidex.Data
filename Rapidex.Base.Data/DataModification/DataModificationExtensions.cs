@@ -21,18 +21,18 @@ namespace Rapidex.Data
 
         }
 
-        public static void DropEntity(this IDbStructureProvider dsp, string entityName)
+        public static void DropEntity(this IDbStructureProvider provider, string entityName)
         {
             entityName.NotEmpty();
-            var em = Database.Metadata.Get(entityName)
+            var em = provider.ParentScope.ParentDbScope.Metadata.Get(entityName)
                 .NotNull($"Entity {entityName} not found in metadata");
 
-            dsp.DropEntity(em);
+            provider.DropEntity(em);
         }
 
         public static void ApplyEntityStructure<T>(this IDbStructureProvider provider, bool applyScopedData = false) where T : IConcreteEntity
         {
-            var em = Database.Metadata.Get<T>().NotNull();
+            var em = provider.ParentScope.ParentDbScope.Metadata.Get<T>().NotNull();
             provider.ApplyEntityStructure(em, applyScopedData);
         }
 

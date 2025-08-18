@@ -123,7 +123,7 @@ public class PostgreSqlServerProvider : IDbProvider
 
     }
 
-    public IDataTestHelper GetTestHelper()
+    public IDataUnitTestHelper GetTestHelper()
     {
         return new PostgreTestHelper();
     }

@@ -60,20 +60,20 @@ internal class EntityFieldDefinitionImplementer : Dictionary<string, object>, II
         return this.Name;
     }
 
-    public IUpdateResult Implement(IImplementHost host, IImplementer parentImplementer, ref object target)
+    public IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target)
     {
         var ures = new UpdateResult();
 
         EntityDefinitionImplementer entDefImplementer = (EntityDefinitionImplementer)parentImplementer;
 
-        IDbEntityMetadata em = Database.Metadata.Get(entDefImplementer.Name);
+        IDbEntityMetadata em = host.Parent.Get(entDefImplementer.Name);
         em.NotNull($"Entity metadata not found with '{entDefImplementer.Name}'");
         IDbFieldMetadata fm = em.Fields.Get(this.Name);
         if (fm == null)
         {
             ObjDictionary dict = new ObjDictionary();
             dict.Set(this);
-            fm = em.AddFieldIfNotExist(this.Name, this.Type, dict);
+            fm = em.AddFieldIfNotExist(host.FieldMetadataFactory, this.Name, this.Type, dict);
 
             ures.Added(fm);
         }

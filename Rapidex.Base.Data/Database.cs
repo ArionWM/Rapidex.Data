@@ -62,7 +62,7 @@ namespace Rapidex.Data
             sp.GetRapidexService<ISignalHub>()
                 .NotNull("Signal hub not found");
 
-            Database.Configuration.LoadDbScopeDefinitions();
+            Database.Configuration.LoadDbScopeDefinitions(sp);
         }
 
     }

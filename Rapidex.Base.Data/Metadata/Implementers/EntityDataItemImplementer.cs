@@ -14,7 +14,7 @@ internal class EntityDataItemImplementer : Dictionary<string, object>, IImplemen
 
     }
 
-    public IUpdateResult Implement(IImplementHost host, IImplementer parentImplementer, ref object target)
+    public IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target)
     {
         string entityName = this.Get("entity").ToString();
 

@@ -63,7 +63,7 @@ namespace Rapidex.Data.Scopes
 
         protected void Initialize()
         {
-            this.Metadata = new DbMetadataContainer();
+            this.Metadata = new DbMetadataContainer(this);
 
             var structureManager = this.DbProvider.GetStructureProvider();
             if (!structureManager.IsDatabaseAvailable(this.DatabaseName))
@@ -84,7 +84,7 @@ namespace Rapidex.Data.Scopes
             if (this.schemaScopes.Keys.Contains(schemaName))
                 this.schemaScopes.Get(schemaName);
 
-            DbManagersFactory dbCreator = new DbManagersFactory();
+            DbProviderFactory dbCreator = new DbProviderFactory();
             IDbProvider dbProvider = dbCreator.CreateProvider(this.dbProvider.GetType().FullName, this.ConnectionString);
 
             DbSchemaScope sscope = new DbSchemaScope(schemaName, this, dbProvider);
@@ -104,7 +104,7 @@ namespace Rapidex.Data.Scopes
 
         protected void LoadRecordedSchemaInfos()
         {
-            var siEm = Database.Metadata.CheckAndGet<SchemaInfo>();
+            var siEm = this.Metadata.CheckAndGet<SchemaInfo>();
             siEm.NotNull("SchemaInfo metadata not found");
             this.baseScope.Structure.ApplyEntityStructure(siEm, false);
 

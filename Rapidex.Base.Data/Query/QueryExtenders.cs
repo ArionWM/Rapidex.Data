@@ -15,7 +15,7 @@ namespace Rapidex.Data
     {
         public static T Map<T>(this T qc, string entityName) where T : IQueryCriteria
         {
-            var em = Database.Metadata.Get(entityName);
+            var em = qc.Schema.ParentDbScope.Metadata.Get(entityName);
             qc.Map(em);
             return qc;
         }
@@ -24,7 +24,7 @@ namespace Rapidex.Data
             where Entity : IConcreteEntity
             where T : IQueryCriteria
         {
-            var em = Database.Metadata.Get<Entity>();
+            var em = qc.Schema.ParentDbScope.Metadata.Get<Entity>();
             qc.Map(em);
             return qc;
         }

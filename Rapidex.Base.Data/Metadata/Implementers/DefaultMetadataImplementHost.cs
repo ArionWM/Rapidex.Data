@@ -5,16 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.Metadata.Implementers;
-internal class DefaultMetadataImplementHost : IImplementHost
+internal class DefaultMetadataImplementHost : IMetadataImplementHost
 {
     public string ModuleName { get; }
 
     public IDbMetadataContainer Parent { get; protected set; }
+    public IDbEntityMetadataFactory EntityMetadataFactory { get; }
+    public IFieldMetadataFactory FieldMetadataFactory { get; }
 
-    public DefaultMetadataImplementHost(IDbMetadataContainer parent)
+    public DefaultMetadataImplementHost(IDbEntityMetadataFactory entityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory)
     {
-        parent.NotNull("Parent can't be null. Use SetParent() method to set the parent before using this implementer.");
-        this.Parent = parent;
+        this.FieldMetadataFactory = fieldMetadataFactory.NotNull("FieldMetadataFactory can't be null.");
+        this.EntityMetadataFactory = entityMetadataFactory;
     }
 
     public void SetParent(IDbMetadataContainer parent)

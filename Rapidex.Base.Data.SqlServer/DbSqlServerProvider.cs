@@ -115,7 +115,7 @@ public class DbSqlServerProvider : IDbProvider
 
     }
 
-    public IDataTestHelper GetTestHelper()
+    public IDataUnitTestHelper GetTestHelper()
     {
         return new DbSqlServerTestHelper();
     }

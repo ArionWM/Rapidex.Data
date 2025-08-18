@@ -5,8 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data;
-//From System.Data + Vector
-
 
 //
 // Summary:

@@ -21,7 +21,7 @@ using System.Text;
 
 namespace Rapidex.Data;
 
-internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
+internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssemblyDefinition
 {
     public override string Name => "Data / Orm Library";
     public override string TablePrefix => "data";
@@ -35,19 +35,19 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 
         services.AddTransientForProd<IEntitySerializationDataCreator, EntitySerializationDataCreator>();
         services.AddTransientForProd<IPredefinedValueProcessor, PredefinedValueProcessor>();
-        services.AddTransientForProd<IImplementHost, DefaultMetadataImplementHost>();
+        services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
         FieldTypeJsonConverterBDT.Register();
-    }
-
-    public override void SetupMetadata(IServiceCollection services)
-    {
-        emContainer.AddIfNotExist<SchemaInfo>()
-            .MarkOnlyBaseSchema();
     }
 
     public override void Start(IServiceProvider serviceProvider)
     {
         EntitySignalProviderHelper.CreatePredefinedContent(Rapidex.Common.SignalHub);
+    }
+
+    public void SetupMetadata(IServiceProvider sp, IDbScope scope)
+    {
+        scope.Metadata.AddIfNotExist<SchemaInfo>()
+            .MarkOnlyBaseSchema();
     }
 }

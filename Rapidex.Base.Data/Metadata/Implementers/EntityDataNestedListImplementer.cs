@@ -29,7 +29,7 @@ internal class EntityDataNestedListImplementer : List<EntityDataItemImplementer>
 
 
 
-    public virtual IUpdateResult Implement(IImplementHost host, IImplementer parentImplementer, ref object target)
+    public virtual IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target)
     {
 
 

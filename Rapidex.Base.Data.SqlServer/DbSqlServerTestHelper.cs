@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.SqlServer;
-internal class DbSqlServerTestHelper : IDataTestHelper
+internal class DbSqlServerTestHelper : IDataUnitTestHelper
 {
     public void DropAllTablesInDatabase(string connectionString)
     {

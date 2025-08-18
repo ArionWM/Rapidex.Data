@@ -9,15 +9,13 @@ namespace Rapidex.Data;
 
 public static class MetadataExtender
 {
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static IDbEntityMetadata Get<T>(this IDbEntityMetadataManager mman) where T : IConcreteEntity
+    public static IDbEntityMetadata Get<T>(this IDbMetadataContainer mman) where T : IConcreteEntity
     {
         Type type = typeof(T);
         return mman.Get(type.Name);
     }
 
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static M Get<T, M>(this IDbEntityMetadataManager mman)
+    public static M Get<T, M>(this IDbMetadataContainer mman)
         where T : IConcreteEntity
         where M : IDbEntityMetadata
     {
@@ -25,11 +23,7 @@ public static class MetadataExtender
         return (M)mman.Get(type.Name);
     }
 
-    public static IDbEntityMetadata Get<T>(this IDbMetadataContainer mman) where T : IConcreteEntity
-    {
-        Type type = typeof(T);
-        return mman.Get(type.Name);
-    }
+
 
     public static IDbEntityMetadata AddPremature(this IDbMetadataContainer mman, string entityName)
     {
@@ -45,68 +39,30 @@ public static class MetadataExtender
         return em;
     }
 
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static IDbEntityMetadata AddIfNotExist(this IDbEntityMetadataManager emman, Type concreteType, string module = null, string prefix = null)
+    public static IDbEntityMetadata AddIfNotExist(this IDbMetadataContainer mContainer, IDbEntityMetadata em) 
     {
-        emman.NotNull();
-
-        IDbEntityMetadata em = emman.Get(concreteType.Name);
-        if (em == null)
-        {
-            em = emman.Add(concreteType, module, prefix);
-        }
-        else
-        {
-            if (em != null && em.IsPremature)
-            {
-                em = emman.Add(concreteType, module, prefix);
-            }
-        }
-
-        return em;
-    }
-
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static IDbEntityMetadata AddIfNotExist<T>(this IDbEntityMetadataManager emman, string module = null, string prefix = null) where T : IConcreteEntity
-    {
-        emman.NotNull();
-
-        IDbEntityMetadata em = emman.Get<T>();
-        if (em == null)
-        {
-            em = emman.Add<T>(module, prefix);
-        }
-        else
-        {
-            if (em != null && em.IsPremature)
-            {
-                em = emman.Add<T>(module, prefix);
-            }
-        }
-
-        return em;
-    }
-
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    internal static IDbEntityMetadata CheckAndGet<T>(this IDbEntityMetadataManager mman) where T : IConcreteEntity
-    {
-        return mman.AddIfNotExist<T>();
-    }
-
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static void AddIfNotExist(this IDbEntityMetadataManager emman, IDbEntityMetadata em)
-    {
-        emman.NotNull();
-
-        IDbEntityMetadata _em = emman.Get(em.Name);
+        var _em = mContainer.Get(em.Name);
         if (_em == null || _em.IsPremature)
         {
-            emman.Add(em);
+            mContainer.Add(em);
+
         }
+        return em;
     }
 
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static M AddIfNotExist<T, M>(this IDbEntityMetadataManager mman)
+    public static IDbEntityMetadata AddIfNotExist<T>(this IDbMetadataContainer mContainer, string module = null, string prefix = null) where T : IConcreteEntity
+    {
+        var em = mContainer.Get<T>();
+        if (em == null || em.IsPremature)
+        {
+            mContainer.Add<T>(module, prefix);
+
+        }
+        return em;
+    }
+
+
+    public static M AddIfNotExist<T, M>(this IDbMetadataContainer mman)
        where T : IConcreteEntity
        where M : IDbEntityMetadata
     {
@@ -114,79 +70,27 @@ public static class MetadataExtender
         return (M)mman.AddIfNotExist<T>();
     }
 
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static DbFieldMetadataList AddfNotExist(this DbFieldMetadataList fields, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
+    public static IDbEntityMetadata CheckAndGet<T>(this IDbMetadataContainer mman) where T : IConcreteEntity
     {
-
-        IDbFieldMetadata fm = Database.Metadata.FieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, null);
-        fields.AddIfNotExist(fm);
-        return fields;
-    }
-
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static DbFieldMetadataList AddfNotExist<T>(this DbFieldMetadataList fields, string name, string caption, Action<IDbFieldMetadata> set = null) //where T : IDataType
-    {
-        fields.AddfNotExist(name, typeof(T), caption, set);
-        return fields;
-    }
-
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static DbFieldMetadataList AddfNotExist(this DbFieldMetadataList fields, string name, string type, string caption, ObjDictionary values = null, Action<IDbFieldMetadata> set = null)
-    {
-
-
-        IDbFieldMetadata fm = Database.Metadata.FieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, values);
-        if (caption.IsNOTNullOrEmpty())
-        {
-            fm.Caption = caption;
-        }
-
-        fields.AddIfNotExist(fm);
-        return fields;
+        return mman.AddIfNotExist<T>();
     }
 
 
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, string type, ObjDictionary values = null)
-    {
-        //IDbSchemaScope scope = Database.Scopes.Db(em.DbName).Schema(em.SchemaName);
 
-        IDbFieldMetadata fm = Database.Metadata.FieldMetadataFactory.CreateType(em, type, name, values);
-        em.AddFieldIfNotExist(fm);
-        return fm;
-    }
 
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static IDbFieldMetadata AddFieldIfNotExist<T>(this IDbEntityMetadata em, string name, ObjDictionary values = null)
-    {
-        //IDbSchemaScope scope = Database.Scopes.Db(em.DbName).Schema(em.SchemaName);
 
-        IDbFieldMetadata fm = Database.Metadata.FieldMetadataFactory.CreateType(em, typeof(T), name, values);
-        em.AddFieldIfNotExist(fm);
-        return fm;
-    }
-
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
-    {
-        IDbFieldMetadata fm = Database.Metadata.FieldMetadataFactory.CreateType(em, type, name, null);
-        set?.Invoke(fm);
-        em.Fields.AddIfNotExist(fm);
-        return fm;
-    }
-
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static void Remove(this IDbEntityMetadataManager emman, string name)
+    
+    public static void Remove(this IDbMetadataContainer emman, string name)
     {
         IDbEntityMetadata em = emman.Get(name);
         if (em != null)
         {
-            emman.Remove(em);
+            emman.Remove(em.Name);
         }
     }
 
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static void Remove<T>(this IDbEntityMetadataManager emman) where T : IConcreteEntity
+    
+    public static void Remove<T>(this IDbMetadataContainer emman) where T : IConcreteEntity
     {
         emman.Remove(typeof(T).Name);
     }
@@ -232,20 +136,76 @@ public static class MetadataExtender
     }
 
 
-    [Obsolete("Use ModuleDefinition.Entities")]
-    public static IDbEntityMetadata[] GetModuleOwnedDefinitions(this IDbEntityMetadataManager emman, string moduleName)
+    public static IDbEntityMetadata[] GetModuleOwnedDefinitions(this IDbMetadataContainer emman, string moduleName)
     {
         var ems = emman.GetAll().Where(em => string.Equals(em.ModuleName, moduleName, StringComparison.InvariantCultureIgnoreCase)).ToArray();
         return ems;
     }
 
-    [Obsolete("Use ModuleDefinition.Entities")]
 
-    public static IDbEntityMetadata[] GetModuleOwnedDefinitions(this IDbEntityMetadataManager emman, IRapidexAssemblyDefinition module)
+    public static IDbEntityMetadata[] GetModuleOwnedDefinitions(this IDbMetadataContainer emman, IRapidexAssemblyDefinition module)
     {
         return emman.GetModuleOwnedDefinitions(module.NavigationName);
     }
 
 
+
+
+
+
+    
+    public static DbFieldMetadataList AddIfNotExist(this DbFieldMetadataList fields, IFieldMetadataFactory fieldMetadataFactory, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
+    {
+
+        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, null);
+        fields.AddIfNotExist(fm);
+        return fields;
+    }
+
+    
+    public static DbFieldMetadataList AddfNotExist<T>(this DbFieldMetadataList fields, IFieldMetadataFactory fieldMetadataFactory, string name, string caption, Action<IDbFieldMetadata> set = null) //where T : IDataType
+    {
+        fields.AddIfNotExist(fieldMetadataFactory, name, typeof(T), caption, set);
+        return fields;
+    }
+
+    [Obsolete("Use DbScope.Metadata instead", true)]
+    public static DbFieldMetadataList AddfNotExist(this DbFieldMetadataList fields, IFieldMetadataFactory fieldMetadataFactory, string name, string type, string caption, ObjDictionary values = null, Action<IDbFieldMetadata> set = null)
+    {
+
+
+        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, values);
+        if (caption.IsNOTNullOrEmpty())
+        {
+            fm.Caption = caption;
+        }
+
+        fields.AddIfNotExist(fm);
+        return fields;
+    }
+
+
+    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, IFieldMetadataFactory fieldMetadataFactory, string name, string type, ObjDictionary values = null)
+    {
+        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(em, type, name, values);
+        em.AddFieldIfNotExist(fm);
+        return fm;
+    }
+
+    public static IDbFieldMetadata AddFieldIfNotExist<T>(this IDbEntityMetadata em, IFieldMetadataFactory fieldMetadataFactory, string name, ObjDictionary values = null)
+    {
+        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(em, typeof(T), name, values);
+        em.AddFieldIfNotExist(fm);
+        return fm;
+    }
+
+
+    public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, IFieldMetadataFactory fieldMetadataFactory, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
+    {
+        IDbFieldMetadata fm = fieldMetadataFactory.CreateType(em, type, name, null);
+        set?.Invoke(fm);
+        em.Fields.AddIfNotExist(fm);
+        return fm;
+    }
 
 }

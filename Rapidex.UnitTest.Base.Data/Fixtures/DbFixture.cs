@@ -70,7 +70,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         module.Start(this.ServiceProvider);
 
         DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
-        DbManagersFactory dbManagersFactory = new DbManagersFactory();
+        DbProviderFactory dbManagersFactory = new DbProviderFactory();
         IDbProvider provider = dbManagersFactory.CreateProvider(connectionInfo);
         this.DropAllTablesInDatabase(provider, false);
 

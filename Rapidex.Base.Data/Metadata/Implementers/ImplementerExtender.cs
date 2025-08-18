@@ -18,27 +18,17 @@ public static class ImplementerExtender
         IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
         IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
 
-        EntityMetadataBuilderFromConcrete cmi = new(mf, ff, mContainer);
+        EntityMetadataBuilderFromConcrete cmi = new(mContainer, mf, ff);
         return cmi.Add(typeof(T), module, prefix);
     }
 
-    public static IDbEntityMetadata AddIfNotExist<T>(this IDbMetadataContainer mContainer, string module = null, string prefix = null) where T : IConcreteEntity
-    {
-        var em = mContainer.Get<T>();
-        if (em == null || em.IsPremature)
-        {
-            mContainer.Add<T>(module, prefix);
-
-        }
-        return em;
-    }
 
     public static IDbEntityMetadata AddEnum<E>(this IDbMetadataContainer mContainer, string module = null, string prefix = null) where E : Enum
     {
         IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
         IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
 
-        EntityMetadataBuilderFromConcrete cmi = new(mf, ff, mContainer);
+        EntityMetadataBuilderFromConcrete cmi = new(mContainer, mf, ff);
         return cmi.Add(typeof(E), module, prefix);
     }
 
@@ -48,7 +38,7 @@ public static class ImplementerExtender
         IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
         IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
 
-        EntityMetadataBuilderFromConcrete cmi = new(mf, ff, mContainer);
+        EntityMetadataBuilderFromConcrete cmi = new(mContainer, mf, ff);
         List<IDbEntityMetadata> entities = new List<IDbEntityMetadata>();
         var types = Common.Assembly.FindDerivedClassTypes(ainfo.Assembly, typeof(IConcreteEntity));
         foreach (Type type in types)
@@ -66,7 +56,7 @@ public static class ImplementerExtender
         IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
         IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
 
-        EntityMetadataBuilderFromConcrete cmi = new(mf, ff, mContainer);
+        EntityMetadataBuilderFromConcrete cmi = new(mContainer, mf, ff);
         List<IDbEntityMetadata> entities = new List<IDbEntityMetadata>();
         var aInfos = Common.Assembly.AssemblyDefinitions;
         foreach (AssemblyInfo ainfo in aInfos)
@@ -89,7 +79,7 @@ public static class ImplementerExtender
         IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
         IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
 
-        IImplementHost ihost = Rapidex.Common.ServiceProvider.GetRapidexService<IImplementHost>();
+        IMetadataImplementHost ihost = Rapidex.Common.ServiceProvider.GetRapidexService<IMetadataImplementHost>();
         ihost.SetParent(mContainer);
         //DefaultMetadataImplementHost cmi = new(mContainer);
         var ures = ihost.AddJson(json);
@@ -103,7 +93,7 @@ public static class ImplementerExtender
         IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
         IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
 
-        IImplementHost ihost = Rapidex.Common.ServiceProvider.GetRapidexService<IImplementHost>();
+        IMetadataImplementHost ihost = Rapidex.Common.ServiceProvider.GetRapidexService<IMetadataImplementHost>();
         ihost.SetParent(mContainer);
         
         var ures = ihost.AddYaml(yaml);

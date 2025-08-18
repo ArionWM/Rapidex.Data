@@ -160,7 +160,7 @@ namespace Rapidex.Data
 
         public IEntity Create<T>(IDbSchemaScope dbScope, bool forNew) where T : IConcreteEntity
         {
-            IDbEntityMetadata em = Database.Metadata.Get<T>();
+            IDbEntityMetadata em = dbScope.ParentDbScope.Metadata.Get<T>();
             return this.Create(em, dbScope, forNew);
         }
 

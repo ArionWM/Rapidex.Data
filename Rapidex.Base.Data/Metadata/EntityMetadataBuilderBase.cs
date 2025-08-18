@@ -18,16 +18,17 @@ internal abstract class EntityMetadataBuilderBase
     public EnumerationDefinitionFactory EnumerationDefinitionFactory { get; }
     public ComponentDictionary<IDbEntityMetadata> Entities { get; } = new();
 
-    public EntityMetadataBuilderBase(IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory)
-    {
-        this.EntityMetadataFactory = dbEntityMetadataFactory.NotNull();
-        this.FieldMetadataFactory = fieldMetadataFactory.NotNull();
-        this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory();
-    }
+    //public EntityMetadataBuilderBase(IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory)
+    //{
+    //}
 
-    public EntityMetadataBuilderBase(IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory, IDbMetadataContainer parent) : this(dbEntityMetadataFactory, fieldMetadataFactory)
+    public EntityMetadataBuilderBase(IDbMetadataContainer parent, IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory) 
     {
         this.SetParent(parent);
+        this.EntityMetadataFactory = dbEntityMetadataFactory.NotNull();
+        this.FieldMetadataFactory = fieldMetadataFactory.NotNull();
+        this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory(this.Parent, this.EntityMetadataFactory, this.FieldMetadataFactory);
+
     }
 
     protected virtual void Validate()
@@ -92,9 +93,9 @@ internal abstract class EntityMetadataBuilderBase
 
     public virtual void Check(IDbEntityMetadata em)
     {
-        em.Fields.AddfNotExist<long>(CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<string>(CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<int>(CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
+        em.Fields.AddfNotExist<long>(this.FieldMetadataFactory, CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
+        em.Fields.AddfNotExist<string>(this.FieldMetadataFactory, CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
+        em.Fields.AddfNotExist<int>(this.FieldMetadataFactory, CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
         em.PrimaryKey = em.Fields.Get(CommonConstants.FIELD_ID, true);
 
         em.TableName = em.Prefix.IsNullOrEmpty() ? em.Name : $"{em.Prefix}_{em.Name}";

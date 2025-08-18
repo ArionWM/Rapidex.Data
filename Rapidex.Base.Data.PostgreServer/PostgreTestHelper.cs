@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.PostgreServer;
-internal class PostgreTestHelper : IDataTestHelper
+internal class PostgreTestHelper : IDataUnitTestHelper
 {
     public void DropAllTablesInDatabase(string connectionString)
     {

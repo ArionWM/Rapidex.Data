@@ -45,7 +45,7 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
     public Dictionary<string, object> ExtensionData { get; set; }
 
 
-    public virtual IUpdateResult Implement(IImplementHost host, IImplementer parentImplementer, ref object target)
+    public virtual IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target)
     {
         var updateRes = new UpdateResult();
 

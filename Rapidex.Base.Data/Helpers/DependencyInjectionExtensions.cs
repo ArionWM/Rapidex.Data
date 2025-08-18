@@ -26,9 +26,6 @@ public static class DependencyInjectionExtensions
     public static void StartRapidexDataLevel(this IServiceProvider sp)
     {
         Rapidex.Common.Start(sp);
-        
-        Rapidex.Common.Assembly.SetupAssemblyMetadata(services);
-
         Rapidex.Data.Database.Start(sp);
         Rapidex.Common.Assembly.StartAssemblies(sp);
     }

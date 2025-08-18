@@ -21,10 +21,6 @@ internal class Module : AssemblyDefinitionBase, IRapidexAssemblyDefinition
         services.AddSingletonForProd<IExceptionTranslator, DbSqlServerExceptionTranslator>();
     }
 
-    public override void SetupMetadata(IServiceCollection services)
-    {
-    }
-
     public override void Start(IServiceProvider serviceProvider)
     {
 

@@ -59,7 +59,7 @@ namespace Rapidex.Data
             this.ReadConnectionInfo();
         }
 
-        public void LoadDbScopeDefinition(string dbName)
+        public void LoadDbScopeDefinition(IServiceProvider sp, string dbName)
         {
             DbConnectionInfo cinfo = this.ConnectionInfo.Get(dbName, true);
             cinfo.NotNull($"Connection info found in configuration for '{dbName}'. see appsettings.json");
@@ -68,10 +68,10 @@ namespace Rapidex.Data
             cinfo.ConnectionString.NotEmpty($"ConnectionString found in configuration for '{dbName}'. see appsettings.json");
             cinfo.Name.NotEmpty($"Name found in configuration for '{dbName}'. see appsettings.json");
 
+            IDbScope scope;
             if (cinfo.Name == DatabaseConstants.MASTER_DB_NAME)
             {
-                Database.Scopes.AddMainDbIfNotExists();
-                return;
+                scope = Database.Scopes.AddMainDbIfNotExists();
             }
             else
             {
@@ -79,14 +79,21 @@ namespace Rapidex.Data
                 //Database.Scopes.EnableMultiDb();
                 //Database.Scopes.AddDbIfNotExists(dbName);
             }
+
+            Common.Assembly.IterateAsemblies(ass =>
+            {
+                if (ass is IRapidexMetadataReleatedAssemblyDefinition mass)
+                    mass.SetupMetadata(sp, scope);
+            });
+
         }
 
-        public void LoadDbScopeDefinitions()
+        public void LoadDbScopeDefinitions(IServiceProvider sp)
         {
             DbConnectionInfo masterConnInfo = this.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
             masterConnInfo.NotNull("Any `default` db connection configuration not found (Name should be: 'Master'). See: appsettings.json");
 
-            this.LoadDbScopeDefinition(DatabaseConstants.MASTER_DB_NAME);
+            this.LoadDbScopeDefinition(sp, DatabaseConstants.MASTER_DB_NAME);
 
             //Removed, but additional connection definitions is not required for now
             //foreach (var dbName in this.ConnectionInfo.Keys)

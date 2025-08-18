@@ -22,7 +22,7 @@ internal static class ImplementationMappingHelper
         return false; // Non-nullable value types
     }
 
-    public static void MergeListTo(IImplementHost host, IImplementer parentImplementer, IList list, ref IList targetList)
+    public static void MergeListTo(IMetadataImplementHost host, IImplementer parentImplementer, IList list, ref IList targetList)
     {
         foreach (var impElement in list)
         {
@@ -51,7 +51,7 @@ internal static class ImplementationMappingHelper
 
     }
 
-    public static void MergeListToFromParent(IImplementHost host, IImplementer impParent, PropertyInfo prop, ref object targetParent)
+    public static void MergeListToFromParent(IMetadataImplementHost host, IImplementer impParent, PropertyInfo prop, ref object targetParent)
     {
         IList listData = (IList)prop.GetValue(impParent);
         if (listData.IsNullOrEmpty())
@@ -70,7 +70,7 @@ internal static class ImplementationMappingHelper
             trgProp.SetValue(targetParent, listFromTarget);
     }
 
-    public static void MergeTo(this IImplementer imp, IImplementHost host, object target)
+    public static void MergeTo(this IImplementer imp, IMetadataImplementHost host, object target)
     {
         //TODO: Typemap ve daha yüksek performans
         if (imp == null)

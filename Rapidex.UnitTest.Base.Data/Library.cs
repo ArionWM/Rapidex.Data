@@ -26,26 +26,22 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
 
-namespace Rapidex.UnitTest.Data
+namespace Rapidex.UnitTest.Data;
+
+internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 {
-    internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
+    public override string Name => "UnitTest.Data";
+    public override string TablePrefix => "utest";
+    public override int Index => 1000;
+
+    public override void SetupServices(IServiceCollection services)
     {
-        public override string Name => "UnitTest.Data";
-        public override string TablePrefix => "utest";
-        public override int Index => 1000;
+        Rapidex.Common.EnviromentCode = CommonConstants.ENV_UNITTEST;
+    }
 
-        public override void SetupServices(IServiceCollection services)
-        {
-            Rapidex.Common.EnviromentCode = CommonConstants.ENV_UNITTEST;
-        }
 
-        public override void SetupMetadata(IServiceCollection services)
-        {
-        }
+    public override void Start(IServiceProvider serviceProvider)
+    {
 
-        public override void Start(IServiceProvider serviceProvider)
-        {
-
-        }
     }
 }

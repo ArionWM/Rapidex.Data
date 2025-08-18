@@ -30,14 +30,14 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
     {
         this.EntityMetadataFactory = new DbEntityMetadataFactoryBase(); //Şimdilik ..
         //this.FieldMetadataFactory = new FieldMetadataFactory(this);
-        this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory();
+        //this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory();
     }
 
     public DbEntityMetadataManager(IDbEntityMetadataFactory mFactory)
     {
         this.EntityMetadataFactory = mFactory;
         //this.FieldMetadataFactory = new FieldMetadataFactory(this);
-        this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory();
+        //this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory();
     }
 
     public virtual void SetEntityMetadataFactory(IDbEntityMetadataFactory factory)
@@ -140,9 +140,9 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
     public virtual void Check(IDbEntityMetadata em)
     {
-        em.Fields.AddfNotExist<long>(CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<string>(CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
-        em.Fields.AddfNotExist<int>(CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
+        em.Fields.AddfNotExist<long>(this.FieldMetadataFactory, CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
+        em.Fields.AddfNotExist<string>(this.FieldMetadataFactory, CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
+        em.Fields.AddfNotExist<int>(this.FieldMetadataFactory, CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
         em.PrimaryKey = em.Fields.Get(CommonConstants.FIELD_ID, true);
 
         em.TableName = em.Prefix.IsNullOrEmpty() ? em.Name : $"{em.Prefix}_{em.Name}";
@@ -326,7 +326,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
         if (em.Fields.Get(primaryKeyFieldName) == null)
         {
-            em.Fields.AddfNotExist<long>(primaryKeyFieldName, CommonConstants.FIELD_ID);
+            em.Fields.AddfNotExist<long>(this.FieldMetadataFactory, primaryKeyFieldName, CommonConstants.FIELD_ID);
         }
 
         this.Add(em);

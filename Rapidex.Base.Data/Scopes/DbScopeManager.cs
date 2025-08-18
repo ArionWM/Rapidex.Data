@@ -28,7 +28,7 @@ namespace Rapidex.Data.Scopes
 
                 try
                 {
-                    DbManagersFactory dbCreator = new DbManagersFactory();
+                    DbProviderFactory dbCreator = new DbProviderFactory();
                     IDbScope dbScope = dbCreator.Create(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_NAME);
 
                     _dbScopes.Add(DatabaseConstants.MASTER_DB_NAME, dbScope);
@@ -52,7 +52,7 @@ namespace Rapidex.Data.Scopes
             if (_dbScopes.ContainsKey(dbNameOrAliasName))
                 return _dbScopes.Get(dbNameOrAliasName);
 
-            DbManagersFactory dbCreator = new DbManagersFactory();
+            DbProviderFactory dbCreator = new DbProviderFactory();
             IDbScope dbScope = dbCreator.Create(id, dbNameOrAliasName);
 
             _dbScopes.Add(dbNameOrAliasName, dbScope);

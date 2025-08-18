@@ -26,11 +26,6 @@ namespace Rapidex.Base.Data.Behaviors
 
         }
 
-        public override void SetupMetadata(IServiceCollection services)
-        {
-
-        }
-
         public override void Start(IServiceProvider serviceProvider)
         {
 

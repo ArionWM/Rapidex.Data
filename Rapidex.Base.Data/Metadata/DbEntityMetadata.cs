@@ -8,6 +8,9 @@ namespace Rapidex.Data.Metadata
 {
     internal class DbEntityMetadata : IDbEntityMetadata
     {
+        [JsonIgnore]
+        [YamlIgnore]
+        public IDbMetadataContainer Parent { get; set; }
 
         [YamlMember(Order = -9999)]
         [JsonPropertyOrder(-9999)]

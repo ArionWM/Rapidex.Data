@@ -26,7 +26,7 @@ internal class EntityDataListImplementer : IImplementer, IEmptyCheckObject
     }
 
 
-    public virtual IUpdateResult Implement(IImplementHost host, IImplementer parentImplementer, ref object target)
+    public virtual IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target)
     {
         //ModuleMetadataImplementer mmi = host as ModuleMetadataImplementer;
         //var moduleDef = mmi.ModuleDefinition;

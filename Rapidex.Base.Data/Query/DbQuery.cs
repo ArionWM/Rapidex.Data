@@ -157,7 +157,7 @@ namespace Rapidex.Data.Query
 
     internal class Query<T> : DbQuery, IQuery<T> where T : IConcreteEntity
     {
-        public Query(IDbSchemaScope schema) : base(schema, Database.Metadata.Get<T>().NotNull($"'{typeof(T).Name}' metadata not found"))
+        public Query(IDbSchemaScope schema) : base(schema, schema.ParentDbScope.Metadata.Get<T>().NotNull($"'{typeof(T).Name}' metadata not found"))
         {
         }
 

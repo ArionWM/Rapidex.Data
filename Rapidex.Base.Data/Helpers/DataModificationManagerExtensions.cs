@@ -47,7 +47,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            IDbEntityMetadata em = Database.Metadata.Get(entityName);
+            IDbEntityMetadata em = dmm.ParentScope.ParentDbScope.Metadata.Get(entityName);
             em.Should().NotBeNull($"Entity metadata not found for '{entityName}'");
 
             IEntity entity = dmm.New(em);
@@ -59,7 +59,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            IDbEntityMetadata em = Database.Metadata.Get<TEntity>();
+            IDbEntityMetadata em = dmm.ParentScope.ParentDbScope.Metadata.Get<TEntity>();
             em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             IEntity entity = dmm.New(em.Name);
@@ -94,7 +94,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var em = Database.Metadata.Get(entityName);
+            var em = dmm.ParentScope.ParentDbScope.Metadata.Get(entityName);
             return dmm.Load(em, act);
         }
 
@@ -113,7 +113,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var em = Database.Metadata.Get<TEntity>();
+            var em = dmm.ParentScope.ParentDbScope.Metadata.Get<TEntity>();
             em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             var loadResult = await dmm.Load(em, act);
@@ -133,7 +133,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var em = Database.Metadata.Get(entityName);
+            var em = dmm.ParentScope.ParentDbScope.Metadata.Get(entityName);
             em.Should().NotBeNull($"Entity metadata not found for '{entityName}'");
 
             return dmm.Find(em, id);
@@ -153,7 +153,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var em = Database.Metadata.Get<TEntity>();
+            var em = dmm.ParentScope.ParentDbScope.Metadata.Get<TEntity>();
             em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             var result = dmm.Find(em, id);

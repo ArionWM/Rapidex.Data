@@ -11,11 +11,13 @@ namespace Rapidex.Data;
 //TODO: Not possible for this level, must remove and use another approach.
 
 
-public interface IImplementHost
+public interface IMetadataImplementHost
 {
     string ModuleName { get; }
     //IDbScope DbScope { get; }
     IDbMetadataContainer Parent { get; }
+    IDbEntityMetadataFactory EntityMetadataFactory { get; }
+    IFieldMetadataFactory FieldMetadataFactory { get; }
 
     void SetParent(IDbMetadataContainer parent);
 
@@ -30,7 +32,7 @@ public interface IImplementer
 {
     string[] SupportedTags { get; }
     bool Implemented { get; }
-    IUpdateResult Implement(IImplementHost host, IImplementer parentImplementer, ref object target);
+    IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target);
 }
 
 
