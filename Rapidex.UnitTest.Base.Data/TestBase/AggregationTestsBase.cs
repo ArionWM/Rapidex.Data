@@ -16,13 +16,12 @@ namespace Rapidex.UnitTest.Data.TestBase
 
         protected async Task GenerateEntities()
         {
-            Database.Metadata.AddIfNotExist<AggrTestEntity01>();
+            var db = Database.Scopes.Db();
+            db.Metadata.AddIfNotExist<AggrTestEntity01>();
 
-            var dbScope = Database.Scopes.Db();
+            db.Structure.DropEntity<AggrTestEntity01>();
 
-            dbScope.Structure.DropEntity<AggrTestEntity01>();
-
-            dbScope.Structure.ApplyEntityStructure<AggrTestEntity01>();
+            db.Structure.ApplyEntityStructure<AggrTestEntity01>();
 
             //100 entity
             //"No" birer artıyor (1'den başlayarak)
@@ -35,7 +34,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             for (int i = 0; i < 100; i++)
             {
-                AggrTestEntity01 entity = dbScope.New<AggrTestEntity01>();
+                AggrTestEntity01 entity = db.New<AggrTestEntity01>();
                 entity.No = i + 1;
                 entity.Age = 20 + i;
                 entity.Name = $"Entity Name {i + 1:000}";
@@ -46,7 +45,7 @@ namespace Rapidex.UnitTest.Data.TestBase
                 entity.Save();
             }
 
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
 
 
@@ -57,24 +56,24 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             await this.GenerateEntities();
 
-            var scope = Database.Scopes.Db();
+            var db = Database.Scopes.Db();
 
-            float val01 = await scope.GetQuery<AggrTestEntity01>().Avg<float>(nameof(AggrTestEntity01.Amount));
+            float val01 = await db.GetQuery<AggrTestEntity01>().Avg<float>(nameof(AggrTestEntity01.Amount));
             Assert.Equal(4.5f, val01);
 
-            double val02 = await scope.GetQuery<AggrTestEntity01>().Sum<double>(nameof(AggrTestEntity01.Value));
+            double val02 = await db.GetQuery<AggrTestEntity01>().Sum<double>(nameof(AggrTestEntity01.Value));
             Assert.Equal(50500000, val02);
 
-            long val03 = await scope.GetQuery<AggrTestEntity01>().Count();
+            long val03 = await db.GetQuery<AggrTestEntity01>().Count();
             Assert.Equal(100, val03);
 
-            DateTimeOffset val04 = await scope.GetQuery<AggrTestEntity01>().Min<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));
+            DateTimeOffset val04 = await db.GetQuery<AggrTestEntity01>().Min<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));
             Assert.Equal(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero), val04);
 
-            DateTimeOffset val05 = await scope.GetQuery<AggrTestEntity01>().Max<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));
+            DateTimeOffset val05 = await db.GetQuery<AggrTestEntity01>().Max<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));
             Assert.Equal(new DateTimeOffset(2000, 4, 9, 0, 0, 0, TimeSpan.Zero), val05);
 
-            float val06 = await scope.GetQuery<AggrTestEntity01>()
+            float val06 = await db.GetQuery<AggrTestEntity01>()
                 .Gt(nameof(AggrTestEntity01.Age), 50)
                 .Avg<float>(nameof(AggrTestEntity01.Amount));
             Assert.Equal(4.5f, val01);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rapidex.Data.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,13 +11,15 @@ internal class DbMetadataContainer : IDbMetadataContainer
     public IDbScope Parent { get; }
     public ComponentDictionary<IDbEntityMetadata> Entities { get; } = new();
 
-    public List<IEntity> Data { get; } = new();
+    public PredefinedDataCollection Data { get; } 
 
-    public List<IEntity> DemoData { get; } = new();
+    public PredefinedDataCollection DemoData { get; } 
 
     public DbMetadataContainer(IDbScope parent)
     {
         this.Parent = parent;
+        this.Data = new PredefinedDataCollection(this);
+        this.DemoData = new PredefinedDataCollection(this);
     }
 
     public void Add(IDbEntityMetadata em)

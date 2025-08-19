@@ -28,7 +28,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity03.base.json");
-            dbScope.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
+            dbScope.Metadata.AddJson(content); //dbScope.Metadata using base schema...
             dbScope.Structure.DropEntity("myJsonEntity03");
 
             var em = dbScope.Metadata.Get("myJsonEntity03");
@@ -56,15 +56,15 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.Db();
+            var db = Database.Scopes.Db();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
-            dbScope.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
+            db.Metadata.AddJson(content); //dbScope.Metadata using base schema...
 
-            dbScope.Structure.DropEntity("myJsonEntity04");
+            db.Structure.DropEntity("myJsonEntity04");
 
-            var em = dbScope.Metadata.Get("myJsonEntity04");
-            dbScope.Structure.ApplyEntityStructure(em);
+            var em = db.Metadata.Get("myJsonEntity04");
+            db.Structure.ApplyEntityStructure(em);
 
         }
 
@@ -97,18 +97,18 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.Db();
+            var db = Database.Scopes.Db();
 
-            dbScope.Metadata.Remove("myJsonEntity04");
+            db.Metadata.Remove("myJsonEntity04");
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
-            dbScope.Metadata.AddFromJson(content); //dbScope.Metadata using base schema...
-            dbScope.Structure.DropEntity("myJsonEntity04");
+            db.Metadata.AddJson(content); //dbScope.Metadata using base schema...
+            db.Structure.DropEntity("myJsonEntity04");
 
-            var em = dbScope.Metadata.Get("myJsonEntity04");
+            var em = db.Metadata.Get("myJsonEntity04");
 
 
-            dbScope.Structure.ApplyEntityStructure(em);
+            db.Structure.ApplyEntityStructure(em);
 
         }
 
@@ -117,15 +117,15 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.Db();
+            var db = Database.Scopes.Db();
 
-            var em = dbScope.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
+            var em = db.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
 
-            var baseSchema = dbScope.Schema("base");
+            var baseSchema = db.Schema("base");
             baseSchema.Structure.DropEntity<ConcreteOnlyBaseEntity01>();
             baseSchema.Structure.ApplyAllStructure();
 
-            var schema02 = dbScope.AddSchemaIfNotExists("schema02");
+            var schema02 = db.AddSchemaIfNotExists("schema02");
             schema02.Structure.DropEntity<ConcreteOnlyBaseEntity01>();
             schema02.Structure.ApplyAllStructure();
 
@@ -141,23 +141,25 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.Db();
+            var db = Database.Scopes.Db();
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity09.OnlyBase.json");
-            var em = dbScope.Metadata.AddFromJson(content);
+            var ems = db.Metadata.AddJson(content);
+            Assert.NotNull(ems);
+            Assert.Single(ems);
 
-            var baseSchema = dbScope.Schema("base");
+            var baseSchema = db.Schema("base");
             baseSchema.Structure.DropEntity("myJsonEntity09");
             baseSchema.Structure.ApplyAllStructure();
 
-            var schema02 = dbScope.AddSchemaIfNotExists("schema02");
+            var schema02 = db.AddSchemaIfNotExists("schema02");
             schema02.Structure.DropEntity("myJsonEntity09");
             schema02.Structure.ApplyAllStructure();
 
             var tableNames = this.GetTableNamesInSchema(baseSchema);
-            Assert.Contains(schema02.Structure.CheckObjectName(em.TableName), tableNames);
+            Assert.Contains(schema02.Structure.CheckObjectName(ems.First().TableName), tableNames);
 
             var tableNames02 = this.GetTableNamesInSchema(schema02);
-            Assert.DoesNotContain(schema02.Structure.CheckObjectName(em.TableName), tableNames02);
+            Assert.DoesNotContain(schema02.Structure.CheckObjectName(ems.First().TableName), tableNames02);
         }
 
     }

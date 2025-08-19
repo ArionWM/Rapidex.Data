@@ -186,7 +186,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
             this.ApplyEntityStructure(em, false);
         }
 
-        Database.PredefinedValues.Apply(scope).Wait();
+        scope.ParentDbScope.Metadata.Data.Apply(scope).Wait();
 
         foreach (var em in allEms)
         {

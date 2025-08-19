@@ -32,7 +32,7 @@ namespace Rapidex.UnitTest.Data.PostgreServer
             using PostgreSqlServerConnection connection = Library.CreatePostgreServerConnection();
 
             // PostgreSQL doesn't support USE statement, connection is already to the correct database
-            // connection.Execute($"USE [{Database.Scopes.Db().DatabaseName}]");
+            // connection.Execute($"USE [{db.DatabaseName}]");
 
             string sql = $"SELECT table_name FROM information_schema.tables WHERE table_schema = 'base' AND table_name = 'utest_myjsonentity03';";
             DataTable table = connection.Execute(sql);
@@ -100,6 +100,8 @@ namespace Rapidex.UnitTest.Data.PostgreServer
         {
             base.Structure_03_AddColumnInRuntime();
 
+            var db = Database.Scopes.Db();
+
             using PostgreSqlServerConnection connection = Library.CreatePostgreServerConnection();
 
             DataTable columnsTable = connection.Execute($"SELECT * FROM information_schema.columns WHERE table_schema = 'base' AND table_name = 'utest_myjsonentity04'");
@@ -117,9 +119,9 @@ namespace Rapidex.UnitTest.Data.PostgreServer
             dv.RowFilter = "column_name = 'addedfield'";
             Assert.Empty(dv);
 
-            var em = Database.Metadata.Get("myJsonEntity04");
+            var em = db.Metadata.Get("myJsonEntity04");
             em.AddFieldIfNotExist<int>("AddedField");
-            Database.Scopes.Db().Base.Structure.ApplyEntityStructure(em);
+            db.Base.Structure.ApplyEntityStructure(em);
 
             columnsTable = connection.Execute($"SELECT * FROM information_schema.columns WHERE table_schema = 'base' AND table_name = 'utest_myjsonentity04'");
             dv = new DataView(columnsTable);
@@ -135,6 +137,8 @@ namespace Rapidex.UnitTest.Data.PostgreServer
         {
             base.Structure_05_RuntimeModify();
 
+            var db = Database.Scopes.Db();
+
             using PostgreSqlServerConnection connection = Library.CreatePostgreServerConnection();
 
             DataTable columnsTable = connection.Execute($"SELECT * FROM information_schema.columns WHERE table_schema = 'base' AND table_name = 'utest_myjsonentity04'");
@@ -152,7 +156,7 @@ namespace Rapidex.UnitTest.Data.PostgreServer
             dv.RowFilter = "column_name = 'addedfield'";
             Assert.Empty(dv);
 
-            var em = Database.Metadata.Get("myJsonEntity04");
+            var em = db.Metadata.Get("myJsonEntity04");
             var fm = em.Fields["ChangeField"];
 
             columnsTable = connection.Execute($"SELECT * FROM information_schema.columns WHERE table_schema = 'base' AND table_name = 'utest_myjsonentity04'");
@@ -169,7 +173,7 @@ namespace Rapidex.UnitTest.Data.PostgreServer
             fm.DbType = DbFieldType.String;
             fm.DbProperties.Length = 250;
 
-            Database.Scopes.Db().Base.Structure.ApplyEntityStructure(em);
+            db.Base.Structure.ApplyEntityStructure(em);
 
             columnsTable = connection.Execute($"SELECT * FROM information_schema.columns WHERE table_schema = 'base' AND table_name = 'utest_myjsonentity04'");
             dv = new DataView(columnsTable);

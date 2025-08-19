@@ -39,16 +39,8 @@ public static class Database
         //EntityFactory = new DbEntityFactory();
         //ConcreteEntityMapper = new ConcreteEntityMapper(); //KAldırılacak ve tek bir mapper'a geçilecek
         //Metadata = new DbEntityMetadataManager(); //TODO: To services
-        PredefinedValues = new PredefinedValueProcessor(); //TODO: To Metadata.Data ...
+        //PredefinedValues = new PredefinedValueProcessor(); //TODO: To Metadata.Data ...
     }
-
-    //public static void SetMetadataFactory<T>() where T : IDbEntityMetadataFactory
-    //{
-    //    Type metadataFactoryType = typeof(T);
-
-    //    IDbEntityMetadataFactory dbEntityMetadataFactory = TypeHelper.CreateInstance<IDbEntityMetadataFactory>(metadataFactoryType);
-    //    Metadata.SetEntityMetadataFactory(dbEntityMetadataFactory);
-    //}
 
     /// <summary>
     /// Load configuration and prepare for work
@@ -63,9 +55,6 @@ public static class Database
             Database.Configuration.Configuration = Common.Configuration;
 
         Database.Configuration.Setup();
-
-        //Database.Metadata.Setup(services);
-
     }
 
     public static void Start(IServiceProvider sp)

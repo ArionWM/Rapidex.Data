@@ -22,10 +22,10 @@ namespace Rapidex.UnitTest.Data.TestBase
             //MasterA ve MasterB için detaylar alınarak kontrol edilir.
 
             //this.Fixture.ClearCaches();
-            var database = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity03>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity04>();
+            db.Metadata.AddIfNotExist<ConcreteEntity03>();
+            db.Metadata.AddIfNotExist<ConcreteEntity04>();
 
             var dbScope = Database.Scopes.Db();
             dbScope.Structure.ApplyEntityStructure<ConcreteEntity03>();
@@ -109,10 +109,10 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public virtual async Task N2N_01_Concrete()
         {
-            var database = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
-            Database.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
-            Database.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
+            db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
+            db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
 
             var dbScope = Database.Scopes.Db();
             dbScope.Structure.DropEntity<ConcreteEntityForN2NTest02>();
@@ -168,12 +168,12 @@ namespace Rapidex.UnitTest.Data.TestBase
         public virtual async Task N2N_02_Json()
         {
 
-            var database = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity10.forN2N.json");
-            var em1 = Database.Metadata.AddFromJson(content);
+            var em1 = db.Metadata.AddJson(content);
             content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity11.forN2N.json");
-            var em2 = Database.Metadata.AddFromJson(content);
+            var em2 = db.Metadata.AddJson(content);
 
             var dbScope = Database.Scopes.Db();
             dbScope.Structure.DropEntity("myJsonEntity10");
@@ -181,8 +181,8 @@ namespace Rapidex.UnitTest.Data.TestBase
             dbScope.Structure.DropEntity<GenericJunction>();
 
             dbScope.Structure.ApplyEntityStructure<GenericJunction>();
-            dbScope.Structure.ApplyEntityStructure(em1);
-            dbScope.Structure.ApplyEntityStructure(em2);
+            dbScope.Structure.ApplyEntityStructure(em1.First());
+            dbScope.Structure.ApplyEntityStructure(em2.First());
 
             var relatedEntity01 = dbScope.New("myJsonEntity10");
             relatedEntity01["Name"] = "Related Entity 01";

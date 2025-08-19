@@ -16,7 +16,8 @@ namespace Rapidex.UnitTest.Data
         [Fact]
         public void T01_Initialization()
         {
-            Assert.NotNull(Database.Metadata);
+            var db = Database.Scopes.AddMainDbIfNotExists();
+            Assert.NotNull(db.Metadata);
             Assert.NotNull(Database.Scopes);
 
             //Assert.NotNull(Database.ConcreteEntityMapper);
@@ -29,10 +30,11 @@ namespace Rapidex.UnitTest.Data
         [Fact]
         public void T02_ParentAssignments()
         {
+            var db = Database.Scopes.AddMainDbIfNotExists();
             this.Fixture.ClearCaches();
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity02>();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity02>();
 
             var database = Database.Scopes.AddMainDbIfNotExists();
             var schema01 = database.AddSchemaIfNotExists("myTestSchema01");

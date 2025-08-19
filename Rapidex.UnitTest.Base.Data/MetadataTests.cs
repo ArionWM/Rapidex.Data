@@ -33,12 +33,12 @@ namespace Rapidex.UnitTest.Data
         {
 
             this.Fixture.ClearCaches();
-            var database = Database.Scopes.Db();
-            var schema = database.AddSchemaIfNotExists("myTestSchema01");
+            var db = Database.Scopes.Db();
+            var schema = db.AddSchemaIfNotExists("myTestSchema01");
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
-            IDbEntityMetadata em01 = Database.Metadata.Get<ConcreteEntity01>();
+            IDbEntityMetadata em01 = db.Metadata.Get<ConcreteEntity01>();
 
             //DbConcreteEntityBase oluþmalý
 
@@ -70,8 +70,8 @@ namespace Rapidex.UnitTest.Data
             Assert.False(pictureFm.SkipDirectSet);
 
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity02>();
-            IDbEntityMetadata em02 = Database.Metadata.Get<ConcreteEntity02>();
+            db.Metadata.AddIfNotExist<ConcreteEntity02>();
+            IDbEntityMetadata em02 = db.Metadata.Get<ConcreteEntity02>();
 
             //Reference ...
         }
@@ -83,20 +83,20 @@ namespace Rapidex.UnitTest.Data
             //ConcreteEntity01 ise henüz eklenmedi. Bu durumda prematüre bir taným oluþmalý
             try
             {
-                var database = Database.Scopes.Db();
-                var schema = database.AddSchemaIfNotExists("myTestSchema02");
-                
-                Database.Metadata.Remove<ConcreteEntity01>();
-                Database.Metadata.ReAdd<ConcreteEntity02>();
+                var db = Database.Scopes.Db();
+                var schema = db.AddSchemaIfNotExists("myTestSchema02");
 
-                var em = Database.Metadata.Get("ConcreteEntity01");
+                db.Metadata.Remove<ConcreteEntity01>();
+                db.Metadata.ReAdd<ConcreteEntity02>();
+
+                var em = db.Metadata.Get("ConcreteEntity01");
                 Assert.NotNull(em);
                 Assert.True(em.IsPremature);
 
 
-                Database.Metadata.AddIfNotExist<ConcreteEntity01>();
+                db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
-                em = Database.Metadata.Get("ConcreteEntity01");
+                em = db.Metadata.Get("ConcreteEntity01");
                 Assert.NotNull(em);
                 Assert.False(em.IsPremature);
             }
@@ -114,14 +114,14 @@ namespace Rapidex.UnitTest.Data
             //DbEntity oluþmalý
             this.Fixture.ClearCaches();
 
-            var database = Database.Scopes.Db();
-            var schema = database.AddSchemaIfNotExists("myTestSchema03");
+            var db = Database.Scopes.Db();
+            var schema = db.AddSchemaIfNotExists("myTestSchema03");
 
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity01.json");
-            Database.Metadata.AddFromJson(content);
+            db.Metadata.AddJson(content);
 
-            IDbEntityMetadata em01 = Database.Metadata.Get("myJsonEntity01");
+            IDbEntityMetadata em01 = db.Metadata.Get("myJsonEntity01");
             Assert.NotNull(em01);
             //Assert.Equal("myTestSchema03", em01.SchemaName);
             Assert.Equal("myJsonEntity01", em01.Name);
@@ -147,15 +147,15 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.Db();
+            var db = Database.Scopes.Db();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity02.WithBehavior.json");
-            Database.Metadata.AddFromJson(content);
+            db.Metadata.AddJson(content);
 
-            dbScope.Structure.DropEntity("myJsonEntity02");
+            db.Structure.DropEntity("myJsonEntity02");
 
 
-            IDbEntityMetadata em01 = Database.Metadata.Get("myJsonEntity02"); // jsonEntity02.json tanýmýnda Id alaný bulunmuyor, otomatik eklenmeli
+            IDbEntityMetadata em01 = db.Metadata.Get("myJsonEntity02"); // jsonEntity02.json tanýmýnda Id alaný bulunmuyor, otomatik eklenmeli
             Assert.NotNull(em01);
             Assert.NotNull(em01.PrimaryKey);
             Assert.Equal("Id", em01.PrimaryKey.Name);
@@ -170,14 +170,14 @@ namespace Rapidex.UnitTest.Data
             //DbEntity oluþmalý
             this.Fixture.ClearCaches();
 
-            var database = Database.Scopes.Db();
-            var schema = database.AddSchemaIfNotExists("myTestSchema03");
+            var db = Database.Scopes.Db();
+            var schema = db.AddSchemaIfNotExists("myTestSchema03");
 
 
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity01.json");
             content = content.Replace("\"EntityDefinition\"", "\"\""); //Type bilgisi olmadan hata vermesi gerekiyor
-            Assert.ThrowsAny<Exception>(() => Database.Metadata.AddFromJson(content));
+            Assert.ThrowsAny<Exception>(() => db.Metadata.AddJson(content));
         }
 
         [Fact]
@@ -185,18 +185,18 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var database = Database.Scopes.Db();
-            var schema = database.AddSchemaIfNotExists("myTestSchema03");
+            var db = Database.Scopes.Db();
+            var schema = db.AddSchemaIfNotExists("myTestSchema03");
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity02>();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity02>();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity02.WithBehavior.json");
-            Database.Metadata.AddFromJson(content);
+            db.Metadata.AddJson(content);
 
             //myJsonEntity02
 
-            IDbEntityMetadata em01 = Database.Metadata.Get("myJsonEntity02");
+            IDbEntityMetadata em01 = db.Metadata.Get("myJsonEntity02");
             Assert.NotNull(em01);
             //Assert.Equal("myTestSchema03", em01.SchemaName);
             Assert.Equal("myJsonEntity02", em01.Name);
@@ -230,15 +230,15 @@ namespace Rapidex.UnitTest.Data
         public void MetadataCreation_05_ReferenceOne2N_Concrete()
         {
             this.Fixture.ClearCaches();
-            var database = Database.Scopes.Db();
-            var schema = database.AddSchemaIfNotExists("myTestSchema01");
+            var db = Database.Scopes.Db();
+            var schema = db.AddSchemaIfNotExists("myTestSchema01");
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity03>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity04>();
+            db.Metadata.AddIfNotExist<ConcreteEntity03>();
+            db.Metadata.AddIfNotExist<ConcreteEntity04>();
 
-            IDbEntityMetadata emEnt03 = Database.Metadata.Get<ConcreteEntity03>();
+            IDbEntityMetadata emEnt03 = db.Metadata.Get<ConcreteEntity03>();
 
-            IDbEntityMetadata emEnt04 = Database.Metadata.Get<ConcreteEntity04>();
+            IDbEntityMetadata emEnt04 = db.Metadata.Get<ConcreteEntity04>();
 
             var fm01 = emEnt04.Fields.Get("Details01");
             Assert.NotNull(fm01);
@@ -252,10 +252,12 @@ namespace Rapidex.UnitTest.Data
         [Fact]
         public void MetadataCreation_06_JsonWithBehavior()
         {
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity02.WithBehavior.json");
-            Database.Metadata.AddFromJson(content);
+            var db = Database.Scopes.Db();
 
-            var em = Database.Metadata.Get("myJsonEntity02");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity02.WithBehavior.json");
+            db.Metadata.AddJson(content);
+
+            var em = db.Metadata.Get("myJsonEntity02");
             Assert.NotNull(em);
             Assert.True(em.Has<HasTags>());
             Assert.True(em.Has<TestBehavior1>());

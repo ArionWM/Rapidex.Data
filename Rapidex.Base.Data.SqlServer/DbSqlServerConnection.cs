@@ -26,7 +26,6 @@ internal class DbSqlServerConnection : IDisposable
     protected void CheckConnectionState()
     {
         this.ConnectionString.NotEmpty("ConnectionString can't empty");
-        //this.Connection.ConnectionString.NotEmpty("Connection.ConnectionString string can't empty");
 
         int retryCount = 0;
         while (this.Connection.State == ConnectionState.Connecting)
@@ -39,7 +38,7 @@ internal class DbSqlServerConnection : IDisposable
             if (retryCount > 200)
             {
                 Log.Error("Database", "Connection is not established after 10 second. ConnectionString: " + this.ConnectionString);
-                throw new InvalidOperationException("Connection is not established after 1 second.");
+                throw new InvalidOperationException("SQL Server Connection is not established after 10 second. Check SQL server accessibility."); //TODO: DatabaseConnectionException
             }
         }
 

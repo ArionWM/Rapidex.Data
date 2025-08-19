@@ -102,7 +102,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         }
 
         var enumValEntities = this.GetValueEntities(em, enumType, callb);
-        Database.PredefinedValues.Register(em, true, enumValEntities);
+        this.Parent.Data.Add(em, true, enumValEntities);
         return em;
     }
 
@@ -143,7 +143,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
 
         JsonNode fieldsNode = json["values"];
         var enumValEntities = this.GetValueEntities(em, fieldsNode);
-        Database.PredefinedValues.Register(em, true, enumValEntities);
+        this.Parent.Data.Add(em, true, enumValEntities);
         return em;
     }
 

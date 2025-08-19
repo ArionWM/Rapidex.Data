@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rapidex.Data.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -388,9 +389,9 @@ public interface IDbMetadataContainer
     /// <summary>
     /// Predefined data for entity / module activation
     /// </summary>
-    List<IEntity> Data { get; }
+    PredefinedDataCollection Data { get; }
 
-    List<IEntity> DemoData { get; }
+    PredefinedDataCollection DemoData { get; }
 
     void Add(IDbEntityMetadata em);
 

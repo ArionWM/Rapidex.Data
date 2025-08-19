@@ -23,8 +23,8 @@ public class DefaultEmptyFixture : ICoreTestFixture
 
     protected virtual void Setup(IServiceCollection services)
     {
-        Rapidex.Library commonLib = new Rapidex.Library();
-        commonLib.SetupServices(services);
+        //Rapidex.Library commonLib = new Rapidex.Library();
+        //commonLib.SetupServices(services);
     }
 
     public virtual void Init()

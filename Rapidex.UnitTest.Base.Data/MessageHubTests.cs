@@ -16,9 +16,10 @@ public class MessageHubTests : DbDependedTestsBase<DbSqlServerProvider>
     public async Task T01_OnNew()
     {
         //ConcreteEntity01
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>();
+        var db = Database.Scopes.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
-        var database = Database.Scopes.AddMainDbIfNotExists();
+        
 
         List<string> subs1Invokes = new List<string>();
 
@@ -33,7 +34,7 @@ public class MessageHubTests : DbDependedTestsBase<DbSqlServerProvider>
 
         Assert.True(subs1Result.Success);
 
-        ConcreteEntity01 ent01 = database.New<ConcreteEntity01>();
+        ConcreteEntity01 ent01 = db.New<ConcreteEntity01>();
 
         Assert.NotEmpty(subs1Invokes);
 

@@ -30,7 +30,7 @@ public interface IPredefinedValueProcessor
     void Clear(IDbEntityMetadata em);
     void Remove(IDbEntityMetadata em, long id);
 
-    PredefinedValueItem Get(IDbEntityMetadata em);
+    PredefinedValueItems Get(IDbEntityMetadata em);
 
     Task Apply(IDbSchemaScope scope);
 

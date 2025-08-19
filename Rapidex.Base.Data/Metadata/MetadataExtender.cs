@@ -91,13 +91,7 @@ public static class MetadataExtender
     }
 
 
-    public static IDbEntityMetadata ReAdd<T>(this IDbMetadataContainer emman, string module = null, string prefix = null) where T : IConcreteEntity
-    {
-        emman.Remove<T>();
-        IDbEntityMetadata metadata = emman.AddIfNotExist<T>(module, prefix);
-        return metadata;
 
-    }
 
     public static void Remove<T>(this IDbMetadataContainer emman) where T : IConcreteEntity
     {

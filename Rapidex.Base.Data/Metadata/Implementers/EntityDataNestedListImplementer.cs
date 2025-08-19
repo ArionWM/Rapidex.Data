@@ -40,8 +40,8 @@ internal class EntityDataNestedListImplementer : List<EntityDataItemImplementer>
             object entityObj = null;
             imp.Implement(host, this, ref entityObj);
             IEntity entity = entityObj.ShouldSupportTo<IEntity>();
-            
-            if (host.Parent.Data.Any(aent => aent.IsEqual(entity)))
+
+            if (host.Parent.Data.Contains(entity))
                 continue;
 
             ures.Added(entity);

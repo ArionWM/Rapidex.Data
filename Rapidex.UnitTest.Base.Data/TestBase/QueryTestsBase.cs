@@ -19,30 +19,30 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     {
         this.Fixture.ClearCaches();
 
-        var dbScope = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Scopes.AddMainDbIfNotExists();
 
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-        dbScope.Structure.DropEntity<ConcreteEntity01>();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
+        db.Structure.DropEntity<ConcreteEntity01>();
 
-        dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
 
         for (int i = 0; i < 10; i++)
         {
-            ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
             entity.Name = $"Entity Name {i:000}";
             entity.CreditLimit1 = 10000 * i;
             entity.Description = $"Description {i:000}";
             entity.Save();
         }
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         this.Fixture.ClearCaches();
 
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
-        var result = await dbScope.Load<ConcreteEntity01>();
+        var result = await db.Load<ConcreteEntity01>();
         Assert.Equal(10, result.ItemCount);
 
         foreach (var item in result)
@@ -60,17 +60,17 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     {
         this.Fixture.ClearCaches();
 
-        var dbScope = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Scopes.AddMainDbIfNotExists();
 
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-        dbScope.Structure.DropEntity<ConcreteEntity01>();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
+        db.Structure.DropEntity<ConcreteEntity01>();
 
-        dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
 
         for (int i = 0; i < 10; i++)
         {
-            ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
             entity.Name = $"Load_01_SimpleCriteria_Concrete {i:000}";
             entity.CreditLimit1 = 10000 * i;
 
@@ -83,21 +83,21 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
-        var result = dbScope.Load<ConcreteEntity01>(q => q.Eq(nameof(ConcreteEntity01.Name), "Phone 002"));
+        var result = db.Load<ConcreteEntity01>(q => q.Eq(nameof(ConcreteEntity01.Name), "Phone 002"));
     }
 
 
     protected async Task Load_03_GenerateEntities(IDbSchemaScope scope, IDbEntityMetadata em)
     {
-        var dbScope = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Scopes.AddMainDbIfNotExists();
 
-        dbScope.Structure.DropEntity<ConcreteEntity01>();
-        dbScope.Structure.DropEntity(em);
+        db.Structure.DropEntity<ConcreteEntity01>();
+        db.Structure.DropEntity(em);
 
-        dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
-        dbScope.Structure.ApplyEntityStructure(em);
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure(em);
 
         //100 entity
         //"No" birer artıyor (1'den başlayarak)
@@ -116,7 +116,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         for (int i = 0; i < 10; i++)
         {
-            ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
             entity.Name = $"Entity Name {i:000}";
             entity.CreditLimit1 = 10000 * i;
             entity.Description = $"Description {i:000}";
@@ -125,7 +125,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             refEntities.Add(entity);
         }
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
 
 
@@ -226,53 +226,53 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual async Task Load_03_Criterias_Concrete()
     {
-        var dbScope = Database.Scopes.AddMainDbIfNotExists();
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-        Database.Metadata.AddIfNotExist<CriteriaTestEntity01>();
+        var db = Database.Scopes.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
+        db.Metadata.AddIfNotExist<CriteriaTestEntity01>();
 
-        dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
-        dbScope.Structure.ApplyEntityStructure<CriteriaTestEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<CriteriaTestEntity01>();
 
-        await this.Load_03_Criterias(dbScope, Database.Metadata.Get<CriteriaTestEntity01>());
+        await this.Load_03_Criterias(db, db.Metadata.Get<CriteriaTestEntity01>());
     }
 
 
     [Fact]
     public virtual async Task Load_04_Criterias_Nested()
     {
-        var dbScope = Database.Scopes.AddMainDbIfNotExists();
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-        Database.Metadata.AddIfNotExist<ConcreteEntity02>();
+        var db = Database.Scopes.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
+        db.Metadata.AddIfNotExist<ConcreteEntity02>();
 
-        dbScope.Structure.DropEntity<ConcreteEntity01>();
-        dbScope.Structure.DropEntity<ConcreteEntity02>();
+        db.Structure.DropEntity<ConcreteEntity01>();
+        db.Structure.DropEntity<ConcreteEntity02>();
 
-        dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
-        dbScope.Structure.ApplyEntityStructure<ConcreteEntity02>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity02>();
 
         //---------------------------------------------------------------------------------
 
-        ConcreteEntity01 refEnt01 = dbScope.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt01 = db.New<ConcreteEntity01>();
         refEnt01.Name = "Ent 01";
         refEnt01.Save();
 
-        ConcreteEntity01 refEnt02 = dbScope.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt02 = db.New<ConcreteEntity01>();
         refEnt02.Name = "Ent 02";
         refEnt02.Save();
 
-        ConcreteEntity02 tent01 = dbScope.New<ConcreteEntity02>();
+        ConcreteEntity02 tent01 = db.New<ConcreteEntity02>();
         tent01.Parent = refEnt01;
         tent01.Save();
 
-        ConcreteEntity02 tent02 = dbScope.New<ConcreteEntity02>();
+        ConcreteEntity02 tent02 = db.New<ConcreteEntity02>();
         tent02.Parent = null;
         tent02.Save();
 
-        await dbScope.Data.CommitOrApplyChanges();
+        await db.Data.CommitOrApplyChanges();
 
         //---------------------------------------------------------------------------------
 
-        var loadResult01 = await dbScope.GetQuery<ConcreteEntity02>()
+        var loadResult01 = await db.GetQuery<ConcreteEntity02>()
               .Nested(nameof(ConcreteEntity02.Parent), q => q.Eq(nameof(ConcreteEntity01.Name), "Ent 01"))
               .Load();
 
@@ -287,13 +287,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual async Task Load_05_Criterias_NestedWithOnlyBase()
     {
-        var dbScope = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Scopes.AddMainDbIfNotExists();
 
-        var schemaBase = dbScope.Schema("base");
-        var schema02 = dbScope.AddSchemaIfNotExists("schema02");
+        var schemaBase = db.Schema("base");
+        var schema02 = db.AddSchemaIfNotExists("schema02");
 
-        Database.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
-        Database.Metadata.AddIfNotExist<ConcreteOnlyBaseReferencedEntity02>();
+        db.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
+        db.Metadata.AddIfNotExist<ConcreteOnlyBaseReferencedEntity02>();
 
         schemaBase.Structure.DropEntity<ConcreteOnlyBaseEntity01>();
         schemaBase.Structure.DropEntity<ConcreteOnlyBaseReferencedEntity02>();
@@ -355,47 +355,47 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual async Task BulkUpdate_06_Criterias_NestedWithOnlyBase()
     {
-        var dbScope = Database.Scopes.AddMainDbIfNotExists();
-        Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-        dbScope.Structure.DropEntity<ConcreteEntity01>();
-        dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        var db = Database.Scopes.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
+        db.Structure.DropEntity<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
 
-        ConcreteEntity01 refEnt01 = dbScope.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt01 = db.New<ConcreteEntity01>();
         refEnt01.Name = "Ent 01";
         refEnt01.Phone = "5336722201";
         refEnt01.Address = "Address 01";
 
         refEnt01.Save();
 
-        ConcreteEntity01 refEnt02 = dbScope.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt02 = db.New<ConcreteEntity01>();
         refEnt02.Name = "Ent 02";
         refEnt02.Phone = "5336722202";
         refEnt02.Address = "Address 02";
         refEnt02.Save();
 
-        ConcreteEntity01 refEnt03 = dbScope.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt03 = db.New<ConcreteEntity01>();
         refEnt03.Name = "Ent 03";
         refEnt03.Phone = "6336722203";
         refEnt03.Address = "Address 03";
         refEnt03.Save();
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
-        long count01 = await dbScope.GetQuery<ConcreteEntity01>()
+        long count01 = await db.GetQuery<ConcreteEntity01>()
              .Like("Phone", "533672220*")
              .Count();
 
         Assert.Equal(2, count01);
 
-        long count02 = await dbScope.GetQuery<ConcreteEntity01>()
+        long count02 = await db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
             .Count();
 
         Assert.Equal(1, count02);
 
 
-        dbScope.GetQuery<ConcreteEntity01>()
+        db.GetQuery<ConcreteEntity01>()
              .EnterUpdateMode()
              .Like("Phone", "533672220*")
              .Update(new ObjDictionary() { { "Address", "Updated Address" } });
@@ -404,21 +404,21 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         //data.Add("Address", "Updated Address");
         //query.Update(data);
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
-        long count03 = await dbScope.GetQuery<ConcreteEntity01>()
+        long count03 = await db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
             .Count();
 
         Assert.Equal(1, count03);
 
-        long count04 = await dbScope.GetQuery<ConcreteEntity01>()
+        long count04 = await db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 01")
             .Count();
 
         Assert.Equal(0, count04);
 
-        long count05 = await dbScope.GetQuery<ConcreteEntity01>()
+        long count05 = await db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Updated Address")
             .Count();
 
@@ -434,22 +434,22 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual async Task Load_06_Criterias_Relation()
     {
-        var database = Database.Scopes.Db();
+        var db = Database.Scopes.Db();
 
-        Database.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
-        Database.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
-        Database.Metadata.AddIfNotExist<GenericJunction>();
+        db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
+        db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
+        db.Metadata.AddIfNotExist<GenericJunction>();
 
-        database.Structure.DropEntity<ConcreteEntityForN2NTest01>();
-        database.Structure.DropEntity<ConcreteEntityForN2NTest02>();
-        database.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
-        database.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest02>();
+        db.Structure.DropEntity<ConcreteEntityForN2NTest01>();
+        db.Structure.DropEntity<ConcreteEntityForN2NTest02>();
+        db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest02>();
 
-        ConcreteEntityForN2NTest01 master01 = database.New<ConcreteEntityForN2NTest01>();
+        ConcreteEntityForN2NTest01 master01 = db.New<ConcreteEntityForN2NTest01>();
         master01.Name = "master01";
         master01.Save();
 
-        ConcreteEntityForN2NTest02 detail01_01 = database.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail01_01 = db.New<ConcreteEntityForN2NTest02>();
         detail01_01.Name = "detail01-01";
         detail01_01.Save();
         master01.Relation01.Add(detail01_01);
@@ -460,29 +460,29 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         //master01.Relation01.Add(detail01_02);
 
 
-        ConcreteEntityForN2NTest01 master02 = database.New<ConcreteEntityForN2NTest01>();
+        ConcreteEntityForN2NTest01 master02 = db.New<ConcreteEntityForN2NTest01>();
         master02.Name = "master02";
         master02.Save();
 
-        ConcreteEntityForN2NTest02 detail02_01 = database.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail02_01 = db.New<ConcreteEntityForN2NTest02>();
         detail02_01.Name = "detail02-02";
         detail02_01.Save();
         master02.Relation01.Add(detail02_01);
 
-        ConcreteEntityForN2NTest02 detail02_02 = database.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail02_02 = db.New<ConcreteEntityForN2NTest02>();
         detail02_02.Name = "detail02-02";
         detail02_02.Save();
         master02.Relation01.Add(detail02_02);
 
-        await database.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
-        long count01 = await database.GetQuery<ConcreteEntityForN2NTest02>()
+        long count01 = await db.GetQuery<ConcreteEntityForN2NTest02>()
               .Related(master01, nameof(ConcreteEntityForN2NTest01.Relation01))
               .Count();
 
         Assert.Equal(1, count01);
 
-        long count02 = await database.GetQuery<ConcreteEntityForN2NTest02>()
+        long count02 = await db.GetQuery<ConcreteEntityForN2NTest02>()
               .Related(master02, nameof(ConcreteEntityForN2NTest01.Relation01))
               .Count();
 

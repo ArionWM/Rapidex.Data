@@ -26,7 +26,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
     protected override void Setup(IServiceCollection services)
     {
-        base.Setup(services);
+        //base.Setup(services);
 
         services.AddRapidexDataLevel();
 
@@ -101,7 +101,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         //Common caches clear
         ((Rapidex.Data.Scopes.DbScopeManager)Database.Scopes).ClearCache();
         //((IDbEntityMetadataManager)Database.Metadata).Clear();
-        Database.PredefinedValues.Clear();
+        //Database.PredefinedValues.Clear();
         //Database.Metadata.Setup(null);
 
         var db = Database.Scopes.AddMainDbIfNotExists();

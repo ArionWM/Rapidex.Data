@@ -20,13 +20,13 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            dbScope.Structure.DropEntity("ConcreteEntity01");
+            var db = Database.Scopes.AddMainDbIfNotExists();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Structure.DropEntity("ConcreteEntity01");
 
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
             Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
             Assert.True(entity._IsNew);
             Assert.NotNull(entity.CreditLimit1); //IDataType türünden ise boş değer içeren bir nesne atanmış olmalı
@@ -35,7 +35,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity.Save();
 
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             Assert.True(entity.Id > 9999); //Yeni entity'ler 10 k dan büyük bir Id alır
             Assert.False(entity._IsNew);
@@ -54,21 +54,21 @@ namespace Rapidex.UnitTest.Data.TestBase
         public virtual async Task Crud_02_Insert_Multiple_Concrete()
         {
             this.Fixture.ClearCaches();
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            dbScope.Structure.DropEntity("ConcreteEntity01");
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Structure.DropEntity("ConcreteEntity01");
 
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
             for (int i = 0; i < 10; i++)
             {
-                ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+                ConcreteEntity01 entity = db.New<ConcreteEntity01>();
                 entity.Name = $"Entity Name {i:000}";
                 entity.Save();
             }
 
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             //Check table
         }
@@ -91,13 +91,13 @@ namespace Rapidex.UnitTest.Data.TestBase
             this.Fixture.ClearCaches();
             //Elle bir entity'nin Id'si 10k altında verilebilir (ön tanımlı kayıtlar bu şekilde çalışır)
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            dbScope.Structure.DropEntity("ConcreteEntity01");
+            var db = Database.Scopes.AddMainDbIfNotExists();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Structure.DropEntity("ConcreteEntity01");
 
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
             entity.Id = 5;
             //??? Assert.True(entity.Id < 0); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
 
@@ -112,13 +112,13 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            dbScope.Structure.DropEntity("ConcreteEntity01");
+            var db = Database.Scopes.AddMainDbIfNotExists();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Structure.DropEntity("ConcreteEntity01");
 
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
             Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
             entity.TestIDataTypeAssignments();
 
@@ -126,13 +126,13 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity.Name = name;
             entity.Save();
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             long id = entity.Id;
 
             //TODO: Cache'ler temizlenecek !!
 
-            ConcreteEntity01 loadedEntity = await dbScope.Find<ConcreteEntity01>(id);
+            ConcreteEntity01 loadedEntity = await db.Find<ConcreteEntity01>(id);
             loadedEntity.TestIDataTypeAssignments();
 
             Assert.False(loadedEntity._IsNew);
@@ -142,11 +142,11 @@ namespace Rapidex.UnitTest.Data.TestBase
             string name2 = RandomHelper.RandomText(10);
             loadedEntity.Name = name2;
             loadedEntity.Save();
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             //TODO: Cache'ler temizlenecek !!
 
-            ConcreteEntity01 loadedEntity2 = await dbScope.Find<ConcreteEntity01>(id);
+            ConcreteEntity01 loadedEntity2 = await db.Find<ConcreteEntity01>(id);
             Assert.NotNull(loadedEntity2);
             loadedEntity2.TestIDataTypeAssignments();
             Assert.Equal(name2, loadedEntity2.Name);
@@ -158,21 +158,21 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity03.base.json");
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity02>();
-            var em1 = Database.Metadata.AddFromJson(content);
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity02>();
+            var ems1 = db.Metadata.AddJson(content);
 
-            dbScope.Structure.DropEntity("ConcreteEntity01");
-            dbScope.Structure.DropEntity(em1);
+            db.Structure.DropEntity("ConcreteEntity01");
+            db.Structure.DropEntity(ems1.First());
 
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity02>();
-            dbScope.Structure.ApplyEntityStructure(em1);
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity02>();
+            db.Structure.ApplyEntityStructure(ems1.First());
 
-            IEntity entity = dbScope.New("myJsonEntity03");
+            IEntity entity = db.New("myJsonEntity03");
             entity.TestIDataTypeAssignments();
 
             Assert.True((long)entity.GetId() < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
@@ -181,13 +181,13 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity["Subject"] = name;
             entity.Save();
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             long id = (long)entity.GetId();
 
             //TODO: Cache'ler temizlenecek !!
 
-            IEntity loadedEntity = await dbScope.Find("myJsonEntity03", id);
+            IEntity loadedEntity = await db.Find("myJsonEntity03", id);
             Assert.NotNull(loadedEntity);
             Assert.True((string)loadedEntity["Subject"] == name);
 
@@ -196,11 +196,11 @@ namespace Rapidex.UnitTest.Data.TestBase
             string name2 = RandomHelper.RandomText(10);
             loadedEntity["Subject"] = name2;
             loadedEntity.Save();
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             //TODO: Cache'ler temizlenecek !!
 
-            IEntity loadedEntity2 = await dbScope.Find("myJsonEntity03", id);
+            IEntity loadedEntity2 = await db.Find("myJsonEntity03", id);
             loadedEntity2.TestIDataTypeAssignments();
 
             Assert.NotNull(loadedEntity2);
@@ -210,44 +210,44 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public virtual async Task Crud_07_SimpleDelete()
         {
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity02>();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity02>();
 
-            dbScope.Structure.DropEntity<ConcreteEntity01>();
+            db.Structure.DropEntity<ConcreteEntity01>();
 
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity02>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity02>();
 
-            ConcreteEntity01 entity01 = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity01 = db.New<ConcreteEntity01>();
             entity01.Name = "Entity 001";
             entity01.Save();
 
-            ConcreteEntity01 entity02 = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity02 = db.New<ConcreteEntity01>();
             entity02.Name = "Entity 002";
             entity02.Save();
 
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
-            var entCount = await dbScope.GetQuery<ConcreteEntity01>().Count();
+            var entCount = await db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(2, entCount);
 
-            dbScope.Delete(entity01);
+            db.Delete(entity01);
 
             //Henüz commit olmadı, veritabanında duruyor
-            entCount = await dbScope.GetQuery<ConcreteEntity01>().Count();
+            entCount = await db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(2, entCount);
 
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
-            entCount = await dbScope.GetQuery<ConcreteEntity01>().Count();
+            entCount = await db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(1, entCount);
 
-            dbScope.Delete(entity02);
-            await dbScope.CommitOrApplyChanges();
+            db.Delete(entity02);
+            await db.CommitOrApplyChanges();
 
-            entCount = await dbScope.GetQuery<ConcreteEntity01>().Count();
+            entCount = await db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(0, entCount);
 
 

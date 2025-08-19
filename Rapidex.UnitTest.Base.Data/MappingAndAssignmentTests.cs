@@ -24,10 +24,10 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var database = Database.Scopes.AddMainDbIfNotExists();
-            var dbScope = database.AddSchemaIfNotExists("myTestSchema01");
+            var db = Database.Scopes.AddMainDbIfNotExists();
+            var dbScope = db.AddSchemaIfNotExists("myTestSchema01");
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
             IEntity entity = dbScope.New<ConcreteEntity01>();
             entity.TestIDataTypeAssignments();
@@ -36,24 +36,24 @@ namespace Rapidex.UnitTest.Data
         [Fact]
         public void T02_EntityInitialization_Json_AdvancedDataTypes_ShouldBe_Assigned()
         {
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity05.base.json");
-            Database.Metadata.AddFromJson(content);
+            db.Metadata.AddJson(content);
 
 
-            IEntity entity = dbScope.New("myJsonEntity05");
+            IEntity entity = db.New("myJsonEntity05");
             entity.TestIDataTypeAssignments();
         }
 
         [Fact]
         public void T03_FieldAssignment_Json_WrongTypesThrowException()
         {
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity05.base.json");
-            Database.Metadata.AddFromJson(content);
-            IEntity entity = dbScope.New("myJsonEntity05");
+            db.Metadata.AddJson(content);
+            IEntity entity = db.New("myJsonEntity05");
 
             //Assert.Throws<InvalidOperationException>(() => entity["Id"] = 1.334d);
 
@@ -79,14 +79,14 @@ namespace Rapidex.UnitTest.Data
         public void T04_FieldAssignment_Json_AdvancedDataTypes01()
         {
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
             string content04 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
             string content06 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity06.base.json");
-            Database.Metadata.AddFromJson(content04);
-            Database.Metadata.AddFromJson(content06);
+            db.Metadata.AddJson(content04);
+            db.Metadata.AddJson(content06);
 
-            IEntity entity = dbScope.New("myJsonEntity06");
+            IEntity entity = db.New("myJsonEntity06");
 
             object valueRef = entity["ConcreteReference01"];
             Assert.IsAssignableFrom<Reference>(valueRef); //null da olsa Reference nesnesi almalıyız
@@ -131,29 +131,29 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity02>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity02>();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity02>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity02>();
 
-            ConcreteEntity01 entity01 = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity01 = db.New<ConcreteEntity01>();
             entity01.Save();
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
-            ConcreteEntity02 entity02 = dbScope.New<ConcreteEntity02>();
+            ConcreteEntity02 entity02 = db.New<ConcreteEntity02>();
             entity02.Parent = entity01;
             entity02.Save();
 
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             long id1 = entity01.Id;
             long id2 = entity02.Id;
 
             //Clear entity cache
 
-            ConcreteEntity02 entity02_1 = await dbScope.Find<ConcreteEntity02>(id2);
+            ConcreteEntity02 entity02_1 = await db.Find<ConcreteEntity02>(id2);
             Assert.Equal(id1, (long)entity02_1.Parent.TargetId);
         }
 
@@ -162,12 +162,12 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            ConcreteEntity01 entity01 = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 entity01 = db.New<ConcreteEntity01>();
             entity01.CreditLimit1 = 100;
             entity01.CreditLimit2 = 200;
             entity01.Description = "Cust01 description";
@@ -176,16 +176,16 @@ namespace Rapidex.UnitTest.Data
             entity01.Phone = "1234567890";
             entity01.Picture.Set(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 }, "aaa", "bbb");
             entity01.Save();
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             long id1 = entity01.Id;
 
             //Clear entity cache
 
-            ConcreteEntity01 entity01_1 = await dbScope.Find<ConcreteEntity01>(id1);
+            ConcreteEntity01 entity01_1 = await db.Find<ConcreteEntity01>(id1);
             entity01_1.TestIDataTypeAssignments();
 
-            ConcreteEntity01 entity01_2 = await dbScope.Find<ConcreteEntity01>(id1);
+            ConcreteEntity01 entity01_2 = await db.Find<ConcreteEntity01>(id1);
             entity01_2.TestIDataTypeAssignments();
 
             //entity01_1 ve entity01_2 farklı referanslara sahip olmalı (aynı bilgiyi tutan farklı nesneler)
@@ -206,24 +206,26 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.Reinit();
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
             string content05 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity05.base.json");
-            var em1 = Database.Metadata.AddFromJson(content05);
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity02>();
+            var ems1 = db.Metadata.AddJson(content05);
+            Assert.NotNull(ems1);
+            Assert.Single(ems1);
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity02>();
 
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity02>();
-            dbScope.Structure.ApplyEntityStructure(em1);
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity02>();
+            db.Structure.ApplyEntityStructure(ems1.First());
 
 
-            ConcreteEntity02 entityForRef = dbScope.New<ConcreteEntity02>();
+            ConcreteEntity02 entityForRef = db.New<ConcreteEntity02>();
             //entityForRef.Name = RandomHelper.RandomText(10);
             entityForRef.Save();
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
-            IEntity jsonEntity01 = dbScope.New("myJsonEntity05");
+            IEntity jsonEntity01 = db.New("myJsonEntity05");
             jsonEntity01["Subject"] = "Subject01";
             jsonEntity01["StartTime"] = DateTimeOffset.Now;
             jsonEntity01["Tags"] = "Tag01,Tag02";
@@ -235,15 +237,15 @@ namespace Rapidex.UnitTest.Data
             jsonEntity01["Price"] = 173233;
 
             jsonEntity01.Save();
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
             long id1 = (long)jsonEntity01.GetId();
             //Clear entity cache
 
-            IEntity entity01_1 = await dbScope.Find("myJsonEntity05", id1);
+            IEntity entity01_1 = await db.Find("myJsonEntity05", id1);
             entity01_1.TestIDataTypeAssignments();
 
-            IEntity entity01_2 = await dbScope.Find("myJsonEntity05", id1);
+            IEntity entity01_2 = await db.Find("myJsonEntity05", id1);
             entity01_2.TestIDataTypeAssignments();
 
             //entity01_1 ve entity01_2 farklı referanslara sahip olmalı (aynı bilgiyi tutan farklı nesneler)
@@ -267,29 +269,29 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
             string content05 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity05.base.json");
-            Database.Metadata.AddFromJson(content05);
-            Database.Metadata.AddIfNotExist<ConcreteEntity01>();
-            Database.Metadata.AddIfNotExist<ConcreteEntity02>();
+            db.Metadata.AddJson(content05);
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Metadata.AddIfNotExist<ConcreteEntity02>();
 
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity01>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntity02>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity02>();
 
 
-            ConcreteEntity01 concreteEntity01 = dbScope.New<ConcreteEntity01>();
+            ConcreteEntity01 concreteEntity01 = db.New<ConcreteEntity01>();
             concreteEntity01.Name = "Cust01";
             concreteEntity01.Save();
 
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
 
-            ConcreteEntity02 concreteEntity02 = dbScope.New<ConcreteEntity02>();
+            ConcreteEntity02 concreteEntity02 = db.New<ConcreteEntity02>();
             concreteEntity02.Parent = concreteEntity01.Id; //id can assign direct
             concreteEntity02.Save();
 
-            await dbScope.CommitOrApplyChanges();
+            await db.CommitOrApplyChanges();
 
         }
 
@@ -298,13 +300,13 @@ namespace Rapidex.UnitTest.Data
         public async Task T08_OnlyBaseEntityReferenceAssignment()
         {
             this.Fixture.ClearCaches();
-            var dbScope = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Scopes.AddMainDbIfNotExists();
 
-            var schemaBase = dbScope.Schema("base");
-            var schema02 = dbScope.AddSchemaIfNotExists("schema02");
+            var schemaBase = db.Schema("base");
+            var schema02 = db.AddSchemaIfNotExists("schema02");
 
-            Database.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
-            Database.Metadata.AddIfNotExist<ConcreteOnlyBaseReferencedEntity02>();
+            db.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
+            db.Metadata.AddIfNotExist<ConcreteOnlyBaseReferencedEntity02>();
 
             schemaBase.Structure.DropEntity<ConcreteOnlyBaseEntity01>();
             schemaBase.Structure.DropEntity<ConcreteOnlyBaseReferencedEntity02>();
@@ -341,13 +343,13 @@ namespace Rapidex.UnitTest.Data
 
 
             this.Fixture.ClearCaches();
-            dbScope = Database.Scopes.AddMainDbIfNotExists();
+            db = Database.Scopes.AddMainDbIfNotExists();
 
-            schemaBase = dbScope.Schema("base");
-            schema02 = dbScope.AddSchemaIfNotExists("schema02");
+            schemaBase = db.Schema("base");
+            schema02 = db.AddSchemaIfNotExists("schema02");
 
-            Database.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
-            Database.Metadata.AddIfNotExist<ConcreteOnlyBaseReferencedEntity02>();
+            db.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
+            db.Metadata.AddIfNotExist<ConcreteOnlyBaseReferencedEntity02>();
 
             ConcreteOnlyBaseReferencedEntity02 refEnt01_02 = await schema02.GetQuery<ConcreteOnlyBaseReferencedEntity02>().Find(refId01);
             Assert.NotNull(refEnt01_02);

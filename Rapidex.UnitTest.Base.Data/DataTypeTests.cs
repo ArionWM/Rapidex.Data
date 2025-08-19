@@ -24,27 +24,27 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public async Task Image_01_BasicSaveAndLoad()
     {
-        var dbScope = Database.Scopes.Db();
+        var db = Database.Scopes.Db();
 
-        dbScope.ReAddReCreate<ConcreteEntity01>();
+        db.ReAddReCreate<ConcreteEntity01>();
 
 
         byte[] imageContentOriginal01 = this.Fixture.GetFileContentAsBinary("TestContent\\Image01.png");
         int hash01 = HashHelper.GetStableHashCode(imageContentOriginal01);
 
-        ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+        ConcreteEntity01 entity = db.New<ConcreteEntity01>();
         entity.Name = "Binary 001";
 
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         long blobId01_check = entity.Picture.TargetId;
 
-        Database.Metadata.ReAdd<ConcreteEntity01>();
+        db.Metadata.ReAdd<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01 = await dbScope.GetQuery<ConcreteEntity01>().First();
+        ConcreteEntity01 ent01 = await db.GetQuery<ConcreteEntity01>().First();
 
         long blobId01 = ent01.Picture.TargetId;
 
@@ -61,7 +61,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal02, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         //Yeni bir içerik yüklendiğinde Id değişmemeli, önceki blobRecord kaydı güncellenmeli
         long blobId02_check = ent01.Picture.TargetId;
@@ -71,40 +71,39 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public async Task Image_02_NullContentDontCreateOrDeleteBlobRecord()
     {
-        var dbScope = Database.Scopes.Db();
-        //Database.Scopes.Db()
+        var db = Database.Scopes.Db();
 
-        dbScope.ReAddReCreate<BlobRecord>();
-        dbScope.ReAddReCreate<ConcreteEntity01>();
+        db.ReAddReCreate<BlobRecord>();
+        db.ReAddReCreate<ConcreteEntity01>();
 
         byte[] imageContentOriginal01 = this.Fixture.GetFileContentAsBinary("TestContent\\Image01.png");
         int hash01 = HashHelper.GetStableHashCode(imageContentOriginal01);
 
-        ConcreteEntity01 entity = dbScope.New<ConcreteEntity01>();
+        ConcreteEntity01 entity = db.New<ConcreteEntity01>();
         entity.Name = "Binary 001";
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         long entityId01 = entity.Id;
 
         long blobRecId01 = entity.Picture.TargetId;
-        BlobRecord br = await dbScope.Find<BlobRecord>(blobRecId01);
+        BlobRecord br = await db.Find<BlobRecord>(blobRecId01);
         Assert.NotNull(br);
 
         int hash01_check = HashHelper.GetStableHashCode(br.Data);
         Assert.Equal(hash01, hash01_check);
 
-        entity = await dbScope.Find<ConcreteEntity01>(entityId01);
+        entity = await db.Find<ConcreteEntity01>(entityId01);
         entity.Picture.SetEmpty();
         entity.Save();
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         Assert.Equal(DatabaseConstants.DEFAULT_EMPTY_ID, entity.Picture.TargetId);
 
-        br = await dbScope.Find<BlobRecord>(blobRecId01);
+        br = await db.Find<BlobRecord>(blobRecId01);
         Assert.Null(br);
 
 
@@ -118,13 +117,14 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         //Database.Metadata.Clear();
         //Database.Metadata.Setup(builder.Services);
 
-        Database.Metadata.Remove("Rank");
+        var db = Database.Scopes.Db();
+
+        db.Metadata.Remove("Rank");
 
         string content = this.Fixture.GetFileContentAsString("TestContent\\EnumDefinition.Sample01.json");
-        Database.Metadata.AddFromJson(content);
+        db.Metadata.AddJson(content);
 
-
-        var em = Database.Metadata.Get("Rank");
+        var em = db.Metadata.Get("Rank");
         Assert.NotNull(em);
 
         //.IsSupportTo<Enumeration>()
@@ -132,11 +132,9 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         Assert.True(em.Fields.ContainsKey(CommonConstants.FIELD_EXTERNAL_ID));
         Assert.True(em.Fields.ContainsKey(CommonConstants.FIELD_VERSION));
 
-        var dbScope = Database.Scopes.Db();
+        db.Structure.ApplyEntityStructure(em);
 
-        dbScope.Structure.ApplyEntityStructure(em);
-
-        var enumValues = await dbScope.Load(em);
+        var enumValues = await db.Load(em);
 
         //WARN: Artık ApplyEntityStructure içerisinde _predefinedValueProcessor.Apply(this.DbScope, mdef.Data, @override); uygulanmıyor
         //TODO: Enum değerlerin yeni altyapı ile uygulanıp uygulanmadığını kontrol et
@@ -155,20 +153,20 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public virtual async Task Enum_02_Assignment()
     {
-        var scope = Database.Scopes.Db();
+        var db = Database.Scopes.Db();
 
-        scope.ReAddReCreate<ConcreteEntity01>();
+        db.ReAddReCreate<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01 = scope.New<ConcreteEntity01>();
+        ConcreteEntity01 ent01 = db.New<ConcreteEntity01>();
         ent01.ContactType = ContactType.Corporate;
         ent01.Save();
 
 
 
-        ConcreteEntity01 ent02 = scope.New<ConcreteEntity01>();
+        ConcreteEntity01 ent02 = db.New<ConcreteEntity01>();
         ent02["ContactType"] = ContactType.Corporate; //Bu durumda farklı bir atama yapısı çalışıyor
         ent02.Save();
-        await scope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         long id01 = ent01.Id;
         long id02 = ent02.Id;
@@ -177,13 +175,13 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //TODO: Clear entity cache
 
-        scope = Database.Scopes.Db();
-        Database.Metadata.ReAdd<ConcreteEntity01>();
+        db = Database.Scopes.Db();
+        db.Metadata.ReAdd<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01_check = await scope.Find<ConcreteEntity01>(id01);
+        ConcreteEntity01 ent01_check = await db.Find<ConcreteEntity01>(id01);
         Assert.Equal(ContactType.Corporate, (ContactType)ent01_check.ContactType);
 
-        ConcreteEntity01 ent02_check = await scope.Find<ConcreteEntity01>(id02);
+        ConcreteEntity01 ent02_check = await db.Find<ConcreteEntity01>(id02);
         Assert.Equal(ContactType.Corporate, (ContactType)ent02_check.ContactType);
 
     }
@@ -191,18 +189,18 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public virtual async Task Enum_03_PredefinedValues()
     {
-        var dbScope = Database.Scopes.Db();
+        var db = Database.Scopes.Db();
 
-        dbScope.ReAddReCreate<ConcreteEntity01>();
+        db.ReAddReCreate<ConcreteEntity01>();
         //Database.Metadata.AddIfNotExist<BlobRecord>();
-        Database.Metadata.Remove("ContactType");
+        db.Metadata.Remove("ContactType");
 
-        var emCT = Database.Metadata.AddFromEnum<ContactType>();
-        dbScope.Structure.DropEntity("ContactType");
-        dbScope.Structure.ApplyEntityStructure(emCT);
-        await Database.PredefinedValues.Apply(dbScope);
+        var emCT = db.Metadata.AddEnum<ContactType>();
+        db.Structure.DropEntity("ContactType");
+        db.Structure.ApplyEntityStructure(emCT);
+        await db.Metadata.Data.Apply(db);
 
-        var lresult = await dbScope.GetQuery("ContactType").Asc(CommonConstants.FIELD_ID).Load();
+        var lresult = await db.GetQuery("ContactType").Asc(CommonConstants.FIELD_ID).Load();
         Assert.Equal(5, lresult.ItemCount);
 
         IEntity ct01 = lresult.First();
@@ -220,25 +218,25 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public async Task Tags_01_Basics()
     {
-        var dbScope = Database.Scopes.Db();
+        var db = Database.Scopes.Db();
 
         //Database.Metadata.ReAdd<ConcreteEntityForTagTest>();
-        dbScope.ReAddReCreate<ConcreteEntityForTagTest>();
-        dbScope.ReAddReCreate<TagRecord>();
+        db.ReAddReCreate<ConcreteEntityForTagTest>();
+        db.ReAddReCreate<TagRecord>();
 
-        IDbEntityMetadata bem = (IDbEntityMetadata)Database.Metadata.Get<ConcreteEntityForTagTest>();
+        IDbEntityMetadata bem = (IDbEntityMetadata)db.Metadata.Get<ConcreteEntityForTagTest>();
         bem.AddBehavior<HasTags>(true, true);
-        dbScope.Structure.ApplyEntityStructure<ConcreteEntityForTagTest>();
+        db.Structure.ApplyEntityStructure<ConcreteEntityForTagTest>();
 
         //dbScope.Structure.ApplyAllStructure();
         //dbScope.Structure.DropEntity<ConcreteEntityForTagTest>();
         //dbScope.Structure.DropEntity<TagRecord>();
         //dbScope.Structure.ApplyAllStructure();
 
-        Assert.Equal(0, await dbScope.GetQuery<ConcreteEntityForTagTest>().Count());
-        Assert.Equal(0, await dbScope.GetQuery<TagRecord>().Count());
+        Assert.Equal(0, await db.GetQuery<ConcreteEntityForTagTest>().Count());
+        Assert.Equal(0, await db.GetQuery<TagRecord>().Count());
 
-        ConcreteEntityForTagTest ent01 = dbScope.New<ConcreteEntityForTagTest>();
+        ConcreteEntityForTagTest ent01 = db.New<ConcreteEntityForTagTest>();
         ent01.Name = "Entity 01";
 
         var tags = ent01.B<HasTags>().Tags;
@@ -250,7 +248,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         ent01.B<HasTags>().Add("Tag 02");
         ent01.Save();
 
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         Tags tags01 = ent01.GetValue<Tags>(HasTags.FIELD_TAGS);
         Assert.Equal("|Tag 01|Tag 02|", tags01.Value);
@@ -258,7 +256,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         Thread.Sleep(1000);
 
 
-        var tagRecords = await dbScope.GetQuery<TagRecord>().Load();
+        var tagRecords = await db.GetQuery<TagRecord>().Load();
         Assert.Equal(2, tagRecords.ItemCount);
 
         TagRecord rec01 = tagRecords.First();
@@ -269,20 +267,20 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public async Task DateTime_01_UseToDateTimeOffset()
     {
-        var scope = Database.Scopes.Db();
-        scope.ReAddReCreate<ConcreteEntity01>();
+        var db = Database.Scopes.Db();
+        db.ReAddReCreate<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01 = scope.New<ConcreteEntity01>();
+        ConcreteEntity01 ent01 = db.New<ConcreteEntity01>();
         DateTimeOffset dtoRef = new DateTimeOffset(2024, 12, 01, 02, 03, 04, TimeSpan.Zero);
         //dto.Offset = TimeSpan.FromHours(3);
 
         ent01.BirthDate = dtoRef;
         ent01.Save();
-        await scope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         long id = ent01.Id;
 
-        ConcreteEntity01 ent01Loaded = await scope.GetQuery<ConcreteEntity01>().Find(id);
+        ConcreteEntity01 ent01Loaded = await db.GetQuery<ConcreteEntity01>().Find(id);
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
 
@@ -291,22 +289,22 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        await scope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         id = ent01.Id;
 
-        ent01Loaded = await scope.GetQuery<ConcreteEntity01>().Find(id);
+        ent01Loaded = await db.GetQuery<ConcreteEntity01>().Find(id);
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
         dtoWithOffset = dtoRef.ToOffset(-1 * TimeSpan.FromHours(3));
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        await scope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         id = ent01.Id;
 
-        ent01Loaded = await scope.GetQuery<ConcreteEntity01>().Find(id);
+        ent01Loaded = await db.GetQuery<ConcreteEntity01>().Find(id);
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
         //ConcreteEntity01 ent02 = scope.New<ConcreteEntity01>();
@@ -348,14 +346,16 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public async Task Password_02_JsonEntity()
     {
-        var dbScope = Database.Scopes.Db();
+        var db = Database.Scopes.Db();
 
         string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity08.forPasswords.json");
-        var em = Database.Metadata.AddFromJson(content);
+        var ems = db.Metadata.AddJson(content);
+        Assert.NotNull(ems);
+        Assert.Single(ems);
 
-        dbScope.Structure.ApplyEntityStructure(em);
+        db.Structure.ApplyEntityStructure(ems.First());
 
-        IEntity ent01 = dbScope.New("myJsonEntity08");
+        IEntity ent01 = db.New("myJsonEntity08");
         ent01["Name"] = "Entity 01";
         ent01["MyJsonEntityPassword01"] = "123456";
 
@@ -364,7 +364,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -381,11 +381,11 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public async Task OneWayPassword_01_CryptDecrypt()
     {
-        var dbScope = Database.Scopes.Db();
+        var db = Database.Scopes.Db();
 
-        dbScope.ReAddReCreate<PasswordTestEntity>();
+        db.ReAddReCreate<PasswordTestEntity>();
 
-        PasswordTestEntity ent01 = dbScope.New<PasswordTestEntity>();
+        PasswordTestEntity ent01 = db.New<PasswordTestEntity>();
         ent01.Name = "Entity 01";
         ent01.MyOneWayPassword = "123456";
 
@@ -394,7 +394,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        await dbScope.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);

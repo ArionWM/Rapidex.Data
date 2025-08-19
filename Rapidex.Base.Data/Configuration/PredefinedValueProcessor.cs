@@ -11,7 +11,7 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
 {
 
 
-    Dictionary<IDbEntityMetadata, PredefinedValueItem> _repository = new Dictionary<IDbEntityMetadata, PredefinedValueItem>();
+    Dictionary<IDbEntityMetadata, PredefinedValueItems> _repository = new Dictionary<IDbEntityMetadata, PredefinedValueItems>();
 
 
     protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em, IEnumerable<IEntity> entities, bool? @override)
@@ -59,7 +59,7 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
 
     protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em)
     {
-        PredefinedValueItem item = _repository.Get(em);
+        PredefinedValueItems item = _repository.Get(em);
         if (item == null)
             return;
 
@@ -81,10 +81,10 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
 
     public void Register(IDbEntityMetadata em, bool @override, params ObjDictionary[] entities)
     {
-        PredefinedValueItem item = _repository.Get(em);
+        PredefinedValueItems item = _repository.Get(em);
         if (item == null)
         {
-            item = new PredefinedValueItem(em, @override);
+            item = new PredefinedValueItems(em, @override);
             _repository.Add(em, item);
         }
 
@@ -140,7 +140,7 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
         throw new NotImplementedException();
     }
 
-    public PredefinedValueItem Get(IDbEntityMetadata em)
+    public PredefinedValueItems Get(IDbEntityMetadata em)
     {
         return this._repository.Get(em);
     }

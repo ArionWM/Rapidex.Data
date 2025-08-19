@@ -201,9 +201,9 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 			this.ApplyEntityStructure(em, false);
 		}
 
-		Database.PredefinedValues.Apply(scope).Wait();
+        scope.ParentDbScope.Metadata.Data.Apply(scope).Wait();
 
-		foreach (var em in allEms)
+        foreach (var em in allEms)
 		{
 			em.ApplyToScope(this.ParentScope);
 		}

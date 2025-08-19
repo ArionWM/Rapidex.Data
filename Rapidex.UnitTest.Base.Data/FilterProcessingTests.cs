@@ -56,12 +56,12 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         //[FromKeyedServices(Rapidex.Common.ENV)] SimpleFlatCriteriaParser criteriaParser
         //this.Fixture.ClearCaches();
 
-        var database = Database.Scopes.Db();
+        var db = Database.Scopes.Db();
 
-        Database.Metadata.AddIfNotExist<ConcreteEntityForFilterTest>();
-        database.Structure.ApplyEntityStructure<ConcreteEntityForFilterTest>();
+        db.Metadata.AddIfNotExist<ConcreteEntityForFilterTest>();
+        db.Structure.ApplyEntityStructure<ConcreteEntityForFilterTest>();
 
-        var query = database.GetQuery<ConcreteEntityForFilterTest>();
+        var query = db.GetQuery<ConcreteEntityForFilterTest>();
 
         //------------------------------------------------------------------------------
         string filter = "Name=abc12";
@@ -77,7 +77,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         Assert.Equal("abc12", cond01.Value);
 
         //------------------------------------------------------------------------------
-        query = database.GetQuery<ConcreteEntityForFilterTest>();
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
         filter = "Address~addr1*";
         criteria = CriteriaParser.Parse(query, filter);
 
@@ -93,7 +93,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 
 
         //------------------------------------------------------------------------------
-        query = database.GetQuery<ConcreteEntityForFilterTest>();
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
         filter = "Age > 18 & Name like myName*";
         criteria = CriteriaParser.Parse(query, filter);
 
@@ -120,7 +120,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 
 
         //------------------------------------------------------------------------------
-        query = database.GetQuery<ConcreteEntityForFilterTest>();
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
         filter = "(Name=abc12) & ((Date>today) | (date=null))";
         criteria = CriteriaParser.Parse(query, filter);
 
@@ -165,7 +165,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //------------------------------------------------------------------------------
         //Enumerations
-        query = database.GetQuery<ConcreteEntityForFilterTest>();
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
         filter = "ContactType=Department";
         criteria = CriteriaParser.Parse(query, filter);
 
@@ -180,7 +180,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //------------------------------------------------------------------------------
         //Null
-        query = database.GetQuery<ConcreteEntityForFilterTest>();
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
         filter = "Name=null";
         criteria = CriteriaParser.Parse(query, filter);
 
@@ -195,7 +195,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //------------------------------------------------------------------------------
         //Caption -> Name
-        query = database.GetQuery<ConcreteEntityForFilterTest>();
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
         filter = "Caption=abc";
         criteria = CriteriaParser.Parse(query, filter);
 
@@ -250,20 +250,20 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         //this.Fixture.ClearCaches();
 
-        var database = Database.Scopes.Db();
-        Database.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
-        Database.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
+        var db = Database.Scopes.Db();
+        db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
+        db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
 
-        database.Structure.DropEntity<ConcreteEntityForN2NTest01>();
-        database.Structure.DropEntity<ConcreteEntityForN2NTest02>();
-        database.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
-        database.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest02>();
+        db.Structure.DropEntity<ConcreteEntityForN2NTest01>();
+        db.Structure.DropEntity<ConcreteEntityForN2NTest02>();
+        db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest02>();
 
-        ConcreteEntityForN2NTest01 master01 = database.New<ConcreteEntityForN2NTest01>();
+        ConcreteEntityForN2NTest01 master01 = db.New<ConcreteEntityForN2NTest01>();
         master01.Name = "master01";
         master01.Save();
 
-        ConcreteEntityForN2NTest02 detail01_01 = database.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail01_01 = db.New<ConcreteEntityForN2NTest02>();
         detail01_01.Name = "detail01-01";
         detail01_01.Save();
         master01.Relation01.Add(detail01_01);
@@ -274,21 +274,21 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         //master01.Relation01.Add(detail01_02);
 
 
-        ConcreteEntityForN2NTest01 master02 = database.New<ConcreteEntityForN2NTest01>();
+        ConcreteEntityForN2NTest01 master02 = db.New<ConcreteEntityForN2NTest01>();
         master02.Name = "master02";
         master02.Save();
 
-        ConcreteEntityForN2NTest02 detail02_01 = database.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail02_01 = db.New<ConcreteEntityForN2NTest02>();
         detail02_01.Name = "detail02-02";
         detail02_01.Save();
         master02.Relation01.Add(detail02_01);
 
-        ConcreteEntityForN2NTest02 detail02_02 = database.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail02_02 = db.New<ConcreteEntityForN2NTest02>();
         detail02_02.Name = "detail02-02";
         detail02_02.Save();
         master02.Relation01.Add(detail02_02);
 
-        await database.CommitOrApplyChanges();
+        await db.CommitOrApplyChanges();
 
 
         long masterId01 = master01.Id;
@@ -304,14 +304,14 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
          
          */
 
-        var query01 = database.GetQuery<ConcreteEntityForN2NTest02>();
+        var query01 = db.GetQuery<ConcreteEntityForN2NTest02>();
         string filter01 = $"related = ConcreteEntityForN2NTest01/{masterId01}/Relation01";
         this.CriteriaParser.Parse(query01, filter01);
         IEntityLoadResult<ConcreteEntityForN2NTest02> result01 = await query01.Load();
         Assert.Equal(1, result01.Count());
 
 
-        var query02 = database.GetQuery<ConcreteEntityForN2NTest02>();
+        var query02 = db.GetQuery<ConcreteEntityForN2NTest02>();
         string filter02 = $"related = ConcreteEntityForN2NTest01/{masterId02}/Relation01";
         this.CriteriaParser.Parse(query02, filter02);
         IEntityLoadResult<ConcreteEntityForN2NTest02> result02 = await query02.Load();
