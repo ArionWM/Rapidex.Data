@@ -27,7 +27,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
     public DbEntityMetadataManager()
     {
-        this.EntityMetadataFactory = new DbEntityMetadataFactoryBase(); //Şimdilik ..
+        this.EntityMetadataFactory = new DbEntityMetadataFactory(); //Şimdilik ..
         //this.FieldMetadataFactory = new FieldMetadataFactory(this);
         //this.EnumerationDefinitionFactory = new EnumerationDefinitionFactory();
     }

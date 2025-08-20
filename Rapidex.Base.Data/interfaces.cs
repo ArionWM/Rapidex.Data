@@ -61,7 +61,7 @@ public interface ILazyBlob : IReference, IDataType<long>
 
 public interface IRapidexMetadataReleatedAssemblyDefinition : IRapidexAssemblyDefinition
 {
-    void SetupMetadata(IServiceProvider sp, IDbScope scope);
+    void SetupMetadata(IDbScope db);
 }
 
 ///// <summary>

@@ -68,10 +68,10 @@ namespace Rapidex.Data
             cinfo.ConnectionString.NotEmpty($"ConnectionString found in configuration for '{dbName}'. see appsettings.json");
             cinfo.Name.NotEmpty($"Name found in configuration for '{dbName}'. see appsettings.json");
 
-            IDbScope scope;
+            IDbScope db;
             if (cinfo.Name == DatabaseConstants.MASTER_DB_NAME)
             {
-                scope = Database.Scopes.AddMainDbIfNotExists();
+                db = Database.Scopes.AddMainDbIfNotExists();
             }
             else
             {
@@ -80,11 +80,7 @@ namespace Rapidex.Data
                 //Database.Scopes.AddDbIfNotExists(dbName);
             }
 
-            Common.Assembly.IterateAsemblies(ass =>
-            {
-                if (ass is IRapidexMetadataReleatedAssemblyDefinition mass)
-                    mass.SetupMetadata(sp, scope);
-            });
+            
 
         }
 

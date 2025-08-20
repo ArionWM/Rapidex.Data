@@ -5,6 +5,7 @@ using Rapidex.Data.Metadata;
 using Rapidex.Data.Metadata.Implementers;
 using Rapidex.Data.Parsing;
 using Rapidex.Data.Query;
+using Rapidex.Data.Scopes;
 using Rapidex.SignalHub;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,12 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
 
     public override void SetupServices(IServiceCollection services)
     {
-        services.AddSingletonForProd<IDbEntityMetadataFactory, DbEntityMetadataFactoryBase>();
+        services.AddSingletonForProd<IDbEntityMetadataFactory, DbEntityMetadataFactory>();
+        services.AddTransientForProd<IFieldMetadataFactory, FieldMetadataFactory>();
+        services.AddSingletonForProd<DbEntityFactory, DbEntityFactory>();
+
+        services.AddSingletonForProd<IDbScopeManager, DbScopeManager>();
+
         services.AddTransientForProd<IDbCriteriaParser, FilterTextParser>();
         services.AddTransientForProd<FilterTextParser, FilterTextParser>();
 
@@ -37,7 +43,10 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<IPredefinedValueProcessor, PredefinedValueProcessor>();
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
+
         FieldTypeJsonConverterBDT.Register();
+        EntityDataListImplementerJsonConverter.Register();
+        EntityDataNestedListImplementerJsonConverter.Register();
     }
 
     public override void Start(IServiceProvider serviceProvider)
@@ -45,14 +54,13 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         EntitySignalProviderHelper.CreatePredefinedContent(Rapidex.Common.SignalHub);
     }
 
-    public void SetupMetadata(IServiceProvider sp, IDbScope scope)
+    public void SetupMetadata(IDbScope db)
     {
-        scope.Metadata.AddIfNotExist<SchemaInfo>()
+        db.Metadata.AddIfNotExist<SchemaInfo>()
             .MarkOnlyBaseSchema();
 
-        scope.Metadata.AddIfNotExist<SchemaInfo>();
-        scope.Metadata.AddIfNotExist<BlobRecord>();
-        scope.Metadata.AddIfNotExist<GenericJunction>();
-        scope.Metadata.AddIfNotExist<TagRecord>();
+        db.Metadata.AddIfNotExist<BlobRecord>();
+        db.Metadata.AddIfNotExist<GenericJunction>();
+        db.Metadata.AddIfNotExist<TagRecord>();
     }
 }

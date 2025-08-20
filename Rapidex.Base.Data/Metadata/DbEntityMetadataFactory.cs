@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Rapidex.Data.Metadata
 {
-    public class DbEntityMetadataFactoryBase : IDbEntityMetadataFactory
+    public class DbEntityMetadataFactory : IDbEntityMetadataFactory
     {
         public virtual IDbEntityMetadata Create(string entityName, string module = null, string prefix = null)
         {

@@ -13,7 +13,7 @@ namespace Rapidex.Data
         public class VirtualRelationN2NDbFieldMetadata : Metadata.Columns.VirtualDbFieldMetadata
         {
             public string TargetEntityName { get; set; }
-            public IDbEntityMetadata TargetEntityMetadata { get; set; }
+            //public IDbEntityMetadata TargetEntityMetadata { get; set; }
             public string JunctionEntityName { get; set; } = JunctionHelper.DEFAULT_JUNCTION_ENTITY_NAME;
 
             public string JunctionSourceFieldName { get; set; }
@@ -82,12 +82,11 @@ namespace Rapidex.Data
                 data.AddData("filter", $"releated = {relationInfo}");
                 data.AddData("relationInfo", relationInfo);
 
-                if (this.TargetEntityMetadata != null)
-                {
-                    //HasPicture?
-                    string behaviorNames = this.TargetEntityMetadata.Behaviors.Join(",");
-                    data.Data.Set("targetBehaviors", behaviorNames);
-                }
+                var targetEm = scope.ParentDbScope.Metadata.Get(this.TargetEntityName)
+                     .NotNull($"Target entity metadata not found: {this.TargetEntityName}");
+
+                string behaviorNames = targetEm.Behaviors.Join(",");
+                data.Data.Set("targetBehaviors", behaviorNames);
             }
         }
 
@@ -168,10 +167,13 @@ namespace Rapidex.Data
 
             VirtualRelationN2NDbFieldMetadata fm = new VirtualRelationN2NDbFieldMetadata(self, this.TargetEntityName);
 
-            JunctionHelper.AddJunctionFields(fm);
-
             IDbEntityMetadata refMetadata = container.Get(this.TargetEntityName);
-            fm.TargetEntityMetadata = refMetadata;
+            if (refMetadata == null)
+                container.AddPremature(this.TargetEntityName);
+
+            refMetadata = container.Get(this.TargetEntityName);
+
+            JunctionHelper.AddJunctionFields(fm);
 
             return fm;
         }

@@ -11,8 +11,11 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.Metadata;
 internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
 {
+    public EntityMetadataBuilderFromEnum EnumerationDefinitionFactory { get; }
+
     public EntityMetadataBuilderFromConcrete(IDbMetadataContainer parent, IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory) : base(parent, dbEntityMetadataFactory, fieldMetadataFactory)
     {
+        this.EnumerationDefinitionFactory = new EntityMetadataBuilderFromEnum(parent, dbEntityMetadataFactory, fieldMetadataFactory);
     }
 
     protected virtual void ValidateConcreteType(Type type)
@@ -23,10 +26,38 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
         type.Name.ValidateInvariantName();
     }
 
+    protected virtual void CheckEnumerations(IDbEntityMetadata em)
+    {
+        foreach (var field in em.Fields.Values)
+        {
+            if (field.Type.IsEnum)
+            {
+                throw new MetadataException($"{em.Name} / {field.Name} is system.Enum. Should convert to Enumeration<Enum>.");
+            }
+
+            if (field.Type.IsSupportTo<Enumeration>())
+            {
+                if (field.Type.IsGenericType)
+                {
+                    Type enumType = field.Type.GetGenericArguments()[0];
+                    //Log.Debug(string.Format("Enumeration field: {0} / {1} / {}", em.Name, field.Name, enumType.Name));
+
+                    this.EnumerationDefinitionFactory.Add(enumType);
+                }
+            }
+        }
+    }
+
     protected virtual void AddField(IDbEntityMetadata em, PropertyInfo propertyInfo)
     {
         IDbFieldMetadata fm = this.FieldMetadataFactory.CreateType(em, propertyInfo.PropertyType, propertyInfo.Name, null);
         em.AddField(fm);
+    }
+
+    public override void Check(IDbEntityMetadata em)
+    {
+        base.Check(em);
+        this.CheckEnumerations(em);
     }
 
     protected virtual IDbEntityMetadata CreateMetadata(Type type)
@@ -43,6 +74,7 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
         }
 
         em.ConcreteTypeName = type.FullName;
+        em.Parent = this.Parent;
 
         PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty);
 
@@ -66,53 +98,44 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
 
         Log.Debug("Database", $"Metadata; Add: {type.FullName}");
 
-        try
+        this.ValidateConcreteType(type);
+
+        IDbEntityMetadata em = this.CreateMetadata(type);
+        em.ModuleName = module;
+        em.Prefix = prefix;
+
+        if (em.ModuleName.IsNullOrEmpty())
         {
-            this.ValidateConcreteType(type);
-
-            IDbEntityMetadata em = this.CreateMetadata(type);
-            em.ModuleName = module;
-            em.Prefix = prefix;
-
-            if (em.ModuleName.IsNullOrEmpty())
-            {
-                //Modülünü bulacağız
-                var aInfo = Common.Assembly.FindAssemblyInfo(type.Assembly);
-                em.ModuleName = aInfo.NavigationName;
-
-                if (em.Prefix.IsNullOrEmpty())
-                    em.Prefix = aInfo.DatabaseEntityPrefix;
-            }
+            //Modülünü bulacağız
+            var aInfo = Common.Assembly.FindAssemblyInfo(type.Assembly);
+            em.ModuleName = aInfo.NavigationName;
 
             if (em.Prefix.IsNullOrEmpty())
-            {
-                em.Prefix = DatabaseConstants.PREFIX_DEFAULT;
-            }
-
-            this.Add(em);
-
-            return em;
+                em.Prefix = aInfo.DatabaseEntityPrefix;
         }
-        catch (Exception ex)
+
+        if (em.Prefix.IsNullOrEmpty())
         {
-            ex.Log();
-            throw ex.Translate();
+            em.Prefix = DatabaseConstants.PREFIX_DEFAULT;
         }
+
+        this.Add(em);
+
+        return em;
+
     }
 
-    protected virtual IDbEntityMetadata AddEnumDefinition(Type type, string module = null, string prefix = null)
-    {
-        this.Validate();
-
-        throw new NotImplementedException();
-    }
 
     public virtual IDbEntityMetadata Add(Type type, string module = null, string prefix = null)
     {
+        IDbEntityMetadata em;
         if (type.IsEnum)
-            return this.AddEnumDefinition(type, module, prefix);
+            em =  this.EnumerationDefinitionFactory.Add(type, module, prefix);
         else
-            return this.AddConcreteDefinition(type, module, prefix);
+            em = this.AddConcreteDefinition(type, module, prefix);
+
+        em.Parent = this.Parent;
+        return em;
     }
 
 }

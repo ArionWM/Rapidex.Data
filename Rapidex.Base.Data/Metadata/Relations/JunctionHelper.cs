@@ -32,7 +32,7 @@ internal class JunctionHelper
 
     public static void AddJunctionFields(IDbEntityMetadata sourceEm, IDbEntityMetadata targetEm, string junctionEntityName = DEFAULT_JUNCTION_ENTITY_NAME)
     {
-        IDbEntityMetadata junctionEm = sourceEm.Parent.Parent.Metadata.Get(junctionEntityName).NotNull();
+        IDbEntityMetadata junctionEm = sourceEm.Parent.DbScope.Metadata.Get(junctionEntityName).NotNull();
         string sourceFieldName = sourceEm.Name.ToFriendly();
         string targetFieldName = targetEm.Name.ToFriendly();
 
@@ -54,7 +54,9 @@ internal class JunctionHelper
 
     public static void AddJunctionFields(VirtualRelationN2NDbFieldMetadata fm)
     {
-        IDbEntityMetadata junctionEm = fm.TargetEntityMetadata.Parent.Parent.Metadata.Get(fm.JunctionEntityName) ?? fm.TargetEntityMetadata.Parent.Parent.Metadata.AddPremature(fm.JunctionEntityName);
+        fm.ParentMetadata.NotNull("Parent metadata cannot be null");
+
+        IDbEntityMetadata junctionEm = fm.ParentMetadata.Parent.DbScope.Metadata.Get(fm.JunctionEntityName) ?? fm.ParentMetadata.Parent.DbScope.Metadata.AddPremature(fm.JunctionEntityName);
 
         string sourceFieldName = GetJunctionSourceFieldName(fm);
         string targetFieldName = GetJunctionTargetFieldName(fm);

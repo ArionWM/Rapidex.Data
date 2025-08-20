@@ -322,6 +322,7 @@ public interface IFieldMetadataFactory : IManager
     IDictionary<string, Type> FieldTypes { get; }
     void AddType(string typeName, Type type);
     void AddType(Type type);
+    void SetParent(IDbMetadataContainer parent);
     IDbFieldMetadata CreateType(IDbEntityMetadata em, string fieldType, string name, ObjDictionary values);
     IDbFieldMetadata CreateType(IDbEntityMetadata em, Type type, string name);
     IDbFieldMetadata CreateType(IDbEntityMetadata em, Type type, string name, ObjDictionary values);
@@ -383,7 +384,7 @@ public interface IDbEntityMetadataManager : IManager
 
 public interface IDbMetadataContainer
 {
-    IDbScope Parent { get; }
+    IDbScope DbScope { get; }
     ComponentDictionary<IDbEntityMetadata> Entities { get; }
 
     /// <summary>

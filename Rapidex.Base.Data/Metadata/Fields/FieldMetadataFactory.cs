@@ -98,6 +98,8 @@ internal class FieldMetadataFactory : IFieldMetadataFactory
 
     public IDbFieldMetadata CreateType(IDbEntityMetadata em, Type type, string name, ObjDictionary values)
     {
+        this.metadataContainer.NotNull();
+
         values = values ?? new ObjDictionary();
 
         DbFieldMetadata fm = new DbFieldMetadata();

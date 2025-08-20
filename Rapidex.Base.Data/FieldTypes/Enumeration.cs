@@ -70,7 +70,7 @@ namespace Rapidex.Data
 
             if (value is string strEnum)
             {
-                var em = entity._Metadata.Parent.Parent.Metadata.Get(this.ReferencedEntity);
+                var em = entity._Metadata.Parent.DbScope.Metadata.Get(this.ReferencedEntity);
                 if (em != null)
                 {
                     //ConcreteTypeName kullanmıyoruz, ConcreteTypeName sadece ConcreteEntity sınıfından türeyenler için

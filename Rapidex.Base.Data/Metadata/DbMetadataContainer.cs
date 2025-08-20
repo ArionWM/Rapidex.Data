@@ -8,18 +8,29 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.Metadata;
 internal class DbMetadataContainer : IDbMetadataContainer
 {
-    public IDbScope Parent { get; }
+    public IDbScope DbScope { get; }
     public ComponentDictionary<IDbEntityMetadata> Entities { get; } = new();
 
-    public PredefinedDataCollection Data { get; } 
+    public PredefinedDataCollection Data { get; }
 
-    public PredefinedDataCollection DemoData { get; } 
+    public PredefinedDataCollection DemoData { get; }
 
     public DbMetadataContainer(IDbScope parent)
     {
-        this.Parent = parent;
+        this.DbScope = parent;
         this.Data = new PredefinedDataCollection(this);
         this.DemoData = new PredefinedDataCollection(this);
+    }
+
+    protected virtual void MergeFieldsWithPremature(IDbEntityMetadata em, IDbEntityMetadata premature)
+    {
+        foreach (IDbFieldMetadata field in premature.Fields.Values)
+        {
+            if (!em.Fields.ContainsKey(field.Name))
+            {
+                em.AddField(field);
+            }
+        }
     }
 
     public void Add(IDbEntityMetadata em)
@@ -30,6 +41,12 @@ internal class DbMetadataContainer : IDbMetadataContainer
         }
 
         em.Parent = this;
+
+        IDbEntityMetadata existingEm = this.Get(em.Name);
+        if (existingEm != null && existingEm.IsPremature)
+        {
+            this.MergeFieldsWithPremature(em, existingEm);
+        }
 
         this.Entities.Set(em.Name, em);
     }
@@ -49,10 +66,6 @@ internal class DbMetadataContainer : IDbMetadataContainer
         if (this.Entities.ContainsKey(entityName))
         {
             this.Entities.Remove(entityName);
-        }
-        else
-        {
-            throw new KeyNotFoundException($"Entity with name '{entityName}' not found in metadata container.");
         }
     }
 }

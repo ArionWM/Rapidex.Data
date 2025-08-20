@@ -65,6 +65,14 @@ namespace Rapidex.Data.Scopes
         {
             this.Metadata = new DbMetadataContainer(this);
 
+            //Call all assemblies to setup metadata
+            Common.Assembly.IterateAsemblies(ass =>
+            {
+                if (ass is IRapidexMetadataReleatedAssemblyDefinition mass)
+                    mass.SetupMetadata(this);
+            });
+
+            //Check db existence
             var structureManager = this.DbProvider.GetStructureProvider();
             if (!structureManager.IsDatabaseAvailable(this.DatabaseName))
             {
@@ -73,9 +81,11 @@ namespace Rapidex.Data.Scopes
 
             this.DbProvider.UseDb(this.DatabaseName);
 
+            //Check 'base' schema
             this.baseScope = this.AddSchemaIfNotExists(this.DefaultSchemaName, 1);
             this.baseScope.Structure.ApplyAllStructure();
 
+            //Load other schemas
             this.LoadRecordedSchemaInfos();
         }
 

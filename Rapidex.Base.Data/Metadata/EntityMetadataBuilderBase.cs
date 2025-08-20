@@ -11,23 +11,18 @@ internal abstract class EntityMetadataBuilderBase
     public string ModuleName { get; }
 
 
-    public IDbMetadataContainer Parent { get; protected set; }
-    public IFieldMetadataFactory FieldMetadataFactory { get; }
-    public IDbEntityMetadataFactory EntityMetadataFactory { get; protected set; }
-    public EntityMetadataBuilderFromEnum EnumerationDefinitionFactory { get; }
+    protected IDbMetadataContainer Parent { get; set; }
+    protected IFieldMetadataFactory FieldMetadataFactory { get; }
+    protected IDbEntityMetadataFactory EntityMetadataFactory { get; set; }
+    
     public ComponentDictionary<IDbEntityMetadata> Entities { get; } = new();
-
-    //public EntityMetadataBuilderBase(IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory)
-    //{
-    //}
 
     public EntityMetadataBuilderBase(IDbMetadataContainer parent, IDbEntityMetadataFactory dbEntityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory)
     {
         this.SetParent(parent);
         this.EntityMetadataFactory = dbEntityMetadataFactory.NotNull();
         this.FieldMetadataFactory = fieldMetadataFactory.NotNull();
-        this.EnumerationDefinitionFactory = new EntityMetadataBuilderFromEnum(this.Parent, this.EntityMetadataFactory, this.FieldMetadataFactory);
-
+        this.FieldMetadataFactory.SetParent(parent);
     }
 
     protected virtual void Validate()
@@ -57,27 +52,7 @@ internal abstract class EntityMetadataBuilderBase
         }
     }
 
-    protected virtual void CheckEnumerations(IDbEntityMetadata em)
-    {
-        foreach (var field in em.Fields.Values)
-        {
-            if (field.Type.IsEnum)
-            {
-                throw new MetadataException($"{em.Name} / {field.Name} is system.Enum. Should convert to Enumeration<Enum>.");
-            }
-
-            if (field.Type.IsSupportTo<Enumeration>())
-            {
-                if (field.Type.IsGenericType)
-                {
-                    Type enumType = field.Type.GetGenericArguments()[0];
-                    //Log.Debug(string.Format("Enumeration field: {0} / {1} / {}", em.Name, field.Name, enumType.Name));
-
-                    this.EnumerationDefinitionFactory.Add(enumType);
-                }
-            }
-        }
-    }
+    
 
     protected virtual void MergeFieldsWithPremature(IDbEntityMetadata em, IDbEntityMetadata premature)
     {
@@ -100,12 +75,13 @@ internal abstract class EntityMetadataBuilderBase
         em.TableName = em.Prefix.IsNullOrEmpty() ? em.Name : $"{em.Prefix}_{em.Name}";
 
         this.CheckCaptionField(em);
-        this.CheckEnumerations(em);
     }
 
 
     public virtual void Add(IDbEntityMetadata em)
     {
+        em.Parent = this.Parent;
+
         this.Check(em);
 
         IDbEntityMetadata existingEm = this.Parent.Get(em.Name);

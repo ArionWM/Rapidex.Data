@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data;
 
-public class SerializationTests : DbDependedTestsBase<DbSqlServerProvider>
+public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public SerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public BasicJsonSerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 
@@ -24,7 +24,7 @@ public class SerializationTests : DbDependedTestsBase<DbSqlServerProvider>
      */
 
     [Fact]
-    public async Task Serialization_01()
+    public async Task Serialization_01_ConvertToEntityDataDto()
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
 
@@ -99,7 +99,7 @@ public class SerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void Serialization_01_RawJsonSerialization()
+    public void Serialization_01_EntityToJsonAndReverse()
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
@@ -126,7 +126,7 @@ public class SerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void Serialization_02_RawJsonDeserialization()
+    public void Serialization_02_EntityJsonDataDeserialization()
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master

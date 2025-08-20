@@ -16,6 +16,8 @@ internal class DefaultMetadataImplementHost : IMetadataImplementHost
     public DefaultMetadataImplementHost(IDbEntityMetadataFactory entityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory)
     {
         this.FieldMetadataFactory = fieldMetadataFactory.NotNull("FieldMetadataFactory can't be null.");
+        if (this.Parent != null)
+            this.FieldMetadataFactory.SetParent(this.Parent);
         this.EntityMetadataFactory = entityMetadataFactory;
     }
 
@@ -23,6 +25,7 @@ internal class DefaultMetadataImplementHost : IMetadataImplementHost
     {
         parent.NotNull();
         this.Parent = parent;
+        this.FieldMetadataFactory.SetParent(this.Parent);
     }
 
 
@@ -51,7 +54,7 @@ internal class DefaultMetadataImplementHost : IMetadataImplementHost
     public IUpdateResult AddConcrete(Type type)
     {
         UpdateResult ures = new();
-        EntityMetadataBuilderFromConcrete cmi = new(this.Parent, Database.EntityMetadataFactory, Database.FieldMetadataFactory);
+        EntityMetadataBuilderFromConcrete cmi = new(this.Parent, this.EntityMetadataFactory, this.FieldMetadataFactory);
         var em = cmi.Add(type);
         ures.Added(em);
         return ures;

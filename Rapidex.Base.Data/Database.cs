@@ -13,11 +13,11 @@ namespace Rapidex.Data;
 public static class Database
 {
 
-    
+
     public static DbEntityFactory EntityFactory { get; private set; } //Internal olmalı ancak DbDataModificationManager ların erişmesi lazım ?
     public static DbConfigurationManager Configuration { get; private set; }
 
-    public static IFieldMetadataFactory FieldMetadataFactory { get; private set; }
+    
     public static IDbEntityMetadataFactory EntityMetadataFactory { get; private set; }
 
 
@@ -72,8 +72,8 @@ public static class Database
         Database.EntityMetadataFactory = sp.GetRapidexService<IDbEntityMetadataFactory>()
             .NotNull("Db entity metadata factory not found");
 
-        Database.FieldMetadataFactory = sp.GetRapidexService<IFieldMetadataFactory>()
-            .NotNull();
+        //Database.FieldMetadataFactory = sp.GetRapidexService<IFieldMetadataFactory>()
+        //    .NotNull();
 
 
         Database.Configuration.LoadDbScopeDefinitions(sp);

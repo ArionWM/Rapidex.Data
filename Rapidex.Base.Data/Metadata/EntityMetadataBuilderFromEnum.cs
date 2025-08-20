@@ -53,7 +53,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
     public IDbEntityMetadata CreateMetadata(string enumerationName, string module = null, string prefix = null)
     {
         IDbEntityMetadata em = this.EntityMetadataFactory.Create(enumerationName, module, prefix ?? DatabaseConstants.PREFIX_ENUMERATION);
-
+        em.Parent= this.Parent;
         IDbEntityMetadata bem = em.ShouldSupportTo<IDbEntityMetadata>($"Entity metadata '{em.Name}' should be IDbEntityMetadata");
 
         em.Fields.AddIfNotExist<long>(CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
@@ -65,6 +65,8 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         em.Fields.AddIfNotExist<bool>("IsArchived", "IsArchived"); // aslında ArchiveEntity ile ekleniyor
         em.Fields.AddIfNotExist<bool>("Sealed", "Sealed");
         em.Fields.AddIfNotExist<string>("Icon", "Icon");
+
+        em.PrimaryKey = em.Fields.Get(CommonConstants.FIELD_ID, true);
 
         bem.AddBehavior("ArchiveEntity", true, false); //Diğer kitaplıkta kaldı?
         bem.AddBehavior("DefinitionEntity", true, false); //Diğer kitaplıkta kaldı?
@@ -139,7 +141,6 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
             em = this.CreateMetadata(name, module, prefix);
             this.Parent.AddIfNotExist(em);
         }
-
 
         JsonNode fieldsNode = json["values"];
         var enumValEntities = this.GetValueEntities(em, fieldsNode);

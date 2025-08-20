@@ -149,8 +149,11 @@ namespace Rapidex.Data
             var relFm = parentFm as VirtualRelationN2NDbFieldMetadata;
             relFm.NotNull($"{parentEm.Name} / {releatedField} is not available or not N2N relation");
 
-            if (crit.EntityMetadata != relFm.TargetEntityMetadata)
-                throw new InvalidOperationException($"Field '{releatedField}' is not a reference field in entity '{crit.EntityMetadata.Name}'");
+            var targetEm = crit.Schema.ParentDbScope.Metadata.Get(relFm.TargetEntityName)
+                .NotNull($"Metadata for '{relFm.TargetEntityName}' not found");
+
+            //if (crit.EntityMetadata != relFm.TargetEntityMetadata)
+            //    throw new InvalidOperationException($"Field '{releatedField}' parent metadata different ('{crit.EntityMetadata.Name}')");
 
             JunctionHelper.SetEntitiesCriteria(crit.Schema, relFm, parentEntity, crit);
 

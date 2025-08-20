@@ -18,7 +18,10 @@ internal static class TestHelper
 
     public static IDbEntityMetadata ReAddReCreate<T>(this IDbSchemaScope scope) where T : IConcreteEntity
     {
-        scope.ParentDbScope.Metadata.Remove<T>();
+        var em = scope.ParentDbScope.Metadata.Get<T>();
+        if (em != null)
+            scope.ParentDbScope.Metadata.Remove<T>();
+
         IDbEntityMetadata metadata = scope.ParentDbScope.Metadata.AddIfNotExist<T>();
         scope.Structure.DropEntity<T>();
         scope.Structure.ApplyEntityStructure<T>();

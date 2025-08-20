@@ -28,7 +28,15 @@ public static class MetadataExtender
 
     public static IDbEntityMetadata AddPremature(this IDbMetadataContainer mman, string entityName)
     {
-        throw new NotImplementedException();
+        if (mman.Get(entityName) != null)
+        {
+            throw new InvalidOperationException($"Entity metadata '{entityName}' already exists in the metadata container.");
+        }
+
+        var em = Database.EntityMetadataFactory.Create(entityName);
+        em.IsPremature = true;
+        mman.Add(em);
+        return em;
     }
 
     public static IDbEntityMetadata GetMetadata(this IEntity ent)
@@ -53,13 +61,13 @@ public static class MetadataExtender
 
     public static IDbEntityMetadata AddIfNotExist<T>(this IDbMetadataContainer mContainer, string module = null, string prefix = null) where T : IConcreteEntity
     {
-        var em = mContainer.Get<T>();
-        if (em == null || em.IsPremature)
+        var _em = mContainer.Get<T>();
+        if (_em == null || _em.IsPremature)
         {
-            mContainer.Add<T>(module, prefix);
+            _em = mContainer.Add<T>(module, prefix);
 
         }
-        return em;
+        return _em;
     }
 
 
@@ -76,26 +84,18 @@ public static class MetadataExtender
         return mman.AddIfNotExist<T>();
     }
 
-
-
-
-
-
-    public static void Remove(this IDbMetadataContainer emman, string name)
-    {
-        IDbEntityMetadata em = emman.Get(name);
-        if (em != null)
-        {
-            emman.Remove(em.Name);
-        }
-    }
-
-
+    //public static void Remove(this IDbMetadataContainer emman, string name)
+    //{
+    //    IDbEntityMetadata em = emman.Get(name);
+    //    if (em != null)
+    //        emman.Remove(em.Name);
+    //}
 
 
     public static void Remove<T>(this IDbMetadataContainer emman) where T : IConcreteEntity
     {
-        emman.Remove(typeof(T).Name);
+        if (emman.Get<T>() != null)
+            emman.Remove(typeof(T).Name);
     }
 
 
@@ -144,10 +144,17 @@ public static class MetadataExtender
         return emman.GetModuleOwnedDefinitions(module.NavigationName);
     }
 
+    public static IFieldMetadataFactory GetFieldMetadataFactory(this IDbMetadataContainer container)
+    {
+        container.NotNull();
+        FieldMetadataFactory fmf = new(container);
+        return fmf;
+    }
+
     public static DbFieldMetadataList AddIfNotExist(this DbFieldMetadataList fields, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
     {
 
-        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, null);
+        IDbFieldMetadata fm = fields.EntityMetadata.Parent.GetFieldMetadataFactory().CreateType(fields.EntityMetadata, type, name, null);
         fields.AddIfNotExist(fm);
         return fields;
     }
@@ -161,7 +168,7 @@ public static class MetadataExtender
 
     public static DbFieldMetadataList AddIfNotExist(this DbFieldMetadataList fields, string name, string type, string caption, ObjDictionary values = null, Action<IDbFieldMetadata> set = null)
     {
-        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(fields.EntityMetadata, type, name, values);
+        IDbFieldMetadata fm = fields.EntityMetadata.Parent.GetFieldMetadataFactory().CreateType(fields.EntityMetadata, type, name, values);
         if (caption.IsNOTNullOrEmpty())
         {
             fm.Caption = caption;
@@ -180,14 +187,14 @@ public static class MetadataExtender
 
     public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, string type, ObjDictionary values = null)
     {
-        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(em, type, name, values);
+        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().CreateType(em, type, name, values);
         em.AddFieldIfNotExist(fm);
         return fm;
     }
 
     public static IDbFieldMetadata AddFieldIfNotExist<T>(this IDbEntityMetadata em, string name, ObjDictionary values = null)
     {
-        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(em, typeof(T), name, values);
+        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().CreateType(em, typeof(T), name, values);
         em.AddFieldIfNotExist(fm);
         return fm;
     }
@@ -195,7 +202,7 @@ public static class MetadataExtender
 
     public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
     {
-        IDbFieldMetadata fm = Database.FieldMetadataFactory.CreateType(em, type, name, null);
+        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().CreateType(em, type, name, null);
         set?.Invoke(fm);
         em.Fields.AddIfNotExist(fm);
         return fm;
@@ -203,7 +210,7 @@ public static class MetadataExtender
 
     internal static void Check(this IDbEntityMetadata em)
     {
-        EntityMetadataBuilderFromConcrete mb = new(em.Parent, Database.EntityMetadataFactory, Database.FieldMetadataFactory);
+        EntityMetadataBuilderFromConcrete mb = new(em.Parent, Database.EntityMetadataFactory, em.Parent.GetFieldMetadataFactory());
         mb.Check(em);
     }
 }
