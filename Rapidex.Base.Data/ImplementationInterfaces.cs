@@ -18,7 +18,7 @@ namespace Rapidex.Data;
 public interface IMetadataImplementHost
 {
     string ModuleName { get; }
-    //IDbScope DbScope { get; }
+
     IDbMetadataContainer Parent { get; }
     IDbEntityMetadataFactory EntityMetadataFactory { get; }
     IFieldMetadataFactory FieldMetadataFactory { get; }

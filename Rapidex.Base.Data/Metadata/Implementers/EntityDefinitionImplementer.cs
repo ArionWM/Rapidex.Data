@@ -12,7 +12,7 @@ namespace Rapidex.Data.Metadata.Implementers;
 
 internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
 {
-    public virtual string[] SupportedTags => new string[] { "!entity", "entity" };
+    public virtual string[] SupportedTags => new string[] { "!entity", "entity", "entitydefinition" };
     public virtual bool Implemented { get; set; }
 
     public IDbEntityMetadata EntityMetadata { get; set; } = null!;
@@ -38,7 +38,7 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
 
     public List<EntityFieldDefinitionImplementer> Fields { get; set; } = new List<EntityFieldDefinitionImplementer>();
 
-    public EntityDataNestedListImplementer? Data { get; set; } 
+    public EntityDataNestedListImplementer? Data { get; set; }
 
 
     [JsonExtensionData]
@@ -50,7 +50,7 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
         var updateRes = new UpdateResult();
 
         IDbEntityMetadata em = host.Parent.Get(this.Name);
-        if (em == null)
+        if (em == null || em.IsPremature)
         {
             //em = Database.EntityMetadataFactory.Create(this.Name, moduleDef.NavigationName, moduleDef.TablePrefix);
             em = Database.EntityMetadataFactory.Create(this.Name, host.ModuleName);
@@ -65,11 +65,7 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
         this.EntityMetadata = em;
 
         this.MergeTo(host, em);
-
-        //if (this.AvailableListViews != null)
-        //{
-        //    em.AddView(this.AvailableListViews.ToArray());
-        //}
+        em.Check();
 
         if (this.Marks.IsNOTNullOrEmpty())
         {
@@ -78,6 +74,13 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
                 em.Tags.Add(mark);
             }
         }
+
+        if (this.Data.IsNOTNullOrEmpty())
+        {
+            object trg = em;
+            this.Data.Implement(host, this, ref trg);
+        }
+
 
         IUpdateResult ures = em.ApplyBehaviors();
         foreach (object added in ures.AddedItems)

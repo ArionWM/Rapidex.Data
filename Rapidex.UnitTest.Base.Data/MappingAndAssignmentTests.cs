@@ -38,7 +38,7 @@ namespace Rapidex.UnitTest.Data
         {
             var db = Database.Scopes.AddMainDbIfNotExists();
 
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity05.base.json");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity05.base.json");
             db.Metadata.AddJson(content);
 
 
@@ -51,7 +51,7 @@ namespace Rapidex.UnitTest.Data
         {
             var db = Database.Scopes.AddMainDbIfNotExists();
 
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity05.base.json");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity05.base.json");
             db.Metadata.AddJson(content);
             IEntity entity = db.New("myJsonEntity05");
 
@@ -81,8 +81,8 @@ namespace Rapidex.UnitTest.Data
 
             var db = Database.Scopes.AddMainDbIfNotExists();
 
-            string content04 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
-            string content06 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity06.base.json");
+            string content04 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity04.base.json");
+            string content06 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity06.base.json");
             db.Metadata.AddJson(content04);
             db.Metadata.AddJson(content06);
 
@@ -208,7 +208,7 @@ namespace Rapidex.UnitTest.Data
 
             var db = Database.Scopes.AddMainDbIfNotExists();
 
-            string content05 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity05.base.json");
+            string content05 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity05.base.json");
             var ems1 = db.Metadata.AddJson(content05);
             Assert.NotNull(ems1);
             Assert.Single(ems1);
@@ -271,7 +271,7 @@ namespace Rapidex.UnitTest.Data
 
             var db = Database.Scopes.AddMainDbIfNotExists();
 
-            string content05 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity05.base.json");
+            string content05 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity05.base.json");
             db.Metadata.AddJson(content05);
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Metadata.AddIfNotExist<ConcreteEntity02>();

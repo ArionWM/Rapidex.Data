@@ -86,7 +86,8 @@ public static class OtherExtensions
 
     public static void Add(this PredefinedDataCollection coll, params IEntity[] entities)
     {
-
-    
+        var em = entities.First().GetMetadata();
+        var valueDicts = entities.Select(ent => EntityMapper.MapToDict(em, ent));
+        coll.Add(em, false, valueDicts.ToArray());
     }
 }

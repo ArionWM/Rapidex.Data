@@ -30,6 +30,8 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
         services.AddRapidexDataLevel();
 
+        Rapidex.Common.Assembly.Add(typeof(DbFixture).Assembly);
+
         //Rapidex.SignalHub.Library mhLib = new Rapidex.SignalHub.Library();
         //mhLib.SetupServices(services);
 

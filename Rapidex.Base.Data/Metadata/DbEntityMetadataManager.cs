@@ -55,7 +55,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
     protected virtual void AddField(IDbEntityMetadata em, PropertyInfo propertyInfo)
     {
-        IDbFieldMetadata fm = this.FieldMetadataFactory.CreateType(em, propertyInfo.PropertyType, propertyInfo.Name, null);
+        IDbFieldMetadata fm = this.FieldMetadataFactory.Create(em, propertyInfo.PropertyType, propertyInfo.Name, null);
         em.AddField(fm);
     }
 
@@ -266,12 +266,12 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
         }
 
 
-        IDbFieldMetadata fm = this.FieldMetadataFactory.CreateType(em, fieldType, fieldName, values);
+        IDbFieldMetadata fm = this.FieldMetadataFactory.Create(em, fieldType, fieldName, values);
         return fm;
     }
     protected virtual IDbFieldMetadata AddJsonField(IDbEntityMetadata em, string fieldName, string fieldType, ObjDictionary values)
     {
-        IDbFieldMetadata fm = this.FieldMetadataFactory.CreateType(em, fieldType, fieldName, values);
+        IDbFieldMetadata fm = this.FieldMetadataFactory.Create(em, fieldType, fieldName, values);
         return fm;
     }
 
@@ -419,7 +419,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
         if (setupOk)
             return;
 
-        this.FieldMetadataFactory.Setup(services);
+        //this.FieldMetadataFactory.Setup(services);
         this.ScanLibrariesForConcreteDefinitions();
 
         setupOk = true;
@@ -427,7 +427,7 @@ internal class DbEntityMetadataManager : IDbEntityMetadataManager
 
     public virtual void Start(IServiceProvider serviceProvider)
     {
-        this.FieldMetadataFactory.Start(serviceProvider);
+        //this.FieldMetadataFactory.Start(serviceProvider);
     }
 
     void IDbEntityMetadataManager.Clear()

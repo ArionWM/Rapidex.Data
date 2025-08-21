@@ -50,7 +50,7 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
 
     protected virtual void AddField(IDbEntityMetadata em, PropertyInfo propertyInfo)
     {
-        IDbFieldMetadata fm = this.FieldMetadataFactory.CreateType(em, propertyInfo.PropertyType, propertyInfo.Name, null);
+        IDbFieldMetadata fm = this.FieldMetadataFactory.Create(em, propertyInfo.PropertyType, propertyInfo.Name, null);
         em.AddField(fm);
     }
 

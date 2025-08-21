@@ -48,9 +48,38 @@ namespace Rapidex.Data
             }
         }
 
+        protected bool TryFindEnumConcreteType(IDbMetadataContainer container, bool checkMetadata, ref Type enumType)
+        {
+            enumType = null;
+            var em = container.Get(this.ReferencedEntity);
+
+            if (em != null && em.ConcreteTypeName.IsNOTNullOrEmpty())
+            {
+                enumType = Type.GetType(em.ConcreteTypeName);
+            }
+
+            if (enumType == null)
+            {
+                enumType = Rapidex.Common.Assembly.FindType(em.Name, true) ?? Type.GetType(em.Name);
+            }
+
+            bool finded = enumType != null && enumType.IsEnum;
+
+            if (finded && checkMetadata)
+            {
+                //Enum metadata'ları kontrol ediliyor
+                container.AddIfNotExist(enumType);
+            }
+
+            return finded;
+        }
+
         public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
             IDbFieldMetadata fm = base.SetupMetadata(container, self, values);
+
+            Type enumType = null;
+            this.TryFindEnumConcreteType(container, true, ref enumType);
 
             ReferenceDbFieldMetadata rfm = (ReferenceDbFieldMetadata)fm;
             rfm.DefinitionDataCallback = Enumeration.EnumDefinitionDataFiller;
@@ -70,17 +99,28 @@ namespace Rapidex.Data
 
             if (value is string strEnum)
             {
-                var em = entity._Metadata.Parent.DbScope.Metadata.Get(this.ReferencedEntity);
-                if (em != null)
+                Type enumType = null;
+
+                if (this.TryFindEnumConcreteType(this.GetParent().GetMetadata().Parent, true, ref enumType)) //TODO: Çok maaliyetli
                 {
-                    //ConcreteTypeName kullanmıyoruz, ConcreteTypeName sadece ConcreteEntity sınıfından türeyenler için
-                    Type enumType = Rapidex.Common.Assembly.FindType(em.Name) ?? Type.GetType(em.Name);
-                    if (enumType != null && enumType.IsEnum && Enum.TryParse(enumType, strEnum, true, out object enumValue))
+                    if (enumType.IsEnum && Enum.TryParse(enumType, strEnum, true, out object enumValue))
                     {
                         value = Convert.ToInt32(enumValue).As<long>();
                     }
-
                 }
+
+                //var em = entity._Metadata.Parent.DbScope.Metadata.Get(this.ReferencedEntity);
+                //if (em != null)
+                //{
+                //    if (em.IsPremature)
+                //        throw new InvalidOperationException($"Entity metadata '{em.Name}' is premature and cannot be used for value setting.");
+
+                //    //ConcreteTypeName kullanmıyoruz, ConcreteTypeName sadece ConcreteEntity sınıfından türeyenler için
+
+
+
+
+                //}
             }
 
             //TODO: Bulamaz ise (String) enum'nin caption field'ı ile aramalı -> Reference

@@ -32,6 +32,25 @@ public static class ImplementerExtender
         return cmi.Add(typeof(E), module, prefix);
     }
 
+    public static IDbEntityMetadata Add(this IDbMetadataContainer mContainer, Type concreteType, string module = null, string prefix = null) 
+    {
+        IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
+        IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
+
+        EntityMetadataBuilderFromConcrete cmi = new(mContainer, mf, ff);
+        return cmi.Add(concreteType, module, prefix);
+    }
+
+    public static IDbEntityMetadata AddIfNotExist(this IDbMetadataContainer mContainer, Type concreteType, string module = null, string prefix = null)
+    {
+        var _em = mContainer.Get(concreteType.Name);
+        if (_em == null || _em.IsPremature)
+        {
+           _em = mContainer.Add(concreteType, module, prefix);
+
+        }
+        return _em;
+    }
 
     public static IDbEntityMetadata[] Add(this IDbMetadataContainer mContainer, AssemblyInfo ainfo)
     {

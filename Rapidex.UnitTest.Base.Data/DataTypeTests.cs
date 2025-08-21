@@ -121,7 +121,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         db.Metadata.Remove("Rank");
 
-        string content = this.Fixture.GetFileContentAsString("TestContent\\EnumDefinition.Sample01.json");
+        string content = this.Fixture.GetFileContentAsString("TestContent\\json\\EnumDefinition.Sample01.json");
         db.Metadata.AddJson(content);
 
         var em = db.Metadata.Get("Rank");
@@ -348,7 +348,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         var db = Database.Scopes.Db();
 
-        string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity08.forPasswords.json");
+        string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity08.forPasswords.json");
         var ems = db.Metadata.AddJson(content);
         Assert.NotNull(ems);
         Assert.Single(ems);

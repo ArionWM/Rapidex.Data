@@ -26,7 +26,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
 {
     public override string Name => "Data / Orm Library";
     public override string TablePrefix => "data";
-    public override int Index => 1000;
+    public override int Index => 10;
 
     public override void SetupServices(IServiceCollection services)
     {
@@ -43,14 +43,20 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<IPredefinedValueProcessor, PredefinedValueProcessor>();
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
-
+        
         FieldTypeJsonConverterBDT.Register();
+        JsonImplementerInterfaceConverter.Register();
         EntityDataListImplementerJsonConverter.Register();
         EntityDataNestedListImplementerJsonConverter.Register();
+
+        FieldMetadataCollection fmc = new();
+        fmc.Setup(services);
     }
 
     public override void Start(IServiceProvider serviceProvider)
     {
+        MetadataImplementerContainer.Setup();
+
         EntitySignalProviderHelper.CreatePredefinedContent(Rapidex.Common.SignalHub);
     }
 

@@ -154,7 +154,7 @@ public static class MetadataExtender
     public static DbFieldMetadataList AddIfNotExist(this DbFieldMetadataList fields, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
     {
 
-        IDbFieldMetadata fm = fields.EntityMetadata.Parent.GetFieldMetadataFactory().CreateType(fields.EntityMetadata, type, name, null);
+        IDbFieldMetadata fm = fields.EntityMetadata.Parent.GetFieldMetadataFactory().Create(fields.EntityMetadata, type, name, null);
         fields.AddIfNotExist(fm);
         return fields;
     }
@@ -168,7 +168,7 @@ public static class MetadataExtender
 
     public static DbFieldMetadataList AddIfNotExist(this DbFieldMetadataList fields, string name, string type, string caption, ObjDictionary values = null, Action<IDbFieldMetadata> set = null)
     {
-        IDbFieldMetadata fm = fields.EntityMetadata.Parent.GetFieldMetadataFactory().CreateType(fields.EntityMetadata, type, name, values);
+        IDbFieldMetadata fm = fields.EntityMetadata.Parent.GetFieldMetadataFactory().Create(fields.EntityMetadata, type, name, values);
         if (caption.IsNOTNullOrEmpty())
         {
             fm.Caption = caption;
@@ -187,14 +187,14 @@ public static class MetadataExtender
 
     public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, string type, ObjDictionary values = null)
     {
-        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().CreateType(em, type, name, values);
+        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().Create(em, type, name, values);
         em.AddFieldIfNotExist(fm);
         return fm;
     }
 
     public static IDbFieldMetadata AddFieldIfNotExist<T>(this IDbEntityMetadata em, string name, ObjDictionary values = null)
     {
-        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().CreateType(em, typeof(T), name, values);
+        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().Create(em, typeof(T), name, values);
         em.AddFieldIfNotExist(fm);
         return fm;
     }
@@ -202,7 +202,7 @@ public static class MetadataExtender
 
     public static IDbFieldMetadata AddFieldIfNotExist(this IDbEntityMetadata em, string name, Type type, string caption, Action<IDbFieldMetadata> set = null)
     {
-        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().CreateType(em, type, name, null);
+        IDbFieldMetadata fm = em.Parent.GetFieldMetadataFactory().Create(em, type, name, null);
         set?.Invoke(fm);
         em.Fields.AddIfNotExist(fm);
         return fm;

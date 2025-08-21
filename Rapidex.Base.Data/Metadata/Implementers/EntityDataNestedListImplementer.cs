@@ -31,8 +31,6 @@ internal class EntityDataNestedListImplementer : List<EntityDataItemImplementer>
 
     public virtual IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target)
     {
-
-
         UpdateResult ures = new UpdateResult();
 
         foreach (EntityDataItemImplementer imp in this)

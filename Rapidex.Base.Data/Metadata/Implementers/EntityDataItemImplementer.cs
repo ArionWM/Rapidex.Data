@@ -23,8 +23,16 @@ internal class EntityDataItemImplementer : Dictionary<string, object>, IImplemen
         UpdateResult ures = new UpdateResult();
 
         //Dikkat scoped entity oluşturuyor, bunu uygular iken scope'ları kaldırmalı ya da dikkate almamalı !!
-        IEntity entity = Database.EntityFactory.Create(em, null, false);
-        //host.DbScope.Mapper.MapToNew(em, this);
+        IEntity entity = Database.EntityFactory.Create(em, host.Parent.DbScope, false);
+        foreach (var field in this)
+        {
+            var fm = em.Fields.Get(field.Key);
+            if (fm == null)
+                continue;
+
+            object value = field.Value;
+            entity.SetValue(fm.Name, value);
+        }
         ures.Added(entity);
         target = entity;
 

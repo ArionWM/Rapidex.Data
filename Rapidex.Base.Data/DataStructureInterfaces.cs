@@ -317,15 +317,12 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
 //Senaryoya göre nasıl farklılıklar yapılacak? Required, Editing props? vs
 
 
-public interface IFieldMetadataFactory : IManager
+public interface IFieldMetadataFactory 
 {
-    IDictionary<string, Type> FieldTypes { get; }
-    void AddType(string typeName, Type type);
-    void AddType(Type type);
     void SetParent(IDbMetadataContainer parent);
-    IDbFieldMetadata CreateType(IDbEntityMetadata em, string fieldType, string name, ObjDictionary values);
-    IDbFieldMetadata CreateType(IDbEntityMetadata em, Type type, string name);
-    IDbFieldMetadata CreateType(IDbEntityMetadata em, Type type, string name, ObjDictionary values);
+    IDbFieldMetadata Create(IDbEntityMetadata em, string fieldType, string name, ObjDictionary values);
+    IDbFieldMetadata Create(IDbEntityMetadata em, Type type, string name);
+    IDbFieldMetadata Create(IDbEntityMetadata em, Type type, string name, ObjDictionary values);
 }
 
 public interface IDbEntityMetadataFactory : IManager

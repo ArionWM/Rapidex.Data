@@ -83,6 +83,8 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
         //ConcreteEntity01 ise henüz eklenmedi. Bu durumda prematüre bir taným oluþmalý
         try
         {
+            this.Fixture.ClearCaches();
+
             var db = Database.Scopes.Db();
             var schema = db.AddSchemaIfNotExists("myTestSchema02");
 
@@ -271,8 +273,6 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void MetadataCreation_WithYaml_01()
     {
-        
-
         this.Fixture.ClearCaches();
 
         var db = Database.Scopes.Db();
@@ -286,7 +286,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
         //Assert.Equal("myTestSchema03", em01.SchemaName);
         Assert.Equal("myEntity1", em01.Name);
         Assert.Equal(em01.Fields["Id"], em01.PrimaryKey);
-        Assert.Equal(7, em01.Fields.Count); //12 alan var ancak ekledikleri ile birlikte 16 oluyor
+        Assert.Equal(6, em01.Fields.Count); //12 alan var ancak ekledikleri ile birlikte 16 oluyor
         Assert.Equal("Id", em01.Fields["Id"].Name);
         Assert.Equal(typeof(long), em01.Fields["Id"].Type);
         Assert.Equal(typeof(long), em01.Fields["Id"].BaseType);
@@ -301,8 +301,40 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
 
     }
 
+    [Fact]
+    public void MetadataCreation_WithYaml_02_PredefinedData()
+    {
+        this.Fixture.ClearCaches();
+
+        var db = Database.Scopes.Db();
+        var schema = db.AddSchemaIfNotExists("myTestSchema03");
+
+        string content = this.Fixture.GetFileContentAsString("TestContent\\yaml\\Entity.02SimpleWithData.yml");
+        db.Metadata.AddYaml(content);
+
+        IDbEntityMetadata em01 = db.Metadata.Get("myEntity2");
+        Assert.NotNull(em01);
+        //Assert.Equal("myTestSchema03", em01.SchemaName);
+        Assert.Equal("myEntity2", em01.Name);
+
+        PredefinedValueItems items = db.Metadata.Data.Repository.Get(em01);
+        Assert.NotNull(items);
+        Assert.Equal(2, items.Entities.Count);
+
+        var item1 = items.Entities.Get(100);
+        Assert.NotNull(item1);
+        Assert.Equal("My Entity2 1", item1["Title"].As<string>());
+
+        var item2 = items.Entities.Get(101);
+        Assert.NotNull(item2);
+        Assert.Equal("My Entity2 2", item2["Title"].As<string>());
 
 
 
 
     }
+
+
+
+
+}

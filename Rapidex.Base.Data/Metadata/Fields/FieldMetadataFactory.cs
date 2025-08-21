@@ -9,10 +9,10 @@ internal class FieldMetadataFactory : IFieldMetadataFactory
 {
     bool started = false;
 
-    Dictionary<string, Type> fieldTypes = new Dictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
+    
     IDbMetadataContainer metadataContainer;
 
-    public IDictionary<string, Type> FieldTypes => fieldTypes;
+    
 
     public FieldMetadataFactory()
     {
@@ -29,74 +29,10 @@ internal class FieldMetadataFactory : IFieldMetadataFactory
         metadataContainer = parent.NotNull();
     }
 
-    public void Setup(IServiceCollection services)
-    {
-        this.AddType("byte", typeof(byte));
-        this.AddType("short", typeof(Int16));
-        this.AddType("int", typeof(int));
-        this.AddType("int32", typeof(int));
-        this.AddType("int64", typeof(long));
-        this.AddType("long", typeof(long));
-        this.AddType("string", typeof(string));
-        this.AddType("datetime", typeof(DateTimeOffset));
-        this.AddType("date", typeof(DateTimeOffset));
-        this.AddType("time", typeof(DateTimeOffset));
-        this.AddType("datetimediff", typeof(TimeSpan));
-        this.AddType("timespan", typeof(TimeSpan));
-        this.AddType("boolean", typeof(bool));
-        this.AddType("bool", typeof(bool));
-        this.AddType("yesno", typeof(bool));
-        this.AddType("guid", typeof(Guid));
-        this.AddType("decimal", typeof(decimal));
-        this.AddType("double", typeof(double));
-        this.AddType("float", typeof(double));
-        this.AddType("byte[]", typeof(byte[]));
-        this.AddType("binary", typeof(byte[]));
-        this.AddType("xml", typeof(XmlNode));
+    
+ 
 
-        var types = Common.Assembly.FindDerivedClassTypes<IDataType>();
-        foreach (var type in types)
-        {
-            AddType(type);
-        }
-    }
-
-    public void Start(IServiceProvider serviceProvider)
-    {
-        if (started)
-            return;
-
-        started = true;
-    }
-
-
-    public void AddType(Type type)
-    {
-        fieldTypes.Set(type.Name.CamelCase(), type);
-
-        if (type.IsGenericType && !type.IsConstructedGenericType)
-        {
-            return;
-        }
-
-        if (type.IsSupportTo<IDataType>())
-        {
-            IDataType dataType = TypeHelper.CreateInstance<IDataType>(type);
-            fieldTypes.Set(dataType.TypeName.CamelCase(), type);
-        }
-        else
-        {
-            fieldTypes.Set(type.Name.CamelCase(), type);
-        }
-    }
-
-    public void AddType(string typeName, Type type)
-    {
-        fieldTypes.Set(typeName.CamelCase(), type);
-    }
-
-
-    public IDbFieldMetadata CreateType(IDbEntityMetadata em, Type type, string name, ObjDictionary values)
+    public IDbFieldMetadata Create(IDbEntityMetadata em, Type type, string name, ObjDictionary values)
     {
         this.metadataContainer.NotNull();
 
@@ -157,14 +93,14 @@ internal class FieldMetadataFactory : IFieldMetadataFactory
         }
     }
 
-    public IDbFieldMetadata CreateType(IDbEntityMetadata em, Type type, string name)
+    public IDbFieldMetadata Create(IDbEntityMetadata em, Type type, string name)
     {
         string typeName = type.Name;
         ObjDictionary values = new();
-        return CreateType(em, type, name, values);
+        return Create(em, type, name, values);
     }
 
-    public IDbFieldMetadata CreateType(IDbEntityMetadata em, string fieldType, string name, ObjDictionary values)
+    public IDbFieldMetadata Create(IDbEntityMetadata em, string fieldType, string name, ObjDictionary values)
     {
         fieldType = fieldType.ToLowerInvariant();
 
@@ -180,14 +116,14 @@ internal class FieldMetadataFactory : IFieldMetadataFactory
             //    return CreateType(em, enumType, name, values);
 
             default:
-                Type type = fieldTypes.Get(fieldType);
+                Type type = FieldMetadataCollection.FieldTypes.Get(fieldType);
                 if (type == null)
                     type = Common.Assembly.FindType(fieldType, true);
 
                 if (type == null)
                     throw new NotSupportedException($"Type '{fieldType}' is not supported.");
 
-                return CreateType(em, type, name, values);
+                return Create(em, type, name, values);
         }
     }
 }

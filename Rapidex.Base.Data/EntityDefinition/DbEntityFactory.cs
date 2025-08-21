@@ -124,9 +124,10 @@ namespace Rapidex.Data
             }
         }
 
-        public IEntity Create(IDbEntityMetadata em, IDbSchemaScope? dbScope, bool forNew)
+        public IEntity Create(IDbEntityMetadata em, IDbSchemaScope dbScope, bool forNew)
         {
             em.NotNull();
+            dbScope.NotNull();
 
             IEntity newEntity = null;
 
@@ -143,7 +144,7 @@ namespace Rapidex.Data
 
             if (forNew)
             {
-                dbScope.NotNull("Scope required for new entitites");
+                //dbScope.NotNull("Scope required for new entitites");
 
                 TemplateInfo templateInfo = GetTemplate(em, dbScope);
 

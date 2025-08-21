@@ -76,9 +76,8 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
 
     public IDbEntityMetadata Add<TEnum>(string module = null, string prefix = null) where TEnum : Enum
     {
-        Type type = typeof(TEnum);
-        IDbEntityMetadata em = CreateMetadata(typeof(TEnum).Name, module, prefix);
-        return em;
+        Type enumType = typeof(TEnum);
+        return this.Add(enumType, module, prefix); 
     }
     public IDbEntityMetadata Add(Enum enumeration, string module = null, string prefix = null)
     {
@@ -96,6 +95,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         if (em == null || em.IsPremature)
         {
             em = CreateMetadata(enumType.Name, module, prefix);
+            em.ConcreteTypeName = enumType.FullName;
             this.Parent.AddIfNotExist(em);
         }
         else
