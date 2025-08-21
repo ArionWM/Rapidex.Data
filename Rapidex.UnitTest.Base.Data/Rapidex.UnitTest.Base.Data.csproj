@@ -67,7 +67,7 @@
 	  <None Update="TestContent\EntityMetadata01.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\EnumDefinition.Sample01.json">
+	  <None Update="TestContent\Json\EnumDefinition.Sample01.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="TestContent\Image01.png">
@@ -76,38 +76,53 @@
 	  <None Update="TestContent\Image02.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity11.forN2N.json">
+	  <None Update="TestContent\Json\jsonEntity11.forN2N.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity10.forN2N.json">
+	  <None Update="TestContent\Json\jsonEntity10.forN2N.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity09.OnlyBase.json">
+	  <None Update="TestContent\Json\jsonEntity09.OnlyBase.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity08.forPasswords.json">
+	  <None Update="TestContent\Json\jsonEntity08.forPasswords.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity07.withPredefinedData.json">
+	  <None Update="TestContent\Json\jsonEntity07.withPredefinedData.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity06.base.json">
+	  <None Update="TestContent\Json\jsonEntity06.base.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity05.base.json">
+	  <None Update="TestContent\Json\jsonEntity05.base.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity04.base.json">
+	  <None Update="TestContent\Json\jsonEntity04.base.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity03.base.json">
+	  <None Update="TestContent\Json\jsonEntity03.base.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity02.WithBehavior.json">
+	  <None Update="TestContent\Json\jsonEntity02.WithBehavior.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\jsonEntity01.json">
+	  <None Update="TestContent\Json\jsonEntity01.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="TestContent\Yaml\Entity.01Simple.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="TestContent\Yaml\Entity.02SimpleWithData.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="TestContent\Yaml\Entity.03SimpleWithReference.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="TestContent\Yaml\Entity.04WithBehaviors.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="TestContent\Yaml\Entity.05ForInjection.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
 

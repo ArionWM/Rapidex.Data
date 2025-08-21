@@ -1,0 +1,28 @@
+﻿#!entity
+_tag: entity
+name: myEntity3
+tenant: common
+workspace: base
+module: project
+  
+#dbPrefix: prj
+
+onlyBaseSchema: true
+
+fields:
+- name: Ref01
+  type: reference
+  caption: 
+  isSealed: false
+  reference: myEntity1
+- name: Title
+  type: string
+  caption: 
+  isSealed: false
+- name: Mobile
+  type: phone
+  caption: 
+  isSealed: false
+
+
+

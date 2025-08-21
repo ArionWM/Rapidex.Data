@@ -1,0 +1,26 @@
+﻿
+#!entity
+_tag: entity
+name: myEntity5
+tenant: common
+workspace: base
+module: project
+  
+#dbPrefix: prj
+
+onlyBaseSchema: true
+
+fields:
+- name: Type
+  type: enum
+  caption: 
+  isSealed: false
+  reference: ContactType
+
+injection: # bir diğer modülün, kaydın vb implementasyonuna ek yapar. 
+# "entity:" ile aynı içerik ancak orjinal implementasyona merge edilir. Peki custom bir şeyler yapıldı ise?
+- entityName: myEntity3
+  fields:
+  - name: InjectedField
+    type: string
+    caption: InjectedField

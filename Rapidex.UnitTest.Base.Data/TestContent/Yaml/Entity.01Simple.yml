@@ -1,0 +1,35 @@
+﻿#!entity
+_tag: entity
+name: myEntity1
+tenant: common
+workspace: base
+module: project
+  
+#dbPrefix: prj
+
+onlyBaseSchema: true
+
+fields:
+- name: Type
+  type: enum
+  caption: 
+  isSealed: false
+  reference: ContactType
+- name: Title
+  type: string
+  caption: 
+  isSealed: false
+- name: Mobile
+  type: phone
+  caption: 
+  isSealed: false
+
+
+
+behaviors: [archiveEntity, hasTags, hasColors,  flowEntity]  
+availableListViews: [ListGridView, ListCardListView, ListKanbanView]
+defaultListView: ListGridView   
+
+  
+
+

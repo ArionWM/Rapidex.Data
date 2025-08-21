@@ -1,0 +1,30 @@
+﻿
+#!entity
+_tag: entity
+name: myComplexEntity4
+tenant: common
+workspace: base
+module: project
+  
+#dbPrefix: prj
+
+onlyBaseSchema: true
+
+fields:
+- name: Type
+  type: enum
+  caption: 
+  isSealed: false
+  reference: ContactType
+- name: Title
+  type: string
+  caption: 
+  isSealed: false
+- name: Mobile
+  type: phone
+  caption: 
+  isSealed: false
+
+# other fields in concrete definition
+
+behaviors: [archiveEntity, hasTags, hasColors, flowEntity]  

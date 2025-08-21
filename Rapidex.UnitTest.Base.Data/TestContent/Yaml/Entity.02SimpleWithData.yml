@@ -1,0 +1,39 @@
+﻿
+#!entity
+_tag: entity
+name: myEntity2
+tenant: common
+workspace: base
+module: project
+
+onlyBaseSchema: false
+
+fields:
+- name: Type
+  type: enum
+  caption: 
+  isSealed: false
+  reference: ContactType
+- name: Title
+  type: string
+  caption: 
+  isSealed: false
+- name: Mobile
+  type: phone
+  caption: 
+  isSealed: false
+  
+
+
+data:
+  - entity: myEntity2
+    id: 100
+    title: 'My Entity2 1'
+    type: Personal
+    tags: ['tag1', 'tag2']
+
+  - entity: myEntity2
+    id: 101
+    title: 'My Entity2 2'
+    type: Corporate
+    tags: ['tag1', 'tag2']
