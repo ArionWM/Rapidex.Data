@@ -15,7 +15,6 @@ namespace Rapidex.Data;
 
 internal class DbDataModificationManager : IDbDataModificationManager
 {
-
     protected ThreadLocal<IDbChangesScope> dbChangesScope;
     protected ThreadLocal<IDbTransactionScope> currentTransaction;
 
@@ -23,7 +22,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
 
     public IDbSchemaScope ParentScope { get; protected set; }
 
-    public IDbTransactionScope CurrentTransaction { get { return currentTransaction.Value; } protected set { currentTransaction.Value = value; } }
+    public IDbTransactionScope CurrentTransaction { get { return currentTransaction.Value; } } //protected set { currentTransaction.Value = value; } 
 
     public IDbDataModificationPovider DmProvider { get; protected set; }
 
@@ -130,7 +129,9 @@ internal class DbDataModificationManager : IDbDataModificationManager
     public IDbTransactionScope Begin(string transactionName = null)
     {
         //CurrentTransaction ???
-        return this.DmProvider.BeginTransaction(transactionName);
+
+        this.currentTransaction.Value = this.DmProvider.BeginTransaction(transactionName);
+        return this.currentTransaction.Value;
     }
 
     protected IDbChangesScope GetChangesScope()
@@ -292,6 +293,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
         finally
         {
             this.dbChangesScope.Value = null;
+            this.currentTransaction.Value = null;
         }
     }
 

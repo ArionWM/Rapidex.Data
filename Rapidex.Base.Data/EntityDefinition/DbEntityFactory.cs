@@ -65,6 +65,8 @@ namespace Rapidex.Data
         protected IEntity CreateConcrete(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
         {
             Type concreteType = Common.Assembly.FindType(entityMetadata.ConcreteTypeName);
+            concreteType.ShouldSupportTo<IEntity>($"Concrete type '{entityMetadata.ConcreteTypeName}' must implement IEntity interface.");
+
             IEntity dbEntity = TypeHelper.CreateInstance<IEntity>(concreteType);
 
             dbEntity._Scope = scope;

@@ -104,6 +104,8 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity.Save();
 
             Assert.Equal(5, entity.Id);
+
+            db.CommitOrApplyChanges();
         }
 
 
@@ -159,7 +161,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             this.Fixture.ClearCaches();
 
             var db = Database.Scopes.AddMainDbIfNotExists();
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity03.base.json");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity03.base.json");
 
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Metadata.AddIfNotExist<ConcreteEntity02>();
@@ -251,6 +253,37 @@ namespace Rapidex.UnitTest.Data.TestBase
             Assert.Equal(0, entCount);
 
 
+        }
+
+        [Fact]
+        public virtual async Task Crud_08_Transaction_Basics()
+        {
+            var db = Database.Scopes.AddMainDbIfNotExists();
+
+            db.ReAddReCreate<ConcreteEntity01>();
+            db.ReAddReCreate<ConcreteEntity02>();
+
+            long count = await db.GetQuery<ConcreteEntity01>().Count();
+            Assert.Equal(0, count);
+
+            ConcreteEntity01 ent1 = db.New<ConcreteEntity01>();
+            ent1.Name = "Ent 1";
+            ent1.Save();
+
+            await db.CommitOrApplyChanges();
+            count = await db.GetQuery<ConcreteEntity01>().Count();
+            Assert.Equal(1, count);
+
+            db.Begin();
+
+            ConcreteEntity01 ent2 = db.New<ConcreteEntity01>();
+            ent2.Name = "Ent 2";
+            ent2.Save();
+
+            await db.Rollback();
+
+            count = await db.GetQuery<ConcreteEntity01>().Count();
+            Assert.Equal(1, count);
         }
 
         //[Fact]

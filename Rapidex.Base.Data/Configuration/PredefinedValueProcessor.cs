@@ -14,61 +14,24 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
     Dictionary<IDbEntityMetadata, PredefinedValueItems> _repository = new Dictionary<IDbEntityMetadata, PredefinedValueItems>();
 
 
-    protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em, IEnumerable<IEntity> entities, bool? @override)
+    protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
-        if (em.OnlyBaseSchema && scope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return;
-
-        //scope.Structure.ApplyEntityStructure(em, false);
-
-        var availEntities = await scope.GetQuery(em).Load();
-
-        entities.ForEach(e =>
-        {
-            e._IsNew = true;
-        });
-
-        if (availEntities.ItemCount == 0)
-        {
-            entities.Save();
-        }
-        else
-        {
-            IDictionary<long, IEntity> dict = availEntities.ToIdDict();
-
-            foreach (var entity in entities)
-            {
-                var avail = dict.Get(entity.GetId().As<long>());
-                //availEntities.FirstOrDefault(e => object.Equals(e.GetId(), entity.GetId()));
-                if (avail == null)
-                {
-                    entity.Save();
-                }
-                else
-                {
-                    if (@override.HasValue)
-                    {
-                        scope.Mapper.Copy(entity, avail);
-                        avail.Save();
-                    }
-                }
-            }
-        }
-        await scope.CommitOrApplyChanges();
+        throw new NotSupportedException("obsolete");
     }
 
     protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em)
     {
-        PredefinedValueItems item = _repository.Get(em);
-        if (item == null)
-            return;
+        throw new NotSupportedException("obsolete");
+        //PredefinedValueItems item = _repository.Get(em);
+        //if (item == null)
+        //    return;
 
-        if (em.OnlyBaseSchema && scope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return;
+        //if (em.OnlyBaseSchema && scope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
+        //    return;
 
-        var newEntities = scope.Mapper.Map(em, item.Entities.Values); //.Clone(scope);
+        //var newEntities = scope.Mapper.Map(em, item.Entities.Values); //.Clone(scope);
 
-        await this.Apply(scope, em, newEntities, item.Override);
+        //await this.Apply(scope, em, newEntities, item.Override);
     }
 
     public async Task Apply(IDbSchemaScope scope)
@@ -81,19 +44,7 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
 
     public void Register(IDbEntityMetadata em, bool @override, params ObjDictionary[] entities)
     {
-        PredefinedValueItems item = _repository.Get(em);
-        if (item == null)
-        {
-            item = new PredefinedValueItems(em, @override);
-            _repository.Add(em, item);
-        }
-
-        item.Override = @override;
-
-        foreach (var entity in entities)
-        {
-            item.Entities.Set(entity["Id"].As<long>(), entity);
-        }
+        throw new NotSupportedException("obsolete");
     }
 
 
@@ -147,15 +98,6 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
 
     public async Task Apply(IDbSchemaScope scope, IEnumerable<IEntity> unregisteredData, bool @override)
     {
-        var group = unregisteredData.GroupBy(ent => ent.GetType().Name);
-        foreach (var item in group)
-        {
-            var em = Database.Metadata.Get(item.Key);
-            if (em == null)
-                continue; //??
-
-            IEnumerable<IEntity> entities = item;
-            await this.Apply(scope, em, entities, @override);
-        }
+        throw new NotSupportedException("obsolete");
     }
 }

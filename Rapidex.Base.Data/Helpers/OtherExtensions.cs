@@ -88,6 +88,6 @@ public static class OtherExtensions
     {
         var em = entities.First().GetMetadata();
         var valueDicts = entities.Select(ent => EntityMapper.MapToDict(em, ent));
-        coll.Add(em, false, valueDicts.ToArray());
+        coll.Add(em, valueDicts.ToArray());
     }
 }

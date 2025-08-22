@@ -241,6 +241,12 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
     string Prefix { get; set; }
     string TableName { get; internal set; }
 
+    /// <summary>
+    /// Full Type name of concrete class with DbConcreteEntityBase
+    /// </summary>
+    /// <remarks>
+    /// Not use for enum types. For enum types, uses created from IEntity abstractions
+    /// </remarks>
     [YamlMember(Order = -9990)]
     [JsonPropertyOrder(-9990)]
     string ConcreteTypeName { get; internal set; }

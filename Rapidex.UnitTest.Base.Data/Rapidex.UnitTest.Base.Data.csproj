@@ -67,7 +67,7 @@
 	  <None Update="TestContent\EntityMetadata01.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Update="TestContent\Json\EnumDefinition.Sample01.json">
+	  <None Update="TestContent\Json\Canceled.EnumDefinition.Sample01.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="TestContent\Image01.png">

@@ -103,7 +103,7 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
-
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
         //var dbscope = Database.Scopes.AddMainDbIfNotExists();
         //dbscope.Structure.DropEntity<ConcreteEntity01>();
         //dbscope.Structure.ApplyEntityStructure<ConcreteEntity01>();

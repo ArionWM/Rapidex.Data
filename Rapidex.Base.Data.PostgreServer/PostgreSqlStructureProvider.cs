@@ -6,6 +6,7 @@ using System;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+using static Rapidex.Data.RelationN2N;
 
 namespace Rapidex.Data.PostgreServer;
 
@@ -44,6 +45,13 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
             tex.Log();
             throw tex;
         }
+    }
+
+    protected bool CanApplyToSchema(IDbEntityMetadata em)
+    {
+        IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
+        bool canApply = !em.OnlyBaseSchema || scope.SchemaName == DatabaseConstants.DEFAULT_SCHEMA_NAME;
+        return canApply;
     }
 
     public void SwitchDatabase(string dbName)
@@ -89,7 +97,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     public bool IsSchemaAvailable(string schemaName)
     {
         schemaName = PostgreHelper.CheckObjectName(schemaName);
-        
+
         this.CheckConnection();
         string sql = this.DdlGenerator.IsSchemaAvailable(schemaName);
         DataTable dataTable = this.Connection.Execute(sql);
@@ -163,29 +171,57 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         }
     }
 
+    protected void ApplyStructureInternal(IEnumerable<IDbEntityMetadata> ems, bool applyScopedData = false)
+    {
+        HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
+        List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
+
+        IEnumerable<IDbEntityMetadata> applyRequiredMetadatas2 = new IDbEntityMetadata[0];
+        do
+        {
+            foreach (IDbEntityMetadata em in applyRequiredMetadatas)
+            {
+                if (!this.CanApplyToSchema(em) || appliedMetadatas.Contains(em))
+                    continue;
+
+                this.ApplyEntityStructureInternal(em, ref applyRequiredMetadatas, applyScopedData);
+                appliedMetadatas.Add(em);
+            }
+
+            applyRequiredMetadatas2 = new HashSet<IDbEntityMetadata>(applyRequiredMetadatas.Except(appliedMetadatas));
+        }
+        while (applyRequiredMetadatas2.Any());
+    }
+
     public void ApplyAllStructure()
     {
-        IDbSchemaScope scope = this.ParentDbProvider.ParentScope;
-        if (scope == null)
-        {
-            throw new InvalidOperationException("Parent scope is null");
-        }
+        IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
+        HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
+        List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
 
         var allEms = scope.ParentDbScope.Metadata.GetAll();
         foreach (var em in allEms)
         {
+            if (!this.CanApplyToSchema(em))
+                continue;
+
             em.ApplyBehaviors();
         }
 
         allEms = scope.ParentDbScope.Metadata.GetAll();
         foreach (var em in allEms)
         {
-            if (em.OnlyBaseSchema && scope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-                continue;
+            if (!this.CanApplyToSchema(em))
+                continue; //Sadece base schema'da olanları dışarıda tutuyoruz.
 
-            this.ApplyEntityStructure(em, false);
+            this.ApplyEntityStructureInternal(em, ref applyRequiredMetadatas, false);
+            appliedMetadatas.Add(em);
         }
 
+
+        this.ApplyStructureInternal(applyRequiredMetadatas, true);
+
+        //Apply predefined data ...
         scope.ParentDbScope.Metadata.Data.Apply(scope).Wait();
 
         foreach (var em in allEms)
@@ -361,15 +397,15 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
             }
     }
 
-    public void ApplyEntityStructure(IDbEntityMetadata em, bool applyScopedData = false)
+    protected void ApplyEntityStructureInternal(IDbEntityMetadata em, ref List<IDbEntityMetadata> applyRequiredMetadatas, bool applyScopedData = false)
     {
         em.NotNull();
 
         if (em.IsPremature)
             throw new InvalidOperationException($"Entity metadata '{this.ParentDbProvider.ParentScope.SchemaName}/{em.Name}' is premature");
 
-        if (em.OnlyBaseSchema && this.ParentScope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            throw new InvalidOperationException($"Entity {em.Name} marked OnlyBaseSchema");
+        if (!this.CanApplyToSchema(em))
+            throw new InvalidOperationException($"Entity {em.Name} can't apply this schema ({this.ParentScope.SchemaName}) (marked OnlyBaseSchema??)");
 
         IUpdateResult bres = em.ApplyBehaviors();
 
@@ -397,10 +433,35 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
                 {
                     if (obj is IDbEntityMetadata aem)
                     {
-                        this.ApplyEntityStructure(aem);
+                        this.ApplyEntityStructureInternal(aem, ref applyRequiredMetadatas);
                     }
                 }
             }
+
+            //TODO: Patch, reengineering with IDataType.StructureUpdate ...
+            //-----------------------------------------------------------
+            if (em.Fields.Values.Any(fm => fm is VirtualRelationN2NDbFieldMetadata))
+            {
+                var n2nFms = em.Fields.Values.Where(fm => fm is VirtualRelationN2NDbFieldMetadata);
+                foreach (VirtualRelationN2NDbFieldMetadata fm in n2nFms)
+                {
+                    var refEm = this.ParentScope.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
+                    if (this.CanApplyToSchema(refEm))
+                        applyRequiredMetadatas.Add(refEm);
+                }
+            }
+
+            if (em.Fields.Values.Any(fm => fm is ReferenceDbFieldMetadata))
+            {
+                var n2nFms = em.Fields.Values.Where(fm => fm is ReferenceDbFieldMetadata);
+                foreach (ReferenceDbFieldMetadata fm in n2nFms)
+                {
+                    var refEm = this.ParentScope.ParentDbScope.Metadata.Get(fm.ReferencedEntity);
+                    if (this.CanApplyToSchema(refEm))
+                        applyRequiredMetadatas.Add(refEm);
+                }
+            }
+            //-----------------------------------------------------------
 
             if (applyScopedData)
             {
@@ -422,6 +483,21 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
             tex.Log();
             throw tex;
         }
+    }
+
+    public void ApplyEntityStructure(IDbEntityMetadata em, bool applyScopedData = false)
+    {
+        em.NotNull();
+
+        HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
+        List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
+
+        this.ApplyEntityStructureInternal(em, ref applyRequiredMetadatas, applyScopedData);
+        appliedMetadatas.Add(em);
+
+        var applyRequiredMetadatas2 = new HashSet<IDbEntityMetadata>(applyRequiredMetadatas.Except(appliedMetadatas));
+
+        this.ApplyStructureInternal(applyRequiredMetadatas, applyScopedData);
     }
 
     public void DropEntity(IDbEntityMetadata em)

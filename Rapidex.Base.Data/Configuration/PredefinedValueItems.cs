@@ -11,12 +11,11 @@ public class PredefinedValueItems
     public IDbEntityMetadata EntityMetadata { get; set; }
     public Dictionary<long, ObjDictionary> Entities { get; set; } = new();
 
-    public bool Override { get; set; }
+    //public bool Override { get; set; }
 
-    public PredefinedValueItems(IDbEntityMetadata entityMetadata, bool @override)
+    public PredefinedValueItems(IDbEntityMetadata entityMetadata)
     {
         EntityMetadata = entityMetadata;
-        Override = @override;
     }
 
     public void Add(ObjDictionary item)

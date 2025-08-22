@@ -35,7 +35,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             var db = Database.Scopes.AddMainDbIfNotExists();
 
-            string content07 = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity07.withPredefinedData.json");
+            string content07 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity07.withPredefinedData.json");
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Metadata.AddJson(content07);
 

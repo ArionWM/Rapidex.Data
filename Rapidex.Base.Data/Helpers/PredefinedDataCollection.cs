@@ -18,16 +18,14 @@ public class PredefinedDataCollection
     }
 
 
-    public void Add(IDbEntityMetadata em, bool @override, params ObjDictionary[] entities)
+    public void Add(IDbEntityMetadata em, params ObjDictionary[] entities)
     {
         PredefinedValueItems item = this.Repository.Get(em);
         if (item == null)
         {
-            item = new PredefinedValueItems(em, @override);
+            item = new PredefinedValueItems(em);
             this.Repository.Add(em, item);
         }
-
-        item.Override = @override;
 
         foreach (var entity in entities)
         {
@@ -55,7 +53,7 @@ public class PredefinedDataCollection
         this.Repository.Clear();
     }
 
-    protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em, IEnumerable<IEntity> entities, bool? @override)
+    protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         if (em.OnlyBaseSchema && scope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
             return;
@@ -87,7 +85,7 @@ public class PredefinedDataCollection
                 }
                 else
                 {
-                    if (@override.HasValue)
+                    if (entity.GetValue<bool>(DatabaseConstants.KEY_OVERRIDE))
                     {
                         scope.Mapper.Copy(entity, avail);
                         avail.Save();
@@ -109,10 +107,10 @@ public class PredefinedDataCollection
 
         var newEntities = scope.Mapper.Map(em, item.Entities.Values); //.Clone(scope);
 
-        await this.Apply(scope, em, newEntities, item.Override);
+        await this.Apply(scope, em, newEntities);
     }
 
-    public async Task Apply(IDbSchemaScope targetSchema, bool? @override = null)
+    public async Task Apply(IDbSchemaScope targetSchema)
     {
         foreach (var em in Repository.Keys)
         {

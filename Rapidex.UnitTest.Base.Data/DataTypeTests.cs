@@ -71,6 +71,8 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public async Task Image_02_NullContentDontCreateOrDeleteBlobRecord()
     {
+        this.Fixture.ClearCaches();
+
         var db = Database.Scopes.Db();
 
         db.ReAddReCreate<BlobRecord>();
@@ -110,45 +112,6 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
     }
 
-    [Fact]
-    public virtual async Task Enum_01_FromJsonDefinition()
-    {
-        //HostApplicationBuilder builder = Host.CreateApplicationBuilder();
-        //Database.Metadata.Clear();
-        //Database.Metadata.Setup(builder.Services);
-
-        var db = Database.Scopes.Db();
-
-        db.Metadata.Remove("Rank");
-
-        string content = this.Fixture.GetFileContentAsString("TestContent\\json\\EnumDefinition.Sample01.json");
-        db.Metadata.AddJson(content);
-
-        var em = db.Metadata.Get("Rank");
-        Assert.NotNull(em);
-
-        //.IsSupportTo<Enumeration>()
-        Assert.True(em.Fields.ContainsKey(CommonConstants.FIELD_ID));
-        Assert.True(em.Fields.ContainsKey(CommonConstants.FIELD_EXTERNAL_ID));
-        Assert.True(em.Fields.ContainsKey(CommonConstants.FIELD_VERSION));
-
-        db.Structure.ApplyEntityStructure(em);
-
-        var enumValues = await db.Load(em);
-
-        //WARN: Artık ApplyEntityStructure içerisinde _predefinedValueProcessor.Apply(this.DbScope, mdef.Data, @override); uygulanmıyor
-        //TODO: Enum değerlerin yeni altyapı ile uygulanıp uygulanmadığını kontrol et
-
-        //Assert.Equal(3, enumValues.ItemCount);
-
-        //IEntity entity01 = enumValues.First();
-        //Assert.Equal(1L, entity01[CommonConstants.FIELD_ID]);
-        //Assert.Equal("Gold", entity01["Name"]);
-        //Assert.True(entity01["color"].IsSupportTo<Rapidex.Data.Color>());
-        //Assert.Equal("#FFD700", ((Rapidex.Data.Color)entity01["color"]).Value);
-
-
-    }
 
     [Fact]
     public virtual async Task Enum_02_Assignment()
@@ -429,6 +392,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         var dbScope = Database.Scopes.Db();
 
+        dbScope.Metadata.AddIfNotExist<Contact>();
         dbScope.ReAddReCreate<ConcreteEntityForUpdateTests01>();
 
         ConcreteEntityForUpdateTests01 entity = dbScope.New<ConcreteEntityForUpdateTests01>();

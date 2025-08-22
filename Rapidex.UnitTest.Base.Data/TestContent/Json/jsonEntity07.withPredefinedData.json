@@ -53,31 +53,34 @@
       "type": "Currency"
     }
   ],
-  "data": {
-    "forceAllValues": false,
-    "values": [
-      {
-        "Id": 1,
-        "Subject": "Meeting 1",
-        "StartTime": "2016-01-01T10:00:00",
-        "EndTime": "2016-01-01T11:00:00",
-        "Email": "test@test.com",
-        "MobilePhone": "1234567890",
-        "Price": 100.00,
-        "Description": "Meeting 1 Description"
-      },
-      {
-        "Id": 3,
-        "Subject": "Meeting 2",
-        "StartTime": "2016-01-01T10:00:00",
-        "EndTime": "2016-01-01T11:00:00",
-        "Email": "test@test.com",
-        "MobilePhone": "587877458",
-        "Price": 333,
-        "Description": "Meeting 2 Description"
-      }
+  "data": [
+    {
+      "Entity": "myJsonEntity07",
+      "Id": 1,
+      "Subject": "Meeting 1",
+      "StartTime": "2016-01-01T10:00:00",
+      "EndTime": "2016-01-01T11:00:00",
+      "Email": "test@test.com",
+      "MobilePhone": "1234567890",
+      "Price": 100.00,
+      "Description": "Meeting 1 Description",
+      "_override": false
 
-    ]
+    },
+    {
+      "Entity": "myJsonEntity07",
+      "Id": 3,
+      "Subject": "Meeting 2",
+      "StartTime": "2016-01-01T10:00:00",
+      "EndTime": "2016-01-01T11:00:00",
+      "Email": "test@test.com",
+      "MobilePhone": "587877458",
+      "Price": 333,
+      "Description": "Meeting 2 Description",
+      "_override": true
+    }
 
-  }
+  ]
+
+
 }

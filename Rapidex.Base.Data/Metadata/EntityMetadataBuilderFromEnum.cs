@@ -25,6 +25,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         rec["IsActive"] = isActive;
         rec["Sealed"] = @sealed;
         rec["Description"] = description;
+        rec[DatabaseConstants.KEY_OVERRIDE] = true;
         return rec;
     }
 
@@ -53,7 +54,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
     public IDbEntityMetadata CreateMetadata(string enumerationName, string module = null, string prefix = null)
     {
         IDbEntityMetadata em = this.EntityMetadataFactory.Create(enumerationName, module, prefix ?? DatabaseConstants.PREFIX_ENUMERATION);
-        em.Parent= this.Parent;
+        em.Parent = this.Parent;
         IDbEntityMetadata bem = em.ShouldSupportTo<IDbEntityMetadata>($"Entity metadata '{em.Name}' should be IDbEntityMetadata");
 
         em.Fields.AddIfNotExist<long>(CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
@@ -77,7 +78,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
     public IDbEntityMetadata Add<TEnum>(string module = null, string prefix = null) where TEnum : Enum
     {
         Type enumType = typeof(TEnum);
-        return this.Add(enumType, module, prefix); 
+        return this.Add(enumType, module, prefix);
     }
     public IDbEntityMetadata Add(Enum enumeration, string module = null, string prefix = null)
     {
@@ -95,7 +96,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         if (em == null || em.IsPremature)
         {
             em = CreateMetadata(enumType.Name, module, prefix);
-            em.ConcreteTypeName = enumType.FullName;
+            //em.ConcreteTypeName = enumType.FullName;
             this.Parent.AddIfNotExist(em);
         }
         else
@@ -104,7 +105,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         }
 
         var enumValEntities = this.GetValueEntities(em, enumType, callb);
-        this.Parent.Data.Add(em, true, enumValEntities);
+        this.Parent.Data.Add(em, enumValEntities);
         return em;
     }
 
@@ -144,7 +145,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
 
         JsonNode fieldsNode = json["values"];
         var enumValEntities = this.GetValueEntities(em, fieldsNode);
-        this.Parent.Data.Add(em, true, enumValEntities);
+        this.Parent.Data.Add(em, enumValEntities);
         return em;
     }
 

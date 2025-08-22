@@ -27,8 +27,12 @@ namespace Rapidex.UnitTest.Data.TestBase
             var dbScope = Database.Scopes.Db();
 
 
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity03.base.json");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity03.base.json");
             dbScope.Metadata.AddJson(content); //dbScope.Metadata using base schema...
+            dbScope.Metadata.Add<ConcreteEntity01>();
+            dbScope.Metadata.Add<ConcreteEntity02>();
+
+
             dbScope.Structure.DropEntity("myJsonEntity03");
 
             var em = dbScope.Metadata.Get("myJsonEntity03");
@@ -58,7 +62,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             var db = Database.Scopes.Db();
 
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity04.base.json");
             db.Metadata.AddJson(content); //dbScope.Metadata using base schema...
 
             db.Structure.DropEntity("myJsonEntity04");
@@ -101,7 +105,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             db.Metadata.Remove("myJsonEntity04");
 
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity04.base.json");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity04.base.json");
             db.Metadata.AddJson(content); //dbScope.Metadata using base schema...
             db.Structure.DropEntity("myJsonEntity04");
 
@@ -142,7 +146,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             this.Fixture.ClearCaches();
 
             var db = Database.Scopes.Db();
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity09.OnlyBase.json");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity09.OnlyBase.json");
             var ems = db.Metadata.AddJson(content);
             Assert.NotNull(ems);
             Assert.Single(ems);

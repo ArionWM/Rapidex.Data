@@ -20,7 +20,7 @@ namespace Rapidex.Data
         public static string[] FIELDS_PRIMARY = new string[] { "Name", "Title", "Subject", "Target", "Responsible", "Assigned", "AssignedTo" };
         public static string[] FIELDS_SECONDARY = new string[] { "StartTime", "EndTime", "Requester", "Owner", "Status" };
         //public static string[] FIELDS_SECONDARY = new string[] { "Description", "Details", "Notes", "Comments" };
-
+        public static string KEY_OVERRIDE = "_override";
 
     }
 }

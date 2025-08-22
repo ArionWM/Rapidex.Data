@@ -16,7 +16,7 @@ internal class EntityDataListImplementer : IImplementer, IEmptyCheckObject
 
     public virtual bool Implemented { get; set; }
 
-    public virtual bool? ForceAllValues { get; set; }
+    //public virtual bool? ForceAllValues { get; set; }
     public virtual List<EntityDataItemImplementer> Data { get; set; } = new List<EntityDataItemImplementer>();
 
 

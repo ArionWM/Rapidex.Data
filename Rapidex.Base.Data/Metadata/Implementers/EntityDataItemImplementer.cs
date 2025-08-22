@@ -16,7 +16,9 @@ internal class EntityDataItemImplementer : Dictionary<string, object>, IImplemen
 
     public IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target)
     {
-        string entityName = this.Get("entity").ToString();
+        string entityName = this.Get("entity")?.ToString();
+        if (entityName.IsNullOrEmpty())
+            throw new ArgumentNullException("'entity' key/value can't be null or empty. Use 'entity' property to set entity name.");
 
         var em = host.Parent.Get(entityName).NotNull($"Entity not found with: '{entityName}'");
 

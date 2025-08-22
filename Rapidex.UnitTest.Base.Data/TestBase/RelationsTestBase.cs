@@ -170,9 +170,9 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             var db = Database.Scopes.AddMainDbIfNotExists();
 
-            string content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity10.forN2N.json");
+            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity10.forN2N.json");
             var em1 = db.Metadata.AddJson(content);
-            content = this.Fixture.GetFileContentAsString("TestContent\\jsonEntity11.forN2N.json");
+            content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity11.forN2N.json");
             var em2 = db.Metadata.AddJson(content);
 
             var dbScope = Database.Scopes.Db();
