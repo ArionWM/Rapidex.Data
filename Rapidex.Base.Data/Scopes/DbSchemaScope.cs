@@ -29,6 +29,8 @@ namespace Rapidex.Data.Scopes
 
         public IBlobRepository Blobs => blobRepository;
 
+        public bool IsTransactionAvailable => dataManager.IsTransactionAvailable;
+
         public DbSchemaScope(string schemaName, IDbScope parentDbScope, IDbProvider provider)
         {
             this.name = schemaName;

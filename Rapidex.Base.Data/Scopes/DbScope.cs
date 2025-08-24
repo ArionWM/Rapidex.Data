@@ -45,6 +45,8 @@ namespace Rapidex.Data.Scopes
 
         public IDbSchemaScope Base => baseScope;
 
+        public bool IsTransactionAvailable => baseScope.IsTransactionAvailable;
+
 
         public DbScope(long id, string name, IDbProvider dbProvider)
         {

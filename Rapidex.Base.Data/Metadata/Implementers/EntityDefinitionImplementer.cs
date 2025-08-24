@@ -20,7 +20,7 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
     [Required]
     public string Name { get; set; }
 
-    public string? Prefix { get; set; }
+    public string? DbPrefix { get; set; }
 
     public string? Module { get; set; }
 
@@ -53,7 +53,12 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
         if (em == null || em.IsPremature)
         {
             //em = Database.EntityMetadataFactory.Create(this.Name, moduleDef.NavigationName, moduleDef.TablePrefix);
-            em = Database.EntityMetadataFactory.Create(this.Name, host.ModuleName);
+            string moduleName = this.Module ?? host.ModuleName;
+            em = Database.EntityMetadataFactory.Create(this.Name, moduleName, this.DbPrefix);
+
+            if (this.OnlyBaseSchema.HasValue && this.OnlyBaseSchema.Value)
+                em.MarkOnlyBaseSchema();
+
             host.Parent.Add(em);
             updateRes.Added(em);
         }
@@ -66,6 +71,14 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
 
         this.MergeTo(host, em);
         em.Check();
+
+        if(this.Behaviors.IsNOTNullOrEmpty())
+        {
+            foreach(var behavior in this.Behaviors)
+            {
+                em.AddBehavior(behavior, false, false);
+            }
+        }
 
         if (this.Marks.IsNOTNullOrEmpty())
         {
@@ -83,6 +96,7 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
 
 
         IUpdateResult ures = em.ApplyBehaviors();
+
         foreach (object added in ures.AddedItems)
             if (added is IDbEntityMetadata aem)
             {

@@ -51,6 +51,11 @@ internal class DbSqlServerConnection : IDisposable
         }
     }
 
+    public void BeginTransaction()
+    {
+        this.Transaction = this.Connection.BeginTransaction();
+    }
+
     public SqlCommand CreateCommand()
     {
         SqlCommand command = this.Connection.CreateCommand();

@@ -26,10 +26,9 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider
 
     public IDbSchemaScope ParentScope { get; }
 
-    public IDbTransactionScope CurrentTransaction { get; }
+    public IDbInternalTransactionScope CurrentTransaction { get; protected set; }
     public IDbProvider ParentProvider { get; protected set; }
 
-    public IQuery Query => throw new NotImplementedException();
 
     public DbSqlServerDataModificationProvider(IDbSchemaScope parentScope, IDbProvider parentProvider, string connectionString)
     {
@@ -62,11 +61,14 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider
 
     }
 
-    public IDbTransactionScope BeginTransaction(string transactionName = null)
+    public IDbInternalTransactionScope BeginTransaction(string transactionName = null)
     {
-        throw new NotImplementedException();
-    }
+        if (this.CurrentTransaction != null && this.CurrentTransaction.Live)
+            throw new InvalidOperationException("Transaction already active");
 
+        this.CurrentTransaction = new DbSqlInternalTransactionScope(this.Connection);
+        return this.CurrentTransaction;
+    }
 
 
     public IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)

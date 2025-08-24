@@ -5,7 +5,7 @@
   "name": "myJsonEntity09",
   "dbPrefix": "utest",
   "primaryKey": "Id",
-  "onlyBase": true,
+  "onlyBaseSchema": true,
   "fields": [
     {
       "name": "Id",
@@ -14,8 +14,8 @@
     {
       "name": "Subject",
       "type": "string"
-    },
-    
+    }
+
 
 
 

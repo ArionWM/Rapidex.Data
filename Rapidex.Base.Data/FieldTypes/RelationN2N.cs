@@ -186,7 +186,7 @@ namespace Rapidex.Data
             IEntity parent = this.GetParent();
             var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
 
-            JunctionHelper.AddRelation(_this.Parent._Scope, fm, parent, detailEntity, true);
+            JunctionHelper.AddRelation(_this.Parent._Scope, fm, parent, detailEntity, true).Wait();
         }
 
         public void Remove(IEntity detailEntity)
@@ -195,7 +195,7 @@ namespace Rapidex.Data
             IEntity parent = this.GetParent();
             var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
 
-            JunctionHelper.RemoveRelation(_this.Parent._Scope, fm, parent, detailEntity, true);
+            JunctionHelper.RemoveRelation(_this.Parent._Scope, fm, parent, detailEntity, true).Wait();
         }
     }
 

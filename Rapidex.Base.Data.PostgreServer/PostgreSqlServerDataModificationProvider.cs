@@ -22,10 +22,9 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
     public IDbSchemaScope ParentScope { get; }
 
-    public IDbTransactionScope CurrentTransaction { get; }
+    public IDbInternalTransactionScope CurrentTransaction { get; }
     public IDbProvider ParentProvider { get; protected set; }
 
-    public IQuery Query => throw new NotImplementedException();
 
     public PostgreSqlServerDataModificationProvider(IDbSchemaScope parentScope, IDbProvider parentProvider, string connectionString)
     {
@@ -53,7 +52,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         }
     }
 
-    public IDbTransactionScope BeginTransaction(string transactionName = null)
+    public IDbInternalTransactionScope BeginTransaction(string transactionName = null)
     {
         throw new NotImplementedException();
     }

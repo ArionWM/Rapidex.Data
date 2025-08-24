@@ -92,6 +92,8 @@ internal class DbDChangesScope : IDbChangesScope
 
     public IReadOnlyCollection<IQueryUpdater> BulkUpdates => _bulkUpdates.ToArray();
 
+    public bool IsEmpty => !_changedEntities.Any() && !_deletedEntities.Any() && !_bulkUpdates.Any();
+
     public DbDChangesScope() { }
 
     public DbDChangesScope(IEnumerable<IEntity> changedEntities, IEnumerable<IEntity> deletedEntities, IEnumerable<IQueryUpdater> bulkUpdates)

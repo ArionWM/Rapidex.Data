@@ -323,7 +323,7 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
 //Senaryoya göre nasıl farklılıklar yapılacak? Required, Editing props? vs
 
 
-public interface IFieldMetadataFactory 
+public interface IFieldMetadataFactory
 {
     void SetParent(IDbMetadataContainer parent);
     IDbFieldMetadata Create(IDbEntityMetadata em, string fieldType, string name, ObjDictionary values);
@@ -440,7 +440,7 @@ public interface IDbProvider : IManager
 /// This object must have thread isolated storages
 /// storage will change while access with different threats
 /// </summary>
-public interface IDbChangesScope
+public interface IDbChangesScope : IEmptyCheckObject
 {
     IReadOnlyCollection<IEntity> ChangedEntities { get; }
 
@@ -466,11 +466,12 @@ public interface IDbChangesScope
 /// <summary>
 /// Created db transaction
 /// </summary>
-public interface IDbTransactionScope : IDbChangesScope, IDisposable
+public interface IDbChangesScopeWithTransaction : IDbChangesScope, IDisposable
 {
-    void Commit();
+    IDbInternalTransactionScope InternalTransactionScope { get; }
+    Task Commit();
 
-    void Rollback();
+    Task Rollback();
 
     void IDisposable.Dispose()
     {
@@ -566,6 +567,31 @@ public interface IDataUnitTestHelper
 
 }
 
+public interface IDbInternalTransactionScope : IDisposable
+{
+    bool Live { get; }
+
+    Task Commit();
+
+    Task Rollback();
+
+    void IDisposable.Dispose()
+    {
+        try
+        {
+            this.Commit();
+        }
+        catch (Exception ex)
+        {
+            var tex = Common.ExceptionManager.Translate(ex);
+            tex.Log();
+
+            this.Rollback();
+            throw tex;
+        }
+    }
+}
+
 public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader
 {
     IDbProvider ParentProvider { get; }
@@ -573,7 +599,7 @@ public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader
 
     IIntSequence Sequence(string name);
 
-    IDbTransactionScope BeginTransaction(string transactionName = null);
+    IDbInternalTransactionScope BeginTransaction(string transactionName = null);
 
     void IDbEntityLoader.Setup(params IDbEntityLoader[] loaders)
     {
@@ -588,8 +614,8 @@ public interface IDbDataModificationManager
     IDbSchemaScope ParentScope { get; }
 
     //TODO: Async yaptık? !! Scope gerekiyor !!
-    IDbTransactionScope CurrentTransaction { get; }
-    bool IsTransactionAvailable { get { return this.CurrentTransaction != null; } }
+    //IDbInternalTransactionScope CurrentTransaction { get; }
+    //bool IsTransactionAvailable { get; }
 
     IEntity New(IDbEntityMetadata em);
 
@@ -617,7 +643,7 @@ public interface IDbDataModificationManager
 
     void Add(IQueryUpdater updater);
 
-    IDbTransactionScope Begin(string transactionName = null);
+    IDbChangesScopeWithTransaction BeginTransaction();
 
     void Delete(IEntity entity);
 
@@ -695,9 +721,9 @@ public interface IDbSchemaScope : IDbDataModificationManager
 
     EntityMapper Mapper { get; }
 
-    IDbTransactionScope IDbDataModificationManager.Begin(string transactionName = null)
+    IDbChangesScopeWithTransaction IDbDataModificationManager.BeginTransaction()
     {
-        return this.Data.Begin(transactionName);
+        return this.Data.BeginTransaction();
     }
 
     async Task<IEntityUpdateResult> IDbDataModificationManager.CommitOrApplyChanges()
@@ -712,7 +738,7 @@ public interface IDbSchemaScope : IDbDataModificationManager
 
     IDbSchemaScope IDbDataModificationManager.ParentScope => this;
 
-    IDbTransactionScope IDbDataModificationManager.CurrentTransaction => this.Data.CurrentTransaction;
+    //IDbChangesScopeWithTransaction IDbDataModificationManager.CurrentTransaction => this.Data.CurrentTransaction;
 
 
     IEntity IDbDataModificationManager.New(IDbEntityMetadata em)

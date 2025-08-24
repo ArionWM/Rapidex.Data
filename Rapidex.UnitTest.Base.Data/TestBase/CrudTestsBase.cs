@@ -232,24 +232,24 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             await db.CommitOrApplyChanges();
 
-            var entCount = await db.GetQuery<ConcreteEntity01>().Count();
+            var entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(2, entCount);
 
             db.Delete(entity01);
 
             //Henüz commit olmadı, veritabanında duruyor
-            entCount = await db.GetQuery<ConcreteEntity01>().Count();
+            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(2, entCount);
 
             await db.CommitOrApplyChanges();
 
-            entCount = await db.GetQuery<ConcreteEntity01>().Count();
+            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(1, entCount);
 
             db.Delete(entity02);
             await db.CommitOrApplyChanges();
 
-            entCount = await db.GetQuery<ConcreteEntity01>().Count();
+            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(0, entCount);
 
 
@@ -263,7 +263,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             db.ReAddReCreate<ConcreteEntity01>();
             db.ReAddReCreate<ConcreteEntity02>();
 
-            long count = await db.GetQuery<ConcreteEntity01>().Count();
+            long count = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(0, count);
 
             ConcreteEntity01 ent1 = db.New<ConcreteEntity01>();
@@ -271,10 +271,10 @@ namespace Rapidex.UnitTest.Data.TestBase
             ent1.Save();
 
             await db.CommitOrApplyChanges();
-            count = await db.GetQuery<ConcreteEntity01>().Count();
+            count = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(1, count);
 
-            db.Begin();
+            db.BeginTransaction();
 
             ConcreteEntity01 ent2 = db.New<ConcreteEntity01>();
             ent2.Name = "Ent 2";
@@ -282,20 +282,19 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             await db.Rollback();
 
-            count = await db.GetQuery<ConcreteEntity01>().Count();
+            count = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(1, count);
+
+            using(db.BeginTransaction())
+            {
+                ConcreteEntity01 ent3 = db.New<ConcreteEntity01>();
+                ent3.Name = "Ent 3";
+                ent3.Save();
+            }
+
+            count = db.GetQuery<ConcreteEntity01>().Count().Result;
+            Assert.Equal(2, count);
         }
-
-        //[Fact]
-        //public virtual void Crud_06_ImageFrieldsIsLazyLoaded()
-        //{
-        //    //Picture Values içerisinde boş olacak
-        //}
-
-        //[Fact]
-        //public virtual void Crud_06_Update_Bulk()
-        //{
-        //}
 
 
 

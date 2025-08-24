@@ -1,6 +1,7 @@
 ﻿#!entity
 _tag: entity
 name: myEntity1
+dbPrefix: utest
 tenant: common
 workspace: base
 module: project

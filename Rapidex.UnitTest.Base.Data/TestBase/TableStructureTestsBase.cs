@@ -110,6 +110,10 @@ namespace Rapidex.UnitTest.Data.TestBase
             db.Structure.DropEntity("myJsonEntity04");
 
             var em = db.Metadata.Get("myJsonEntity04");
+            Assert.Equal("utest", em.Prefix);
+
+            Assert.NotNull(em);
+            Assert.True(em.Fields.ContainsKey("Id"));
 
 
             db.Structure.ApplyEntityStructure(em);

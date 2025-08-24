@@ -16,13 +16,9 @@ namespace Rapidex.Data;
 internal class DbDataModificationManager : IDbDataModificationManager
 {
     protected ThreadLocal<IDbChangesScope> dbChangesScope;
-    protected ThreadLocal<IDbTransactionScope> currentTransaction;
-
-    //public int BulkOperationThreshold { get; set; } = int.MaxValue;
+    protected ThreadLocal<IDbChangesScopeWithTransaction> dbChangesScopeWithTransaction;
 
     public IDbSchemaScope ParentScope { get; protected set; }
-
-    public IDbTransactionScope CurrentTransaction { get { return currentTransaction.Value; } } //protected set { currentTransaction.Value = value; } 
 
     public IDbDataModificationPovider DmProvider { get; protected set; }
 
@@ -31,12 +27,13 @@ internal class DbDataModificationManager : IDbDataModificationManager
         ParentScope = parentScope;
         DmProvider = dmProvider;
         dbChangesScope = new ThreadLocal<IDbChangesScope>();
-        currentTransaction = new ThreadLocal<IDbTransactionScope>();
+        dbChangesScopeWithTransaction = new ThreadLocal<IDbChangesScopeWithTransaction>();
+        //currentInternalTransaction = new ThreadLocal<IDbInternalTransactionScope>();
     }
 
     protected IDbEntityLoader SelectLoader(IDbEntityMetadata em)
     {
-
+        //TODO: Select loader 
         //DbEntityInMemoryCacheLoader cacheLoader = new DbEntityInMemoryCacheLoader();
         //cacheLoader.Setup(this.DmProvider);
 
@@ -97,7 +94,19 @@ internal class DbDataModificationManager : IDbDataModificationManager
 
     public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader)
     {
-        return this.DmProvider.LoadRaw(loader);
+        return await Task<ILoadResult<DataRow>>.Run(() =>
+        {
+            try
+            {
+                return this.DmProvider.LoadRaw(loader);
+            }
+            catch (Exception ex)
+            {
+                ex.Log();
+                throw;
+            }
+        }
+        );
     }
 
 
@@ -126,19 +135,28 @@ internal class DbDataModificationManager : IDbDataModificationManager
         return entity;
     }
 
-    public IDbTransactionScope Begin(string transactionName = null)
+    public IDbChangesScopeWithTransaction BeginTransaction()
     {
         //CurrentTransaction ???
 
-        this.currentTransaction.Value = this.DmProvider.BeginTransaction(transactionName);
-        return this.currentTransaction.Value;
+        //if (this.IsTransactionAvailable)
+        //    throw new InvalidOperationException("Transaction already active");
+
+        if (this.dbChangesScopeWithTransaction.Value != null)
+            throw new InvalidOperationException("Transaction already active");
+
+        if (this.dbChangesScope.Value != null && !this.dbChangesScope.Value.IsEmpty)
+            throw new InvalidOperationException("Scope already has modified entities. Commit or discard changes before starting a new transaction.");
+
+        IDbInternalTransactionScope its = this.DmProvider.BeginTransaction();
+
+        //this.currentInternalTransaction.Value = this.DmProvider.BeginTransaction();
+        this.dbChangesScope.Value = this.dbChangesScopeWithTransaction.Value = new DbChangesScopeWithTransaction(this, its);
+        return this.dbChangesScopeWithTransaction.Value;
     }
 
     protected IDbChangesScope GetChangesScope()
     {
-        if (this.CurrentTransaction != null)
-            this.dbChangesScope.Value = this.CurrentTransaction;
-
         if (this.dbChangesScope.Value == null)
             this.dbChangesScope.Value = new DbDChangesScope();
 
@@ -262,6 +280,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
 
     public async Task<IEntityUpdateResult> CommitOrApplyChanges()
     {
+        IDbInternalTransactionScope _its = this.dbChangesScopeWithTransaction.Value?.InternalTransactionScope;
         EntityUpdateResult result = new EntityUpdateResult();
         try
         {
@@ -275,7 +294,8 @@ internal class DbDataModificationManager : IDbDataModificationManager
                 result.MergeWith(await this.InsertOrUpdate(_scope));
             }
 
-            this.CurrentTransaction?.Commit();
+            await _its?.Commit();
+            //this.CurrentTransaction?.Commit();
 
             result.Success = true;
 
@@ -286,21 +306,24 @@ internal class DbDataModificationManager : IDbDataModificationManager
             var tex = Common.ExceptionManager.Translate(ex);
             tex.Log();
 
-            this.CurrentTransaction?.Rollback();
+            _its?.Rollback();
 
             throw tex;
         }
         finally
         {
             this.dbChangesScope.Value = null;
-            this.currentTransaction.Value = null;
+            this.dbChangesScopeWithTransaction.Value = null;
         }
     }
 
     public async Task Rollback()
     {
+        IDbInternalTransactionScope _its = this.dbChangesScopeWithTransaction.Value?.InternalTransactionScope;
+        _its.NotNull("No transaction available");
         this.dbChangesScope.Value = null;
-        this.CurrentTransaction?.Rollback();
+        this.dbChangesScopeWithTransaction.Value = null;
+        await _its.Rollback();
     }
 
     public IIntSequence Sequence(string name)
