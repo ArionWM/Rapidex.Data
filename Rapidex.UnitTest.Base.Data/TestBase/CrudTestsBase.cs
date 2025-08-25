@@ -35,7 +35,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity.Save();
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             Assert.True(entity.Id > 9999); //Yeni entity'ler 10 k dan büyük bir Id alır
             Assert.False(entity._IsNew);
@@ -68,7 +68,7 @@ namespace Rapidex.UnitTest.Data.TestBase
                 entity.Save();
             }
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             //Check table
         }
@@ -105,7 +105,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             Assert.Equal(5, entity.Id);
 
-            db.CommitOrApplyChanges();
+            db.ApplyChanges();
         }
 
 
@@ -128,7 +128,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity.Name = name;
             entity.Save();
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             long id = entity.Id;
 
@@ -144,7 +144,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             string name2 = RandomHelper.RandomText(10);
             loadedEntity.Name = name2;
             loadedEntity.Save();
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             //TODO: Cache'ler temizlenecek !!
 
@@ -183,7 +183,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity["Subject"] = name;
             entity.Save();
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             long id = (long)entity.GetId();
 
@@ -198,7 +198,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             string name2 = RandomHelper.RandomText(10);
             loadedEntity["Subject"] = name2;
             loadedEntity.Save();
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             //TODO: Cache'ler temizlenecek !!
 
@@ -230,7 +230,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity02.Name = "Entity 002";
             entity02.Save();
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             var entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(2, entCount);
@@ -241,13 +241,13 @@ namespace Rapidex.UnitTest.Data.TestBase
             entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(2, entCount);
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(1, entCount);
 
             db.Delete(entity02);
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(0, entCount);
@@ -270,7 +270,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             ent1.Name = "Ent 1";
             ent1.Save();
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
             count = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(1, count);
 

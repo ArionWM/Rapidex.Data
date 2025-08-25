@@ -55,7 +55,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             var (masterEntity01, details01) = createData(1);
             var (masterEntity02, details02) = createData(2);
 
-            await dbScope.CommitOrApplyChanges();
+            await dbScope.ApplyChanges();
 
             //Clear caches
 
@@ -144,7 +144,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity02.Name = "Entity 02";
             entity02.Save();
 
-            await dbScope.CommitOrApplyChanges();
+            await dbScope.ApplyChanges();
 
             long entity1Id = entity01.Id;
             long entity2Id = entity02.Id;
@@ -205,7 +205,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity02["Name"] = "Entity 02";
             entity02.Save();
 
-            await dbScope.CommitOrApplyChanges();
+            await dbScope.ApplyChanges();
 
             long entity1Id = entity01.GetId().As<long>();
             long entity2Id = entity02.GetId().As<long>();

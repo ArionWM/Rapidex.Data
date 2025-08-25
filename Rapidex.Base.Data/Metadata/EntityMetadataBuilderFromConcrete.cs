@@ -6,6 +6,7 @@ using System.ComponentModel.Design;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.Metadata;
@@ -92,6 +93,22 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
         return em;
     }
 
+    protected virtual void CheckAndApplyConcreteImplementer(Type type, IDbEntityMetadata em)
+    {
+        Type intType = typeof(IConcreteEntityImplementer<>);
+        Type intGenericType = intType.MakeGenericType(type);
+        Type[] types = Common.Assembly.FindDerivedClassTypes(intGenericType);
+
+        types = TypeInheritenceHelper.SortTypesByInheritanceHierarchy(types);
+        Type implementerType = types.FirstOrDefault();
+
+        if(implementerType == null)
+            return;
+
+        IConcreteEntityImplementer implementer = TypeHelper.CreateInstance<IConcreteEntityImplementer>(implementerType);
+        implementer.SetupMetadata(this.Parent.DbScope, em);
+    }
+
     protected virtual IDbEntityMetadata AddConcreteDefinition(Type type, string module = null, string prefix = null)
     {
         this.Validate();
@@ -119,6 +136,8 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
             em.Prefix = DatabaseConstants.PREFIX_DEFAULT;
         }
 
+        this.CheckAndApplyConcreteImplementer(type, em);
+
         this.Add(em);
 
         return em;
@@ -130,7 +149,7 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
     {
         IDbEntityMetadata em;
         if (type.IsEnum)
-            em =  this.EnumerationDefinitionFactory.Add(type, module, prefix);
+            em = this.EnumerationDefinitionFactory.Add(type, module, prefix);
         else
             em = this.AddConcreteDefinition(type, module, prefix);
 

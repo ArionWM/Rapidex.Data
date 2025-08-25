@@ -54,7 +54,7 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
         ent04.Details01.Add(ent03_01);
         ent04.Details01.Add(ent03_02);
 
-        await dbscope.CommitOrApplyChanges();
+        await dbscope.ApplyChanges();
 
         IEntitySerializationDataCreator dataCreator = this.Fixture.ServiceProvider.GetRapidexService<IEntitySerializationDataCreator>() ?? new EntitySerializationDataCreator();
 

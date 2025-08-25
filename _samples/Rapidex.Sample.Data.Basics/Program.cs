@@ -13,6 +13,8 @@ ServiceCollection services = new();
 // Configure Serilog for logging
 services.UseSerilog(Path.Combine(AppContext.BaseDirectory, "Logs"));
 
+//RAPIDEX DATA LEVEL INITIALIZATION
+//======================================
 services.AddRapidexDataLevel(); //<- Add Rapidex services
 
 //If we not use IRapidexAssemblyDefinition class, we can add manually own assemblies
@@ -36,4 +38,4 @@ dbScope.Metadata.ScanConcreteDefinitions();
 
 // Or you can add metadata manually
 dbScope.Metadata.AddJson("myJsonContent");
-dbScope.Metadata.AddIfNotExist<MyEntity1>();
+dbScope.Metadata.AddIfNotExist<Order>();

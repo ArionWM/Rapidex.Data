@@ -162,7 +162,7 @@ namespace Rapidex.Data
                     }
                 }
 
-               await dbScope.CommitOrApplyChanges();
+               await dbScope.ApplyChanges();
                 //trn.Commit();
             }
             catch (Exception ex)

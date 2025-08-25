@@ -288,7 +288,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         detail02_02.Save();
         master02.Relation01.Add(detail02_02);
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
 
         long masterId01 = master01.Id;

@@ -38,7 +38,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         long blobId01_check = entity.Picture.TargetId;
 
@@ -61,7 +61,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal02, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         //Yeni bir içerik yüklendiğinde Id değişmemeli, önceki blobRecord kaydı güncellenmeli
         long blobId02_check = ent01.Picture.TargetId;
@@ -86,7 +86,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         long entityId01 = entity.Id;
 
@@ -101,7 +101,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.SetEmpty();
         entity.Save();
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         Assert.Equal(DatabaseConstants.DEFAULT_EMPTY_ID, entity.Picture.TargetId);
 
@@ -129,7 +129,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         ConcreteEntity01 ent02 = db.New<ConcreteEntity01>();
         ent02["ContactType"] = ContactType.Corporate; //Bu durumda farklı bir atama yapısı çalışıyor
         ent02.Save();
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         long id01 = ent01.Id;
         long id02 = ent02.Id;
@@ -211,7 +211,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         ent01.B<HasTags>().Add("Tag 02");
         ent01.Save();
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         Tags tags01 = ent01.GetValue<Tags>(HasTags.FIELD_TAGS);
         Assert.Equal("|Tag 01|Tag 02|", tags01.Value);
@@ -239,7 +239,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ent01.BirthDate = dtoRef;
         ent01.Save();
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         long id = ent01.Id;
 
@@ -252,7 +252,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         id = ent01.Id;
 
@@ -263,7 +263,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         id = ent01.Id;
 
@@ -293,7 +293,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        await dbScope.CommitOrApplyChanges();
+        await dbScope.ApplyChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -327,7 +327,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -357,7 +357,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -402,7 +402,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         entity.Save();
 
-        await dbScope.CommitOrApplyChanges();
+        await dbScope.ApplyChanges();
     }
 
    

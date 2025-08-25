@@ -250,7 +250,7 @@ namespace Rapidex.Data
         //    dmm.NotNull();
         //    return Task<IEntityUpdateResult>.Run(() =>
         //    {
-        //        return dmm.CommitOrApplyChanges();
+        //        return dmm.ApplyChanges();
         //    });
 
 

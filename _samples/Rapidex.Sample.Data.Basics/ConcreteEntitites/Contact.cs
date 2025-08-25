@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Rapidex.Sample.Data.Basics.ConcreteEntitites;
+internal class Contact : DbConcreteEntityBase
+{
+    public Enumeration<ContactType> Type { get; set; }
+
+    public string FullName { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public DateTimeOffset? BirthDate { get; set; }
+    public int Age { get; set; }
+}
+
+internal class ContractImplementer : IConcreteEntityImplementer<Contact>
+{
+    protected static IEntityReleatedMessageArguments BeforeSave(IEntityReleatedMessageArguments args)
+    {
+        Contact contact = args.Entity.As<Contact>();
+        if(contact.BirthDate.HasValue)
+        {
+            DateTimeOffset now = DateTimeOffset.Now;
+            int age = now.Year - contact.BirthDate.Value.Year;
+            if (now.DayOfYear < contact.BirthDate.Value.DayOfYear)
+                age--;
+            contact.Age = age;
+        }
+
+        if(contact.FullName.IsNullOrEmpty())
+        {
+            contact.FullName = (contact.FirstName + " " + contact.LastName).Trim();
+        }
+
+        return args;
+    }
+    public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
+    {
+        metadata
+            .AddBehavior<ArchiveEntity>(true, false)
+            .AddBehavior<HasTags>(true, false)
+            .MarkOnlyBaseSchema();
+
+        //See: 
+        Common.SignalHub.SubscribeOnBeforeSave("/", ContractImplementer.BeforeSave);
+    }
+}

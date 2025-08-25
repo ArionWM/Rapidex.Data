@@ -93,7 +93,7 @@ public class PredefinedDataCollection
                 }
             }
         }
-        await scope.CommitOrApplyChanges();
+        await scope.ApplyChanges();
     }
 
     protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em)

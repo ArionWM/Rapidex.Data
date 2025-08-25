@@ -140,13 +140,13 @@ namespace Rapidex.UnitTest.Data
 
             ConcreteEntity01 entity01 = db.New<ConcreteEntity01>();
             entity01.Save();
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             ConcreteEntity02 entity02 = db.New<ConcreteEntity02>();
             entity02.Parent = entity01;
             entity02.Save();
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             long id1 = entity01.Id;
             long id2 = entity02.Id;
@@ -176,7 +176,7 @@ namespace Rapidex.UnitTest.Data
             entity01.Phone = "1234567890";
             entity01.Picture.Set(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 }, "aaa", "bbb");
             entity01.Save();
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             long id1 = entity01.Id;
 
@@ -223,7 +223,7 @@ namespace Rapidex.UnitTest.Data
             ConcreteEntity02 entityForRef = db.New<ConcreteEntity02>();
             //entityForRef.Name = RandomHelper.RandomText(10);
             entityForRef.Save();
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             IEntity jsonEntity01 = db.New("myJsonEntity05");
             jsonEntity01["Subject"] = "Subject01";
@@ -237,7 +237,7 @@ namespace Rapidex.UnitTest.Data
             jsonEntity01["Price"] = 173233;
 
             jsonEntity01.Save();
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
             long id1 = (long)jsonEntity01.GetId();
             //Clear entity cache
@@ -284,14 +284,14 @@ namespace Rapidex.UnitTest.Data
             concreteEntity01.Name = "Cust01";
             concreteEntity01.Save();
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
 
             ConcreteEntity02 concreteEntity02 = db.New<ConcreteEntity02>();
             concreteEntity02.Parent = concreteEntity01.Id; //id can assign direct
             concreteEntity02.Save();
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
         }
 
@@ -326,7 +326,7 @@ namespace Rapidex.UnitTest.Data
             baseEnt02.Name = "CEnt 02";
             baseEnt02.Save();
 
-            await schemaBase.CommitOrApplyChanges();
+            await schemaBase.ApplyChanges();
 
             long baseId01 = (long)baseEnt01.GetId();
             long baseId02 = (long)baseEnt02.GetId();
@@ -336,7 +336,7 @@ namespace Rapidex.UnitTest.Data
             refEntity01.Reference = baseEnt01;
             refEntity01.Save();
 
-            await schema02.CommitOrApplyChanges();
+            await schema02.ApplyChanges();
 
             long refId01 = (long)refEntity01.GetId();
             //----------------------------------------------------------------------------------

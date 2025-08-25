@@ -76,7 +76,7 @@ public static class ImplementerExtender
         IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
 
         EntityMetadataBuilderFromConcrete cmi = new(mContainer, mf, ff);
-        List<IDbEntityMetadata> entities = new List<IDbEntityMetadata>();
+        List<IDbEntityMetadata> ems = new List<IDbEntityMetadata>();
         var aInfos = Common.Assembly.AssemblyDefinitions;
         foreach (AssemblyInfo ainfo in aInfos)
         {
@@ -86,11 +86,11 @@ public static class ImplementerExtender
                 if (type.IsAbstract || type.IsInterface)
                     continue; //Skip abstract and interface types
 
-                entities.Add(
+                ems.Add(
                     cmi.Add(type, ainfo.NavigationName, ainfo.DatabaseEntityPrefix));
             }
         }
-        return entities.ToArray();
+        return ems.ToArray();
     }
 
     public static IDbEntityMetadata[] AddJson(this IDbMetadataContainer mContainer, string json)

@@ -45,7 +45,7 @@ namespace Rapidex.UnitTest.Data.TestBase
                 entity.Save();
             }
 
-            await db.CommitOrApplyChanges();
+            await db.ApplyChanges();
 
 
 

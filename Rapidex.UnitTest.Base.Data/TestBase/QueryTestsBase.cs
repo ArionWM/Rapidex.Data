@@ -36,7 +36,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         this.Fixture.ClearCaches();
 
@@ -83,7 +83,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         var result = db.Load<ConcreteEntity01>(q => q.Eq(nameof(ConcreteEntity01.Name), "Phone 002"));
     }
@@ -125,7 +125,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             refEntities.Add(entity);
         }
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
 
 
@@ -150,7 +150,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        await scope.CommitOrApplyChanges();
+        await scope.ApplyChanges();
 
     }
 
@@ -268,7 +268,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         tent02.Parent = null;
         tent02.Save();
 
-        await db.Data.CommitOrApplyChanges();
+        await db.Data.ApplyChanges();
 
         //---------------------------------------------------------------------------------
 
@@ -314,7 +314,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         baseEnt02.Name = "Nest Test 01 CEnt 02";
         baseEnt02.Save();
 
-        await schemaBase.CommitOrApplyChanges();
+        await schemaBase.ApplyChanges();
 
         long baseId01 = (long)baseEnt01.GetId();
         long baseId02 = (long)baseEnt02.GetId();
@@ -334,7 +334,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         refEntity03.Reference = null;
         refEntity03.Save();
 
-        await schema02.CommitOrApplyChanges();
+        await schema02.ApplyChanges();
 
         long refId01 = (long)refEntity01.GetId();
         long refId02 = (long)refEntity02.GetId();
@@ -380,7 +380,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         refEnt03.Address = "Address 03";
         refEnt03.Save();
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         long count01 = await db.GetQuery<ConcreteEntity01>()
              .Like("Phone", "533672220*")
@@ -404,7 +404,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         //data.Add("Address", "Updated Address");
         //query.Update(data);
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         long count03 = await db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
@@ -474,7 +474,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         detail02_02.Save();
         master02.Relation01.Add(detail02_02);
 
-        await db.CommitOrApplyChanges();
+        await db.ApplyChanges();
 
         long count01 = await db.GetQuery<ConcreteEntityForN2NTest02>()
               .Related(master01, nameof(ConcreteEntityForN2NTest01.Relation01))

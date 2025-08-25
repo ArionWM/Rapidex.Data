@@ -54,5 +54,13 @@ public interface IImplementer<T> : IImplementer where T : IImplementTarget
     }
 }
 
+public interface IConcreteEntityImplementer
+{
+    void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata);
+}
 
+public interface IConcreteEntityImplementer<T> : IConcreteEntityImplementer where T : IConcreteEntity
+{
+
+}
 

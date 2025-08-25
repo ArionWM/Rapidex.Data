@@ -440,7 +440,7 @@ public interface IDbProvider : IManager
 /// This object must have thread isolated storages
 /// storage will change while access with different threats
 /// </summary>
-public interface IDbChangesScope : IEmptyCheckObject
+public interface IDbChangesCollection : IEmptyCheckObject
 {
     IReadOnlyCollection<IEntity> ChangedEntities { get; }
 
@@ -450,7 +450,7 @@ public interface IDbChangesScope : IEmptyCheckObject
 
     void CheckNewEntities();
 
-    IDbChangesScope[] SplitForTypesAndDependencies();
+    IDbChangesCollection[] SplitForTypesAndDependencies();
 
     void Add(IEntity entity);
 
@@ -466,7 +466,8 @@ public interface IDbChangesScope : IEmptyCheckObject
 /// <summary>
 /// Created db transaction
 /// </summary>
-public interface IDbChangesScopeWithTransaction : IDbChangesScope, IDisposable
+[Obsolete("", true)]
+public interface IDbChangesScopeWithTransaction : IDbChangesCollection, IDisposable
 {
     IDbInternalTransactionScope InternalTransactionScope { get; }
     Task Commit();
@@ -609,13 +610,9 @@ public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader
 
 
 
-public interface IDbDataModificationManager
+public interface IDbDataModificationManager 
 {
     IDbSchemaScope ParentScope { get; }
-
-    //TODO: Async yaptık? !! Scope gerekiyor !!
-    //IDbInternalTransactionScope CurrentTransaction { get; }
-    //bool IsTransactionAvailable { get; }
 
     IEntity New(IDbEntityMetadata em);
 
@@ -624,16 +621,9 @@ public interface IDbDataModificationManager
 
     IQuery<T> GetQuery<T>() where T : IConcreteEntity;
 
-
-    //[Obsolete("", true)]
-    //IEntityLoadResult<IEntity> Load(IDbEntityMetadata em, IDbCriteria criteria = null);
-
-
     Task<IEntity> Find(IDbEntityMetadata em, long id);
 
-
     Task<IEntityLoadResult> Load(IQueryLoader loader);
-
 
     Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader);
 
@@ -643,19 +633,31 @@ public interface IDbDataModificationManager
 
     void Add(IQueryUpdater updater);
 
-    IDbChangesScopeWithTransaction BeginTransaction();
 
     void Delete(IEntity entity);
 
+    
+}
+
+public interface IDbDataModificationStaticScope : IDbDataModificationManager
+{
+    IDbDataModificationScope Begin();
+
     /// <summary>
     /// Write changes to database
-    /// If transaction is available, changes will be written before commit transaction
     /// </summary>
-    Task<IEntityUpdateResult> CommitOrApplyChanges();
-    Task Rollback();
-
-
+    Task<IEntityUpdateResult> ApplyChanges();
     IIntSequence Sequence(string name);
+}
+
+
+public interface IDbDataModificationScope : IDbDataModificationManager, IDisposable
+{
+    /// <summary>
+    /// Write changes to database and commit transaction
+    /// </summary>
+    Task<IEntityUpdateResult> CommitChanges();
+    Task Rollback();
 }
 
 
@@ -705,7 +707,7 @@ public interface IDbStructureProvider
 
 
 
-public interface IDbSchemaScope : IDbDataModificationManager
+public interface IDbSchemaScope : IDbDataModificationStaticScope
 {
     IDbScope ParentDbScope { get; }
     IDbProvider DbProvider { get; }
@@ -717,24 +719,20 @@ public interface IDbSchemaScope : IDbDataModificationManager
 
     IDbStructureProvider Structure { get; }
     IBlobRepository Blobs { get; }
-    IDbDataModificationManager Data { get; }
+    IDbDataModificationStaticScope Data { get; }
 
     EntityMapper Mapper { get; }
 
-    IDbChangesScopeWithTransaction IDbDataModificationManager.BeginTransaction()
+    IDbDataModificationScope IDbDataModificationStaticScope.Begin()
     {
-        return this.Data.BeginTransaction();
+        return this.Data.Begin();
     }
 
-    async Task<IEntityUpdateResult> IDbDataModificationManager.CommitOrApplyChanges()
+    async Task<IEntityUpdateResult> IDbDataModificationStaticScope.ApplyChanges()
     {
-        return await this.Data.CommitOrApplyChanges();
+        return await this.Data.ApplyChanges();
     }
 
-    async Task IDbDataModificationManager.Rollback()
-    {
-        await this.Data.Rollback();
-    }
 
     IDbSchemaScope IDbDataModificationManager.ParentScope => this;
 

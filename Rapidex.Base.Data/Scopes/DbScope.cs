@@ -37,7 +37,7 @@ namespace Rapidex.Data.Scopes
 
         public IDbStructureProvider Structure => baseScope.Structure;
 
-        public IDbDataModificationManager Data => baseScope.Data;
+        public IDbDataModificationStaticScope Data => baseScope.Data;
 
         public EntityMapper Mapper => baseScope.Mapper;
 
@@ -45,7 +45,6 @@ namespace Rapidex.Data.Scopes
 
         public IDbSchemaScope Base => baseScope;
 
-        public bool IsTransactionAvailable => baseScope.IsTransactionAvailable;
 
 
         public DbScope(long id, string name, IDbProvider dbProvider)
@@ -138,7 +137,7 @@ namespace Rapidex.Data.Scopes
 
             schemaRecord.Save();
 
-            _base.CommitOrApplyChanges()
+            _base.ApplyChanges()
                 .Wait();
         }
 

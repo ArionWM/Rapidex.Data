@@ -9,7 +9,7 @@ using static Rapidex.Data.Reference;
 
 namespace Rapidex.Data.DataModification;
 
-internal class DbDChangesScope : IDbChangesScope
+internal class DbChangesCollection : IDbChangesCollection
 {
     internal class EntityDependency
     {
@@ -94,9 +94,9 @@ internal class DbDChangesScope : IDbChangesScope
 
     public bool IsEmpty => !_changedEntities.Any() && !_deletedEntities.Any() && !_bulkUpdates.Any();
 
-    public DbDChangesScope() { }
+    public DbChangesCollection() { }
 
-    public DbDChangesScope(IEnumerable<IEntity> changedEntities, IEnumerable<IEntity> deletedEntities, IEnumerable<IQueryUpdater> bulkUpdates)
+    public DbChangesCollection(IEnumerable<IEntity> changedEntities, IEnumerable<IEntity> deletedEntities, IEnumerable<IQueryUpdater> bulkUpdates)
     {
         if (changedEntities.IsNOTNullOrEmpty())
             this.Add(changedEntities);
@@ -318,16 +318,16 @@ internal class DbDChangesScope : IDbChangesScope
     }
 
 
-    public IDbChangesScope[] SplitForTypesAndDependencies()
+    public IDbChangesCollection[] SplitForTypesAndDependencies()
     {
         _locker.EnterReadLock();
         try
         {
-            List<IDbChangesScope> list = new List<IDbChangesScope>();
+            List<IDbChangesCollection> list = new List<IDbChangesCollection>();
 
-            list.AddRange(this.ChangedEntities.GroupBy(e => e._TypeName).Select(g => new DbDChangesScope(g, null, null)).ToArray());
-            list.AddRange(this.DeletedEntities.GroupBy(e => e._TypeName).Select(g => new DbDChangesScope(null, g, null)).ToArray());
-            list.AddRange(this.BulkUpdates.GroupBy(e => e.EntityMetadata.Name).Select(g => new DbDChangesScope(null, null, g)).ToArray());
+            list.AddRange(this.ChangedEntities.GroupBy(e => e._TypeName).Select(g => new DbChangesCollection(g, null, null)).ToArray());
+            list.AddRange(this.DeletedEntities.GroupBy(e => e._TypeName).Select(g => new DbChangesCollection(null, g, null)).ToArray());
+            list.AddRange(this.BulkUpdates.GroupBy(e => e.EntityMetadata.Name).Select(g => new DbChangesCollection(null, null, g)).ToArray());
 
             return list.ToArray();
         }

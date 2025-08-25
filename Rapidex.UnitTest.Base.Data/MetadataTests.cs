@@ -109,6 +109,14 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
+    public void MetadataCreation_WithConcrete_03_WithConcreteImplementer()
+    {
+        throw new NotImplementedException();
+        //ConcreteEntityForImplementationTests01
+    }
+
+
+    [Fact]
     public void MetadataCreation_WithJson_01()
     {
         //EntityMetadata01.json

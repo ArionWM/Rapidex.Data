@@ -5,8 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Sample.Data.Basics.ConcreteEntitites;
-internal class MyEntity1 : DbConcreteEntityBase
+internal class Item : DbConcreteEntityBase
 {
+    public string Code { get; set; }
     public string Name { get; set; }
-    public int Age { get; set; }
+    public string Description { get; set; }
+    public decimal Price { get; set; }
+    public int StockQuantity { get; set; }
 }

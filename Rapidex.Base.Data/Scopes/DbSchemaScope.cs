@@ -1,4 +1,5 @@
-﻿using Rapidex.Data.Metadata;
+﻿using Rapidex.Data.DataModification;
+using Rapidex.Data.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Rapidex.Data.Scopes
         protected readonly IDbProvider dbProvider;
         protected readonly string name;
         protected IDbStructureProvider structureManager;
-        protected IDbDataModificationManager dataManager;
+        protected IDbDataModificationStaticScope dataManager;
         protected EntityMapper mapper;
         protected IBlobRepository blobRepository;
 
@@ -23,13 +24,12 @@ namespace Rapidex.Data.Scopes
 
         public IDbStructureProvider Structure => structureManager;
 
-        public IDbDataModificationManager Data => dataManager;
+        public IDbDataModificationStaticScope Data => dataManager;
 
         public EntityMapper Mapper => mapper;
 
         public IBlobRepository Blobs => blobRepository;
 
-        public bool IsTransactionAvailable => dataManager.IsTransactionAvailable;
 
         public DbSchemaScope(string schemaName, IDbScope parentDbScope, IDbProvider provider)
         {
@@ -41,11 +41,9 @@ namespace Rapidex.Data.Scopes
             this.structureManager = this.dbProvider.GetStructureProvider();
 
             var dmProvider = this.dbProvider.GetDataModificationPovider();
-            this.dataManager = new DbDataModificationManager(this, dmProvider);
-            //this.metadataManager = new DbEntityMetadataManager(this);
+            this.dataManager = new DataModificationStaticScope(this, dmProvider);
             this.mapper = new EntityMapper(this);
             this.blobRepository = new DefaultDbBlobRepository(this);
-
         }
 
         public virtual void Setup()

@@ -199,6 +199,10 @@ public class RelationOne2N : RelationBase, ILazy
     }
 }
 
+/// <summary>
+/// Add field ("Parent" + ParentEntityName) to detail entity for parent reference
+/// </summary>
+/// <typeparam name="TEntity"></typeparam>
 public class RelationOne2N<TEntity> : RelationOne2N where TEntity : IConcreteEntity
 {
     public override string TypeName => "relationOne2NConcrete";
