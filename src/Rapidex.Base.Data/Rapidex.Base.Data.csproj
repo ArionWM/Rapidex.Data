@@ -11,7 +11,7 @@
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	</PropertyGroup>
 	<ItemGroup>
-		<Compile Include="..\RapidexAssemblyInfo.cs" Link="RapidexAssemblyInfo.cs" />
+		<Compile Include="..\..\RapidexAssemblyInfo.cs" Link="RapidexAssemblyInfo.cs" />
 	</ItemGroup>
 	<ItemGroup>
 	  
@@ -20,7 +20,7 @@
 	  <PackageReference Include="System.Text.Json" Version="9.0.3" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Rapidex-Base-Common\Rapidex.Base.Common.SignalHub\Rapidex.Base.Common.SignalHub.csproj" />
-	  <ProjectReference Include="..\..\Rapidex-Base-Common\Rapidex.Base.Common\Rapidex.Base.Common.csproj" />
+	  <ProjectReference Include="..\..\..\Rapidex-Base-Common\Rapidex.Base.Common.SignalHub\Rapidex.Base.Common.SignalHub.csproj" />
+	  <ProjectReference Include="..\..\..\Rapidex-Base-Common\Rapidex.Base.Common\Rapidex.Base.Common.csproj" />
 	</ItemGroup>
 </Project>

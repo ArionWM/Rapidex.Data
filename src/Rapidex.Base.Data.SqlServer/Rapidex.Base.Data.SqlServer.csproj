@@ -2,22 +2,22 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
-		<RootNamespace>Rapidex.Data.Behaviors</RootNamespace>
-		<AssemblyName>Rapidex.Data.Behaviors</AssemblyName>
+		<RootNamespace>Rapidex.Data.SqlServer</RootNamespace>
+		<AssemblyName>Rapidex.Data.SqlServer</AssemblyName>
 		<Nullable>enable</Nullable>
-
 		<LangVersion>Latest</LangVersion>
 		<PlatformTarget>x64</PlatformTarget>
 		<NoWarn>1701;1702;1591;1572;1573;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS1584;CS1658</NoWarn>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
 	</PropertyGroup>
-
 	<ItemGroup>
-		<Compile Include="..\RapidexAssemblyInfo.cs" Link="RapidexAssemblyInfo.cs" />
+		<Compile Include="..\..\RapidexAssemblyInfo.cs" Link="RapidexAssemblyInfo.cs" />
 	</ItemGroup>
-
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Rapidex-Base-Data\Rapidex.Base.Data\Rapidex.Base.Data.csproj" />
+	  <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
 	</ItemGroup>
-
+	<ItemGroup>
+	  <ProjectReference Include="..\Rapidex.Base.Data\Rapidex.Base.Data.csproj" />
+	</ItemGroup>
 </Project>
