@@ -16,17 +16,17 @@ internal class DbSqlInternalTransactionScope : IDbInternalTransactionScope
         this.Connection.BeginTransaction();
     }
 
-    public async Task Commit()
+    public void Commit()
     {
-        await this.Connection.Transaction.CommitAsync();
+        this.Connection.Transaction.Commit();
         this.Live = false;
     }
 
-    public async Task Rollback()
+    public void Rollback()
     {
         try
         {
-            await this.Connection.Transaction.RollbackAsync();
+            this.Connection.Transaction.Rollback();
         }
         finally
         {

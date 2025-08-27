@@ -12,8 +12,6 @@ namespace Rapidex.Data;
 
 public static class Database
 {
-
-
     public static DbEntityFactory EntityFactory { get; private set; } //Internal olmalı ancak DbDataModificationManager ların erişmesi lazım ?
     public static DbConfigurationManager Configuration { get; private set; }
 

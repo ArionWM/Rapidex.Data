@@ -222,7 +222,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         this.ApplyStructureInternal(applyRequiredMetadatas, true);
 
         //Apply predefined data ...
-        scope.ParentDbScope.Metadata.Data.Apply(scope).Wait();
+        scope.ParentDbScope.Metadata.Data.Apply(scope);
 
         foreach (var em in allEms)
         {

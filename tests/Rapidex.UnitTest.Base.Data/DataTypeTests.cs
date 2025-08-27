@@ -22,7 +22,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public async Task Image_01_BasicSaveAndLoad()
+    public void Image_01_BasicSaveAndLoad()
     {
         var db = Database.Scopes.Db();
 
@@ -38,13 +38,13 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         long blobId01_check = entity.Picture.TargetId;
 
         db.Metadata.ReAdd<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01 = await db.GetQuery<ConcreteEntity01>().First();
+        ConcreteEntity01 ent01 = db.GetQuery<ConcreteEntity01>().First();
 
         long blobId01 = ent01.Picture.TargetId;
 
@@ -61,7 +61,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal02, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         //Yeni bir içerik yüklendiğinde Id değişmemeli, önceki blobRecord kaydı güncellenmeli
         long blobId02_check = ent01.Picture.TargetId;
@@ -69,7 +69,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public async Task Image_02_NullContentDontCreateOrDeleteBlobRecord()
+    public void Image_02_NullContentDontCreateOrDeleteBlobRecord()
     {
         this.Fixture.ClearCaches();
 
@@ -86,26 +86,26 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         long entityId01 = entity.Id;
 
         long blobRecId01 = entity.Picture.TargetId;
-        BlobRecord br = await db.Find<BlobRecord>(blobRecId01);
+        BlobRecord br = db.Find<BlobRecord>(blobRecId01);
         Assert.NotNull(br);
 
         int hash01_check = HashHelper.GetStableHashCode(br.Data);
         Assert.Equal(hash01, hash01_check);
 
-        entity = await db.Find<ConcreteEntity01>(entityId01);
+        entity = db.Find<ConcreteEntity01>(entityId01);
         entity.Picture.SetEmpty();
         entity.Save();
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         Assert.Equal(DatabaseConstants.DEFAULT_EMPTY_ID, entity.Picture.TargetId);
 
-        br = await db.Find<BlobRecord>(blobRecId01);
+        br = db.Find<BlobRecord>(blobRecId01);
         Assert.Null(br);
 
 
@@ -114,7 +114,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
 
     [Fact]
-    public virtual async Task Enum_02_Assignment()
+    public virtual void Enum_02_Assignment()
     {
         var db = Database.Scopes.Db();
 
@@ -129,7 +129,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         ConcreteEntity01 ent02 = db.New<ConcreteEntity01>();
         ent02["ContactType"] = ContactType.Corporate; //Bu durumda farklı bir atama yapısı çalışıyor
         ent02.Save();
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         long id01 = ent01.Id;
         long id02 = ent02.Id;
@@ -141,16 +141,16 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         db = Database.Scopes.Db();
         db.Metadata.ReAdd<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01_check = await db.Find<ConcreteEntity01>(id01);
+        ConcreteEntity01 ent01_check = db.Find<ConcreteEntity01>(id01);
         Assert.Equal(ContactType.Corporate, (ContactType)ent01_check.ContactType);
 
-        ConcreteEntity01 ent02_check = await db.Find<ConcreteEntity01>(id02);
+        ConcreteEntity01 ent02_check = db.Find<ConcreteEntity01>(id02);
         Assert.Equal(ContactType.Corporate, (ContactType)ent02_check.ContactType);
 
     }
 
     [Fact]
-    public virtual async Task Enum_03_PredefinedValues()
+    public virtual void Enum_03_PredefinedValues()
     {
         var db = Database.Scopes.Db();
 
@@ -161,9 +161,9 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         var emCT = db.Metadata.AddEnum<ContactType>();
         db.Structure.DropEntity("ContactType");
         db.Structure.ApplyEntityStructure(emCT);
-        await db.Metadata.Data.Apply(db);
+        db.Metadata.Data.Apply(db);
 
-        var lresult = await db.GetQuery("ContactType").Asc(CommonConstants.FIELD_ID).Load();
+        var lresult = db.GetQuery("ContactType").Asc(CommonConstants.FIELD_ID).Load();
         Assert.Equal(5, lresult.ItemCount);
 
         IEntity ct01 = lresult.First();
@@ -179,7 +179,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
 
     [Fact]
-    public async Task Tags_01_Basics()
+    public void Tags_01_Basics()
     {
         var db = Database.Scopes.Db();
 
@@ -196,8 +196,8 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         //dbScope.Structure.DropEntity<TagRecord>();
         //dbScope.Structure.ApplyAllStructure();
 
-        Assert.Equal(0, await db.GetQuery<ConcreteEntityForTagTest>().Count());
-        Assert.Equal(0, await db.GetQuery<TagRecord>().Count());
+        Assert.Equal(0, db.GetQuery<ConcreteEntityForTagTest>().Count());
+        Assert.Equal(0, db.GetQuery<TagRecord>().Count());
 
         ConcreteEntityForTagTest ent01 = db.New<ConcreteEntityForTagTest>();
         ent01.Name = "Entity 01";
@@ -211,7 +211,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         ent01.B<HasTags>().Add("Tag 02");
         ent01.Save();
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         Tags tags01 = ent01.GetValue<Tags>(HasTags.FIELD_TAGS);
         Assert.Equal("|Tag 01|Tag 02|", tags01.Value);
@@ -219,7 +219,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         Thread.Sleep(1000);
 
 
-        var tagRecords = await db.GetQuery<TagRecord>().Load();
+        var tagRecords = db.GetQuery<TagRecord>().Load();
         Assert.Equal(2, tagRecords.ItemCount);
 
         TagRecord rec01 = tagRecords.First();
@@ -228,7 +228,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public async Task DateTime_01_UseToDateTimeOffset()
+    public void DateTime_01_UseToDateTimeOffset()
     {
         var db = Database.Scopes.Db();
         db.ReAddReCreate<ConcreteEntity01>();
@@ -239,11 +239,11 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ent01.BirthDate = dtoRef;
         ent01.Save();
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         long id = ent01.Id;
 
-        ConcreteEntity01 ent01Loaded = await db.GetQuery<ConcreteEntity01>().Find(id);
+        ConcreteEntity01 ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id);
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
 
@@ -252,22 +252,22 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         id = ent01.Id;
 
-        ent01Loaded = await db.GetQuery<ConcreteEntity01>().Find(id);
+        ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id);
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
         dtoWithOffset = dtoRef.ToOffset(-1 * TimeSpan.FromHours(3));
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         id = ent01.Id;
 
-        ent01Loaded = await db.GetQuery<ConcreteEntity01>().Find(id);
+        ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id);
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
         //ConcreteEntity01 ent02 = scope.New<ConcreteEntity01>();
@@ -278,7 +278,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public async Task Password_01_ConcreteEntity()
+    public void Password_01_ConcreteEntity()
     {
         var dbScope = Database.Scopes.Db();
 
@@ -293,7 +293,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        await dbScope.ApplyChanges();
+        dbScope.ApplyChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -307,7 +307,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public async Task Password_02_JsonEntity()
+    public void Password_02_JsonEntity()
     {
         var db = Database.Scopes.Db();
 
@@ -327,7 +327,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -342,7 +342,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
 
     [Fact]
-    public async Task OneWayPassword_01_CryptDecrypt()
+    public void OneWayPassword_01_CryptDecrypt()
     {
         var db = Database.Scopes.Db();
 
@@ -357,7 +357,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -388,7 +388,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
 
     [Fact]
-    public async Task DateTimeStartEnd_01_Simple()
+    public void DateTimeStartEnd_01_Simple()
     {
         var dbScope = Database.Scopes.Db();
 
@@ -402,8 +402,8 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         entity.Save();
 
-        await dbScope.ApplyChanges();
+        dbScope.ApplyChanges();
     }
 
-   
+
 }

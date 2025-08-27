@@ -41,11 +41,11 @@ public interface IPredefinedValueProcessor
 
 public interface IBlobRepository
 {
-    Task<IResult<BlobRecord>> Set(Stream content, string name, string contentType, long id = DatabaseConstants.DEFAULT_EMPTY_ID);
+    IResult<BlobRecord> Set(Stream content, string name, string contentType, long id = DatabaseConstants.DEFAULT_EMPTY_ID);
 
     //DbDataModificationManager currentTransaction ve dbChangesScope threadLocal oldukları için async olduğunda farklı scope'a geçiyor (silme işlemi)
     IEntityUpdateResult Delete(long id);
-    Task<IResult<StreamContent>> Get(long id);
+    IResult<StreamContent> Get(long id);
 
 }
 

@@ -23,7 +23,7 @@ namespace Rapidex.Data.Helpers
 
             int id = Convert.ToInt32(value);
 
-            IEntity ent = scope.GetQuery(em).Find(id).Result;
+            IEntity ent = scope.GetQuery(em).Find(id);
             check(ent);
             ent.Save();
         }

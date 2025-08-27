@@ -53,7 +53,7 @@ namespace Rapidex.Data.Entities
     {
         //See: GetFileDescriptorIdForFieldFile
 
-        public static async Task<IEntity> GetBlobRecordOwner(IDbSchemaScope dbScope, string blobIdOrInfo)
+        public static IEntity GetBlobRecordOwner(IDbSchemaScope dbScope, string blobIdOrInfo)
         {
 
             BlobInfo binfo = ParseBlobId(null, blobIdOrInfo);
@@ -61,7 +61,7 @@ namespace Rapidex.Data.Entities
                 throw new InvalidOperationException($"Blob info invalid: {blobIdOrInfo}");
 
             dbScope.NotNull();
-            var parentEntity = await dbScope.Find(binfo.OwnerName, binfo.Id.As<long>());
+            var parentEntity = dbScope.Find(binfo.OwnerName, binfo.Id.As<long>());
             return parentEntity;
 
             //var parts = blobIdOrInfo.Replace('/', '.').Split('.');
@@ -148,7 +148,7 @@ namespace Rapidex.Data.Entities
             return blobInfo;
         }
 
-        public static Task<BlobRecord> GetBlobRecord(IDbSchemaScope dbScope, IEntity parentEntity, string blobIdOrInfo)
+        public static BlobRecord GetBlobRecord(IDbSchemaScope dbScope, IEntity parentEntity, string blobIdOrInfo)
         {
             if (long.TryParse(blobIdOrInfo, out long blobId))
             {

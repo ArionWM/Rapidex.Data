@@ -25,7 +25,7 @@ namespace Rapidex.Data
             {
                 var results = scope.GetQuery(rfm.ReferencedEntityMetadata.NotNull())
                       .Eq(FIELD_IS_ARCHIVED, false)
-                      .Load().Result;
+                      .Load();
 
                 foreach (IEntity entity in results)
                 {

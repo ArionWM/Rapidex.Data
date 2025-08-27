@@ -29,7 +29,7 @@ namespace Rapidex.Data
 
             IDataType _this = this;
             IEntity _parent = this.GetParent().NotNull("Parent not set");
-            IResult<StreamContent> fsr = _parent._Scope.Blobs.Get(this.TargetId).Result;
+            IResult<StreamContent> fsr = _parent._Scope.Blobs.Get(this.TargetId);
             return fsr.Content;
         }
 
@@ -88,7 +88,7 @@ namespace Rapidex.Data
             {
                 //güncelle ya da ekle
                 IResult<BlobRecord> bres = _parent._Scope.Blobs.Set(stream, name, contentType, this.TargetId)
-                    .Result;
+                    ;
                 blobRec = bres.Content;
                 this.TargetId = blobRec.Id;
             }

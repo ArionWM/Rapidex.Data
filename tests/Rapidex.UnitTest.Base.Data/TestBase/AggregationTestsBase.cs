@@ -14,7 +14,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         }
 
 
-        protected async Task GenerateEntities()
+        protected void GenerateEntities()
         {
             var db = Database.Scopes.Db();
             db.Metadata.AddIfNotExist<AggrTestEntity01>();
@@ -45,35 +45,35 @@ namespace Rapidex.UnitTest.Data.TestBase
                 entity.Save();
             }
 
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
 
 
         }
 
         [Fact]
-        public virtual async Task Aggr_01_Test01()
+        public virtual void Aggr_01_Test01()
         {
-            await this.GenerateEntities();
+            this.GenerateEntities();
 
             var db = Database.Scopes.Db();
 
-            float val01 = await db.GetQuery<AggrTestEntity01>().Avg<float>(nameof(AggrTestEntity01.Amount));
+            float val01 = db.GetQuery<AggrTestEntity01>().Avg<float>(nameof(AggrTestEntity01.Amount));
             Assert.Equal(4.5f, val01);
 
-            double val02 = await db.GetQuery<AggrTestEntity01>().Sum<double>(nameof(AggrTestEntity01.Value));
+            double val02 = db.GetQuery<AggrTestEntity01>().Sum<double>(nameof(AggrTestEntity01.Value));
             Assert.Equal(50500000, val02);
 
-            long val03 = await db.GetQuery<AggrTestEntity01>().Count();
+            long val03 = db.GetQuery<AggrTestEntity01>().Count();
             Assert.Equal(100, val03);
 
-            DateTimeOffset val04 = await db.GetQuery<AggrTestEntity01>().Min<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));
+            DateTimeOffset val04 = db.GetQuery<AggrTestEntity01>().Min<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));
             Assert.Equal(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero), val04);
 
-            DateTimeOffset val05 = await db.GetQuery<AggrTestEntity01>().Max<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));
+            DateTimeOffset val05 = db.GetQuery<AggrTestEntity01>().Max<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));
             Assert.Equal(new DateTimeOffset(2000, 4, 9, 0, 0, 0, TimeSpan.Zero), val05);
 
-            float val06 = await db.GetQuery<AggrTestEntity01>()
+            float val06 = db.GetQuery<AggrTestEntity01>()
                 .Gt(nameof(AggrTestEntity01.Age), 50)
                 .Avg<float>(nameof(AggrTestEntity01.Amount));
             Assert.Equal(4.5f, val01);

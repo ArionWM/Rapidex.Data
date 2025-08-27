@@ -9,7 +9,7 @@ namespace Rapidex.UnitTest.Data.TestContent
 {
     internal class ConcreteEntity02 : DbConcreteEntityBase
     {
-        public Reference<ConcreteEntity01> Parent { get; set; } 
+        public Reference<ConcreteEntity01> MyReference { get; set; } 
 
 
     }

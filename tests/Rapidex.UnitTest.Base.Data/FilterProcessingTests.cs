@@ -246,7 +246,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public async Task FilterParser_02()
+    public void FilterParser_02()
     {
         //this.Fixture.ClearCaches();
 
@@ -288,7 +288,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         detail02_02.Save();
         master02.Relation01.Add(detail02_02);
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
 
         long masterId01 = master01.Id;
@@ -307,14 +307,14 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         var query01 = db.GetQuery<ConcreteEntityForN2NTest02>();
         string filter01 = $"related = ConcreteEntityForN2NTest01/{masterId01}/Relation01";
         this.CriteriaParser.Parse(query01, filter01);
-        IEntityLoadResult<ConcreteEntityForN2NTest02> result01 = await query01.Load();
+        IEntityLoadResult<ConcreteEntityForN2NTest02> result01 = query01.Load();
         Assert.Equal(1, result01.Count());
 
 
         var query02 = db.GetQuery<ConcreteEntityForN2NTest02>();
         string filter02 = $"related = ConcreteEntityForN2NTest01/{masterId02}/Relation01";
         this.CriteriaParser.Parse(query02, filter02);
-        IEntityLoadResult<ConcreteEntityForN2NTest02> result02 = await query02.Load();
+        IEntityLoadResult<ConcreteEntityForN2NTest02> result02 = query02.Load();
         Assert.Equal(2, result02.Count());
 
     }

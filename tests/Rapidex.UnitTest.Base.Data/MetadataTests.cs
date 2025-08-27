@@ -6,6 +6,7 @@ using Rapidex.Data.SqlServer;
 using Rapidex.UnitTest.Data.Fixtures;
 using Rapidex.UnitTest.Data.TestBase;
 using Rapidex.UnitTest.Data.TestContent;
+using Rapidex.UnitTest.Data.TestContent.Concrete;
 using System.Data;
 using static Rapidex.Data.Reference;
 using static Rapidex.UnitTest.Data.Behaviors.BehaviorTests;
@@ -111,8 +112,16 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void MetadataCreation_WithConcrete_03_WithConcreteImplementer()
     {
-        throw new NotImplementedException();
-        //ConcreteEntityForImplementationTests01
+        this.Fixture.ClearCaches();
+
+        var db = Database.Scopes.Db();
+        var em = db.ReAddReCreate<ConcreteEntityForImplementationTests01>();
+
+        Assert.True(em.Fields.ContainsKey("Name"));
+
+        //added by ConcreteEntityForImplementationTests01Implementer
+        Assert.True(em.Fields.ContainsKey("newField"));
+        Assert.True(em.Has<HasTags>());
     }
 
 

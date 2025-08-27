@@ -115,35 +115,35 @@ public interface IQueryOrder : IQueryPager
 
 public interface IQueryLoader : IQueryOrder, ICloneable
 {
-    Task<IEntityLoadResult> Load();
+    IEntityLoadResult Load();
 
-    Task<ILoadResult<DataRow>> LoadPartial(params string[] fields); //Şimdilik DataRow dönsün
+    ILoadResult<DataRow> LoadPartial(params string[] fields); //Şimdilik DataRow dönsün
 
-    Task<IEntity> First();
+    IEntity First();
 
     //IEntity Last();
 
-    Task<ILoadResult<DbEntityId>> GetIds();
+    ILoadResult<DbEntityId> GetIds();
 }
 
 public interface IQueryLoader<T> : IQueryLoader, IQueryBase where T : IConcreteEntity
 {
-    new Task<IEntityLoadResult<T>> Load();
+    new IEntityLoadResult<T> Load();
 
-    Task<T> Find(long id);
+    T Find(long id);
 
-    new Task<T> First();
+    new T First();
 
 }
 
 public interface IQueryAggregate : IQueryLoader
 {
-    Task<bool> Exist();
-    Task<long> Count();
-    Task<object> Sum(string field);
-    Task<object> Min(string field);
-    Task<object> Max(string field);
-    Task<object> Avg(string field);
+    bool Exist();
+    long Count();
+    object Sum(string field);
+    object Min(string field);
+    object Max(string field);
+    object Avg(string field);
 }
 
 public interface IQueryUpdater : IQueryCriteria

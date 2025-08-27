@@ -15,7 +15,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         }
 
         [Fact]
-        public virtual async Task One2N_01_Concrete()
+        public virtual void One2N_01_Concrete()
         {
             //MasterA/DetailB İki master ve her bir master'a 3'er detail eklenir.
             //Cache temizlenir
@@ -55,7 +55,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             var (masterEntity01, details01) = createData(1);
             var (masterEntity02, details02) = createData(2);
 
-            await dbScope.ApplyChanges();
+             dbScope.ApplyChanges();
 
             //Clear caches
 
@@ -107,7 +107,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
 
         [Fact]
-        public virtual async Task N2N_01_Concrete()
+        public virtual void N2N_01_Concrete()
         {
             var db = Database.Scopes.AddMainDbIfNotExists();
 
@@ -144,18 +144,18 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity02.Name = "Entity 02";
             entity02.Save();
 
-            await dbScope.ApplyChanges();
+             dbScope.ApplyChanges();
 
             long entity1Id = entity01.Id;
             long entity2Id = entity02.Id;
 
             //Clear cache
 
-            var entity1 = await dbScope.Find<ConcreteEntityForN2NTest01>(entity1Id);
+            var entity1 =  dbScope.Find<ConcreteEntityForN2NTest01>(entity1Id);
             var relations01 = entity1.Relation01.GetContent();
             Assert.Equal(2, relations01.ItemCount);
 
-            var entity2 = await dbScope.Find<ConcreteEntityForN2NTest01>(entity2Id);
+            var entity2 =  dbScope.Find<ConcreteEntityForN2NTest01>(entity2Id);
             var relations02 = entity2.Relation01.GetContent();
             Assert.Empty(relations02);
 
@@ -165,7 +165,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         }
 
         [Fact]
-        public virtual async Task N2N_02_Json()
+        public virtual void N2N_02_Json()
         {
 
             var db = Database.Scopes.AddMainDbIfNotExists();
@@ -205,7 +205,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity02["Name"] = "Entity 02";
             entity02.Save();
 
-            await dbScope.ApplyChanges();
+             dbScope.ApplyChanges();
 
             long entity1Id = entity01.GetId().As<long>();
             long entity2Id = entity02.GetId().As<long>();

@@ -53,7 +53,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
         return new Rapidex.Data.Query.Query<T>(this.ParentScope);
     }
 
-    public async Task<IEntityLoadResult> Load(IQueryLoader loader)
+    public IEntityLoadResult Load(IQueryLoader loader)
     {
         IQueryLoader idsLoader = (IQueryLoader)loader.Clone();
         idsLoader.Alias = loader.Alias;
@@ -82,7 +82,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
                 totalCounter.Alias = loader.Alias;
                 totalCounter.ClearPaging();
                 //totalCounter.Page(int.MaxValue, 0);
-                loadedResult.TotalItemCount = await totalCounter.Count();
+                loadedResult.TotalItemCount =  totalCounter.Count();
                 loadedResult.IncludeTotalItemCount = true;
                 loadedResult.PageCount = (long)Math.Ceiling(Convert.ToDecimal(loadedResult.TotalItemCount) / Convert.ToDecimal(loadedResult.PageSize.Value));
 
@@ -93,28 +93,18 @@ internal class DbDataModificationManager : IDbDataModificationManager
 
     }
 
-    public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader)
+    public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
     {
-        return await Task<ILoadResult<DataRow>>.Run(() =>
-        {
-            try
-            {
+
                 return this.DmProvider.LoadRaw(loader);
-            }
-            catch (Exception ex)
-            {
-                ex.Log();
-                throw;
-            }
-        }
-        );
+
     }
 
 
-    public async Task<IEntity> Find(IDbEntityMetadata em, long id)
+    public IEntity Find(IDbEntityMetadata em, long id)
     {
         if (em.OnlyBaseSchema && this.ParentScope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return await this.ParentScope.ParentDbScope.Find(em, id);
+            return  this.ParentScope.ParentDbScope.Find(em, id);
 
         DbEntityId eid = new DbEntityId(id, -1);
         IDbEntityLoader loader = this.SelectLoader(em);
@@ -166,7 +156,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
 
     }
 
-    //Async olduğunda transaction ayrı bir thread'da kalıyor. Scope şeklinde 
+    //olduğunda transaction ayrı bir thread'da kalıyor. Scope şeklinde 
     public void Save(IEntity entity)
     {
         //TODO: Validate 
@@ -232,7 +222,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
     //    return scope.ChangedEntities.Count() > this.BulkOperationThreshold;
     //}
 
-    protected async Task<IEntityUpdateResult> InsertOrUpdate(IDbChangesCollection scope)
+    protected IEntityUpdateResult InsertOrUpdate(IDbChangesCollection scope)
     {
         EntityUpdateResult result = new EntityUpdateResult();
 
@@ -280,7 +270,7 @@ internal class DbDataModificationManager : IDbDataModificationManager
     }
 
 
-    public async Task<IEntityUpdateResult> CommitOrApplyChanges()
+    public IEntityUpdateResult CommitOrApplyChanges()
     {
         IDbInternalTransactionScope _its = this.dbChangesScopeWithTransaction.Value?.InternalTransactionScope;
         EntityUpdateResult result = new EntityUpdateResult();
@@ -293,10 +283,10 @@ internal class DbDataModificationManager : IDbDataModificationManager
 
             foreach (var _scope in types)
             {
-                result.MergeWith(await this.InsertOrUpdate(_scope));
+                result.MergeWith( this.InsertOrUpdate(_scope));
             }
 
-            await _its?.Commit();
+             _its?.Commit();
             //this.CurrentTransaction?.Commit();
 
             result.Success = true;
@@ -319,13 +309,13 @@ internal class DbDataModificationManager : IDbDataModificationManager
         }
     }
 
-    public async Task Rollback()
+    public void Rollback()
     {
         IDbInternalTransactionScope _its = this.dbChangesScopeWithTransaction.Value?.InternalTransactionScope;
         _its.NotNull("No transaction available");
         this.dbChangesScope.Value = null;
         this.dbChangesScopeWithTransaction.Value = null;
-        await _its.Rollback();
+         _its.Rollback();
     }
 
     public IIntSequence Sequence(string name)

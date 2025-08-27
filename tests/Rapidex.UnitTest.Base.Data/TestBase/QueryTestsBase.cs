@@ -15,7 +15,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     }
 
     [Fact]
-    public virtual async Task Load_01_LoadMultiple()
+    public virtual void Load_01_LoadMultiple()
     {
         this.Fixture.ClearCaches();
 
@@ -36,13 +36,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         this.Fixture.ClearCaches();
 
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
-        var result = await db.Load<ConcreteEntity01>();
+        var result = db.Load<ConcreteEntity01>();
         Assert.Equal(10, result.ItemCount);
 
         foreach (var item in result)
@@ -50,13 +50,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             Assert.NotNull(item.Name);
             Assert.NotNull(item.Description);
 
-            item.TestIDataTypeAssignments();
+            item.CheckIDataTypeAssignments();
         }
     }
 
 
     [Fact]
-    public virtual async Task Load_02_SimpleCriteria_Concrete()
+    public virtual void Load_02_SimpleCriteria_Concrete()
     {
         this.Fixture.ClearCaches();
 
@@ -83,13 +83,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
         var result = db.Load<ConcreteEntity01>(q => q.Eq(nameof(ConcreteEntity01.Name), "Phone 002"));
     }
 
 
-    protected async Task Load_03_GenerateEntities(IDbSchemaScope scope, IDbEntityMetadata em)
+    protected void Load_03_GenerateEntities(IDbSchemaScope scope, IDbEntityMetadata em)
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
 
@@ -125,7 +125,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             refEntities.Add(entity);
         }
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
 
 
@@ -150,72 +150,72 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        await scope.ApplyChanges();
+        scope.ApplyChanges();
 
     }
 
-    protected virtual async Task Load_03_Criterias(IDbSchemaScope scope, IDbEntityMetadata em)
+    protected virtual void Load_03_Criterias(IDbSchemaScope scope, IDbEntityMetadata em)
     {
-        await this.Load_03_GenerateEntities(scope, em);
+        this.Load_03_GenerateEntities(scope, em);
 
         //1. IsActive == true olanları getir
-        long count = await scope.GetQuery(em).Eq("IsActive", true).Count();
+        long count = scope.GetQuery(em).Eq("IsActive", true).Count();
         Assert.Equal(50, count);
 
         //2. IsActive == false olanları getir
-        count = await scope.GetQuery(em).Eq("IsActive", false).Count();
+        count = scope.GetQuery(em).Eq("IsActive", false).Count();
         Assert.Equal(50, count);
 
         //3. Amount == 5 olanları getir
-        count = await scope.GetQuery(em).Eq("Amount", 5).Count();
+        count = scope.GetQuery(em).Eq("Amount", 5).Count();
         Assert.Equal(10, count);
 
         //4. Amount > 5 olanları getir
-        count = await scope.GetQuery(em).Gt("Amount", 5).Count();
+        count = scope.GetQuery(em).Gt("Amount", 5).Count();
         Assert.Equal(40, count);
 
         //5. Amount < 5 olanları getir
-        count = await scope.GetQuery(em).Lt("Amount", 5).Count();
+        count = scope.GetQuery(em).Lt("Amount", 5).Count();
         Assert.Equal(50, count);
 
         //6. Amount >= 5 olanları getir
-        count = await scope.GetQuery(em).GtEq("Amount", 5).Count();
+        count = scope.GetQuery(em).GtEq("Amount", 5).Count();
         Assert.Equal(50, count);
 
         //7. Amount <= 5 olanları getir
-        count = await scope.GetQuery(em).LtEq("Amount", 5).Count();
+        count = scope.GetQuery(em).LtEq("Amount", 5).Count();
         Assert.Equal(60, count);
 
         //8. Amount between 3 and 7 olanları getir
-        count = await scope.GetQuery(em).Between("Amount", 3, 7).Count();
+        count = scope.GetQuery(em).Between("Amount", 3, 7).Count();
         Assert.Equal(50, count);
 
         //9. Name like "Entity Name 005" olanları getir
-        count = await scope.GetQuery(em).Like("Name", "Entity Name 005").Count();
+        count = scope.GetQuery(em).Like("Name", "Entity Name 005").Count();
         Assert.Equal(1, count);
 
         //10. Name like "Entity Name *" olanları getir
-        count = await scope.GetQuery(em).Like("Name", "Entity Name 00*").Count();
+        count = scope.GetQuery(em).Like("Name", "Entity Name 00*").Count();
         Assert.Equal(9, count);
 
         //11. Phone like "5336722205" olanları getir
-        count = await scope.GetQuery(em).Like("Phone", "5336722205").Count();
+        count = scope.GetQuery(em).Like("Phone", "5336722205").Count();
         Assert.Equal(1, count);
 
         //12. Value > 50000 olanları getir
-        count = await scope.GetQuery(em).Gt("Value", 50000).Count();
+        count = scope.GetQuery(em).Gt("Value", 50000).Count();
         Assert.Equal(95, count);
 
         //13. BirthDate > 20.01.2000 olanları getir
-        count = await scope.GetQuery(em).Gt("BirthDate", new DateTimeOffset(2000, 1, 20, 0, 0, 0, TimeSpan.Zero)).Count();
+        count = scope.GetQuery(em).Gt("BirthDate", new DateTimeOffset(2000, 1, 20, 0, 0, 0, TimeSpan.Zero)).Count();
         Assert.Equal(80, count);
 
         //14. BirthDate < 20.01.2000 olanları getir
-        count = await scope.GetQuery(em).Lt("BirthDate", new DateTimeOffset(2000, 1, 20, 0, 0, 0, TimeSpan.Zero)).Count();
+        count = scope.GetQuery(em).Lt("BirthDate", new DateTimeOffset(2000, 1, 20, 0, 0, 0, TimeSpan.Zero)).Count();
         Assert.Equal(19, count);
 
         //15. Reference ilişkisindeki kayıtın adı "Entity Name 001" olanları getir
-        count = await scope.GetQuery(em).Nested("Reference01", q => q.Eq(nameof(ConcreteEntity01.Name), "Entity Name 001")).Count();
+        count = scope.GetQuery(em).Nested("Reference01", q => q.Eq(nameof(ConcreteEntity01.Name), "Entity Name 001")).Count();
         Assert.Equal(10, count);
 
 
@@ -224,7 +224,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
 
     [Fact]
-    public virtual async Task Load_03_Criterias_Concrete()
+    public virtual void Load_03_Criterias_Concrete()
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -233,12 +233,12 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
         db.Structure.ApplyEntityStructure<CriteriaTestEntity01>();
 
-        await this.Load_03_Criterias(db, db.Metadata.Get<CriteriaTestEntity01>());
+        this.Load_03_Criterias(db, db.Metadata.Get<CriteriaTestEntity01>());
     }
 
 
     [Fact]
-    public virtual async Task Load_04_Criterias_Nested()
+    public virtual void Load_04_Criterias_Nested()
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -261,19 +261,19 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         refEnt02.Save();
 
         ConcreteEntity02 tent01 = db.New<ConcreteEntity02>();
-        tent01.Parent = refEnt01;
+        tent01.MyReference = refEnt01;
         tent01.Save();
 
         ConcreteEntity02 tent02 = db.New<ConcreteEntity02>();
-        tent02.Parent = null;
+        tent02.MyReference = null;
         tent02.Save();
 
-        await db.Data.ApplyChanges();
+        db.Data.ApplyChanges();
 
         //---------------------------------------------------------------------------------
 
-        var loadResult01 = await db.GetQuery<ConcreteEntity02>()
-              .Nested(nameof(ConcreteEntity02.Parent), q => q.Eq(nameof(ConcreteEntity01.Name), "Ent 01"))
+        var loadResult01 = db.GetQuery<ConcreteEntity02>()
+              .Nested(nameof(ConcreteEntity02.MyReference), q => q.Eq(nameof(ConcreteEntity01.Name), "Ent 01"))
               .Load();
 
         Assert.Single(loadResult01);
@@ -285,7 +285,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
 
     [Fact]
-    public virtual async Task Load_05_Criterias_NestedWithOnlyBase()
+    public virtual void Load_05_Criterias_NestedWithOnlyBase()
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
 
@@ -314,7 +314,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         baseEnt02.Name = "Nest Test 01 CEnt 02";
         baseEnt02.Save();
 
-        await schemaBase.ApplyChanges();
+        schemaBase.ApplyChanges();
 
         long baseId01 = (long)baseEnt01.GetId();
         long baseId02 = (long)baseEnt02.GetId();
@@ -334,13 +334,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         refEntity03.Reference = null;
         refEntity03.Save();
 
-        await schema02.ApplyChanges();
+        schema02.ApplyChanges();
 
         long refId01 = (long)refEntity01.GetId();
         long refId02 = (long)refEntity02.GetId();
         long refId03 = (long)refEntity03.GetId();
 
-        var loadResult01 = await schema02.GetQuery<ConcreteOnlyBaseReferencedEntity02>()
+        var loadResult01 = schema02.GetQuery<ConcreteOnlyBaseReferencedEntity02>()
               .Nested(nameof(ConcreteOnlyBaseReferencedEntity02.Reference), q => q.Eq(nameof(ConcreteOnlyBaseEntity01.Name), "Nest Test 01 CEnt 01"))
               .Load();
 
@@ -353,7 +353,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
 
     [Fact]
-    public virtual async Task BulkUpdate_06_Criterias_NestedWithOnlyBase()
+    public virtual void BulkUpdate_06_Criterias_NestedWithOnlyBase()
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -380,15 +380,15 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         refEnt03.Address = "Address 03";
         refEnt03.Save();
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
-        long count01 = await db.GetQuery<ConcreteEntity01>()
+        long count01 = db.GetQuery<ConcreteEntity01>()
              .Like("Phone", "533672220*")
              .Count();
 
         Assert.Equal(2, count01);
 
-        long count02 = await db.GetQuery<ConcreteEntity01>()
+        long count02 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
             .Count();
 
@@ -404,21 +404,21 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         //data.Add("Address", "Updated Address");
         //query.Update(data);
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
-        long count03 = await db.GetQuery<ConcreteEntity01>()
+        long count03 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
             .Count();
 
         Assert.Equal(1, count03);
 
-        long count04 = await db.GetQuery<ConcreteEntity01>()
+        long count04 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 01")
             .Count();
 
         Assert.Equal(0, count04);
 
-        long count05 = await db.GetQuery<ConcreteEntity01>()
+        long count05 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Updated Address")
             .Count();
 
@@ -432,7 +432,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     //Aggregation
 
     [Fact]
-    public virtual async Task Load_06_Criterias_Relation()
+    public virtual void Load_06_Criterias_Relation()
     {
         var db = Database.Scopes.Db();
 
@@ -474,15 +474,15 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         detail02_02.Save();
         master02.Relation01.Add(detail02_02);
 
-        await db.ApplyChanges();
+        db.ApplyChanges();
 
-        long count01 = await db.GetQuery<ConcreteEntityForN2NTest02>()
+        long count01 = db.GetQuery<ConcreteEntityForN2NTest02>()
               .Related(master01, nameof(ConcreteEntityForN2NTest01.Relation01))
               .Count();
 
         Assert.Equal(1, count01);
 
-        long count02 = await db.GetQuery<ConcreteEntityForN2NTest02>()
+        long count02 = db.GetQuery<ConcreteEntityForN2NTest02>()
               .Related(master02, nameof(ConcreteEntityForN2NTest01.Relation01))
               .Count();
 

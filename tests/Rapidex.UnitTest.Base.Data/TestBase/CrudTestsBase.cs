@@ -35,7 +35,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity.Save();
 
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             Assert.True(entity.Id > 9999); //Yeni entity'ler 10 k dan büyük bir Id alır
             Assert.False(entity._IsNew);
@@ -68,7 +68,7 @@ namespace Rapidex.UnitTest.Data.TestBase
                 entity.Save();
             }
 
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             //Check table
         }
@@ -122,20 +122,20 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             ConcreteEntity01 entity = db.New<ConcreteEntity01>();
             Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
-            entity.TestIDataTypeAssignments();
+            entity.CheckIDataTypeAssignments();
 
             string name = RandomHelper.RandomText(10);
 
             entity.Name = name;
             entity.Save();
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             long id = entity.Id;
 
             //TODO: Cache'ler temizlenecek !!
 
-            ConcreteEntity01 loadedEntity = await db.Find<ConcreteEntity01>(id);
-            loadedEntity.TestIDataTypeAssignments();
+            ConcreteEntity01 loadedEntity = db.Find<ConcreteEntity01>(id);
+            loadedEntity.CheckIDataTypeAssignments();
 
             Assert.False(loadedEntity._IsNew);
             Assert.NotNull(loadedEntity);
@@ -144,13 +144,13 @@ namespace Rapidex.UnitTest.Data.TestBase
             string name2 = RandomHelper.RandomText(10);
             loadedEntity.Name = name2;
             loadedEntity.Save();
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             //TODO: Cache'ler temizlenecek !!
 
-            ConcreteEntity01 loadedEntity2 = await db.Find<ConcreteEntity01>(id);
+            ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id);
             Assert.NotNull(loadedEntity2);
-            loadedEntity2.TestIDataTypeAssignments();
+            loadedEntity2.CheckIDataTypeAssignments();
             Assert.Equal(name2, loadedEntity2.Name);
 
         }
@@ -175,7 +175,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             db.Structure.ApplyEntityStructure(ems1.First());
 
             IEntity entity = db.New("myJsonEntity03");
-            entity.TestIDataTypeAssignments();
+            entity.CheckIDataTypeAssignments();
 
             Assert.True((long)entity.GetId() < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
 
@@ -183,27 +183,27 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity["Subject"] = name;
             entity.Save();
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             long id = (long)entity.GetId();
 
             //TODO: Cache'ler temizlenecek !!
 
-            IEntity loadedEntity = await db.Find("myJsonEntity03", id);
+            IEntity loadedEntity = db.Find("myJsonEntity03", id);
             Assert.NotNull(loadedEntity);
             Assert.True((string)loadedEntity["Subject"] == name);
 
-            loadedEntity.TestIDataTypeAssignments();
+            loadedEntity.CheckIDataTypeAssignments();
 
             string name2 = RandomHelper.RandomText(10);
             loadedEntity["Subject"] = name2;
             loadedEntity.Save();
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             //TODO: Cache'ler temizlenecek !!
 
-            IEntity loadedEntity2 = await db.Find("myJsonEntity03", id);
-            loadedEntity2.TestIDataTypeAssignments();
+            IEntity loadedEntity2 = db.Find("myJsonEntity03", id);
+            loadedEntity2.CheckIDataTypeAssignments();
 
             Assert.NotNull(loadedEntity2);
             Assert.Equal(name2, (string)loadedEntity2["Subject"]);
@@ -230,26 +230,26 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity02.Name = "Entity 002";
             entity02.Save();
 
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
-            var entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
+            var entCount = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(2, entCount);
 
             db.Delete(entity01);
 
             //Henüz commit olmadı, veritabanında duruyor
-            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
+            entCount = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(2, entCount);
 
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
-            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
+            entCount = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(1, entCount);
 
             db.Delete(entity02);
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
-            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
+            entCount = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(0, entCount);
 
 
@@ -263,36 +263,36 @@ namespace Rapidex.UnitTest.Data.TestBase
             db.ReAddReCreate<ConcreteEntity01>();
             db.ReAddReCreate<ConcreteEntity02>();
 
-            long count = db.GetQuery<ConcreteEntity01>().Count().Result;
+            long count = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(0, count);
 
             ConcreteEntity01 ent1 = db.New<ConcreteEntity01>();
             ent1.Name = "Ent 1";
             ent1.Save();
 
-            await db.ApplyChanges();
-            count = db.GetQuery<ConcreteEntity01>().Count().Result;
+            db.ApplyChanges();
+            count = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(1, count);
 
-            db.BeginTransaction();
+            var tran1 = db.Begin();
 
             ConcreteEntity01 ent2 = db.New<ConcreteEntity01>();
             ent2.Name = "Ent 2";
             ent2.Save();
 
-            await db.Rollback();
+            tran1.Rollback();
 
-            count = db.GetQuery<ConcreteEntity01>().Count().Result;
+            count = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(1, count);
 
-            using(db.BeginTransaction())
+            using (var tran2 = db.Begin())
             {
                 ConcreteEntity01 ent3 = db.New<ConcreteEntity01>();
                 ent3.Name = "Ent 3";
                 ent3.Save();
             }
 
-            count = db.GetQuery<ConcreteEntity01>().Count().Result;
+            count = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(2, count);
         }
 

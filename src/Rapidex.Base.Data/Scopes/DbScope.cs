@@ -9,7 +9,7 @@ namespace Rapidex.Data.Scopes
 {
     internal class DbScope : IDbScope
     {
-
+        private int debugTracker;
         protected readonly string name;
         protected readonly string defaultSchemaName;
         protected readonly long id;
@@ -37,7 +37,7 @@ namespace Rapidex.Data.Scopes
 
         public IDbStructureProvider Structure => baseScope.Structure;
 
-        public IDbDataModificationStaticScope Data => baseScope.Data;
+        public IDbDataModificationStaticManager Data => baseScope.Data;
 
         public EntityMapper Mapper => baseScope.Mapper;
 
@@ -58,6 +58,8 @@ namespace Rapidex.Data.Scopes
             this.defaultSchemaName = DatabaseConstants.DEFAULT_SCHEMA_NAME;
 
             dbProvider.SetParentScope(this);
+
+            this.debugTracker = RandomHelper.Random(int.MaxValue);
 
             this.Initialize();
         }
@@ -119,7 +121,7 @@ namespace Rapidex.Data.Scopes
             siEm.NotNull("SchemaInfo metadata not found");
             this.baseScope.Structure.ApplyEntityStructure(siEm, false);
 
-            var schemas = this.baseScope.Data.Load<SchemaInfo>().Result;
+            var schemas = this.baseScope.Data.Load<SchemaInfo>();
             foreach (var schema in schemas)
             {
                 AddSchema(schema.Name);
@@ -137,8 +139,7 @@ namespace Rapidex.Data.Scopes
 
             schemaRecord.Save();
 
-            _base.ApplyChanges()
-                .Wait();
+            _base.ApplyChanges();
         }
 
         public IDbSchemaScope AddSchemaIfNotExists(string schemaName = null, long id = DatabaseConstants.DEFAULT_EMPTY_ID)

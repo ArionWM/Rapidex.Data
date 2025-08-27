@@ -9,7 +9,7 @@ namespace Rapidex.Data.DataModification;
 internal abstract class DataModificationManagerBase : IDbDataModificationManager
 {
 
-    
+
 
 
 
@@ -51,11 +51,9 @@ internal abstract class DataModificationManagerBase : IDbDataModificationManager
         return new Rapidex.Data.Query.Query<T>(this.ParentScope);
     }
 
-    public async Task<IEntityLoadResult> Load(IQueryLoader loader)
+    public IEntityLoadResult Load(IQueryLoader queryLoader)
     {
-        IQueryLoader idsLoader = (IQueryLoader)loader.Clone();
-        idsLoader.Alias = loader.Alias;
-        var em = loader.EntityMetadata;
+        var em = queryLoader.EntityMetadata;
 
         //TODO: count
         //TODO: SelectLoader'a query i verelim, critere bakarak;
@@ -63,24 +61,23 @@ internal abstract class DataModificationManagerBase : IDbDataModificationManager
         //3- count ya da id sayısı X'in üzerinde ise doğrudan yükle
         // - değil ise id listesi ile yükle (Cache)
 
-        IDbEntityLoader multiEntLoader = this.SelectLoader(em);
+        IDbEntityLoader entityLoader = this.SelectLoader(em);
 
-        IEntityLoadResult loadedResult = null;
-        loadedResult = multiEntLoader.Load(loader);
+        IEntityLoadResult loadedResult = entityLoader.Load(queryLoader);
 
-        if (loader.Paging.IsPagingSet())
+        if (queryLoader.Paging.IsPagingSet())
         {
-            loadedResult.StartIndex = loader.Paging.StartIndex;
-            loadedResult.PageSize = loader.Paging.PageSize;
-            loadedResult.PageIndex = loadedResult.StartIndex / loader.Paging.PageSize;
+            loadedResult.StartIndex = queryLoader.Paging.StartIndex;
+            loadedResult.PageSize = queryLoader.Paging.PageSize;
+            loadedResult.PageIndex = loadedResult.StartIndex / queryLoader.Paging.PageSize;
 
-            if (loader.Paging.IsPagingSet() && loader.Paging.IncludeTotalItemCount)
+            if (queryLoader.Paging.IsPagingSet() && queryLoader.Paging.IncludeTotalItemCount)
             {
-                IQueryAggregate totalCounter = (IQueryAggregate)loader.Clone();
-                totalCounter.Alias = loader.Alias;
+                IQueryAggregate totalCounter = (IQueryAggregate)queryLoader.Clone();
+                totalCounter.Alias = queryLoader.Alias;
                 totalCounter.ClearPaging();
                 //totalCounter.Page(int.MaxValue, 0);
-                loadedResult.TotalItemCount = await totalCounter.Count();
+                loadedResult.TotalItemCount = totalCounter.Count();
                 loadedResult.IncludeTotalItemCount = true;
                 loadedResult.PageCount = (long)Math.Ceiling(Convert.ToDecimal(loadedResult.TotalItemCount) / Convert.ToDecimal(loadedResult.PageSize.Value));
 
@@ -91,28 +88,16 @@ internal abstract class DataModificationManagerBase : IDbDataModificationManager
 
     }
 
-    public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader)
+    public ILoadResult<DataRow> LoadRaw(IQueryLoader queryLoader)
     {
-        return await Task<ILoadResult<DataRow>>.Run(() =>
-        {
-            try
-            {
-                return this.DmProvider.LoadRaw(loader);
-            }
-            catch (Exception ex)
-            {
-                ex.Log();
-                throw;
-            }
-        }
-        );
+        return this.DmProvider.LoadRaw(queryLoader);
     }
 
 
-    public async Task<IEntity> Find(IDbEntityMetadata em, long id)
+    public IEntity Find(IDbEntityMetadata em, long id)
     {
         if (em.OnlyBaseSchema && this.ParentScope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return await this.ParentScope.ParentDbScope.Find(em, id);
+            return this.ParentScope.ParentDbScope.Find(em, id);
 
         DbEntityId eid = new DbEntityId(id, -1);
         IDbEntityLoader loader = this.SelectLoader(em);
@@ -122,7 +107,7 @@ internal abstract class DataModificationManagerBase : IDbDataModificationManager
 
     public virtual IEntity New(IDbEntityMetadata em)
     {
-        
+
 
         em.NotNull();
 
@@ -139,7 +124,7 @@ internal abstract class DataModificationManagerBase : IDbDataModificationManager
 
     protected abstract IDbChangesCollection GetChangesCollection();
 
-    //Async olduğunda transaction ayrı bir thread'da kalıyor. Scope şeklinde 
+    //olduğunda transaction ayrı bir thread'da kalıyor. Scope şeklinde 
     public virtual void Save(IEntity entity)
     {
         //TODO: Validate 
@@ -205,7 +190,7 @@ internal abstract class DataModificationManagerBase : IDbDataModificationManager
     //    return scope.ChangedEntities.Count() > this.BulkOperationThreshold;
     //}
 
-    protected async Task<IEntityUpdateResult> InsertOrUpdate(IDbChangesCollection scope)
+    protected IEntityUpdateResult InsertOrUpdate(IDbChangesCollection scope)
     {
         EntityUpdateResult result = new EntityUpdateResult();
 
@@ -256,10 +241,10 @@ internal abstract class DataModificationManagerBase : IDbDataModificationManager
 
     protected virtual void ApplyFinalized()
     {
-        
+
     }
 
-    protected virtual async Task<IEntityUpdateResult> CommitOrApplyChangesInternal()
+    protected virtual IEntityUpdateResult CommitOrApplyChangesInternal()
     {
         EntityUpdateResult result = new EntityUpdateResult();
 
@@ -270,7 +255,7 @@ internal abstract class DataModificationManagerBase : IDbDataModificationManager
 
         foreach (var _scope in types)
         {
-            result.MergeWith(await this.InsertOrUpdate(_scope));
+            result.MergeWith(this.InsertOrUpdate(_scope));
         }
 
         result.Success = true;

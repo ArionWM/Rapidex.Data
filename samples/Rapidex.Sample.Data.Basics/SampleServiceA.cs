@@ -19,7 +19,7 @@ internal class SampleServiceA
         {
             Item item = myDb.GetQuery<Item>()
                 .Eq(nameof(Item.Code), itemCode)
-                .First().Result;
+                .First();
 
             item.NotNull($"Item not found: {itemCode}");
 
@@ -31,7 +31,7 @@ internal class SampleServiceA
             order.Lines.Add(line);
         }
 
-        myDb.ApplyChanges().Wait();
+        myDb.ApplyChanges();
     }
 
     public void CreateOrderOnMasterDbAndBaseSchema2(Contact contact, params string[] itemCodes)
@@ -47,7 +47,7 @@ internal class SampleServiceA
             {
                 Item item = dmScope.GetQuery<Item>()
                     .Eq(nameof(Item.Code), itemCode)
-                    .First().Result;
+                    .First();
 
                 item.NotNull($"Item not found: {itemCode}");
 

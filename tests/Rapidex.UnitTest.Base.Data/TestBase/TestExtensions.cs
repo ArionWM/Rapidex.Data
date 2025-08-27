@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestBase;
-internal static class TestHelper
+internal static class TestExtensions
 {
     public static IDbEntityMetadata ReAdd<T>(this IDbMetadataContainer emman, string module = null, string prefix = null) where T : IConcreteEntity
     {
@@ -26,5 +26,23 @@ internal static class TestHelper
         scope.Structure.DropEntity<T>();
         scope.Structure.ApplyEntityStructure<T>();
         return metadata;
+    }
+
+    public static void CheckIDataTypeAssignments(this IEntity entity)
+    {
+        var em = entity.GetMetadata();
+
+        foreach (IDbFieldMetadata fm in em.Fields.Values)
+        {
+            if (!fm.Type.IsSupportTo<IDataType>())
+                continue;
+
+            IDataType available = entity.GetValue(fm.Name) as IDataType;
+
+            if (available == null)
+            {
+                throw new InvalidOperationException($"IDataType assignments not available on entity {entity} / {fm.Name}");
+            }
+        }
     }
 }

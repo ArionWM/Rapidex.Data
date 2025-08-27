@@ -24,7 +24,7 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
      */
 
     [Fact]
-    public async Task Serialization_01_ConvertToEntityDataDto()
+    public void Serialization_01_ConvertToEntityDataDto()
     {
         var db = Database.Scopes.AddMainDbIfNotExists();
 
@@ -54,7 +54,7 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
         ent04.Details01.Add(ent03_01);
         ent04.Details01.Add(ent03_02);
 
-        await dbscope.ApplyChanges();
+        dbscope.ApplyChanges();
 
         IEntitySerializationDataCreator dataCreator = this.Fixture.ServiceProvider.GetRapidexService<IEntitySerializationDataCreator>() ?? new EntitySerializationDataCreator();
 

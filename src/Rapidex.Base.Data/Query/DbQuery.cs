@@ -165,9 +165,9 @@ namespace Rapidex.Data.Query
         {
         }
 
-        public async Task<T> Find(long id)
+        public T Find(long id)
         {
-            return await this.Schema.Find<T>(id);
+            return this.Schema.Find<T>(id);
         }
 
 
@@ -187,9 +187,9 @@ namespace Rapidex.Data.Query
             return (IQuery<T>)base.Eq(field, value);
         }
 
-        async Task<T> IQueryLoader<T>.First()
+        T IQueryLoader<T>.First()
         {
-            return (T)await base.First();
+            return (T)base.First();
         }
 
         IQuery<T> IQuery<T>.Gt(string field, object value)
@@ -212,9 +212,9 @@ namespace Rapidex.Data.Query
             return (IQuery<T>)base.Like(field, value);
         }
 
-        async Task<IEntityLoadResult<T>> IQueryLoader<T>.Load()
+        IEntityLoadResult<T> IQueryLoader<T>.Load()
         {
-            IEntityLoadResult res = await base.Load();
+            IEntityLoadResult res = base.Load();
             var lres = res.CastTo<T>();
             return lres;
         }

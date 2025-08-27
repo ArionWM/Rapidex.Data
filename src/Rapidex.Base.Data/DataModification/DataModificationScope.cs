@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
-internal class DataModificationScope : DataModificationManagerBase, IDbDataModificationScope
+internal class DataModificationScope : DataModificationManagerBase, IDbDataModificationTransactionedManager
 {
     protected bool IsFinalized { get; set; } = false;
     public IDbInternalTransactionScope CurrentTransaction { get; protected set; }
@@ -63,17 +63,17 @@ internal class DataModificationScope : DataModificationManagerBase, IDbDataModif
 
 
 
-    public async Task Rollback()
+    public void Rollback()
     {
         IDbInternalTransactionScope _its = this.CurrentTransaction;
         _its.NotNull("No transaction available");
 
-        await _its.Rollback();
+        _its.Rollback();
 
         this.ApplyFinalized();
     }
 
-    public async Task<IEntityUpdateResult> CommitChanges()
+    public IEntityUpdateResult CommitChanges()
     {
         if (this.IsFinalized)
             throw new InvalidOperationException("This scope is finalized");
@@ -81,8 +81,8 @@ internal class DataModificationScope : DataModificationManagerBase, IDbDataModif
         IDbInternalTransactionScope _its = this.CurrentTransaction;
         try
         {
-            var result = await base.CommitOrApplyChangesInternal();
-            await _its?.Commit();
+            var result = base.CommitOrApplyChangesInternal();
+            _its?.Commit();
             return result;
         }
         catch (Exception ex)
@@ -107,6 +107,6 @@ internal class DataModificationScope : DataModificationManagerBase, IDbDataModif
         if (this.IsFinalized)
             return;
 
-        this.CommitChanges().Wait();
+        this.CommitChanges();
     }
 }

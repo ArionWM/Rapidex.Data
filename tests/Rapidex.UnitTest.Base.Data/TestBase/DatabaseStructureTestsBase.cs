@@ -31,7 +31,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         }
 
         [Fact]
-        public virtual async Task Structure_02_PredefinedRecords()
+        public virtual void Structure_02_PredefinedRecords()
         {
             var db = Database.Scopes.AddMainDbIfNotExists();
 
@@ -44,15 +44,15 @@ namespace Rapidex.UnitTest.Data.TestBase
             var em = db.Metadata.Get("myJsonEntity07");
             Assert.NotNull(em);
 
-            var predefinedValues = await db.Load("myJsonEntity07");
+            var predefinedValues =  db.Load("myJsonEntity07");
             Assert.Equal(2, predefinedValues.ItemCount);
 
-            IEntity ent01 = await db.Find("myJsonEntity07", 1);
+            IEntity ent01 =  db.Find("myJsonEntity07", 1);
             Assert.NotNull(ent01);
             Assert.Equal("Meeting 1", ent01["Subject"]);
 
 
-            IEntity ent03 = await db.Find("myJsonEntity07", 3);
+            IEntity ent03 =  db.Find("myJsonEntity07", 3);
             Assert.NotNull(ent03);
             Assert.Equal("Meeting 2", ent03["Subject"]);
             Assert.Equal(333, ent03["Price"].As<decimal>());

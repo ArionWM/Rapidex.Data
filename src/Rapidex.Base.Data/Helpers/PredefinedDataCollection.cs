@@ -53,14 +53,14 @@ public class PredefinedDataCollection
         this.Repository.Clear();
     }
 
-    protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    protected void Apply(IDbSchemaScope scope, IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         if (em.OnlyBaseSchema && scope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
             return;
 
         //scope.Structure.ApplyEntityStructure(em, false);
 
-        var availEntities = await scope.GetQuery(em).Load();
+        var availEntities = scope.GetQuery(em).Load();
 
         entities.ForEach(e =>
         {
@@ -93,10 +93,10 @@ public class PredefinedDataCollection
                 }
             }
         }
-        await scope.ApplyChanges();
+        scope.ApplyChanges();
     }
 
-    protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em)
+    protected void Apply(IDbSchemaScope scope, IDbEntityMetadata em)
     {
         PredefinedValueItems item = this.Repository.Get(em);
         if (item == null)
@@ -107,14 +107,14 @@ public class PredefinedDataCollection
 
         var newEntities = scope.Mapper.Map(em, item.Entities.Values); //.Clone(scope);
 
-        await this.Apply(scope, em, newEntities);
+        this.Apply(scope, em, newEntities);
     }
 
-    public async Task Apply(IDbSchemaScope targetSchema)
+    public void Apply(IDbSchemaScope targetSchema)
     {
         foreach (var em in Repository.Keys)
         {
-            await this.Apply(targetSchema, em);
+            this.Apply(targetSchema, em);
         }
     }
 }

@@ -68,7 +68,7 @@ namespace Rapidex.Data
             if (value.IsNOTNullOrEmpty())
             {
                 //Job yapısına buradan verilebilir mi?
-                var _ = HasTags.CheckEntityTags(_this.Parent._Scope, _this.FieldMetadata.ParentMetadata, (string)value);
+                HasTags.CheckEntityTags(_this.Parent._Scope, _this.FieldMetadata.ParentMetadata, (string)value);
             }
         }
 

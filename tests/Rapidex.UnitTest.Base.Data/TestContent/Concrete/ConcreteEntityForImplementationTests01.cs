@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.Data.TestContent.Concrete;
 internal class ConcreteEntityForImplementationTests01 : DbConcreteEntityBase
 {
-
+    public string Name { get; set; }
+    public Percent Percent { get; set; }
 }
 
 internal class ConcreteEntityForImplementationTests01Implementer : IConcreteEntityImplementer<ConcreteEntityForImplementationTests01>
@@ -17,7 +18,8 @@ internal class ConcreteEntityForImplementationTests01Implementer : IConcreteEnti
         metadata
             .AddBehavior<ArchiveEntity>(true, false)
             .AddBehavior<HasTags>(true, false)
-            .MarkOnlyBaseSchema();
+            .MarkOnlyBaseSchema()
+            .AddFieldIfNotExist("newField", typeof(string), "New Field");
     }
 }
 

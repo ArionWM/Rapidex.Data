@@ -8,11 +8,12 @@ namespace Rapidex.Data.Scopes
 {
     internal class DbSchemaScope : IDbSchemaScope
     {
+        private int debugTracker;
         protected readonly IDbScope parentDbScope;
         protected readonly IDbProvider dbProvider;
         protected readonly string name;
         protected IDbStructureProvider structureManager;
-        protected IDbDataModificationStaticScope dataManager;
+        protected IDbDataModificationStaticManager dataManager;
         protected EntityMapper mapper;
         protected IBlobRepository blobRepository;
 
@@ -24,7 +25,7 @@ namespace Rapidex.Data.Scopes
 
         public IDbStructureProvider Structure => structureManager;
 
-        public IDbDataModificationStaticScope Data => dataManager;
+        public IDbDataModificationStaticManager Data => dataManager;
 
         public EntityMapper Mapper => mapper;
 
@@ -44,6 +45,7 @@ namespace Rapidex.Data.Scopes
             this.dataManager = new DataModificationStaticScope(this, dmProvider);
             this.mapper = new EntityMapper(this);
             this.blobRepository = new DefaultDbBlobRepository(this);
+            this.debugTracker = RandomHelper.Random(int.MaxValue);
         }
 
         public virtual void Setup()

@@ -76,10 +76,10 @@ internal class JunctionHelper
             );
     }
 
-    public static async Task<bool> Exist(IDbSchemaScope dbScema, IDbEntityMetadata jEm, string sourceFieldName, string targetFieldName, long entityAId, long entityBId) //TODO: Additional query
+    public static bool Exist(IDbSchemaScope dbScema, IDbEntityMetadata jEm, string sourceFieldName, string targetFieldName, long entityAId, long entityBId) //TODO: Additional query
     {
         //Self relation?
-        bool isExist = await dbScema.GetQuery(jEm)
+        bool isExist = dbScema.GetQuery(jEm)
               .Or(
                   q => q.And(
                       q1 => q1.Eq(sourceFieldName, entityAId),
@@ -95,10 +95,10 @@ internal class JunctionHelper
         return isExist;
     }
 
-    public static async Task<bool> Exist(IDbSchemaScope dbSchema, IDbEntityMetadata jEm, string sourceFieldName, string targetFieldName, IEntity entityA, IEntity entityB) //TODO: Additional query
+    public static bool Exist(IDbSchemaScope dbSchema, IDbEntityMetadata jEm, string sourceFieldName, string targetFieldName, IEntity entityA, IEntity entityB) //TODO: Additional query
     {
         //Self relation?
-        bool isExist = await dbSchema.GetQuery(jEm)
+        bool isExist = dbSchema.GetQuery(jEm)
               .Or(
                   q => q.And(
                       q1 => q1.Eq(sourceFieldName, entityA),
@@ -114,7 +114,7 @@ internal class JunctionHelper
         return isExist;
     }
 
-    public static Task<bool> Exist(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, IEntity entityB)
+    public static bool Exist(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, IEntity entityB)
     {
         var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
 
@@ -127,7 +127,7 @@ internal class JunctionHelper
         return Exist(dbSchema, jEm, sourceFieldName, targetFieldName, entityA, entityB);
     }
 
-    public static async Task<IEntity> AddRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBID, bool directSave)
+    public static IEntity AddRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBID, bool directSave)
     {
         var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
 
@@ -137,7 +137,7 @@ internal class JunctionHelper
         sourceFieldName = dbSchema.Structure.CheckObjectName(sourceFieldName);
         targetFieldName = dbSchema.Structure.CheckObjectName(targetFieldName);
 
-        bool isExist = await Exist(dbSchema, jEm, sourceFieldName, targetFieldName, entityAId, entityBID);
+        bool isExist = Exist(dbSchema, jEm, sourceFieldName, targetFieldName, entityAId, entityBID);
 
         if (!isExist)
         {
@@ -156,7 +156,7 @@ internal class JunctionHelper
         return null;
     }
 
-    public static Task<IEntity> AddRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, IEntity entityB, bool directSave)
+    public static IEntity AddRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, IEntity entityB, bool directSave)
     {
         if (entityA == null || entityB == null)
             throw new ArgumentNullException("Entity A or Entity B cannot be null");
@@ -165,7 +165,7 @@ internal class JunctionHelper
 
     }
 
-    public static async Task<IPartialEntity> RemoveRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBId, bool directSave)
+    public static IPartialEntity RemoveRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBId, bool directSave)
     {
         var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
 
@@ -175,7 +175,7 @@ internal class JunctionHelper
         sourceFieldName = dbSchema.Structure.CheckObjectName(sourceFieldName);
         targetFieldName = dbSchema.Structure.CheckObjectName(targetFieldName);
 
-        IEntity ent = await dbSchema.GetQuery(jEm)
+        IEntity ent = dbSchema.GetQuery(jEm)
              .Or(
                  q => q.And(
                      q1 => q1.Eq(sourceFieldName, entityAId),
@@ -207,18 +207,16 @@ internal class JunctionHelper
         return null;
     }
 
-    public static async Task RemoveRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, IEntity entityB, bool directSave)
+    public static void RemoveRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, IEntity entityB, bool directSave)
     {
         if (entityA == null || entityB == null)
             throw new ArgumentNullException("Entity A or Entity B cannot be null");
 
-        await RemoveRelation(dbSchema, fm, entityA.GetId().As<long>(), entityB.GetId().As<long>(), directSave);
-
-
+        RemoveRelation(dbSchema, fm, entityA.GetId().As<long>(), entityB.GetId().As<long>(), directSave);
     }
 
 
-    public static async Task<IEntityLoadResult> GetJunctionEntities(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, Action<IQueryCriteria> additionalCriterias = null)
+    public static IEntityLoadResult GetJunctionEntities(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, Action<IQueryCriteria> additionalCriterias = null)
     {
         var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
 
@@ -236,7 +234,7 @@ internal class JunctionHelper
 
         additionalCriterias?.Invoke(query);
 
-        var loadResult = await query.Load();
+        var loadResult = query.Load();
 
         return loadResult;
     }
@@ -264,41 +262,15 @@ internal class JunctionHelper
 
     }
 
-    public static async Task<IEntityLoadResult> GetEntities(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, Action<IQueryCriteria> additionalCriterias = null)
+    public static IEntityLoadResult GetEntities(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, Action<IQueryCriteria> additionalCriterias = null)
     {
         var tEm = dbSchema.ParentDbScope.Metadata.Get(fm.TargetEntityName).NotNull();
         IQueryCriteria query = dbSchema.GetQuery(tEm);
         SetEntitiesCriteria(dbSchema, fm, entityA, query, additionalCriterias);
 
-        var loadResult = await ((IQuery)query).Load();
+        var loadResult = ((IQuery)query).Load();
 
         return loadResult;
     }
-
-    //public static bool IsExist(IDbSchemaScope dbScema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBId)
-    //{
-    //    var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName).NotNull();
-
-
-    //    string sourceFieldName = GetJunctionSourceFieldName(fm);
-    //    string targetFieldName = GetJunctionTargetFieldName(fm);
-
-
-    //    IQuery query = dbScema.GetQuery(jEm);
-    //    query
-    //        .Or(
-    //            q => q.And(
-    //                q1 => q1.Eq(sourceFieldName, entityAId),
-    //                q2 => q2.Eq(targetFieldName, entityBId)
-    //            ),
-    //            q => q.And(
-    //                q1 => q1.Eq(sourceFieldName, entityBId),
-    //                q2 => q2.Eq(targetFieldName, entityAId)
-    //            )
-    //        );
-
-    //    return query.Exist();
-
-    //}
 
 }

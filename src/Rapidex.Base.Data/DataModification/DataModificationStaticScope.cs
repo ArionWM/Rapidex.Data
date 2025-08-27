@@ -6,17 +6,19 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
-internal class DataModificationStaticScope : DataModificationManagerBase, IDbDataModificationStaticScope
+internal class DataModificationStaticScope : DataModificationManagerBase, IDbDataModificationStaticManager
 {
     protected ThreadLocal<IDbChangesCollection> dbChangesScope;
+    
 
     public DataModificationStaticScope(IDbSchemaScope parentScope, IDbDataModificationPovider dmProvider) : base(parentScope, dmProvider)
     {
+        this.dbChangesScope = new ThreadLocal<IDbChangesCollection>();
     }
 
-    public IDbDataModificationScope Begin()
+    public IDbDataModificationTransactionedManager Begin()
     {
-        throw new NotImplementedException();
+        return new DataModificationScope(this.ParentScope, this.DmProvider);
     }
 
     protected override IDbChangesCollection GetChangesCollection()
@@ -40,8 +42,20 @@ internal class DataModificationStaticScope : DataModificationManagerBase, IDbDat
         return this.DmProvider.Sequence(name);
     }
 
-    public Task<IEntityUpdateResult> ApplyChanges()
+    public IEntityUpdateResult ApplyChanges()
     {
-        return this.CommitOrApplyChangesInternal();
+        try
+        {
+            return this.CommitOrApplyChangesInternal();
+        }
+        catch(Exception ex)
+        {
+            ex.Log();
+            throw;
+        }
+        finally
+        {
+            this.dbChangesScope.Value = null;
+        }
     }
 }

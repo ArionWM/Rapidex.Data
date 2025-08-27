@@ -68,7 +68,7 @@ namespace Rapidex.Data
         //    return (Entity)qc.Eq(CommonConstants.FIELD_ID, id).First();
         //}
 
-        public static Task<IEntity> Find<T>(this T qc, long id)
+        public static IEntity Find<T>(this T qc, long id)
                 where T : IQuery
         {
             return qc.Eq(CommonConstants.FIELD_ID, id).First();
@@ -213,24 +213,24 @@ namespace Rapidex.Data
             return ((IQueryCriteria)crit).Related(parentEntity, releatedField) as IQuery<T>;
         }
 
-        public static Task<T> Sum<T>(this IQueryAggregate query, string field)
+        public static T Sum<T>(this IQueryAggregate query, string field)
         {
-            return query.Sum(field).ContinueWith(t => t.Result.As<T>());
+            return query.Sum(field).As<T>();
         }
 
-        public static Task<T> Min<T>(this IQueryAggregate query, string field)
+        public static T Min<T>(this IQueryAggregate query, string field)
         {
-            return query.Min(field).ContinueWith(t => t.Result.As<T>());
+            return query.Min(field).As<T>();
         }
 
-        public static Task<T> Max<T>(this IQueryAggregate query, string field)
+        public static T Max<T>(this IQueryAggregate query, string field)
         {
-            return query.Max(field).ContinueWith(t => t.Result.As<T>());
+            return query.Max(field).As<T>();
         }
 
-        public static Task<T> Avg<T>(this IQueryAggregate query, string field)
+        public static T Avg<T>(this IQueryAggregate query, string field)
         {
-            return query.Avg(field).ContinueWith(t => t.Result.As<T>());
+            return query.Avg(field).As<T>();
         }
 
 

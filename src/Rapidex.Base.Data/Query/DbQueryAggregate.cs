@@ -12,14 +12,14 @@ namespace Rapidex.Data.Query
         {
         }
 
-        public async Task<object> Avg(string field)
+        public object Avg(string field)
         {
             field = this.Schema.Structure.CheckObjectName(field);
 
             this.Query.ClearComponent("select");
             this.Query.AsAvg(field);
 
-            var result = await this.Schema.Data.LoadRaw(this);
+            var result = this.Schema.Data.LoadRaw(this);
             DataRow row = result.FirstOrDefault();
             if (row == null)
                 throw new InvalidOperationException($"Count invalid");
@@ -28,13 +28,13 @@ namespace Rapidex.Data.Query
             return res;
         }
 
-        public async Task<long> Count()
+        public long Count()
         {
             this.Query.ClearComponent("select");
             this.Query.AsCount(new string[] { this.GetFieldName(this.EntityMetadata.PrimaryKey.Name) });
             //this.Query.AsCount(new string[] { this.EntityMetadata.PrimaryKey.Name });
 
-            var result = await this.Schema.Data.LoadRaw(this);
+            var result = this.Schema.Data.LoadRaw(this);
             DataRow row = result.FirstOrDefault();
             if (row == null)
                 throw new InvalidOperationException($"Count invalid");
@@ -43,7 +43,7 @@ namespace Rapidex.Data.Query
             return count;
         }
 
-        public async Task<bool> Exist()
+        public bool Exist()
         {
             SqlKata.Query _query = this.Query.Clone();
             _query.ClearComponent("select");
@@ -51,7 +51,7 @@ namespace Rapidex.Data.Query
             _query.Limit(1);
 
 
-            var result = await this.Schema.Data.LoadRaw(this);
+            var result = this.Schema.Data.LoadRaw(this);
             DataRow row = result.FirstOrDefault();
             if (row == null)
                 return false;
@@ -59,14 +59,14 @@ namespace Rapidex.Data.Query
             return true;
         }
 
-        public async Task<object>Max(string field)
+        public object Max(string field)
         {
             field = this.Schema.Structure.CheckObjectName(field);
 
             this.Query.ClearComponent("select");
             this.Query.AsMax(this.GetFieldName(field));
 
-            var result = await this.Schema.Data.LoadRaw(this);
+            var result = this.Schema.Data.LoadRaw(this);
             DataRow row = result.FirstOrDefault();
             if (row == null)
                 throw new InvalidOperationException($"Count invalid");
@@ -75,14 +75,14 @@ namespace Rapidex.Data.Query
             return res;
         }
 
-        public async Task<object>Min(string field)
+        public object Min(string field)
         {
             field = this.Schema.Structure.CheckObjectName(field);
 
             this.Query.ClearComponent("select");
             this.Query.AsMin(field);
 
-            var result = await this.Schema.Data.LoadRaw(this);
+            var result = this.Schema.Data.LoadRaw(this);
             DataRow row = result.FirstOrDefault();
             if (row == null)
                 throw new InvalidOperationException($"Count invalid");
@@ -91,14 +91,14 @@ namespace Rapidex.Data.Query
             return res;
         }
 
-        public async Task<object>Sum(string field)
+        public object Sum(string field)
         {
             field = this.Schema.Structure.CheckObjectName(field);
 
             this.Query.ClearComponent("select");
             this.Query.AsSum(field);
 
-            var result = await this.Schema.Data.LoadRaw(this);
+            var result = this.Schema.Data.LoadRaw(this);
             DataRow row = result.FirstOrDefault();
             if (row == null)
                 throw new InvalidOperationException($"Count invalid");

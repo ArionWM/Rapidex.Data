@@ -94,7 +94,7 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
         var fm = em.Fields.Get(fieldName, false);
         fm.NotNull($"Field '{fieldName}' not found in '{entityName}' metadata");
 
-        IEntity parentEntity = query.Schema.Find(em, entityId.As<long>()).Result;
+        IEntity parentEntity = query.Schema.Find(em, entityId.As<long>());
         parentEntity.NotNull($"Entity '{entityName}' with id '{entityId}' not found");
 
         query.Related(parentEntity, fieldName);

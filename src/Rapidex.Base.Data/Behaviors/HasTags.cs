@@ -82,8 +82,7 @@ namespace Rapidex.Data
             {
                 var availableTags = dbScope.GetQuery<TagRecord>()
                     .Eq(nameof(TagRecord.Entity), entityName)
-                    .Load()
-                    .Result;
+                    .Load();
 
                 foreach (var tag in availableTags)
                 {
@@ -110,7 +109,7 @@ namespace Rapidex.Data
                 return new TagInfo(tag, null);
         }
 
-        protected static async Task InternalCheckEntityTags(IDbSchemaScope dbScope, IDbEntityMetadata em, string[] tags)
+        protected static void InternalCheckEntityTags(IDbSchemaScope dbScope, IDbEntityMetadata em, string[] tags)
         {
             dbScope.NotNull();
 
@@ -135,7 +134,7 @@ namespace Rapidex.Data
             if (tagNames.IsNOTNullOrEmpty() && tagNames.Count > 0)
                 query = query.In(nameof(TagRecord.Name), tagNames);
 
-            var availableTags = await query.Load();
+            var availableTags = query.Load();
 
             //TODO: var trn = dbScope.Begin("tags");
             try
@@ -162,7 +161,7 @@ namespace Rapidex.Data
                     }
                 }
 
-               await dbScope.ApplyChanges();
+                dbScope.ApplyChanges();
                 //trn.Commit();
             }
             catch (Exception ex)
@@ -177,36 +176,36 @@ namespace Rapidex.Data
             }
         }
 
-        public async static Task CheckEntityTags(IDbSchemaScope dbScope, IDbEntityMetadata em, params string[] tags)
+        public static void CheckEntityTagsAsync(IDbSchemaScope dbScope, IDbEntityMetadata em, params string[] tags)
         {
 
-            await Task.Run(async () =>
-             {
-                 try
-                 {
-                    await InternalCheckEntityTags(dbScope, em, tags);
-                 }
-                 catch (Exception ex)
-                 {
-                     ex.Log();
-                     throw;
-                 }
-             });
+            Task.Run(() =>
+            {
+                try
+                {
+                    InternalCheckEntityTags(dbScope, em, tags);
+                }
+                catch (Exception ex)
+                {
+                    ex.Log();
+                    throw;
+                }
+            });
 
         }
 
-        public async static Task CheckEntityTags(IDbSchemaScope dbScope, IDbEntityMetadata em, string tags)
+        public static void CheckEntityTags(IDbSchemaScope dbScope, IDbEntityMetadata em, string tags)
         {
             tags = tags?.Trim();
             if (tags.IsNullOrEmpty())
                 return;
-            await CheckEntityTags(dbScope, em, tags.Split('|'));
+            CheckEntityTagsAsync(dbScope, em, tags.Split('|'));
         }
 
-        public static async Task<IEntityLoadResult<TagRecord>> GetEntityTags(IDbSchemaScope dbScope, IDbEntityMetadata em)
+        public static IEntityLoadResult<TagRecord> GetEntityTags(IDbSchemaScope dbScope, IDbEntityMetadata em)
         {
             //TODO: From cache
-            return await dbScope.GetQuery<TagRecord>()
+            return dbScope.GetQuery<TagRecord>()
                 .Eq(nameof(TagRecord.Entity), em.Name)
                 .Load();
         }

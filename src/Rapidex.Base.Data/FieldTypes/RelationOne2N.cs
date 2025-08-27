@@ -116,7 +116,7 @@ public class RelationOne2N : RelationBase, ILazy
         {
             crit.Eq(detailFm.Name, parentEntity.GetId());
             additionalCriteria?.Invoke(crit);
-        }).Result;
+        });
 
         return loadResult;
     }

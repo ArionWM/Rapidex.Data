@@ -16,9 +16,9 @@ namespace Rapidex.Data.Scopes
             this.parentScope = parentScope;
         }
 
-        public async Task<IResult<StreamContent>> Get(long id)
+        public IResult<StreamContent> Get(long id)
         {
-            BlobRecord rec = await this.parentScope.GetQuery<BlobRecord>().Eq("Id", id).First();
+            BlobRecord rec = this.parentScope.GetQuery<BlobRecord>().Eq("Id", id).First();
             if (rec == null)
             {
                 return Result<StreamContent>.Ok(null);
@@ -32,8 +32,7 @@ namespace Rapidex.Data.Scopes
             EntityUpdateResult ures = new EntityUpdateResult();
             if (id > -1)
             {
-                var brec = this.parentScope.GetQuery<BlobRecord>().Eq("Id", id).First()
-                    .Result;
+                var brec = this.parentScope.GetQuery<BlobRecord>().Eq("Id", id).First();
 
                 if (brec != null)
                 {
@@ -56,12 +55,12 @@ namespace Rapidex.Data.Scopes
             return ures;
         }
 
-        public async Task<IResult<BlobRecord>> Set(Stream content, string name, string contentType, long id = -1)
+        public IResult<BlobRecord> Set(Stream content, string name, string contentType, long id = -1)
         {
             BlobRecord brec = null;
             if (id > -1)
             {
-                brec = await this.parentScope.GetQuery<BlobRecord>().Eq("Id", id).First();
+                brec = this.parentScope.GetQuery<BlobRecord>().Eq("Id", id).First();
             }
 
             if (content == null)

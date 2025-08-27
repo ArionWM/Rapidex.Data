@@ -14,19 +14,19 @@ namespace Rapidex.Data.Query
         }
 
 
-        public async Task<IEntity> First()
+        public IEntity First()
         {
             this.Query.Skip(0).Take(1);
-            return await this.Load()
-                .ContinueWith<IEntity>(res => res.Result.FirstOrDefault());
+            return this.Load().FirstOrDefault();
+                
         }
 
-        public async Task<ILoadResult<DbEntityId>> GetIds()
+        public ILoadResult<DbEntityId> GetIds()
         {
             //this.Query.Select(this.GetFieldName(this.EntityMetadata.PrimaryKey.Name), this.GetFieldName(CommonConstants.FIELD_VERSION));
             //string idFieldName = this.GetFieldName(this.EntityMetadata.PrimaryKey.Name);
             //string versionFieldName = this.GetFieldName(CommonConstants.FIELD_VERSION);
-            var rawResult = await this.LoadPartial(this.EntityMetadata.PrimaryKey.Name, CommonConstants.FIELD_VERSION);
+            var rawResult = this.LoadPartial(this.EntityMetadata.PrimaryKey.Name, CommonConstants.FIELD_VERSION);
 
             List<DbEntityId> result = new List<DbEntityId>();
             foreach (DataRow row in rawResult)
@@ -37,12 +37,12 @@ namespace Rapidex.Data.Query
             return new LoadResult<DbEntityId>(result);
         }
 
-        public async Task<IEntityLoadResult> Load()
+        public IEntityLoadResult Load()
         {
-            return await this.Schema.Data.Load(this);
+            return this.Schema.Data.Load(this);
         }
 
-        public async Task<ILoadResult<DataRow>> LoadPartial(params string[] fields)
+        public ILoadResult<DataRow> LoadPartial(params string[] fields)
         {
             //Clone Query?
             this.Query.Select(this.GetFieldName(CommonConstants.FIELD_ID));
@@ -53,7 +53,7 @@ namespace Rapidex.Data.Query
 
             this.Query.Select(this.GetFieldName(CommonConstants.FIELD_VERSION));
 
-            return await this.Schema.Data.LoadRaw(this);
+            return this.Schema.Data.LoadRaw(this);
         }
 
         public virtual object Clone()

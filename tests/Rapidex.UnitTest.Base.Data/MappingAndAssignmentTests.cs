@@ -30,7 +30,7 @@ namespace Rapidex.UnitTest.Data
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
             IEntity entity = dbScope.New<ConcreteEntity01>();
-            entity.TestIDataTypeAssignments();
+            entity.CheckIDataTypeAssignments();
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Rapidex.UnitTest.Data
 
 
             IEntity entity = db.New("myJsonEntity05");
-            entity.TestIDataTypeAssignments();
+            entity.CheckIDataTypeAssignments();
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace Rapidex.UnitTest.Data
         }
 
         [Fact]
-        public async Task T05_ConcreteReferenceAssignment()
+        public void T05_ConcreteReferenceAssignment()
         {
             this.Fixture.ClearCaches();
 
@@ -140,25 +140,25 @@ namespace Rapidex.UnitTest.Data
 
             ConcreteEntity01 entity01 = db.New<ConcreteEntity01>();
             entity01.Save();
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             ConcreteEntity02 entity02 = db.New<ConcreteEntity02>();
-            entity02.Parent = entity01;
+            entity02.MyReference = entity01;
             entity02.Save();
 
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             long id1 = entity01.Id;
             long id2 = entity02.Id;
 
             //Clear entity cache
 
-            ConcreteEntity02 entity02_1 = await db.Find<ConcreteEntity02>(id2);
-            Assert.Equal(id1, (long)entity02_1.Parent.TargetId);
+            ConcreteEntity02 entity02_1 = db.Find<ConcreteEntity02>(id2);
+            Assert.Equal(id1, (long)entity02_1.MyReference.TargetId);
         }
 
         [Fact]
-        public async Task T06_SameEntityWithDifferentLoadShouldHaveDifferentReferences_Concrete()
+        public void T06_SameEntityWithDifferentLoadShouldHaveDifferentReferences_Concrete()
         {
             this.Fixture.ClearCaches();
 
@@ -176,17 +176,17 @@ namespace Rapidex.UnitTest.Data
             entity01.Phone = "1234567890";
             entity01.Picture.Set(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 }, "aaa", "bbb");
             entity01.Save();
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             long id1 = entity01.Id;
 
             //Clear entity cache
 
-            ConcreteEntity01 entity01_1 = await db.Find<ConcreteEntity01>(id1);
-            entity01_1.TestIDataTypeAssignments();
+            ConcreteEntity01 entity01_1 = db.Find<ConcreteEntity01>(id1);
+            entity01_1.CheckIDataTypeAssignments();
 
-            ConcreteEntity01 entity01_2 = await db.Find<ConcreteEntity01>(id1);
-            entity01_2.TestIDataTypeAssignments();
+            ConcreteEntity01 entity01_2 = db.Find<ConcreteEntity01>(id1);
+            entity01_2.CheckIDataTypeAssignments();
 
             //entity01_1 ve entity01_2 farklı referanslara sahip olmalı (aynı bilgiyi tutan farklı nesneler)
             Assert.NotSame(entity01_1, entity01_2);
@@ -202,7 +202,7 @@ namespace Rapidex.UnitTest.Data
         }
 
         [Fact]
-        public async Task T06_SameEntityWithDifferentLoadShouldHaveDifferentReferences_Json()
+        public void T06_SameEntityWithDifferentLoadShouldHaveDifferentReferences_Json()
         {
             this.Fixture.Reinit();
 
@@ -223,7 +223,7 @@ namespace Rapidex.UnitTest.Data
             ConcreteEntity02 entityForRef = db.New<ConcreteEntity02>();
             //entityForRef.Name = RandomHelper.RandomText(10);
             entityForRef.Save();
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             IEntity jsonEntity01 = db.New("myJsonEntity05");
             jsonEntity01["Subject"] = "Subject01";
@@ -237,16 +237,16 @@ namespace Rapidex.UnitTest.Data
             jsonEntity01["Price"] = 173233;
 
             jsonEntity01.Save();
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
             long id1 = (long)jsonEntity01.GetId();
             //Clear entity cache
 
-            IEntity entity01_1 = await db.Find("myJsonEntity05", id1);
-            entity01_1.TestIDataTypeAssignments();
+            IEntity entity01_1 = db.Find("myJsonEntity05", id1);
+            entity01_1.CheckIDataTypeAssignments();
 
-            IEntity entity01_2 = await db.Find("myJsonEntity05", id1);
-            entity01_2.TestIDataTypeAssignments();
+            IEntity entity01_2 = db.Find("myJsonEntity05", id1);
+            entity01_2.CheckIDataTypeAssignments();
 
             //entity01_1 ve entity01_2 farklı referanslara sahip olmalı (aynı bilgiyi tutan farklı nesneler)
             Assert.NotSame(entity01_1, entity01_2);
@@ -265,7 +265,7 @@ namespace Rapidex.UnitTest.Data
 
 
         [Fact]
-        public async Task T07_ReferenceX()
+        public void T07_ReferenceX()
         {
             this.Fixture.ClearCaches();
 
@@ -284,20 +284,20 @@ namespace Rapidex.UnitTest.Data
             concreteEntity01.Name = "Cust01";
             concreteEntity01.Save();
 
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
 
             ConcreteEntity02 concreteEntity02 = db.New<ConcreteEntity02>();
-            concreteEntity02.Parent = concreteEntity01.Id; //id can assign direct
+            concreteEntity02.MyReference = concreteEntity01.Id; //id can assign direct
             concreteEntity02.Save();
 
-            await db.ApplyChanges();
+            db.ApplyChanges();
 
         }
 
 
         [Fact]
-        public async Task T08_OnlyBaseEntityReferenceAssignment()
+        public void T08_OnlyBaseEntityReferenceAssignment()
         {
             this.Fixture.ClearCaches();
             var db = Database.Scopes.AddMainDbIfNotExists();
@@ -326,7 +326,7 @@ namespace Rapidex.UnitTest.Data
             baseEnt02.Name = "CEnt 02";
             baseEnt02.Save();
 
-            await schemaBase.ApplyChanges();
+            schemaBase.ApplyChanges();
 
             long baseId01 = (long)baseEnt01.GetId();
             long baseId02 = (long)baseEnt02.GetId();
@@ -336,7 +336,7 @@ namespace Rapidex.UnitTest.Data
             refEntity01.Reference = baseEnt01;
             refEntity01.Save();
 
-            await schema02.ApplyChanges();
+            schema02.ApplyChanges();
 
             long refId01 = (long)refEntity01.GetId();
             //----------------------------------------------------------------------------------
@@ -351,7 +351,7 @@ namespace Rapidex.UnitTest.Data
             db.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
             db.Metadata.AddIfNotExist<ConcreteOnlyBaseReferencedEntity02>();
 
-            ConcreteOnlyBaseReferencedEntity02 refEnt01_02 = await schema02.GetQuery<ConcreteOnlyBaseReferencedEntity02>().Find(refId01);
+            ConcreteOnlyBaseReferencedEntity02 refEnt01_02 = schema02.GetQuery<ConcreteOnlyBaseReferencedEntity02>().Find(refId01);
             Assert.NotNull(refEnt01_02);
             Assert.Equal(baseId01, refEnt01_02.Reference.TargetId);
             ConcreteOnlyBaseEntity01 referencedEntity = refEnt01_02.Reference.GetContent();

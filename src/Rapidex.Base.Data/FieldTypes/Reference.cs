@@ -99,8 +99,7 @@ namespace Rapidex.Data
                 throw new InvalidOperationException("Premature references can't get content");
 
             IDbSchemaScope scope = parent._Scope;
-            IEntity entity = scope.Find(this.ReferencedEntity, this.TargetId)
-                .Result;
+            IEntity entity = scope.Find(this.ReferencedEntity, this.TargetId);
             return entity;
         }
 

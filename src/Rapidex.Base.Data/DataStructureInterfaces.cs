@@ -470,9 +470,9 @@ public interface IDbChangesCollection : IEmptyCheckObject
 public interface IDbChangesScopeWithTransaction : IDbChangesCollection, IDisposable
 {
     IDbInternalTransactionScope InternalTransactionScope { get; }
-    Task Commit();
+    void Commit();
 
-    Task Rollback();
+    void Rollback();
 
     void IDisposable.Dispose()
     {
@@ -572,9 +572,9 @@ public interface IDbInternalTransactionScope : IDisposable
 {
     bool Live { get; }
 
-    Task Commit();
+    void Commit();
 
-    Task Rollback();
+    void Rollback();
 
     void IDisposable.Dispose()
     {
@@ -621,11 +621,11 @@ public interface IDbDataModificationManager
 
     IQuery<T> GetQuery<T>() where T : IConcreteEntity;
 
-    Task<IEntity> Find(IDbEntityMetadata em, long id);
+    IEntity Find(IDbEntityMetadata em, long id);
 
-    Task<IEntityLoadResult> Load(IQueryLoader loader);
+    IEntityLoadResult Load(IQueryLoader loader);
 
-    Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader);
+    ILoadResult<DataRow> LoadRaw(IQueryLoader loader);
 
     void Save(IEntity entity);
 
@@ -639,25 +639,25 @@ public interface IDbDataModificationManager
     
 }
 
-public interface IDbDataModificationStaticScope : IDbDataModificationManager
+public interface IDbDataModificationStaticManager : IDbDataModificationManager
 {
-    IDbDataModificationScope Begin();
+    IDbDataModificationTransactionedManager Begin();
 
     /// <summary>
     /// Write changes to database
     /// </summary>
-    Task<IEntityUpdateResult> ApplyChanges();
+    IEntityUpdateResult ApplyChanges();
     IIntSequence Sequence(string name);
 }
 
 
-public interface IDbDataModificationScope : IDbDataModificationManager, IDisposable
+public interface IDbDataModificationTransactionedManager : IDbDataModificationManager, IDisposable
 {
     /// <summary>
     /// Write changes to database and commit transaction
     /// </summary>
-    Task<IEntityUpdateResult> CommitChanges();
-    Task Rollback();
+    IEntityUpdateResult CommitChanges();
+    void Rollback();
 }
 
 
@@ -707,7 +707,7 @@ public interface IDbStructureProvider
 
 
 
-public interface IDbSchemaScope : IDbDataModificationStaticScope
+public interface IDbSchemaScope : IDbDataModificationStaticManager
 {
     IDbScope ParentDbScope { get; }
     IDbProvider DbProvider { get; }
@@ -719,18 +719,18 @@ public interface IDbSchemaScope : IDbDataModificationStaticScope
 
     IDbStructureProvider Structure { get; }
     IBlobRepository Blobs { get; }
-    IDbDataModificationStaticScope Data { get; }
+    IDbDataModificationStaticManager Data { get; }
 
     EntityMapper Mapper { get; }
 
-    IDbDataModificationScope IDbDataModificationStaticScope.Begin()
+    IDbDataModificationTransactionedManager IDbDataModificationStaticManager.Begin()
     {
         return this.Data.Begin();
     }
 
-    async Task<IEntityUpdateResult> IDbDataModificationStaticScope.ApplyChanges()
+    IEntityUpdateResult IDbDataModificationStaticManager.ApplyChanges()
     {
-        return await this.Data.ApplyChanges();
+        return this.Data.ApplyChanges();
     }
 
 
@@ -755,20 +755,20 @@ public interface IDbSchemaScope : IDbDataModificationStaticScope
     }
 
 
-    async Task<IEntityLoadResult> IDbDataModificationManager.Load(IQueryLoader loader)
+    IEntityLoadResult IDbDataModificationManager.Load(IQueryLoader queryLoader)
     {
-        return await this.Data.Load(loader);
+        return this.Data.Load(queryLoader);
     }
 
-    Task<ILoadResult<DataRow>> IDbDataModificationManager.LoadRaw(IQueryLoader loader)
+    ILoadResult<DataRow> IDbDataModificationManager.LoadRaw(IQueryLoader queryLoader)
     {
-        return this.Data.LoadRaw(loader);
+        return this.Data.LoadRaw(queryLoader);
     }
 
 
-    async Task<IEntity> IDbDataModificationManager.Find(IDbEntityMetadata em, long id)
+    IEntity IDbDataModificationManager.Find(IDbEntityMetadata em, long id)
     {
-        return await this.Data.Find(em, id);
+        return this.Data.Find(em, id);
     }
 
     void IDbDataModificationManager.Save(IEntity entity)
