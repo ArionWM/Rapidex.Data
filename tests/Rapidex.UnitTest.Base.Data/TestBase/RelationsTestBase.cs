@@ -22,12 +22,12 @@ namespace Rapidex.UnitTest.Data.TestBase
             //MasterA ve MasterB için detaylar alınarak kontrol edilir.
 
             //this.Fixture.ClearCaches();
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             db.Metadata.AddIfNotExist<ConcreteEntity03>();
             db.Metadata.AddIfNotExist<ConcreteEntity04>();
 
-            var dbScope = Database.Scopes.Db();
+            var dbScope = Database.Dbs.Db();
             dbScope.Structure.ApplyEntityStructure<ConcreteEntity03>();
             dbScope.Structure.ApplyEntityStructure<ConcreteEntity04>();
 
@@ -109,12 +109,12 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public virtual void N2N_01_Concrete()
         {
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
             db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
 
-            var dbScope = Database.Scopes.Db();
+            var dbScope = Database.Dbs.Db();
             dbScope.Structure.DropEntity<ConcreteEntityForN2NTest02>();
             dbScope.Structure.DropEntity<ConcreteEntityForN2NTest01>();
             dbScope.Structure.DropEntity<GenericJunction>();
@@ -168,14 +168,14 @@ namespace Rapidex.UnitTest.Data.TestBase
         public virtual void N2N_02_Json()
         {
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity10.forN2N.json");
             var em1 = db.Metadata.AddJson(content);
             content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity11.forN2N.json");
             var em2 = db.Metadata.AddJson(content);
 
-            var dbScope = Database.Scopes.Db();
+            var dbScope = Database.Dbs.Db();
             dbScope.Structure.DropEntity("myJsonEntity10");
             dbScope.Structure.DropEntity("myJsonEntity11");
             dbScope.Structure.DropEntity<GenericJunction>();

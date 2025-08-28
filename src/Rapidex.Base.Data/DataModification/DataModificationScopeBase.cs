@@ -6,21 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
-internal abstract class DataModificationManagerBase : IDbDataModificationManager
+internal abstract class DataModificationScopeBase : IDbDataModificationScope
 {
-
-
-
-
-
     public IDbSchemaScope ParentScope { get; protected set; }
     public IDbDataModificationPovider DmProvider { get; protected set; }
 
-    public DataModificationManagerBase(IDbSchemaScope parentScope, IDbDataModificationPovider dmProvider)
+    public DataModificationScopeBase(IDbSchemaScope parentScope, IDbDataModificationPovider dmProvider)
     {
         this.ParentScope = parentScope;
         this.DmProvider = dmProvider;
-
 
         this.Initialize();
     }

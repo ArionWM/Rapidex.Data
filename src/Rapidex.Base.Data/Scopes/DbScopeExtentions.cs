@@ -27,7 +27,7 @@ namespace Rapidex.Data
 
         //}
 
-        private static DbConnectionInfo CheckConnectionInfo(this IDbScopeManager sman, string dbName, string connectionStringOrConnectionNameInConfig = null)
+        private static DbConnectionInfo CheckConnectionInfo(this IDbManager sman, string dbName, string connectionStringOrConnectionNameInConfig = null)
         {
             var cInfo = Database.Configuration.ConnectionInfo.Get(dbName);
             if (cInfo == null && connectionStringOrConnectionNameInConfig.IsNOTNullOrEmpty())
@@ -41,7 +41,7 @@ namespace Rapidex.Data
                 cInfo.Name = dbName.ToFriendly();
                 cInfo.ConnectionString = connectionStringOrConnectionNameInConfig;
 
-                IDbScope masterScope = Database.Scopes.Db();
+                IDbScope masterScope = Database.Dbs.Db();
                 if (masterScope != null)
                 {
                     cInfo.Provider = masterScope.DbProvider.GetType().FullName;

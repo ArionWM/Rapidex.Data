@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace Rapidex.Data.Scopes;
 
-internal class DbScopeManager : IDbScopeManager
+internal class DbScopeManager : IDbManager
 {
     internal bool IsMultiDb { get; set; } = false;
     internal Dictionary<string, IDbScope> _dbScopes = new Dictionary<string, IDbScope>(StringComparer.InvariantCultureIgnoreCase);
@@ -84,7 +84,7 @@ internal class DbScopeManager : IDbScopeManager
     public void EnableMultiDb()
     {
         DbValidator dbValidator = new DbValidator();
-        var dbMaster = Database.Scopes.Db(DatabaseConstants.MASTER_DB_NAME);
+        var dbMaster = Database.Dbs.Db(DatabaseConstants.MASTER_DB_NAME);
         var dbMasterScope = dbMaster.Base;
         var validation = dbValidator.ValidateMultiDb(dbMasterScope.DbProvider);
         if (!validation.Success)

@@ -24,7 +24,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var dbScope = Database.Scopes.Db();
+            var dbScope = Database.Dbs.Db();
 
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity03.base.json");
@@ -47,7 +47,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             this.Fixture.ClearCaches();
 
 
-            var dbScope = Database.Scopes.Db();
+            var dbScope = Database.Dbs.Db();
 
             dbScope.ReAddReCreate<ConcreteEntity01>();
 
@@ -60,7 +60,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity04.base.json");
             db.Metadata.AddJson(content); //dbScope.Metadata using base schema...
@@ -82,9 +82,9 @@ namespace Rapidex.UnitTest.Data.TestBase
             {
                 string tableName = RandomHelper.RandomText(10);
 
-                //((Rapidex.Data.Scopes.DbScopeManager)Database.Scopes).ClearCache();
+                //((Rapidex.Data.Scopes.DbScopeManager)Database.Databases).ClearCache();
 
-                var dbScope = Database.Scopes.Db();
+                var dbScope = Database.Dbs.Db();
                 dbScope.Metadata.AddPremature(tableName);
 
                 Assert.Throws<InvalidOperationException>(() => dbScope.Structure.ApplyAllStructure());
@@ -101,7 +101,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
 
             db.Metadata.Remove("myJsonEntity04");
 
@@ -125,7 +125,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
 
             var em = db.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
 
@@ -149,7 +149,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
             string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity09.OnlyBase.json");
             var ems = db.Metadata.AddJson(content);
             Assert.NotNull(ems);

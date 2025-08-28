@@ -56,7 +56,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         //[FromKeyedServices(Rapidex.Common.ENV)] SimpleFlatCriteriaParser criteriaParser
         //this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         db.Metadata.AddIfNotExist<ConcreteEntityForFilterTest>();
         db.Structure.ApplyEntityStructure<ConcreteEntityForFilterTest>();
@@ -250,7 +250,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         //this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
         db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
 

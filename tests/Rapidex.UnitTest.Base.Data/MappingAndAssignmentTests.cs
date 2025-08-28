@@ -24,7 +24,7 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
             var dbScope = db.AddSchemaIfNotExists("myTestSchema01");
 
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -36,7 +36,7 @@ namespace Rapidex.UnitTest.Data
         [Fact]
         public void T02_EntityInitialization_Json_AdvancedDataTypes_ShouldBe_Assigned()
         {
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity05.base.json");
             db.Metadata.AddJson(content);
@@ -49,7 +49,7 @@ namespace Rapidex.UnitTest.Data
         [Fact]
         public void T03_FieldAssignment_Json_WrongTypesThrowException()
         {
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity05.base.json");
             db.Metadata.AddJson(content);
@@ -79,7 +79,7 @@ namespace Rapidex.UnitTest.Data
         public void T04_FieldAssignment_Json_AdvancedDataTypes01()
         {
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             string content04 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity04.base.json");
             string content06 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity06.base.json");
@@ -131,7 +131,7 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Metadata.AddIfNotExist<ConcreteEntity02>();
@@ -162,7 +162,7 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Structure.ApplyEntityStructure<ConcreteEntity01>();
@@ -206,7 +206,7 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.Reinit();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             string content05 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity05.base.json");
             var ems1 = db.Metadata.AddJson(content05);
@@ -269,7 +269,7 @@ namespace Rapidex.UnitTest.Data
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             string content05 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity05.base.json");
             db.Metadata.AddJson(content05);
@@ -300,7 +300,7 @@ namespace Rapidex.UnitTest.Data
         public void T08_OnlyBaseEntityReferenceAssignment()
         {
             this.Fixture.ClearCaches();
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             var schemaBase = db.Schema("base");
             var schema02 = db.AddSchemaIfNotExists("schema02");
@@ -343,7 +343,7 @@ namespace Rapidex.UnitTest.Data
 
 
             this.Fixture.ClearCaches();
-            db = Database.Scopes.AddMainDbIfNotExists();
+            db = Database.Dbs.AddMainDbIfNotExists();
 
             schemaBase = db.Schema("base");
             schema02 = db.AddSchemaIfNotExists("schema02");

@@ -71,13 +71,13 @@ namespace Rapidex.Data
             IDbScope db;
             if (cinfo.Name == DatabaseConstants.MASTER_DB_NAME)
             {
-                db = Database.Scopes.AddMainDbIfNotExists();
+                db = Database.Dbs.AddMainDbIfNotExists();
             }
             else
             {
                 throw new NotSupportedException("Removed, but additional connection definitions is not required for now");
-                //Database.Scopes.EnableMultiDb();
-                //Database.Scopes.AddDbIfNotExists(dbName);
+                //Database.Databases.EnableMultiDb();
+                //Database.Databases.AddDbIfNotExists(dbName);
             }
 
             

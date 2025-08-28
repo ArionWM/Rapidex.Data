@@ -16,7 +16,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
         protected void GenerateEntities()
         {
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
             db.Metadata.AddIfNotExist<AggrTestEntity01>();
 
             db.Structure.DropEntity<AggrTestEntity01>();
@@ -56,7 +56,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.GenerateEntities();
 
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
 
             float val01 = db.GetQuery<AggrTestEntity01>().Avg<float>(nameof(AggrTestEntity01.Amount));
             Assert.Equal(4.5f, val01);

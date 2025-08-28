@@ -46,10 +46,10 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
     {
         DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
         NpgsqlConnectionStringBuilder sqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(dbc.ConnectionString);
-        sqlConnectionStringBuilder.Database = Database.Scopes.Db().DatabaseName;
+        sqlConnectionStringBuilder.Database = Database.Dbs.Db().DatabaseName;
         PostgreSqlServerConnection connection = new PostgreSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
-        //connection.Execute($"USE [{Database.Scopes.Db().DatabaseName}]");
+        //connection.Execute($"USE [{Database.Databases.Db().DatabaseName}]");
         return connection;
     }
 }

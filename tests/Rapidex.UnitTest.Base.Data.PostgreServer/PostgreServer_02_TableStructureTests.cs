@@ -100,7 +100,7 @@ namespace Rapidex.UnitTest.Data.PostgreServer
         {
             base.Structure_03_AddColumnInRuntime();
 
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
 
             using PostgreSqlServerConnection connection = Library.CreatePostgreServerConnection();
 
@@ -137,7 +137,7 @@ namespace Rapidex.UnitTest.Data.PostgreServer
         {
             base.Structure_05_RuntimeModify();
 
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
 
             using PostgreSqlServerConnection connection = Library.CreatePostgreServerConnection();
 

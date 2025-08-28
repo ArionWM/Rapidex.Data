@@ -14,7 +14,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Rapidex.Data;
 
 [Obsolete("", true)]
-internal class DbDataModificationManager : IDbDataModificationManager
+internal class DbDataModificationManager : IDbDataModificationScope
 {
     protected ThreadLocal<IDbChangesCollection> dbChangesScope;
     protected ThreadLocal<IDbChangesScopeWithTransaction> dbChangesScopeWithTransaction;

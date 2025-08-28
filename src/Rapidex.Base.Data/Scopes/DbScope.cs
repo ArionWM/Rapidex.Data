@@ -37,7 +37,7 @@ namespace Rapidex.Data.Scopes
 
         public IDbStructureProvider Structure => baseScope.Structure;
 
-        public IDbDataModificationStaticManager Data => baseScope.Data;
+        public IDbDataModificationStaticHost Data => baseScope.Data;
 
         public EntityMapper Mapper => baseScope.Mapper;
 

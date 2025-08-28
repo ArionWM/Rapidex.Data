@@ -15,12 +15,18 @@ public static class Database
     public static DbEntityFactory EntityFactory { get; private set; } //Internal olmalı ancak DbDataModificationManager ların erişmesi lazım ?
     public static DbConfigurationManager Configuration { get; private set; }
 
-    
+
     public static IDbEntityMetadataFactory EntityMetadataFactory { get; private set; }
 
 
-    public static IDbScopeManager Scopes { get; private set; }
-    public static IDbThreadScopeManager Current { get; private set; }
+    [Obsolete("Use Database.Databases instead", true)]
+    public static IDbManager Scopes { get => Database.Dbs; set => Database.Dbs = value; }
+
+    /// <summary>
+    /// Database manager, contains all db objects
+    /// </summary>
+    public static IDbManager Dbs { get; private set; }
+
 
 
 
@@ -61,7 +67,7 @@ public static class Database
         sp.GetRapidexService<ISignalHub>()
             .NotNull("Signal hub not found");
 
-        Database.Scopes = sp.GetRapidexService<IDbScopeManager>()
+        Database.Dbs = sp.GetRapidexService<IDbManager>()
                         .NotNull("Db scope manager not found");
 
         Database.EntityFactory = sp.GetRapidexService<DbEntityFactory>()

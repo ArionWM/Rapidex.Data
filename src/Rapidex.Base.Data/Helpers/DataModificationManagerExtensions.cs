@@ -43,7 +43,7 @@ namespace Rapidex.Data
             return result;
         }
 
-        public static IEntity New(this IDbDataModificationManager dmm, string entityName)
+        public static IEntity New(this IDbDataModificationScope dmm, string entityName)
         {
             dmm.NotNull();
 
@@ -55,7 +55,7 @@ namespace Rapidex.Data
 
         }
 
-        public static TEntity New<TEntity>(this IDbDataModificationManager dmm) where TEntity : IConcreteEntity
+        public static TEntity New<TEntity>(this IDbDataModificationScope dmm) where TEntity : IConcreteEntity
         {
             dmm.NotNull();
 
@@ -68,7 +68,7 @@ namespace Rapidex.Data
             return concEntity;
         }
 
-        public static IEntityLoadResult Load(this IDbDataModificationManager dmm, IDbEntityMetadata em, Action<IQueryCriteria> act = null)
+        public static IEntityLoadResult Load(this IDbDataModificationScope dmm, IDbEntityMetadata em, Action<IQueryCriteria> act = null)
         {
             dmm.NotNull();
 
@@ -80,7 +80,7 @@ namespace Rapidex.Data
         }
 
 
-        public static IEntityLoadResult Load(this IDbDataModificationManager dmm, string entityName, Action<IQueryCriteria> act = null)
+        public static IEntityLoadResult Load(this IDbDataModificationScope dmm, string entityName, Action<IQueryCriteria> act = null)
         {
             dmm.NotNull();
 
@@ -90,7 +90,7 @@ namespace Rapidex.Data
 
 
 
-        public static IEntityLoadResult<TEntity> Load<TEntity>(this IDbDataModificationManager dmm, Action<IQueryCriteria> act = null) where TEntity : IConcreteEntity
+        public static IEntityLoadResult<TEntity> Load<TEntity>(this IDbDataModificationScope dmm, Action<IQueryCriteria> act = null) where TEntity : IConcreteEntity
         {
             dmm.NotNull();
 
@@ -101,7 +101,7 @@ namespace Rapidex.Data
             return loadResult.CastTo<TEntity>();
         }
 
-        public static IEntity Find(this IDbDataModificationManager dmm, string entityName, long id)
+        public static IEntity Find(this IDbDataModificationScope dmm, string entityName, long id)
         {
             dmm.NotNull();
 
@@ -112,7 +112,7 @@ namespace Rapidex.Data
         }
 
 
-        public static TEntity Find<TEntity>(this IDbDataModificationManager dmm, long id) where TEntity : IConcreteEntity
+        public static TEntity Find<TEntity>(this IDbDataModificationScope dmm, long id) where TEntity : IConcreteEntity
         {
             dmm.NotNull();
 
@@ -124,7 +124,7 @@ namespace Rapidex.Data
         }
 
 
-        public static void Delete(this IDbDataModificationManager dmm, IEnumerable<IEntity> entities)
+        public static void Delete(this IDbDataModificationScope dmm, IEnumerable<IEntity> entities)
         {
             dmm.NotNull();
             foreach (var entity in entities)

@@ -34,7 +34,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     {
 
         this.Fixture.ClearCaches();
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         var schema = db.AddSchemaIfNotExists("myTestSchema01");
 
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -86,7 +86,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.Db();
+            var db = Database.Dbs.Db();
             var schema = db.AddSchemaIfNotExists("myTestSchema02");
 
             db.Metadata.Remove<ConcreteEntity01>();
@@ -114,7 +114,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         var em = db.ReAddReCreate<ConcreteEntityForImplementationTests01>();
 
         Assert.True(em.Fields.ContainsKey("Name"));
@@ -133,7 +133,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
         //DbEntity oluþmalý
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         var schema = db.AddSchemaIfNotExists("myTestSchema03");
 
 
@@ -169,7 +169,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         var schema = db.AddSchemaIfNotExists("myTestSchema03");
 
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -219,7 +219,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
         //DbEntity oluþmalý
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         var schema = db.AddSchemaIfNotExists("myTestSchema03");
 
 
@@ -234,7 +234,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity02.WithBehavior.json");
         db.Metadata.AddJson(content);
@@ -252,7 +252,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void MetadataCreation_WithJson_04_Behavior()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity02.WithBehavior.json");
         db.Metadata.AddJson(content);
@@ -267,7 +267,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     public void MetadataCreation_WithConcrete_03_ReferenceOne2N()
     {
         this.Fixture.ClearCaches();
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         var schema = db.AddSchemaIfNotExists("myTestSchema01");
 
         db.Metadata.AddIfNotExist<ConcreteEntity03>();
@@ -292,7 +292,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         var schema = db.AddSchemaIfNotExists("myTestSchema03");
 
         string content = this.Fixture.GetFileContentAsString("TestContent\\yaml\\Entity.01Simple.yml");
@@ -323,7 +323,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         var schema = db.AddSchemaIfNotExists("myTestSchema03");
 
         string content = this.Fixture.GetFileContentAsString("TestContent\\yaml\\Entity.02SimpleWithData.yml");

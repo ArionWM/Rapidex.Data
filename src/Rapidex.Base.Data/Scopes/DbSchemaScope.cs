@@ -13,7 +13,7 @@ namespace Rapidex.Data.Scopes
         protected readonly IDbProvider dbProvider;
         protected readonly string name;
         protected IDbStructureProvider structureManager;
-        protected IDbDataModificationStaticManager dataManager;
+        protected IDbDataModificationStaticHost dataManager;
         protected EntityMapper mapper;
         protected IBlobRepository blobRepository;
 
@@ -25,7 +25,7 @@ namespace Rapidex.Data.Scopes
 
         public IDbStructureProvider Structure => structureManager;
 
-        public IDbDataModificationStaticManager Data => dataManager;
+        public IDbDataModificationStaticHost Data => dataManager;
 
         public EntityMapper Mapper => mapper;
 
@@ -42,7 +42,7 @@ namespace Rapidex.Data.Scopes
             this.structureManager = this.dbProvider.GetStructureProvider();
 
             var dmProvider = this.dbProvider.GetDataModificationPovider();
-            this.dataManager = new DataModificationStaticScope(this, dmProvider);
+            this.dataManager = new DataModificationStaticHost(this, dmProvider);
             this.mapper = new EntityMapper(this);
             this.blobRepository = new DefaultDbBlobRepository(this);
             this.debugTracker = RandomHelper.Random(int.MaxValue);

@@ -16,7 +16,7 @@ public class MessageHubTests : DbDependedTestsBase<DbSqlServerProvider>
     public async Task T01_OnNew()
     {
         //ConcreteEntity01
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
         

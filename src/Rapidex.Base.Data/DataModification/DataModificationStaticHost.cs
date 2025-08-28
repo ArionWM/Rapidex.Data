@@ -6,27 +6,27 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
-internal class DataModificationStaticScope : DataModificationManagerBase, IDbDataModificationStaticManager
+internal class DataModificationStaticHost : DataModificationScopeBase, IDbDataModificationStaticHost
 {
-    protected ThreadLocal<IDbChangesCollection> dbChangesScope;
+    protected ThreadLocal<IDbChangesCollection> dbChangesCollection;
     
 
-    public DataModificationStaticScope(IDbSchemaScope parentScope, IDbDataModificationPovider dmProvider) : base(parentScope, dmProvider)
+    public DataModificationStaticHost(IDbSchemaScope parentScope, IDbDataModificationPovider dmProvider) : base(parentScope, dmProvider)
     {
-        this.dbChangesScope = new ThreadLocal<IDbChangesCollection>();
+        this.dbChangesCollection = new ThreadLocal<IDbChangesCollection>();
     }
 
-    public IDbDataModificationTransactionedManager Begin()
+    public IDbDataModificationTransactionedScope BeginWork()
     {
         return new DataModificationScope(this.ParentScope, this.DmProvider);
     }
 
     protected override IDbChangesCollection GetChangesCollection()
     {
-        if (this.dbChangesScope.Value == null)
-            this.dbChangesScope.Value = new DbChangesCollection();
+        if (this.dbChangesCollection.Value == null)
+            this.dbChangesCollection.Value = new DbChangesCollection();
 
-        return this.dbChangesScope.Value;
+        return this.dbChangesCollection.Value;
     }
 
 
@@ -55,7 +55,7 @@ internal class DataModificationStaticScope : DataModificationManagerBase, IDbDat
         }
         finally
         {
-            this.dbChangesScope.Value = null;
+            this.dbChangesCollection.Value = null;
         }
     }
 }

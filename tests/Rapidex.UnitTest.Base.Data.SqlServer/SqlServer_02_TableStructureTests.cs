@@ -29,7 +29,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
         using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
 
-        connection.Execute($"USE [{Database.Scopes.Db().DatabaseName}]");
+        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
 
         DataTable table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity03'");
         Assert.Equal(1, table.Rows.Count);
@@ -95,7 +95,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
     public override void Structure_03_AddColumnInRuntime()
     {
         base.Structure_03_AddColumnInRuntime();
-        var dbScope = Database.Scopes.Db();
+        var dbScope = Database.Dbs.Db();
 
         using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
 
@@ -116,7 +116,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
         var em = dbScope.Metadata.Get("myJsonEntity04");
         em.AddFieldIfNotExist<int>("AddedField");
-        Database.Scopes.Db().Base.Structure.ApplyEntityStructure(em);
+        Database.Dbs.Db().Base.Structure.ApplyEntityStructure(em);
 
         columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
         dv = new DataView(columnsTable);
@@ -132,7 +132,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
     {
         base.Structure_05_RuntimeModify();
 
-        var dbScope = Database.Scopes.Db();
+        var dbScope = Database.Dbs.Db();
 
         using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
 
@@ -168,7 +168,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
         fm.DbType = DbFieldType.String;
         fm.DbProperties.Length = 250;
 
-        Database.Scopes.Db().Base.Structure.ApplyEntityStructure(em);
+        Database.Dbs.Db().Base.Structure.ApplyEntityStructure(em);
 
         columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
         dv = new DataView(columnsTable);

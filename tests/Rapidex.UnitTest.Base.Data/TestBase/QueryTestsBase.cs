@@ -19,7 +19,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     {
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
         db.Structure.DropEntity<ConcreteEntity01>();
@@ -60,7 +60,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     {
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
         db.Structure.DropEntity<ConcreteEntity01>();
@@ -91,7 +91,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
     protected void Load_03_GenerateEntities(IDbSchemaScope scope, IDbEntityMetadata em)
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
         db.Structure.DropEntity<ConcreteEntity01>();
         db.Structure.DropEntity(em);
@@ -226,7 +226,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual void Load_03_Criterias_Concrete()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
         db.Metadata.AddIfNotExist<CriteriaTestEntity01>();
 
@@ -240,7 +240,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual void Load_04_Criterias_Nested()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
         db.Metadata.AddIfNotExist<ConcreteEntity02>();
 
@@ -287,7 +287,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual void Load_05_Criterias_NestedWithOnlyBase()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
         var schemaBase = db.Schema("base");
         var schema02 = db.AddSchemaIfNotExists("schema02");
@@ -355,7 +355,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual void BulkUpdate_06_Criterias_NestedWithOnlyBase()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
         db.Structure.DropEntity<ConcreteEntity01>();
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
@@ -434,7 +434,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     [Fact]
     public virtual void Load_06_Criterias_Relation()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
         db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();

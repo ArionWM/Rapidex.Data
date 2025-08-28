@@ -36,7 +36,7 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
     public void Behaviors_01_Add()
     {
         
-        var dbScope = Database.Scopes.Db();
+        var dbScope = Database.Dbs.Db();
 
         var em = dbScope.ParentDbScope.Metadata.ReAdd<ConcreteEntityWithoutBehavior01>() as IDbEntityMetadata;
 
@@ -53,7 +53,7 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         //this.Fixture.ClearCaches();
 
-        var dbScope = Database.Scopes.Db();
+        var dbScope = Database.Dbs.Db();
 
         IDbEntityMetadata bem = dbScope.ReAddReCreate<ConcreteEntityWithoutBehavior01>();
 
@@ -65,7 +65,7 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
         DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
-        connection.Execute($"USE [{Database.Scopes.Db().DatabaseName}]");
+        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
 
         DataTable table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntityWithoutBehavior01'");
         Assert.Equal(1, table.Rows.Count);

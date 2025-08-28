@@ -20,7 +20,7 @@ public class Basics //With no fixture
 
         serviceProvider.StartRapidexDataLevel();
 
-        var masterBaseScope = Database.Scopes.AddMainDbIfNotExists();
+        var masterBaseScope = Database.Dbs.AddMainDbIfNotExists();
 
         masterBaseScope.Metadata.Add<ConcreteEntity01>();
         masterBaseScope.Structure.ApplyEntityStructure<ConcreteEntity01>();

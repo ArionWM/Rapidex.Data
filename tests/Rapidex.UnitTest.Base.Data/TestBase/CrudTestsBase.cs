@@ -20,7 +20,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Structure.DropEntity("ConcreteEntity01");
 
@@ -54,7 +54,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         public virtual async Task Crud_02_Insert_Multiple_Concrete()
         {
             this.Fixture.ClearCaches();
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Structure.DropEntity("ConcreteEntity01");
@@ -91,7 +91,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             this.Fixture.ClearCaches();
             //Elle bir entity'nin Id'si 10k altında verilebilir (ön tanımlı kayıtlar bu şekilde çalışır)
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Structure.DropEntity("ConcreteEntity01");
 
@@ -114,7 +114,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Structure.DropEntity("ConcreteEntity01");
 
@@ -160,7 +160,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.ClearCaches();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
             string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity03.base.json");
 
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -212,7 +212,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public virtual async Task Crud_07_SimpleDelete()
         {
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
             db.Metadata.AddIfNotExist<ConcreteEntity02>();
@@ -258,7 +258,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public virtual async Task Crud_08_Transaction_Basics()
         {
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             db.ReAddReCreate<ConcreteEntity01>();
             db.ReAddReCreate<ConcreteEntity02>();
@@ -274,7 +274,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             count = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(1, count);
 
-            var tran1 = db.Begin();
+            var tran1 = db.BeginWork();
 
             ConcreteEntity01 ent2 = db.New<ConcreteEntity01>();
             ent2.Name = "Ent 2";
@@ -285,7 +285,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             count = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(1, count);
 
-            using (var tran2 = db.Begin())
+            using (var tran2 = db.BeginWork())
             {
                 ConcreteEntity01 ent3 = db.New<ConcreteEntity01>();
                 ent3.Name = "Ent 3";

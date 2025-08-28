@@ -30,7 +30,7 @@ serviceProvider.StartRapidexDataLevel(); //<- Start Rapidex infrastructure
 
 
 // Lets access database
-var dbScope = Database.Scopes.AddMainDbIfNotExists();
+var dbScope = Database.Dbs.AddMainDbIfNotExists();
 
 //Scan and add metadata from definitions
 dbScope.Metadata.ScanDefinitions(@".\App_Content\MyAppDefinitions");

@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
-internal class DataModificationScope : DataModificationManagerBase, IDbDataModificationTransactionedManager
+internal class DataModificationScope : DataModificationScopeBase, IDbDataModificationTransactionedScope
 {
     protected bool IsFinalized { get; set; } = false;
     public IDbInternalTransactionScope CurrentTransaction { get; protected set; }

@@ -15,14 +15,14 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void TTT1()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         db.ReAddReCreate<ConcreteEntity03>();
 
         ConcreteEntity03 ent1 = db.New<ConcreteEntity03>();
         ent1.Name = "test 1";
         ent1.Save();
 
-        using (var scope = db.Begin())
+        using (var scope = db.BeginWork())
         {
             ConcreteEntity03 ent2 = scope.New<ConcreteEntity03>();
             ent2.Name = "test 2";
@@ -48,7 +48,7 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void TTT2()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         db.ReAddReCreate<ConcreteEntity02>();
         db.ReAddReCreate<ConcreteEntity01>();
 
@@ -56,7 +56,7 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
         ent1_1.Name = "test 1";
         ent1_1.Save();
 
-        using (var scope = db.Begin())
+        using (var scope = db.BeginWork())
         {
             ConcreteEntity02 ent2_1 = scope.New<ConcreteEntity02>();
             ent2_1.MyReference = ent1_1;

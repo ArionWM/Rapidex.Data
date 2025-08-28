@@ -24,7 +24,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Image_01_BasicSaveAndLoad()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         db.ReAddReCreate<ConcreteEntity01>();
 
@@ -73,7 +73,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         this.Fixture.ClearCaches();
 
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         db.ReAddReCreate<BlobRecord>();
         db.ReAddReCreate<ConcreteEntity01>();
@@ -116,7 +116,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public virtual void Enum_02_Assignment()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         db.ReAddReCreate<ConcreteEntity01>();
 
@@ -138,7 +138,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //TODO: Clear entity cache
 
-        db = Database.Scopes.Db();
+        db = Database.Dbs.Db();
         db.Metadata.ReAdd<ConcreteEntity01>();
 
         ConcreteEntity01 ent01_check = db.Find<ConcreteEntity01>(id01);
@@ -152,7 +152,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public virtual void Enum_03_PredefinedValues()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         db.ReAddReCreate<ConcreteEntity01>();
         //Database.Metadata.AddIfNotExist<BlobRecord>();
@@ -181,7 +181,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Tags_01_Basics()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         //Database.Metadata.ReAdd<ConcreteEntityForTagTest>();
         db.ReAddReCreate<ConcreteEntityForTagTest>();
@@ -230,7 +230,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void DateTime_01_UseToDateTimeOffset()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
         db.ReAddReCreate<ConcreteEntity01>();
 
         ConcreteEntity01 ent01 = db.New<ConcreteEntity01>();
@@ -280,7 +280,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Password_01_ConcreteEntity()
     {
-        var dbScope = Database.Scopes.Db();
+        var dbScope = Database.Dbs.Db();
 
         dbScope.ReAddReCreate<PasswordTestEntity>();
 
@@ -309,7 +309,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Password_02_JsonEntity()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity08.forPasswords.json");
         var ems = db.Metadata.AddJson(content);
@@ -344,7 +344,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void OneWayPassword_01_CryptDecrypt()
     {
-        var db = Database.Scopes.Db();
+        var db = Database.Dbs.Db();
 
         db.ReAddReCreate<PasswordTestEntity>();
 
@@ -390,7 +390,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void DateTimeStartEnd_01_Simple()
     {
-        var dbScope = Database.Scopes.Db();
+        var dbScope = Database.Dbs.Db();
 
         dbScope.Metadata.AddIfNotExist<Contact>();
         dbScope.ReAddReCreate<ConcreteEntityForUpdateTests01>();

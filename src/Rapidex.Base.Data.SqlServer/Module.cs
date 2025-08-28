@@ -32,7 +32,7 @@ internal class Module : AssemblyDefinitionBase, IRapidexAssemblyDefinition
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
         DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
-        connection.Execute($"USE [{Database.Scopes.Db().DatabaseName}]");
+        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
         return connection;
     }
 }

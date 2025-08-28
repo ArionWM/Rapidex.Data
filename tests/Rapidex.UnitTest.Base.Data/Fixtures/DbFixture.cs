@@ -77,7 +77,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         this.ServiceProvider.StartRapidexDataLevel();
 
 
-        var dbScope = Database.Scopes.AddMainDbIfNotExists();
+        var dbScope = Database.Dbs.AddMainDbIfNotExists();
         dbScope.Structure.ApplyAllStructure();
 
 
@@ -91,7 +91,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
         DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
-        connection.Execute($"USE [{Database.Scopes.Db().DatabaseName}]");
+        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
         return connection;
     }
 
@@ -101,12 +101,12 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
     {
         //InMemCache clear
         //Common caches clear
-        ((Rapidex.Data.Scopes.DbScopeManager)Database.Scopes).ClearCache();
+        ((Rapidex.Data.Scopes.DbScopeManager)Database.Dbs).ClearCache();
         //((IDbEntityMetadataManager)Database.Metadata).Clear();
         //Database.PredefinedValues.Clear();
         //Database.Metadata.Setup(null);
 
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
 
     }

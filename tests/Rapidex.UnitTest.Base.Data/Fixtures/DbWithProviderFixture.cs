@@ -27,7 +27,7 @@ namespace Rapidex.UnitTest.Data.Fixtures
             //Database.Configuration.DatabaseSectionParentName = typeof(T).Name;
             base.Init();
 
-            Database.Scopes.AddMainDbIfNotExists();
+            Database.Dbs.AddMainDbIfNotExists();
         }
 
 

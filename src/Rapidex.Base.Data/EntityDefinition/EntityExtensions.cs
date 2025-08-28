@@ -54,7 +54,7 @@ public static class EntityExtensions
     public static void Save(this IEntity entity)
     {
         entity._Scope.Save(entity);
-        //Database.Scopes.Db(entity._DbName).Schema(entity._SchemaName)
+        //Database.Databases.Db(entity._DbName).Schema(entity._SchemaName)
     }
 
     public static void Save(this IEnumerable<IEntity> entities)

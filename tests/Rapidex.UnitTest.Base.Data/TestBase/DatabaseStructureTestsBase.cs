@@ -23,7 +23,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             this.Fixture.Reinit();
 
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             string databaseName = db.DatabaseName; // Database.Configuration.DefaultDatabaseNamePrefix + "_" + dbScope.Name;
             Assert.True(db.Structure.IsDatabaseAvailable(databaseName));
@@ -33,7 +33,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public virtual void Structure_02_PredefinedRecords()
         {
-            var db = Database.Scopes.AddMainDbIfNotExists();
+            var db = Database.Dbs.AddMainDbIfNotExists();
 
             string content07 = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity07.withPredefinedData.json");
             db.Metadata.AddIfNotExist<ConcreteEntity01>();

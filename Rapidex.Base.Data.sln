@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommonRepository", "CommonR
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3A34B72D-C506-4C2A-865F-A5548F5CD433}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Base.Common", "..\Rapidex-Base-Common\Rapidex.UnitTest.Base.Common\Rapidex.UnitTest.Base.Common.csproj", "{89651E18-0E05-1D28-59F2-AA50D56BEAE0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,6 +92,10 @@ Global
 		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89651E18-0E05-1D28-59F2-AA50D56BEAE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89651E18-0E05-1D28-59F2-AA50D56BEAE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89651E18-0E05-1D28-59F2-AA50D56BEAE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89651E18-0E05-1D28-59F2-AA50D56BEAE0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,6 +113,7 @@ Global
 		{33CCFF31-33F0-03EC-77BF-8FB4FA6A9AAC} = {5DF207CE-1D5A-44CA-97BD-C3712DA80806}
 		{0E98197D-AC04-46E8-9FAE-02B69EBBB06C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{5DF207CE-1D5A-44CA-97BD-C3712DA80806} = {3F9BCB72-82C8-47CF-AD6F-D5A6E7978958}
+		{89651E18-0E05-1D28-59F2-AA50D56BEAE0} = {5DF207CE-1D5A-44CA-97BD-C3712DA80806}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7BA78EAA-AAC5-488A-9D07-61F6CB6F437A}

@@ -10,20 +10,22 @@ internal class SampleServiceA
 {
     public void CreateOrderOnMasterDbAndBaseSchema(Contact contact, params string[] itemCodes)
     {
-        var myDb = Database.Scopes.Db();
-        Order order = myDb.New<Order>();
+        var myDb = Database.Dbs.Db();
+        using var work = myDb.BeginWork();
+
+        Order order = work.New<Order>();
         order.Customer = contact;
         order.Save();
 
         foreach (var itemCode in itemCodes)
         {
-            Item item = myDb.GetQuery<Item>()
+            Item item = work.GetQuery<Item>()
                 .Eq(nameof(Item.Code), itemCode)
                 .First();
 
             item.NotNull($"Item not found: {itemCode}");
 
-            OrderLine line = myDb.New<OrderLine>();
+            OrderLine line = work.New<OrderLine>();
             line.Item = item;
             line.Quantity = 1;
             line.UnitPrice = item.Price;
@@ -31,13 +33,13 @@ internal class SampleServiceA
             order.Lines.Add(line);
         }
 
-        myDb.ApplyChanges();
+        work.CommitChanges();
     }
 
     public void CreateOrderOnMasterDbAndBaseSchema2(Contact contact, params string[] itemCodes)
     {
-        var myDb = Database.Scopes.Db();
-        using (var dmScope = myDb.Begin())
+        var myDb = Database.Dbs.Db();
+        using (var dmScope = myDb.BeginWork())
         {
             Order order = dmScope.New<Order>();
             order.Customer = contact;

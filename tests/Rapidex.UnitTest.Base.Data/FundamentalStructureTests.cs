@@ -16,9 +16,9 @@ public class FundamentalStructureTests : DbDependedTestsBase<DbSqlServerProvider
     [Fact]
     public void T01_Initialization()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
         Assert.NotNull(db.Metadata);
-        Assert.NotNull(Database.Scopes);
+        Assert.NotNull(Database.Dbs);
 
         //Assert.NotNull(Database.ConcreteEntityMapper);
         Assert.NotNull(Database.EntityFactory);
@@ -30,13 +30,13 @@ public class FundamentalStructureTests : DbDependedTestsBase<DbSqlServerProvider
     [Fact]
     public void T02_ParentAssignments()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
         this.Fixture.ClearCaches();
 
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
         db.Metadata.AddIfNotExist<ConcreteEntity02>();
 
-        var database = Database.Scopes.AddMainDbIfNotExists();
+        var database = Database.Dbs.AddMainDbIfNotExists();
         var schema01 = database.AddSchemaIfNotExists("myTestSchema01");
         var schema02 = database.AddSchemaIfNotExists("myTestSchema02");
 

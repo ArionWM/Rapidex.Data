@@ -19,7 +19,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public void Sequence_01_CreateSequence()
         {
-            var dbScope = Database.Scopes.Db();
+            var dbScope = Database.Dbs.Db();
 
             string sequenceName = "s" + RandomHelper.RandomText(10);
             dbScope.Structure.CreateSequenceIfNotExists(sequenceName, 1);
@@ -37,7 +37,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public void Sequence_02_GetNext()
         {
-            var dbScope = Database.Scopes.Db();
+            var dbScope = Database.Dbs.Db();
 
             string sequenceName = "s" + RandomHelper.RandomText(10);
             dbScope.Structure.CreateSequenceIfNotExists(sequenceName, 1);
@@ -50,7 +50,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         [Fact]
         public void Sequence_03_Relocate()
         {
-            var dbScope = Database.Scopes.Db();
+            var dbScope = Database.Dbs.Db();
 
             string sequenceName = "s" + RandomHelper.RandomText(10);
             dbScope.Structure.CreateSequenceIfNotExists(sequenceName, 10001);
@@ -65,7 +65,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         //[Fact]
         //public void Sequence_03_CantRelocateUnderMinValue()
         //{
-        //    var dbScope = Database.Scopes.Db();
+        //    var dbScope = Database.Databases.Db();
 
         //    string sequenceName = RandomHelper.RandomText(10);
         //    dbScope.Structure.AddOrUpdateSequence(sequenceName);

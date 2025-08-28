@@ -34,7 +34,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<IFieldMetadataFactory, FieldMetadataFactory>();
         services.AddSingletonForProd<DbEntityFactory, DbEntityFactory>();
 
-        services.AddSingletonForProd<IDbScopeManager, DbScopeManager>();
+        services.AddSingletonForProd<IDbManager, DbScopeManager>();
 
         services.AddTransientForProd<IDbCriteriaParser, FilterTextParser>();
         services.AddTransientForProd<FilterTextParser, FilterTextParser>();

@@ -26,12 +26,12 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
     [Fact]
     public void Serialization_01_ConvertToEntityDataDto()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
         db.Metadata.AddIfNotExist<ConcreteEntity04>(); //Master
         db.Metadata.AddIfNotExist<ConcreteEntity03>(); //Detail
 
-        var dbscope = Database.Scopes.AddMainDbIfNotExists();
+        var dbscope = Database.Dbs.AddMainDbIfNotExists();
         dbscope.Structure.DropEntity<ConcreteEntity03>();
         dbscope.Structure.DropEntity<ConcreteEntity04>();
 
@@ -101,10 +101,10 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
     [Fact]
     public void Serialization_01_EntityToJsonAndReverse()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
-        //var dbscope = Database.Scopes.AddMainDbIfNotExists();
+        //var dbscope = Database.Databases.AddMainDbIfNotExists();
         //dbscope.Structure.DropEntity<ConcreteEntity01>();
         //dbscope.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
@@ -128,10 +128,10 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
     [Fact]
     public void Serialization_02_EntityJsonDataDeserialization()
     {
-        var db = Database.Scopes.AddMainDbIfNotExists();
+        var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
 
-        //var dbscope = Database.Scopes.AddMainDbIfNotExists();
+        //var dbscope = Database.Databases.AddMainDbIfNotExists();
         //dbscope.Structure.DropEntity<ConcreteEntity01>();
 
         //dbscope.Structure.ApplyAllStructure();
