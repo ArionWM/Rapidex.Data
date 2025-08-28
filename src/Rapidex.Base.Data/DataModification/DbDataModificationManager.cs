@@ -327,4 +327,14 @@ internal class DbDataModificationManager : IDbDataModificationScope
     {
         this.GetChangesScope().Delete(entity);
     }
+
+    public IEntityUpdateResult CommitChanges()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
 }

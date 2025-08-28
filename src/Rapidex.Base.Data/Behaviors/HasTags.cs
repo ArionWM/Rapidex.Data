@@ -136,7 +136,8 @@ namespace Rapidex.Data
 
             var availableTags = query.Load();
 
-            //TODO: var trn = dbScope.Begin("tags");
+            using var work = dbScope.BeginWork();
+
             try
             {
                 foreach (var tag in tags)
@@ -153,7 +154,7 @@ namespace Rapidex.Data
                     }
                     else
                     {
-                        TagRecord tagrec = dbScope.New<TagRecord>();
+                        TagRecord tagrec = work.New<TagRecord>();
                         tagrec.Entity = em.Name;
                         tagrec.Name = _tag.Name;
                         tagrec.Color = _tag.Color;
@@ -161,8 +162,7 @@ namespace Rapidex.Data
                     }
                 }
 
-                dbScope.ApplyChanges();
-                //trn.Commit();
+                work.CommitChanges();
             }
             catch (Exception ex)
             {

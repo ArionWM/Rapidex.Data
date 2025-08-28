@@ -62,6 +62,8 @@ public class PredefinedDataCollection
 
         var availEntities = scope.GetQuery(em).Load();
 
+        using var work = scope.BeginWork();
+
         entities.ForEach(e =>
         {
             e._IsNew = true;
@@ -93,7 +95,7 @@ public class PredefinedDataCollection
                 }
             }
         }
-        scope.ApplyChanges();
+        work.CommitChanges();
     }
 
     protected void Apply(IDbSchemaScope scope, IDbEntityMetadata em)

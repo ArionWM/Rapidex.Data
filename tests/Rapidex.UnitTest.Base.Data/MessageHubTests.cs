@@ -34,7 +34,8 @@ public class MessageHubTests : DbDependedTestsBase<DbSqlServerProvider>
 
         Assert.True(subs1Result.Success);
 
-        ConcreteEntity01 ent01 = db.New<ConcreteEntity01>();
+        using var work = db.BeginWork();
+        ConcreteEntity01 ent01 = work.New<ConcreteEntity01>();
 
         Assert.NotEmpty(subs1Invokes);
 

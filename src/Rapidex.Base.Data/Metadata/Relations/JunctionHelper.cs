@@ -141,7 +141,7 @@ internal class JunctionHelper
 
         if (!isExist)
         {
-            IEntity jEntity = dbSchema.New(fm.JunctionEntityName);
+            IEntity jEntity = dbSchema.CurrentWork.New(fm.JunctionEntityName);
             jEntity[sourceFieldName] = entityAId;
             jEntity[targetFieldName] = entityBID;
 
@@ -192,7 +192,7 @@ internal class JunctionHelper
         {
             if (directSave)
             {
-                dbSchema.Delete(ent);
+                dbSchema.CurrentWork.Delete(ent);
             }
             else
             {

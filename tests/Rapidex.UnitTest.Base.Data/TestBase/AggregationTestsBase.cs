@@ -23,18 +23,19 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             db.Structure.ApplyEntityStructure<AggrTestEntity01>();
 
-            //100 entity
-            //"No" birer artıyor (1'den başlayarak)
-            //"Age" 20'den başlayarak 1'er artıyor
-            //Name: "Entity Name 001" şeklinde
-            //Amount: i % 10
-            //IsActive: i % 2 == 0
-            //BirthDate: 01.01.2000 + i gün
+			//100 entity
+			//"No" birer artıyor (1'den başlayarak)
+			//"Age" 20'den başlayarak 1'er artıyor
+			//Name: "Entity Name 001" şeklinde
+			//Amount: i % 10
+			//IsActive: i % 2 == 0
+			//BirthDate: 01.01.2000 + i gün
 
+			using var work = db.BeginWork();
 
-            for (int i = 0; i < 100; i++)
+			for (int i = 0; i < 100; i++)
             {
-                AggrTestEntity01 entity = db.New<AggrTestEntity01>();
+                AggrTestEntity01 entity = work.New<AggrTestEntity01>();
                 entity.No = i + 1;
                 entity.Age = 20 + i;
                 entity.Name = $"Entity Name {i + 1:000}";
@@ -45,10 +46,7 @@ namespace Rapidex.UnitTest.Data.TestBase
                 entity.Save();
             }
 
-            db.ApplyChanges();
-
-
-
+            work.CommitChanges();
         }
 
         [Fact]

@@ -131,15 +131,17 @@ namespace Rapidex.Data.Scopes
         protected void RecordSchemaInfo(IDbSchemaScope schemaScope, long id = DatabaseConstants.DEFAULT_EMPTY_ID)
         {
             IDbSchemaScope _base = schemaScope.SchemaName == this.DefaultSchemaName ? schemaScope : this.baseScope;
-
-            SchemaInfo schemaRecord = _base.New<SchemaInfo>();
+            
+            using var work = _base.BeginWork();
+            
+            SchemaInfo schemaRecord = work.New<SchemaInfo>();
             schemaRecord.Name = schemaScope.SchemaName;
             if (id > 0)
                 schemaRecord.Id = id;
 
             schemaRecord.Save();
 
-            _base.ApplyChanges();
+            work.CommitChanges();
         }
 
         public IDbSchemaScope AddSchemaIfNotExists(string schemaName = null, long id = DatabaseConstants.DEFAULT_EMPTY_ID)

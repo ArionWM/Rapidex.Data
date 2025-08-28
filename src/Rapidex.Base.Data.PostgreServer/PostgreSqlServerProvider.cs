@@ -16,7 +16,7 @@ public class PostgreSqlServerProvider : IDbProvider
     protected string _databaseName;
 
     protected NpgsqlConnectionStringBuilder Connectionbuilder { get; set; }
-    protected Dictionary<IDbSchemaScope, IDbDataModificationPovider> dmProviders = new();
+    //protected Dictionary<IDbSchemaScope, IDbDataModificationPovider> dmProviders = new();
 
     internal static IExceptionTranslator PostgreServerExceptionTranslator { get; }
 
@@ -103,16 +103,19 @@ public class PostgreSqlServerProvider : IDbProvider
 
     }
 
-    public IDbDataModificationPovider GetDataModificationPovider()
+    public IDbDataModificationPovider GetDataModificationProvider()
     {
+
         this.ValidateInitialization();
 
-        var provider = dmProviders.GetOr(this.ParentScope, () =>
-        {
-            return new PostgreSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
-        });
+        return new PostgreSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
 
-        return provider;
+        //var provider = dmProviders.GetOr(this.ParentScope, () =>
+        //{
+        //    return new PostgreSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
+        //});
+
+        //return provider;
     }
 
     public IDbStructureProvider GetStructureProvider()

@@ -53,8 +53,9 @@ public static class EntityExtensions
 
     public static void Save(this IEntity entity)
     {
-        entity._Scope.Save(entity);
-        //Database.Databases.Db(entity._DbName).Schema(entity._SchemaName)
+        entity._Scope.CurrentWork.NotNull("No active work found in current scope");
+
+        entity._Scope.CurrentWork.Save(entity);
     }
 
     public static void Save(this IEnumerable<IEntity> entities)
@@ -64,7 +65,9 @@ public static class EntityExtensions
 
         //TODO: Farklı scope'lar için ayrı ayrı kaydetme yapılabilir mi?
         IDbSchemaScope scope = entities.FirstOrDefault()._Scope;
-        scope.Save(entities);
+
+        scope.CurrentWork.NotNull("No active work found in current scope");
+        scope.CurrentWork.Save(entities);
     }
 
 

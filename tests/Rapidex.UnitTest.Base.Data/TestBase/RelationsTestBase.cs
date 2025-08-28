@@ -31,16 +31,18 @@ namespace Rapidex.UnitTest.Data.TestBase
             dbScope.Structure.ApplyEntityStructure<ConcreteEntity03>();
             dbScope.Structure.ApplyEntityStructure<ConcreteEntity04>();
 
+            using var work = db.BeginWork();
+
             var createData = (int scopeId) =>
             {
-                ConcreteEntity04 masterEntity = dbScope.New<ConcreteEntity04>();
+                ConcreteEntity04 masterEntity = work.New<ConcreteEntity04>();
                 masterEntity.Number = RandomHelper.Random(100000);
                 masterEntity.Save();
 
                 List<ConcreteEntity03> details = new List<ConcreteEntity03>();
                 for (int i = 0; i < 3; i++)
                 {
-                    ConcreteEntity03 detailEntity = dbScope.New<ConcreteEntity03>();
+                    ConcreteEntity03 detailEntity = work.New<ConcreteEntity03>();
                     detailEntity.Name = "Detail " + scopeId.ToString("00") + " " + i.ToString("00");
                     detailEntity.Save();
 
@@ -55,7 +57,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             var (masterEntity01, details01) = createData(1);
             var (masterEntity02, details02) = createData(2);
 
-             dbScope.ApplyChanges();
+            work.CommitChanges();
 
             //Clear caches
 
@@ -114,25 +116,22 @@ namespace Rapidex.UnitTest.Data.TestBase
             db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
             db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
 
-            var dbScope = Database.Dbs.Db();
-            dbScope.Structure.DropEntity<ConcreteEntityForN2NTest02>();
-            dbScope.Structure.DropEntity<ConcreteEntityForN2NTest01>();
-            dbScope.Structure.DropEntity<GenericJunction>();
+            db.ReAddReCreate<ConcreteEntityForN2NTest02>();
+            db.ReAddReCreate<ConcreteEntityForN2NTest01>();
+            db.ReAddReCreate<GenericJunction>();
 
-            dbScope.Structure.ApplyEntityStructure<GenericJunction>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest02>();
-            dbScope.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
+            using var work = db.BeginWork();
 
-            var relatedEntity01 = dbScope.New<ConcreteEntityForN2NTest02>();
+            var relatedEntity01 = work.New<ConcreteEntityForN2NTest02>();
             relatedEntity01.Name = "Related Entity 01";
             relatedEntity01.Save();
 
-            var relatedEntity02 = dbScope.New<ConcreteEntityForN2NTest02>();
+            var relatedEntity02 = work.New<ConcreteEntityForN2NTest02>();
             relatedEntity02.Name = "Related Entity 02";
             relatedEntity02.Save();
 
 
-            var entity01 = dbScope.New<ConcreteEntityForN2NTest01>();
+            var entity01 = work.New<ConcreteEntityForN2NTest01>();
             entity01.Name = "Entity 01";
             entity01.Save();
 
@@ -140,22 +139,22 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity01.Relation01.Add(relatedEntity02);
             entity01.Save();
 
-            var entity02 = dbScope.New<ConcreteEntityForN2NTest01>();
+            var entity02 = work.New<ConcreteEntityForN2NTest01>();
             entity02.Name = "Entity 02";
             entity02.Save();
 
-             dbScope.ApplyChanges();
+             work.CommitChanges();
 
             long entity1Id = entity01.Id;
             long entity2Id = entity02.Id;
 
             //Clear cache
 
-            var entity1 =  dbScope.Find<ConcreteEntityForN2NTest01>(entity1Id);
+            var entity1 =  db.Find<ConcreteEntityForN2NTest01>(entity1Id);
             var relations01 = entity1.Relation01.GetContent();
             Assert.Equal(2, relations01.ItemCount);
 
-            var entity2 =  dbScope.Find<ConcreteEntityForN2NTest01>(entity2Id);
+            var entity2 =  db.Find<ConcreteEntityForN2NTest01>(entity2Id);
             var relations02 = entity2.Relation01.GetContent();
             Assert.Empty(relations02);
 
@@ -174,26 +173,27 @@ namespace Rapidex.UnitTest.Data.TestBase
             var em1 = db.Metadata.AddJson(content);
             content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity11.forN2N.json");
             var em2 = db.Metadata.AddJson(content);
+            
+            db.Structure.DropEntity("myJsonEntity10");
+            db.Structure.DropEntity("myJsonEntity11");
+            db.Structure.DropEntity<GenericJunction>();
 
-            var dbScope = Database.Dbs.Db();
-            dbScope.Structure.DropEntity("myJsonEntity10");
-            dbScope.Structure.DropEntity("myJsonEntity11");
-            dbScope.Structure.DropEntity<GenericJunction>();
+            db.Structure.ApplyEntityStructure<GenericJunction>();
+            db.Structure.ApplyEntityStructure(em1.First());
+            db.Structure.ApplyEntityStructure(em2.First());
 
-            dbScope.Structure.ApplyEntityStructure<GenericJunction>();
-            dbScope.Structure.ApplyEntityStructure(em1.First());
-            dbScope.Structure.ApplyEntityStructure(em2.First());
+            using var work = db.BeginWork();
 
-            var relatedEntity01 = dbScope.New("myJsonEntity10");
+            var relatedEntity01 = work.New("myJsonEntity10");
             relatedEntity01["Name"] = "Related Entity 01";
             relatedEntity01.Save();
 
-            var relatedEntity02 = dbScope.New("myJsonEntity10");
+            var relatedEntity02 = work.New("myJsonEntity10");
             relatedEntity02["Name"] = "Related Entity 02";
             relatedEntity02.Save();
 
 
-            var entity01 = dbScope.New("myJsonEntity11");
+            var entity01 = work.New("myJsonEntity11");
             entity01["Name"] = "Entity 01";
             entity01.Save();
 
@@ -201,22 +201,22 @@ namespace Rapidex.UnitTest.Data.TestBase
             ((RelationN2N)entity01["Relation01"]).Add(relatedEntity02);
             entity01.Save();
 
-            var entity02 = dbScope.New("myJsonEntity11");
+            var entity02 = work.New("myJsonEntity11");
             entity02["Name"] = "Entity 02";
             entity02.Save();
 
-             dbScope.ApplyChanges();
+             work.CommitChanges();
 
             long entity1Id = entity01.GetId().As<long>();
             long entity2Id = entity02.GetId().As<long>();
 
             //Clear cache
 
-            var entity1 = dbScope.Find("myJsonEntity11", entity1Id);
+            var entity1 = db.Find("myJsonEntity11", entity1Id);
             var relations01 = (IEntityLoadResult)((RelationN2N)entity01["Relation01"]).GetContent();
             Assert.Equal(2, relations01.ItemCount);
 
-            var entity2 = dbScope.Find("myJsonEntity11", entity2Id);
+            var entity2 = db.Find("myJsonEntity11", entity2Id);
             var relations02 = (IEntityLoadResult)((RelationN2N)entity02["Relation01"]).GetContent();
             Assert.Empty(relations02);
 

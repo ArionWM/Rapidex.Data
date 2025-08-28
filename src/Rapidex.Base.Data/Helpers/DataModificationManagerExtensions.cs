@@ -68,7 +68,7 @@ namespace Rapidex.Data
             return concEntity;
         }
 
-        public static IEntityLoadResult Load(this IDbDataModificationScope dmm, IDbEntityMetadata em, Action<IQueryCriteria> act = null)
+        public static IEntityLoadResult Load(this IDbDataReadScope dmm, IDbEntityMetadata em, Action<IQueryCriteria> act = null)
         {
             dmm.NotNull();
 
@@ -80,7 +80,7 @@ namespace Rapidex.Data
         }
 
 
-        public static IEntityLoadResult Load(this IDbDataModificationScope dmm, string entityName, Action<IQueryCriteria> act = null)
+        public static IEntityLoadResult Load(this IDbDataReadScope dmm, string entityName, Action<IQueryCriteria> act = null)
         {
             dmm.NotNull();
 
@@ -90,7 +90,7 @@ namespace Rapidex.Data
 
 
 
-        public static IEntityLoadResult<TEntity> Load<TEntity>(this IDbDataModificationScope dmm, Action<IQueryCriteria> act = null) where TEntity : IConcreteEntity
+        public static IEntityLoadResult<TEntity> Load<TEntity>(this IDbDataReadScope dmm, Action<IQueryCriteria> act = null) where TEntity : IConcreteEntity
         {
             dmm.NotNull();
 
@@ -101,7 +101,7 @@ namespace Rapidex.Data
             return loadResult.CastTo<TEntity>();
         }
 
-        public static IEntity Find(this IDbDataModificationScope dmm, string entityName, long id)
+        public static IEntity Find(this IDbDataReadScope dmm, string entityName, long id)
         {
             dmm.NotNull();
 
@@ -112,7 +112,7 @@ namespace Rapidex.Data
         }
 
 
-        public static TEntity Find<TEntity>(this IDbDataModificationScope dmm, long id) where TEntity : IConcreteEntity
+        public static TEntity Find<TEntity>(this IDbDataReadScope dmm, long id) where TEntity : IConcreteEntity
         {
             dmm.NotNull();
 

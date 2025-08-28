@@ -36,7 +36,7 @@ namespace Rapidex.Data.Scopes
 
                 if (brec != null)
                 {
-                    this.parentScope.Data.Delete(brec);
+                    this.parentScope.CurrentWork.Delete(brec);
                     ures.Deleted(brec);
                     ures.Success = true;
                 }
@@ -68,7 +68,7 @@ namespace Rapidex.Data.Scopes
 
                 if (brec != null)
                 {
-                    this.parentScope.Data.Delete(brec);
+                    this.parentScope.CurrentWork.Delete(brec);
                 }
 
                 return Result<BlobRecord>.Ok(null);
@@ -77,7 +77,7 @@ namespace Rapidex.Data.Scopes
 
             if (brec == null)
             {
-                brec = this.parentScope.New<BlobRecord>();
+                brec = this.parentScope.CurrentWork.New<BlobRecord>();
             }
 
             brec.Data = new byte[content.Length];
@@ -88,7 +88,7 @@ namespace Rapidex.Data.Scopes
             brec.Length = brec.Data.Length;
 
             IEntity bsef = brec;
-            this.parentScope.Save(bsef);
+            this.parentScope.CurrentWork.Save(bsef);
 
             return Result<BlobRecord>.Ok(brec);
         }

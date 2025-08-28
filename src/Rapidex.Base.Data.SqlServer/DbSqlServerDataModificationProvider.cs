@@ -15,17 +15,12 @@ namespace Rapidex.Data.SqlServer;
 
 internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider
 {
-    //protected SqlConnectionStringBuilder Connectionbuilder { get; set; }
     protected DbSqlDdlGenerator DdlGenerator { get; set; } = new DbSqlDdlGenerator();
-
     internal DbSqlServerConnection Connection { get; set; }
-
-
 
     internal string ConnectionString { get; set; }
 
     public IDbSchemaScope ParentScope { get; }
-
     public IDbInternalTransactionScope CurrentTransaction { get; protected set; }
     public IDbProvider ParentProvider { get; protected set; }
 

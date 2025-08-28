@@ -546,7 +546,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public void CreateSequenceIfNotExists(string name, int minValue = -1, int startValue = -1)
     {
-        var seq = new PostgreSqlSequence((PostgreSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationPovider(), name);
+        var seq = new PostgreSqlSequence((PostgreSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider(), name);
         seq.CreateIfNotExists(minValue, startValue);
     }
 

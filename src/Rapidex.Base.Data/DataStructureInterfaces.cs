@@ -425,7 +425,7 @@ public interface IDbProvider : IManager
 
     IDbStructureProvider GetStructureProvider();
 
-    IDbDataModificationPovider GetDataModificationPovider();
+    IDbDataModificationPovider GetDataModificationProvider();
 
     IDataUnitTestHelper GetTestHelper();
 
@@ -608,15 +608,13 @@ public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader
     }
 }
 
-
-
-public interface IDbDataModificationScope 
+public interface IDbDataReadScope
 {
     IDbSchemaScope ParentScope { get; }
 
-    IEntity New(IDbEntityMetadata em);
+    //IDbDataModificationPovider DmProvider { get; }
 
-    IQuery GetQuery(IDbEntityMetadata em);
+    IQuery GetQuery(IDbEntityMetadata em); //TODO: Query Data modification contents can't be there, shoud move to IDbDataModificationScope?
 
     IQuery<T> GetQuery<T>() where T : IConcreteEntity;
 
@@ -625,6 +623,12 @@ public interface IDbDataModificationScope
     IEntityLoadResult Load(IQueryLoader loader);
 
     ILoadResult<DataRow> LoadRaw(IQueryLoader loader);
+}
+
+public interface IDbDataModificationScope : IDbDataReadScope, IDisposable
+{
+
+    IEntity New(IDbEntityMetadata em);
 
     void Save(IEntity entity);
 
@@ -632,29 +636,29 @@ public interface IDbDataModificationScope
 
     void Add(IQueryUpdater updater);
 
-
     void Delete(IEntity entity);
-}
 
-public interface IDbDataModificationStaticHost : IDbDataModificationScope
-{
-    IDbDataModificationTransactionedScope BeginWork();
-
-    /// <summary>
-    /// Write changes to database
-    /// </summary>
-    IEntityUpdateResult ApplyChanges();
-    IIntSequence Sequence(string name);
-}
-
-
-public interface IDbDataModificationTransactionedScope : IDbDataModificationScope, IDisposable
-{
     /// <summary>
     /// Write changes to database and commit transaction
     /// </summary>
     IEntityUpdateResult CommitChanges();
     void Rollback();
+}
+
+public interface IDbDataModificationStaticHost : IDbDataReadScope
+{
+    IDbDataModificationScope CurrentWork { get; }
+
+    IDbDataModificationScope BeginWork();
+
+    ///// <summary>
+    ///// Write changes to database
+    ///// </summary>
+    //IEntityUpdateResult ApplyChanges();
+
+    IIntSequence Sequence(string name);
+
+    void UnRegister(IDbDataModificationScope scope);
 }
 
 
@@ -704,7 +708,7 @@ public interface IDbStructureProvider
 
 
 
-public interface IDbSchemaScope : IDbDataModificationStaticHost //TODO: Rename: IDbSchema
+public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: IDbSchema
 {
     IDbScope ParentDbScope { get; }
     IDbProvider DbProvider { get; }
@@ -720,72 +724,80 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost //TODO: Rename: 
 
     EntityMapper Mapper { get; }
 
-    IDbDataModificationTransactionedScope IDbDataModificationStaticHost.BeginWork()
+    IDbSchemaScope IDbDataReadScope.ParentScope => this.Data.ParentScope;
+    //IDbDataModificationPovider IDbDataReadScope.DmProvider => this.Data.DmProvider;
+    IDbDataModificationScope IDbDataModificationStaticHost.CurrentWork => this.Data.CurrentWork;
+    IDbDataModificationScope IDbDataModificationStaticHost.BeginWork()
     {
         return this.Data.BeginWork();
     }
 
-    IEntityUpdateResult IDbDataModificationStaticHost.ApplyChanges()
+    void IDbDataModificationStaticHost.UnRegister(IDbDataModificationScope scope)
     {
-        return this.Data.ApplyChanges();
+        this.Data.UnRegister(scope);
     }
 
+    //IEntityUpdateResult IDbDataModificationStaticHost.ApplyChanges()
+    //{
+    //    return this.Data.ApplyChanges();
+    //}
 
-    IDbSchemaScope IDbDataModificationScope.ParentScope => this;
+
+    //IDbSchemaScope IDbDataModificationScope.ParentScope => this;
 
     //IDbChangesScopeWithTransaction IDbDataModificationManager.CurrentTransaction => this.Data.CurrentTransaction;
 
 
-    IEntity IDbDataModificationScope.New(IDbEntityMetadata em)
-    {
-        return this.Data.New(em);
-    }
+    //IEntity IDbDataModificationScope.New(IDbEntityMetadata em)
+    //{
+    //    return this.Data.New(em);
+    //}
 
-    IQuery IDbDataModificationScope.GetQuery(IDbEntityMetadata em)
+    IQuery IDbDataReadScope.GetQuery(IDbEntityMetadata em)
     {
         return this.Data.GetQuery(em);
     }
 
-    IQuery<T> IDbDataModificationScope.GetQuery<T>()
+    IQuery<T> IDbDataReadScope.GetQuery<T>()
     {
         return this.Data.GetQuery<T>();
     }
 
 
-    IEntityLoadResult IDbDataModificationScope.Load(IQueryLoader queryLoader)
+    IEntityLoadResult IDbDataReadScope.Load(IQueryLoader queryLoader)
     {
         return this.Data.Load(queryLoader);
     }
 
-    ILoadResult<DataRow> IDbDataModificationScope.LoadRaw(IQueryLoader queryLoader)
+    ILoadResult<DataRow> IDbDataReadScope.LoadRaw(IQueryLoader queryLoader)
     {
         return this.Data.LoadRaw(queryLoader);
     }
 
-    IEntity IDbDataModificationScope.Find(IDbEntityMetadata em, long id)
+    IEntity IDbDataReadScope.Find(IDbEntityMetadata em, long id)
     {
         return this.Data.Find(em, id);
     }
 
-    void IDbDataModificationScope.Save(IEntity entity)
-    {
-        this.Data.Save(entity);
-    }
+    //void IDbDataModificationScope.Save(IEntity entity)
+    //{
+    //    this.Data.Save(entity);
+    //}
 
-    void IDbDataModificationScope.Save(IEnumerable<IEntity> entities)
-    {
-        this.Data.Save(entities);
-    }
+    //void IDbDataModificationScope.Save(IEnumerable<IEntity> entities)
+    //{
+    //    this.Data.Save(entities);
+    //}
 
-    void IDbDataModificationScope.Add(IQueryUpdater updater)
-    {
-        this.Data.Add(updater);
-    }
+    //void IDbDataModificationScope.Add(IQueryUpdater updater)
+    //{
+    //    this.Data.Add(updater);
+    //}
 
-    void IDbDataModificationScope.Delete(IEntity entity)
-    {
-        this.Data.Delete(entity);
-    }
+    //void IDbDataModificationScope.Delete(IEntity entity)
+    //{
+    //    this.Data.Delete(entity);
+    //}
 
 
     void Setup();

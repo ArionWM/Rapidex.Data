@@ -110,7 +110,7 @@ namespace Rapidex.Data.Query
             return (IQuery)base.ClearPaging();
         }
 
-        public void Update(ObjDictionary data)
+        public void Update(IDbDataModificationScope workScope, ObjDictionary data)
         {
             if (this.Mode != QMode.Update)
                 throw new InvalidOperationException("Query is not in update mode");
@@ -140,7 +140,7 @@ namespace Rapidex.Data.Query
                 this.UpdateData.Add(_fieldName, lowerValue);
             }
 
-            this.Schema.Data.Add(this);
+            workScope.Add(this);
         }
 
         public void Delete()

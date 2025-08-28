@@ -26,7 +26,9 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+            using var work = db.BeginWork();
+
+			ConcreteEntity01 entity = work.New<ConcreteEntity01>();
             Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
             Assert.True(entity._IsNew);
             Assert.NotNull(entity.CreditLimit1); //IDataType türünden ise boş değer içeren bir nesne atanmış olmalı
@@ -35,7 +37,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity.Save();
 
-            db.ApplyChanges();
+            work.CommitChanges();
 
             Assert.True(entity.Id > 9999); //Yeni entity'ler 10 k dan büyük bir Id alır
             Assert.False(entity._IsNew);
@@ -61,14 +63,16 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            for (int i = 0; i < 10; i++)
+			using var work = db.BeginWork();
+
+			for (int i = 0; i < 10; i++)
             {
-                ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+                ConcreteEntity01 entity = work.New<ConcreteEntity01>();
                 entity.Name = $"Entity Name {i:000}";
                 entity.Save();
             }
 
-            db.ApplyChanges();
+            work.CommitChanges();
 
             //Check table
         }
@@ -97,7 +101,9 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+			using var work = db.BeginWork();
+
+			ConcreteEntity01 entity = work.New<ConcreteEntity01>();
             entity.Id = 5;
             //??? Assert.True(entity.Id < 0); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
 
@@ -105,7 +111,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             Assert.Equal(5, entity.Id);
 
-            db.ApplyChanges();
+            work.CommitChanges();
         }
 
 
@@ -120,7 +126,9 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+			using var work = db.BeginWork();
+
+			ConcreteEntity01 entity = work.New<ConcreteEntity01>();
             Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
             entity.CheckIDataTypeAssignments();
 
@@ -128,7 +136,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity.Name = name;
             entity.Save();
-            db.ApplyChanges();
+            work.CommitChanges();
 
             long id = entity.Id;
 
@@ -144,7 +152,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             string name2 = RandomHelper.RandomText(10);
             loadedEntity.Name = name2;
             loadedEntity.Save();
-            db.ApplyChanges();
+            work.CommitChanges();
 
             //TODO: Cache'ler temizlenecek !!
 
@@ -174,7 +182,9 @@ namespace Rapidex.UnitTest.Data.TestBase
             db.Structure.ApplyEntityStructure<ConcreteEntity02>();
             db.Structure.ApplyEntityStructure(ems1.First());
 
-            IEntity entity = db.New("myJsonEntity03");
+			using var work = db.BeginWork();
+
+			IEntity entity = work.New("myJsonEntity03");
             entity.CheckIDataTypeAssignments();
 
             Assert.True((long)entity.GetId() < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
@@ -183,7 +193,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             entity["Subject"] = name;
             entity.Save();
-            db.ApplyChanges();
+            work.CommitChanges();
 
             long id = (long)entity.GetId();
 
@@ -198,7 +208,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             string name2 = RandomHelper.RandomText(10);
             loadedEntity["Subject"] = name2;
             loadedEntity.Save();
-            db.ApplyChanges();
+            work.CommitChanges();
 
             //TODO: Cache'ler temizlenecek !!
 
@@ -222,32 +232,34 @@ namespace Rapidex.UnitTest.Data.TestBase
             db.Structure.ApplyEntityStructure<ConcreteEntity01>();
             db.Structure.ApplyEntityStructure<ConcreteEntity02>();
 
-            ConcreteEntity01 entity01 = db.New<ConcreteEntity01>();
+			using var work = db.BeginWork();
+
+			ConcreteEntity01 entity01 = work.New<ConcreteEntity01>();
             entity01.Name = "Entity 001";
             entity01.Save();
 
-            ConcreteEntity01 entity02 = db.New<ConcreteEntity01>();
+            ConcreteEntity01 entity02 = work.New<ConcreteEntity01>();
             entity02.Name = "Entity 002";
             entity02.Save();
 
-            db.ApplyChanges();
+            work.CommitChanges();
 
             var entCount = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(2, entCount);
 
-            db.Delete(entity01);
+            work.Delete(entity01);
 
             //Henüz commit olmadı, veritabanında duruyor
             entCount = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(2, entCount);
 
-            db.ApplyChanges();
+            work.CommitChanges();
 
             entCount = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(1, entCount);
 
-            db.Delete(entity02);
-            db.ApplyChanges();
+            work.Delete(entity02);
+            work.CommitChanges();
 
             entCount = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(0, entCount);
@@ -266,17 +278,19 @@ namespace Rapidex.UnitTest.Data.TestBase
             long count = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(0, count);
 
-            ConcreteEntity01 ent1 = db.New<ConcreteEntity01>();
+			using var work = db.BeginWork();
+
+			ConcreteEntity01 ent1 = work.New<ConcreteEntity01>();
             ent1.Name = "Ent 1";
             ent1.Save();
 
-            db.ApplyChanges();
+            work.CommitChanges();
             count = db.GetQuery<ConcreteEntity01>().Count();
             Assert.Equal(1, count);
 
             var tran1 = db.BeginWork();
 
-            ConcreteEntity01 ent2 = db.New<ConcreteEntity01>();
+            ConcreteEntity01 ent2 = work.New<ConcreteEntity01>();
             ent2.Name = "Ent 2";
             ent2.Save();
 
@@ -287,7 +301,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             using (var tran2 = db.BeginWork())
             {
-                ConcreteEntity01 ent3 = db.New<ConcreteEntity01>();
+                ConcreteEntity01 ent3 = work.New<ConcreteEntity01>();
                 ent3.Name = "Ent 3";
                 ent3.Save();
             }

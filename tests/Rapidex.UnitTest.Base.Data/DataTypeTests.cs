@@ -32,13 +32,15 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         byte[] imageContentOriginal01 = this.Fixture.GetFileContentAsBinary("TestContent\\Image01.png");
         int hash01 = HashHelper.GetStableHashCode(imageContentOriginal01);
 
-        ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+        using var work = db.BeginWork();
+
+        ConcreteEntity01 entity = work.New<ConcreteEntity01>();
         entity.Name = "Binary 001";
 
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         long blobId01_check = entity.Picture.TargetId;
 
@@ -61,7 +63,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal02, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         //Yeni bir içerik yüklendiğinde Id değişmemeli, önceki blobRecord kaydı güncellenmeli
         long blobId02_check = ent01.Picture.TargetId;
@@ -78,15 +80,17 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         db.ReAddReCreate<BlobRecord>();
         db.ReAddReCreate<ConcreteEntity01>();
 
+        using var work = db.BeginWork();
+
         byte[] imageContentOriginal01 = this.Fixture.GetFileContentAsBinary("TestContent\\Image01.png");
         int hash01 = HashHelper.GetStableHashCode(imageContentOriginal01);
 
-        ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+        ConcreteEntity01 entity = work.New<ConcreteEntity01>();
         entity.Name = "Binary 001";
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         long entityId01 = entity.Id;
 
@@ -101,7 +105,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.SetEmpty();
         entity.Save();
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         Assert.Equal(DatabaseConstants.DEFAULT_EMPTY_ID, entity.Picture.TargetId);
 
@@ -120,16 +124,16 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         db.ReAddReCreate<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01 = db.New<ConcreteEntity01>();
+        using var work = db.BeginWork();
+
+        ConcreteEntity01 ent01 = work.New<ConcreteEntity01>();
         ent01.ContactType = ContactType.Corporate;
         ent01.Save();
 
-
-
-        ConcreteEntity01 ent02 = db.New<ConcreteEntity01>();
+        ConcreteEntity01 ent02 = work.New<ConcreteEntity01>();
         ent02["ContactType"] = ContactType.Corporate; //Bu durumda farklı bir atama yapısı çalışıyor
         ent02.Save();
-        db.ApplyChanges();
+        work.CommitChanges();
 
         long id01 = ent01.Id;
         long id02 = ent02.Id;
@@ -162,6 +166,8 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         db.Structure.DropEntity("ContactType");
         db.Structure.ApplyEntityStructure(emCT);
         db.Metadata.Data.Apply(db);
+
+        using var work = db.BeginWork();
 
         var lresult = db.GetQuery("ContactType").Asc(CommonConstants.FIELD_ID).Load();
         Assert.Equal(5, lresult.ItemCount);
@@ -196,10 +202,12 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         //dbScope.Structure.DropEntity<TagRecord>();
         //dbScope.Structure.ApplyAllStructure();
 
+        using var work = db.BeginWork();
+
         Assert.Equal(0, db.GetQuery<ConcreteEntityForTagTest>().Count());
         Assert.Equal(0, db.GetQuery<TagRecord>().Count());
 
-        ConcreteEntityForTagTest ent01 = db.New<ConcreteEntityForTagTest>();
+        ConcreteEntityForTagTest ent01 = work.New<ConcreteEntityForTagTest>();
         ent01.Name = "Entity 01";
 
         var tags = ent01.B<HasTags>().Tags;
@@ -211,7 +219,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         ent01.B<HasTags>().Add("Tag 02");
         ent01.Save();
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         Tags tags01 = ent01.GetValue<Tags>(HasTags.FIELD_TAGS);
         Assert.Equal("|Tag 01|Tag 02|", tags01.Value);
@@ -233,13 +241,15 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         var db = Database.Dbs.Db();
         db.ReAddReCreate<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01 = db.New<ConcreteEntity01>();
+        using var work = db.BeginWork();
+
+        ConcreteEntity01 ent01 = work.New<ConcreteEntity01>();
         DateTimeOffset dtoRef = new DateTimeOffset(2024, 12, 01, 02, 03, 04, TimeSpan.Zero);
         //dto.Offset = TimeSpan.FromHours(3);
 
         ent01.BirthDate = dtoRef;
         ent01.Save();
-        db.ApplyChanges();
+        work.CommitChanges();
 
         long id = ent01.Id;
 
@@ -252,7 +262,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        db.ApplyChanges();
+        work.CommitChanges();
 
         id = ent01.Id;
 
@@ -263,7 +273,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        db.ApplyChanges();
+        work.CommitChanges();
 
         id = ent01.Id;
 
@@ -280,11 +290,13 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Password_01_ConcreteEntity()
     {
-        var dbScope = Database.Dbs.Db();
+        var db = Database.Dbs.Db();
 
-        dbScope.ReAddReCreate<PasswordTestEntity>();
+        db.ReAddReCreate<PasswordTestEntity>();
 
-        PasswordTestEntity ent01 = dbScope.New<PasswordTestEntity>();
+        using var work = db.BeginWork();
+
+        PasswordTestEntity ent01 = work.New<PasswordTestEntity>();
         ent01.Name = "Entity 01";
         ent01.MyPassword = "123456";
 
@@ -293,7 +305,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        dbScope.ApplyChanges();
+        work.CommitChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -318,7 +330,9 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         db.Structure.ApplyEntityStructure(ems.First());
 
-        IEntity ent01 = db.New("myJsonEntity08");
+        using var work = db.BeginWork();
+
+        IEntity ent01 = work.New("myJsonEntity08");
         ent01["Name"] = "Entity 01";
         ent01["MyJsonEntityPassword01"] = "123456";
 
@@ -327,7 +341,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        db.ApplyChanges();
+        work.CommitChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -348,7 +362,9 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         db.ReAddReCreate<PasswordTestEntity>();
 
-        PasswordTestEntity ent01 = db.New<PasswordTestEntity>();
+        using var work = db.BeginWork();
+
+        PasswordTestEntity ent01 = work.New<PasswordTestEntity>();
         ent01.Name = "Entity 01";
         ent01.MyOneWayPassword = "123456";
 
@@ -357,7 +373,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         //Henüz prematüre bir entity üzerinde 
         Assert.Equal("123456", psw.Value);
-        db.ApplyChanges();
+        work.CommitChanges();
 
         string cryptValue = psw.Value;
         Assert.NotEqual("123456", cryptValue);
@@ -390,19 +406,21 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void DateTimeStartEnd_01_Simple()
     {
-        var dbScope = Database.Dbs.Db();
+        var db = Database.Dbs.Db();
 
-        dbScope.Metadata.AddIfNotExist<Contact>();
-        dbScope.ReAddReCreate<ConcreteEntityForUpdateTests01>();
+        db.Metadata.AddIfNotExist<Contact>();
+        db.ReAddReCreate<ConcreteEntityForUpdateTests01>();
 
-        ConcreteEntityForUpdateTests01 entity = dbScope.New<ConcreteEntityForUpdateTests01>();
+        using var work = db.BeginWork();
+
+        ConcreteEntityForUpdateTests01 entity = work.New<ConcreteEntityForUpdateTests01>();
 
         entity.PlannedDate.Start = new DateTimeOffset(2021, 02, 03, 04, 05, 06, TimeSpan.Zero);
         entity.PlannedDate.End = new DateTimeOffset(2021, 04, 06, 08, 05, 06, TimeSpan.Zero);
 
         entity.Save();
 
-        dbScope.ApplyChanges();
+        work.CommitChanges();
     }
 
 

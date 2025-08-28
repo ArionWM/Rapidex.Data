@@ -568,7 +568,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public void CreateSequenceIfNotExists(string name, int minValue = -1, int startValue = -1)
     {
-        var seq = new DbSqlSequence((DbSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationPovider(), name);
+        var seq = new DbSqlSequence((DbSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider(), name);
         seq.CreateIfNotExists(minValue, startValue);
     }
 

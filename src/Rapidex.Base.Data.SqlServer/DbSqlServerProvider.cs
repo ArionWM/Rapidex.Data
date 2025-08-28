@@ -9,7 +9,7 @@ public class DbSqlServerProvider : IDbProvider
     protected string _databaseName;
 
     protected SqlConnectionStringBuilder Connectionbuilder { get; set; }
-    protected Dictionary<IDbSchemaScope, IDbDataModificationPovider> dmProviders = new();
+    //protected Dictionary<IDbSchemaScope, IDbDataModificationPovider> dmProviders = new();
 
     internal static IExceptionTranslator SqlServerExceptionTranslator { get; }
 
@@ -96,15 +96,17 @@ public class DbSqlServerProvider : IDbProvider
 
     }
 
-    public IDbDataModificationPovider GetDataModificationPovider()
+    public IDbDataModificationPovider GetDataModificationProvider()
     {
         this.ValidateInitialization();
-        var provider = dmProviders.GetOr(this.ParentScope, () =>
-        {
-            return new DbSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
-        });
+        return new DbSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
 
-        return provider;
+        //var provider = dmProviders.GetOr(this.ParentScope, () =>
+        //{
+        //    return new DbSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
+        //});
+
+        //return provider;
     }
 
     public IDbStructureProvider GetStructureProvider()

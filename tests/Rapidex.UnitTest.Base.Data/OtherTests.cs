@@ -18,30 +18,32 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
         var db = Database.Dbs.Db();
         db.ReAddReCreate<ConcreteEntity03>();
 
-        ConcreteEntity03 ent1 = db.New<ConcreteEntity03>();
+        using var work1 = db.BeginWork();
+
+        ConcreteEntity03 ent1 = work1.New<ConcreteEntity03>();
         ent1.Name = "test 1";
         ent1.Save();
 
-        using (var scope = db.BeginWork())
+        using (var work1_1 = db.BeginWork())
         {
-            ConcreteEntity03 ent2 = scope.New<ConcreteEntity03>();
+            ConcreteEntity03 ent2 = work1_1.New<ConcreteEntity03>();
             ent2.Name = "test 2";
             ent2.Save();
         }
 
-        long count = db.GetQuery<ConcreteEntity03>().Count();
+        long count = work1.GetQuery<ConcreteEntity03>().Count();
         Assert.Equal(1, count);
 
-        var all = db.Data.Load<ConcreteEntity03>();
+        var all = db.Load<ConcreteEntity03>();
         Assert.Single(all);
         Assert.Equal("test 2", all.First().Name);
 
-        db.ApplyChanges();
+        work1.CommitChanges();
 
         count = db.GetQuery<ConcreteEntity03>().Count();
         Assert.Equal(2, count);
 
-        all = db.Data.Load<ConcreteEntity03>();
+        all = db.Load<ConcreteEntity03>();
         Assert.Equal(2, all.Count());
     }
 
@@ -52,7 +54,8 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
         db.ReAddReCreate<ConcreteEntity02>();
         db.ReAddReCreate<ConcreteEntity01>();
 
-        ConcreteEntity01 ent1_1 = db.New<ConcreteEntity01>();
+        using var work = db.BeginWork();
+        ConcreteEntity01 ent1_1 = work.New<ConcreteEntity01>();
         ent1_1.Name = "test 1";
         ent1_1.Save();
 
@@ -63,6 +66,6 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
             ent2_1.Save();
         }
 
-        db.ApplyChanges();
+        work.CommitChanges();
     }
 }

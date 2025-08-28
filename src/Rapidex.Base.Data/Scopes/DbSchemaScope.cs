@@ -41,8 +41,7 @@ namespace Rapidex.Data.Scopes
             provider.SetParentScope(this);
             this.structureManager = this.dbProvider.GetStructureProvider();
 
-            var dmProvider = this.dbProvider.GetDataModificationPovider();
-            this.dataManager = new DataModificationStaticHost(this, dmProvider);
+            this.dataManager = new DataModificationStaticHost(this);
             this.mapper = new EntityMapper(this);
             this.blobRepository = new DefaultDbBlobRepository(this);
             this.debugTracker = RandomHelper.Random(int.MaxValue);

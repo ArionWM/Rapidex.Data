@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rapidex.Theading;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,54 +9,47 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.DataModification;
 internal class DataModificationStaticHost : DataModificationScopeBase, IDbDataModificationStaticHost
 {
-    protected ThreadLocal<IDbChangesCollection> dbChangesCollection;
-    
-
-    public DataModificationStaticHost(IDbSchemaScope parentScope, IDbDataModificationPovider dmProvider) : base(parentScope, dmProvider)
+    AsyncLocalStack<IDbDataModificationScope> localStack = new AsyncLocalStack<IDbDataModificationScope>();
+    public IDbDataModificationScope CurrentWork
     {
-        this.dbChangesCollection = new ThreadLocal<IDbChangesCollection>();
-    }
-
-    public IDbDataModificationTransactionedScope BeginWork()
-    {
-        return new DataModificationScope(this.ParentScope, this.DmProvider);
-    }
-
-    protected override IDbChangesCollection GetChangesCollection()
-    {
-        if (this.dbChangesCollection.Value == null)
-            this.dbChangesCollection.Value = new DbChangesCollection();
-
-        return this.dbChangesCollection.Value;
+        get
+        {
+            return localStack.Peek();
+        }
     }
 
 
-
-    protected override void ApplyFinalized()
+    public DataModificationStaticHost(IDbSchemaScope parentScope) : base(parentScope)
     {
 
-
     }
+
+    public IDbDataModificationScope BeginWork()
+    {
+
+        //var dmProvider = this.dbProvider.GetDataModificationPovider();
+        IDbDataModificationScope scope = new DataModificationScope(this);
+        this.Register(scope);
+        return scope;
+    }
+
 
     public IIntSequence Sequence(string name)
     {
         return this.DmProvider.Sequence(name);
     }
 
-    public IEntityUpdateResult ApplyChanges()
+    protected void Register(IDbDataModificationScope scope)
     {
-        try
-        {
-            return this.CommitOrApplyChangesInternal();
-        }
-        catch(Exception ex)
-        {
-            ex.Log();
-            throw;
-        }
-        finally
-        {
-            this.dbChangesCollection.Value = null;
-        }
+        localStack.Push(scope);
+    }
+
+    public void UnRegister(IDbDataModificationScope scope)
+    {
+        var top = localStack.Peek();
+        if (top != scope)
+            throw new InvalidOperationException("The scope is not top on the stack. Close scopes with reverse order");
+
+        localStack.Pop();
     }
 }

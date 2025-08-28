@@ -26,17 +26,18 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
+		using var work = db.BeginWork();
 
-        for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++)
         {
-            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = work.New<ConcreteEntity01>();
             entity.Name = $"Entity Name {i:000}";
             entity.CreditLimit1 = 10000 * i;
             entity.Description = $"Description {i:000}";
             entity.Save();
         }
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         this.Fixture.ClearCaches();
 
@@ -67,10 +68,11 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
+		using var work = db.BeginWork();
 
-        for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++)
         {
-            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = work.New<ConcreteEntity01>();
             entity.Name = $"Load_01_SimpleCriteria_Concrete {i:000}";
             entity.CreditLimit1 = 10000 * i;
 
@@ -83,7 +85,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         var result = db.Load<ConcreteEntity01>(q => q.Eq(nameof(ConcreteEntity01.Name), "Phone 002"));
     }
@@ -99,24 +101,26 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
         db.Structure.ApplyEntityStructure(em);
 
-        //100 entity
-        //"No" birer artıyor (1'den başlayarak)
-        //Name: "Entity Name 001" şeklinde
-        //CreditLimit1: 10000 * No
-        //Description: "Description 001" şeklinde
-        //Amount: i % 10
-        //IsActive: i % 2 == 0
-        //Phone: "53367222(i:00)" şeklinde
-        //Email: ilk 50 adedi "email(i:00)@testA.com", diğerleri "email(i-49:00)@testB.com"
-        //BirthDate: 01.01.2000 + i gün
-        //UniqueId: Guid.NewGuid()
-        //Reference01: 10 tane ConcreteEntity01 oluşturuyoruz, index = i % 10 olarak ekliyoruz
+		//100 entity
+		//"No" birer artıyor (1'den başlayarak)
+		//Name: "Entity Name 001" şeklinde
+		//CreditLimit1: 10000 * No
+		//Description: "Description 001" şeklinde
+		//Amount: i % 10
+		//IsActive: i % 2 == 0
+		//Phone: "53367222(i:00)" şeklinde
+		//Email: ilk 50 adedi "email(i:00)@testA.com", diğerleri "email(i-49:00)@testB.com"
+		//BirthDate: 01.01.2000 + i gün
+		//UniqueId: Guid.NewGuid()
+		//Reference01: 10 tane ConcreteEntity01 oluşturuyoruz, index = i % 10 olarak ekliyoruz
 
-        List<ConcreteEntity01> refEntities = new List<ConcreteEntity01>();
+		var work = scope.BeginWork();
+
+		List<ConcreteEntity01> refEntities = new List<ConcreteEntity01>();
 
         for (int i = 0; i < 10; i++)
         {
-            ConcreteEntity01 entity = db.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = work.New<ConcreteEntity01>();
             entity.Name = $"Entity Name {i:000}";
             entity.CreditLimit1 = 10000 * i;
             entity.Description = $"Description {i:000}";
@@ -125,14 +129,14 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             refEntities.Add(entity);
         }
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
 
 
 
         for (int i = 0; i < 100; i++)
         {
-            IEntity entity = scope.New(em);
+            IEntity entity = work.New(em);
             entity["No"] = i + 1;
             entity["Name"] = $"Entity Name {i + 1:000}";
             entity["Value"] = 10000 * (i + 1);
@@ -150,7 +154,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        scope.ApplyChanges();
+        work.CommitChanges();
 
     }
 
@@ -250,29 +254,30 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
         db.Structure.ApplyEntityStructure<ConcreteEntity02>();
 
-        //---------------------------------------------------------------------------------
+		//---------------------------------------------------------------------------------
+		using var work = db.BeginWork();
 
-        ConcreteEntity01 refEnt01 = db.New<ConcreteEntity01>();
+		ConcreteEntity01 refEnt01 = work.New<ConcreteEntity01>();
         refEnt01.Name = "Ent 01";
         refEnt01.Save();
 
-        ConcreteEntity01 refEnt02 = db.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt02 = work.New<ConcreteEntity01>();
         refEnt02.Name = "Ent 02";
         refEnt02.Save();
 
-        ConcreteEntity02 tent01 = db.New<ConcreteEntity02>();
+        ConcreteEntity02 tent01 = work.New<ConcreteEntity02>();
         tent01.MyReference = refEnt01;
         tent01.Save();
 
-        ConcreteEntity02 tent02 = db.New<ConcreteEntity02>();
+        ConcreteEntity02 tent02 = work.New<ConcreteEntity02>();
         tent02.MyReference = null;
         tent02.Save();
 
-        db.Data.ApplyChanges();
+        work.CommitChanges();
 
-        //---------------------------------------------------------------------------------
+		//---------------------------------------------------------------------------------
 
-        var loadResult01 = db.GetQuery<ConcreteEntity02>()
+		var loadResult01 = db.GetQuery<ConcreteEntity02>()
               .Nested(nameof(ConcreteEntity02.MyReference), q => q.Eq(nameof(ConcreteEntity01.Name), "Ent 01"))
               .Load();
 
@@ -306,35 +311,40 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         //---------------------------------------------------------------------------------
 
-        ConcreteOnlyBaseEntity01 baseEnt01 = schemaBase.New<ConcreteOnlyBaseEntity01>();
+        using var workOnBase = schemaBase.BeginWork();
+
+		ConcreteOnlyBaseEntity01 baseEnt01 = workOnBase.New<ConcreteOnlyBaseEntity01>();
         baseEnt01.Name = "Nest Test 01 CEnt 01";
         baseEnt01.Save();
 
-        ConcreteOnlyBaseEntity01 baseEnt02 = schemaBase.New<ConcreteOnlyBaseEntity01>();
+        ConcreteOnlyBaseEntity01 baseEnt02 = workOnBase.New<ConcreteOnlyBaseEntity01>();
         baseEnt02.Name = "Nest Test 01 CEnt 02";
         baseEnt02.Save();
 
-        schemaBase.ApplyChanges();
+        workOnBase.CommitChanges();
 
         long baseId01 = (long)baseEnt01.GetId();
         long baseId02 = (long)baseEnt02.GetId();
 
-        ConcreteOnlyBaseReferencedEntity02 refEntity01 = schema02.New<ConcreteOnlyBaseReferencedEntity02>();
+
+        using var workOnSchema02 = schema02.BeginWork();
+
+		ConcreteOnlyBaseReferencedEntity02 refEntity01 = workOnSchema02.New<ConcreteOnlyBaseReferencedEntity02>();
         refEntity01.Name = "Nest Test REnt 01";
         refEntity01.Reference = baseEnt01;
         refEntity01.Save();
 
-        ConcreteOnlyBaseReferencedEntity02 refEntity02 = schema02.New<ConcreteOnlyBaseReferencedEntity02>();
+        ConcreteOnlyBaseReferencedEntity02 refEntity02 = workOnSchema02.New<ConcreteOnlyBaseReferencedEntity02>();
         refEntity02.Name = "Nest Test REnt 02";
         refEntity02.Reference = baseEnt02;
         refEntity02.Save();
 
-        ConcreteOnlyBaseReferencedEntity02 refEntity03 = schema02.New<ConcreteOnlyBaseReferencedEntity02>();
+        ConcreteOnlyBaseReferencedEntity02 refEntity03 = workOnSchema02.New<ConcreteOnlyBaseReferencedEntity02>();
         refEntity03.Name = "Nest Test REnt 03";
         refEntity03.Reference = null;
         refEntity03.Save();
 
-        schema02.ApplyChanges();
+        workOnSchema02.CommitChanges();
 
         long refId01 = (long)refEntity01.GetId();
         long refId02 = (long)refEntity02.GetId();
@@ -360,27 +370,28 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         db.Structure.DropEntity<ConcreteEntity01>();
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
+        using var work = db.BeginWork();
 
-        ConcreteEntity01 refEnt01 = db.New<ConcreteEntity01>();
+		ConcreteEntity01 refEnt01 = work.New<ConcreteEntity01>();
         refEnt01.Name = "Ent 01";
         refEnt01.Phone = "5336722201";
         refEnt01.Address = "Address 01";
 
         refEnt01.Save();
 
-        ConcreteEntity01 refEnt02 = db.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt02 = work.New<ConcreteEntity01>();
         refEnt02.Name = "Ent 02";
         refEnt02.Phone = "5336722202";
         refEnt02.Address = "Address 02";
         refEnt02.Save();
 
-        ConcreteEntity01 refEnt03 = db.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt03 = work.New<ConcreteEntity01>();
         refEnt03.Name = "Ent 03";
         refEnt03.Phone = "6336722203";
         refEnt03.Address = "Address 03";
         refEnt03.Save();
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         long count01 = db.GetQuery<ConcreteEntity01>()
              .Like("Phone", "533672220*")
@@ -398,13 +409,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         db.GetQuery<ConcreteEntity01>()
              .EnterUpdateMode()
              .Like("Phone", "533672220*")
-             .Update(new ObjDictionary() { { "Address", "Updated Address" } });
+             .Update(work, new ObjDictionary() { { "Address", "Updated Address" } });
 
         //var data = new ObjDictionary();
         //data.Add("Address", "Updated Address");
         //query.Update(data);
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         long count03 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
@@ -445,11 +456,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
         db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest02>();
 
-        ConcreteEntityForN2NTest01 master01 = db.New<ConcreteEntityForN2NTest01>();
+		using var work = db.BeginWork();
+
+		ConcreteEntityForN2NTest01 master01 = work.New<ConcreteEntityForN2NTest01>();
         master01.Name = "master01";
         master01.Save();
 
-        ConcreteEntityForN2NTest02 detail01_01 = db.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail01_01 = work.New<ConcreteEntityForN2NTest02>();
         detail01_01.Name = "detail01-01";
         detail01_01.Save();
         master01.Relation01.Add(detail01_01);
@@ -460,21 +473,21 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         //master01.Relation01.Add(detail01_02);
 
 
-        ConcreteEntityForN2NTest01 master02 = db.New<ConcreteEntityForN2NTest01>();
+        ConcreteEntityForN2NTest01 master02 = work.New<ConcreteEntityForN2NTest01>();
         master02.Name = "master02";
         master02.Save();
 
-        ConcreteEntityForN2NTest02 detail02_01 = db.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail02_01 = work.New<ConcreteEntityForN2NTest02>();
         detail02_01.Name = "detail02-02";
         detail02_01.Save();
         master02.Relation01.Add(detail02_01);
 
-        ConcreteEntityForN2NTest02 detail02_02 = db.New<ConcreteEntityForN2NTest02>();
+        ConcreteEntityForN2NTest02 detail02_02 = work.New<ConcreteEntityForN2NTest02>();
         detail02_02.Name = "detail02-02";
         detail02_02.Save();
         master02.Relation01.Add(detail02_02);
 
-        db.ApplyChanges();
+        work.CommitChanges();
 
         long count01 = db.GetQuery<ConcreteEntityForN2NTest02>()
               .Related(master01, nameof(ConcreteEntityForN2NTest01.Relation01))
