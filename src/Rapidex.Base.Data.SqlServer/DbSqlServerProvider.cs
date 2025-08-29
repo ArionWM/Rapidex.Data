@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Rapidex.Data.SqlServer;
+using System.Xml.Linq;
 
 namespace Rapidex.Data.SqlServer;
 
@@ -17,7 +18,7 @@ public class DbSqlServerProvider : IDbProvider
     public string ConnectionString { get { return _connectionString; } set { SetConnectionString(value); } }
     public string DatabaseName { get { return _databaseName; } set { SetDatabaseName(value); } }
 
-    
+    public string StartDbName { get; protected set; }
 
     public IExceptionTranslator ExceptionTranslator => SqlServerExceptionTranslator;
 
@@ -41,12 +42,23 @@ public class DbSqlServerProvider : IDbProvider
         this._connectionString = connectionString;
         this.Connectionbuilder = new SqlConnectionStringBuilder(connectionString);
         this._databaseName = this.Connectionbuilder.InitialCatalog;
+        this.StartDbName = this._databaseName;
     }
 
-    private void SetDatabaseName(string value)
+    private string GetDatabaseName(string dbName)
     {
-        this._databaseName = value;
-        this.Connectionbuilder.InitialCatalog = value;
+        if (this.StartDbName.IsNOTNullOrEmpty() && !dbName.StartsWith(this.StartDbName))
+        {
+            string databaseName = this.StartDbName + dbName.ToFriendly().Trim();
+            dbName = databaseName;
+        }
+        return dbName;
+    }
+
+    private void SetDatabaseName(string dbName)
+    {
+        this._databaseName = this.GetDatabaseName(dbName);
+        this.Connectionbuilder.InitialCatalog = dbName;
         this._connectionString = this.Connectionbuilder.ConnectionString;
     }
 
@@ -72,12 +84,12 @@ public class DbSqlServerProvider : IDbProvider
         this.ParentScope = parent;
     }
 
-    public void UseDb(string dbName)
+    public void UseDb(string dbNameOrAlias)
     {
-        this.SetDatabaseName(dbName);
-
         var strMan = this.GetStructureProvider();
-        strMan.SwitchDatabase(dbName);
+        dbNameOrAlias = this.GetDatabaseName(dbNameOrAlias);
+        strMan.SwitchDatabase(dbNameOrAlias);
+        this.SetDatabaseName(dbNameOrAlias);
     }
 
 

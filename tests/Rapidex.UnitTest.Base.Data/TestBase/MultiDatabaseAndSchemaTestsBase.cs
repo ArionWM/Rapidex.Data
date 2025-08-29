@@ -55,7 +55,15 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
     [Fact]
     public virtual void T01_MultipleDatabases()
     {
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
+
+        string dbName1 = "TestDb" + RandomHelper.RandomText(5);
+
+        var newDb1 = Database.Dbs.AddDbIfNotExists(2, dbName1);
+        newDb1.Structure.ApplyAllStructure();
+        
+        newDb1.Structure.DestroyDatabase(newDb1.DatabaseName);
     }
 
 }

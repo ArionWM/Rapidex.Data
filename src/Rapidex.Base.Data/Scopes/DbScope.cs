@@ -47,13 +47,13 @@ namespace Rapidex.Data.Scopes
 
 
 
-        public DbScope(long id, string name, IDbProvider dbProvider)
+        public DbScope(long id, string dbName, IDbProvider dbProvider)
         {
-            name.ValidateInvariantName();
+            dbName.ValidateInvariantName();
 
             this.id = id;
-            this.name = name;
-            //this.databaseName = databaseName;
+            this.name = dbName;
+
             this.dbProvider = dbProvider;
             this.defaultSchemaName = DatabaseConstants.DEFAULT_SCHEMA_NAME;
 
@@ -82,7 +82,10 @@ namespace Rapidex.Data.Scopes
                 structureManager.CreateDatabase(this.DatabaseName);
             }
 
-            this.DbProvider.UseDb(this.DatabaseName);
+            if (this.Name != DatabaseConstants.MASTER_DB_NAME)
+            {
+                this.DbProvider.UseDb(this.Name);
+            }
 
             //Check 'base' schema
             this.baseScope = this.AddSchemaIfNotExists(this.DefaultSchemaName, 1);
@@ -92,10 +95,10 @@ namespace Rapidex.Data.Scopes
             this.LoadRecordedSchemaInfos();
         }
 
-        protected DbSchemaScope AddSchema(string schemaName)
+        protected IDbSchemaScope AddSchema(string schemaName)
         {
             if (this.schemaScopes.Keys.Contains(schemaName))
-                this.schemaScopes.Get(schemaName);
+                return this.schemaScopes.Get(schemaName);
 
             DbProviderFactory dbCreator = new DbProviderFactory();
             IDbProvider dbProvider = dbCreator.CreateProvider(this.dbProvider.GetType().FullName, this.ConnectionString);
@@ -131,9 +134,9 @@ namespace Rapidex.Data.Scopes
         protected void RecordSchemaInfo(IDbSchemaScope schemaScope, long id = DatabaseConstants.DEFAULT_EMPTY_ID)
         {
             IDbSchemaScope _base = schemaScope.SchemaName == this.DefaultSchemaName ? schemaScope : this.baseScope;
-            
+
             using var work = _base.BeginWork();
-            
+
             SchemaInfo schemaRecord = work.New<SchemaInfo>();
             schemaRecord.Name = schemaScope.SchemaName;
             if (id > 0)
@@ -151,7 +154,7 @@ namespace Rapidex.Data.Scopes
             if (this.schemaScopes.ContainsKey(schemaName))
                 return this.Schema(schemaName);
 
-            DbSchemaScope sscope = this.AddSchema(schemaName);
+            IDbSchemaScope sscope = this.AddSchema(schemaName);
             if (string.Compare(schemaName, this.defaultSchemaName, true) != 0)
                 this.RecordSchemaInfo(sscope, id);
 

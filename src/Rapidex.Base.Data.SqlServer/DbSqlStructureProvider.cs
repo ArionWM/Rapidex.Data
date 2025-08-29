@@ -91,6 +91,11 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     {
         this.CheckConnection(false);
 
+        if(!this.IsDatabaseAvailable(dbName))
+        {
+            this.CreateDatabase(dbName);
+        }
+
         string sql = this.DdlGenerator.SwitchDatabase(dbName);
         DataTable dataTable = this.Connection.Execute(sql);
     }
@@ -568,7 +573,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         catch (SqlException sex) when (DbSqlServerHelper.SQL_Errors_Permission.Contains(sex.Number))
         {
             sex.Log();
-            throw new Exception($"Db Permission denied: {sex.Number}, {sex.Message}");
+            throw new DbInsufficientPermissionsException("Drop database", null, sex.Message);
         }
         catch (Exception ex)
         {

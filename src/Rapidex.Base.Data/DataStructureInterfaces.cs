@@ -412,11 +412,12 @@ public interface IDbMetadataContainer
 public interface IDbProvider : IManager
 {
     string ConnectionString { get; }
+    string StartDbName { get; }
     string DatabaseName { get; }
     IDbSchemaScope ParentScope { get; }
     IExceptionTranslator ExceptionTranslator { get; }
 
-    void UseDb(string dbName);
+    void UseDb(string dbNameOrAlias);
 
     void SetParentScope(IDbSchemaScope parent);
 

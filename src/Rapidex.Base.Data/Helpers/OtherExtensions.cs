@@ -1,5 +1,4 @@
-﻿using Rapidex.Data.Exceptions;
-using Rapidex.Data.Helpers;
+﻿using Rapidex.Data.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;

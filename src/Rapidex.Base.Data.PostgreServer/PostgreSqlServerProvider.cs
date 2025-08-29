@@ -16,17 +16,25 @@ public class PostgreSqlServerProvider : IDbProvider
     protected string _databaseName;
 
     protected NpgsqlConnectionStringBuilder Connectionbuilder { get; set; }
-    //protected Dictionary<IDbSchemaScope, IDbDataModificationPovider> dmProviders = new();
 
     internal static IExceptionTranslator PostgreServerExceptionTranslator { get; }
 
     public IDbSchemaScope ParentScope { get; private set; }
     public string ConnectionString { get { return _connectionString; } set { SetConnectionString(value); } }
-    public string DatabaseName { get { return _databaseName; } set { SetDatabaseName(value); } }
+    public string DatabaseName
+    {
+        get { return _databaseName; }
+        set
+        {
+            SetDatabaseName(value);
+        }
+    }
 
 
 
     public IExceptionTranslator ExceptionTranslator => PostgreServerExceptionTranslator;
+
+    public string StartDbName { get; protected set; }
 
     static PostgreSqlServerProvider()
     {
@@ -48,12 +56,23 @@ public class PostgreSqlServerProvider : IDbProvider
         this._connectionString = connectionString;
         this.Connectionbuilder = new NpgsqlConnectionStringBuilder(connectionString);
         this._databaseName = this.Connectionbuilder.Database;
+        this.StartDbName = this._databaseName;
     }
 
-    private void SetDatabaseName(string value)
+    private string GetDatabaseName(string dbName)
     {
-        this._databaseName = value;
-        this.Connectionbuilder.Database = value;
+        if (this.StartDbName.IsNOTNullOrEmpty() && !dbName.StartsWith(this.StartDbName))
+        {
+            string databaseName = this.StartDbName + dbName.ToFriendly().Trim();
+            dbName = databaseName;
+        }
+        return dbName;
+    }
+
+    private void SetDatabaseName(string dbName)
+    {
+        this._databaseName = this.GetDatabaseName(dbName);
+        this.Connectionbuilder.Database = dbName;
         this._connectionString = this.Connectionbuilder.ConnectionString;
     }
 
@@ -81,10 +100,12 @@ public class PostgreSqlServerProvider : IDbProvider
 
     public void UseDb(string dbName)
     {
-        this.SetDatabaseName(dbName);
-
         var strMan = this.GetStructureProvider();
+
+        dbName = this.GetDatabaseName(dbName);
         strMan.SwitchDatabase(dbName);
+
+        this.SetDatabaseName(dbName);
     }
 
     public void Setup(IServiceCollection services)

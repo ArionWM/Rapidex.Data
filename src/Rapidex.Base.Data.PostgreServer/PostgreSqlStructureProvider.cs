@@ -68,11 +68,15 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         // In PostgreSQL, you must reconnect with a new connection string to switch databases.
         // This method is a no-op or can be used to re-instantiate the connection.
 
+        if(!this.IsDatabaseAvailable(dbName))
+        {
+            this.CreateDatabase(dbName);
+        }
+
         this.CloseConnection();
 
-        this.Connection = new PostgreSqlServerConnection(
-            new NpgsqlConnectionStringBuilder(this.ConnectionString) { Database = dbName }.ToString()
-        );
+        //new NpgsqlConnectionStringBuilder(this.ConnectionString) { Database = dbName }.ToString()
+        this.Connection = new PostgreSqlServerConnection(this.ConnectionString);
     }
 
     public bool IsDatabaseAvailable(string dbName)
@@ -531,6 +535,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     public void DestroyDatabase(string dbName)
     {
         this.CheckConnection();
+
         // No master database in PostgreSQL, so just connect and drop
         try
         {
@@ -547,7 +552,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         catch (PostgresException pex) when (pex.SqlState == "42501") // insufficient_privilege
         {
             pex.Log();
-            throw new Exception($"Db Permission denied: {pex.SqlState}, {pex.Message}");
+            throw new DbInsufficientPermissionsException("Drop database", null, pex.Message);
+            //throw new Exception($"Db Permission denied: {pex.SqlState}, {pex.Message}");
         }
         catch (Exception ex)
         {
