@@ -26,6 +26,8 @@ internal class PostgreSqlServerConnection : IDisposable
         if (npgsqlConnectionStringBuilder.MaxPoolSize < 200)
             npgsqlConnectionStringBuilder.MaxPoolSize = 200;
 
+        //npgsqlConnectionStringBuilder.Database = PostgreHelper.CheckObjectName(npgsqlConnectionStringBuilder.Database);
+
         this.ConnectionString = npgsqlConnectionStringBuilder.ConnectionString;
         this.Connection = new NpgsqlConnection(this.ConnectionString);
         this.Connection.Open();

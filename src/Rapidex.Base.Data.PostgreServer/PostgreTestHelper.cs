@@ -31,6 +31,23 @@ internal class PostgreTestHelper : IDataUnitTestHelper
 
     public void DropAllTablesInDatabase(string connectionString)
     {
+        NpgsqlConnectionStringBuilder npgsqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
+
+        // Check if database exists before proceeding
+        string databaseName = npgsqlConnectionStringBuilder.Database;
+
+        // Create a temporary connection to check database existence
+        using (var tempConnection = new PostgreSqlServerConnection(npgsqlConnectionStringBuilder.ConnectionString))
+        {
+            string checkDbSql = $"SELECT 1 FROM pg_database WHERE datname = '{databaseName}'";
+            DataTable dbCheckResult = tempConnection.Execute(checkDbSql);
+
+            // If database doesn't exist, return early
+            if (dbCheckResult.Rows.Count == 0)
+            {
+                return;
+            }
+        }
 
         string schemasSql = "select sch.schema_name" +
             " from information_schema.schemata as sch" +
@@ -38,9 +55,8 @@ internal class PostgreTestHelper : IDataUnitTestHelper
             " and sch.schema_name not like 'pg_toast%'" +
             " and sch.schema_name not like 'pg_temp_%'";
 
-        NpgsqlConnectionStringBuilder npgsqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
-
         using PostgreSqlServerConnection pConnection = new PostgreSqlServerConnection(npgsqlConnectionStringBuilder.ConnectionString);
+
 
         DataTable schemas = pConnection.Execute(schemasSql);
         foreach (DataRow row in schemas.Rows)

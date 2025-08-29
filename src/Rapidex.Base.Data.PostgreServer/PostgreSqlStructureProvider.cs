@@ -75,12 +75,13 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
         this.CloseConnection();
 
-        //new NpgsqlConnectionStringBuilder(this.ConnectionString) { Database = dbName }.ToString()
-        this.Connection = new PostgreSqlServerConnection(this.ConnectionString);
+        //
+        this.Connection = new PostgreSqlServerConnection(new NpgsqlConnectionStringBuilder(this.ConnectionString) { Database = dbName }.ToString());
     }
 
     public bool IsDatabaseAvailable(string dbName)
     {
+        //dbName = PostgreHelper.CheckObjectName(dbName);
         bool directTargetDatabase = this.CheckConnection(true);
         string sql = this.DdlGenerator.IsDatabaseAvailable(dbName);
         DataTable dataTable = this.Connection.Execute(sql);
@@ -129,6 +130,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
         try
         {
+            //dbName = PostgreHelper.CheckObjectName(dbName);
+
             this.ParentDbProvider.CanCreateDatabase();
 
             string sql1 = this.DdlGenerator.CreateDatabase01(dbName, this.Connectionbuilder.Username);
@@ -137,7 +140,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
             // In PostgreSQL, owner is set at creation, so CreateDatabase02 is not needed.
             // this.DdlGenerator.CreateDatabase02(dbName, this.Connectionbuilder.Username);
 
-            this.SwitchDatabase(dbName);
+            //this.SwitchDatabase(dbName);
         }
         catch (PostgresException pex) when (pex.SqlState == "42P04") // duplicate_database
         {

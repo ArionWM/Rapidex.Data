@@ -55,6 +55,8 @@ public class PostgreSqlServerProvider : IDbProvider
     {
         this._connectionString = connectionString;
         this.Connectionbuilder = new NpgsqlConnectionStringBuilder(connectionString);
+        //this.Connectionbuilder.Database = PostgreHelper.CheckObjectName(this.Connectionbuilder.Database);
+
         this._databaseName = this.Connectionbuilder.Database;
         this.StartDbName = this._databaseName;
     }
@@ -63,7 +65,7 @@ public class PostgreSqlServerProvider : IDbProvider
     {
         if (this.StartDbName.IsNOTNullOrEmpty() && !dbName.StartsWith(this.StartDbName))
         {
-            string databaseName = this.StartDbName + dbName.ToFriendly().Trim();
+            string databaseName = this.StartDbName + PostgreHelper.CheckObjectName(dbName.Trim());
             dbName = databaseName;
         }
         return dbName;

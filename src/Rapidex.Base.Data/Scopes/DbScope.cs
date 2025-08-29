@@ -76,11 +76,12 @@ namespace Rapidex.Data.Scopes
             });
 
             //Check db existence
-            var structureManager = this.DbProvider.GetStructureProvider();
-            if (!structureManager.IsDatabaseAvailable(this.DatabaseName))
-            {
-                structureManager.CreateDatabase(this.DatabaseName);
-            }
+            //var structureManager = this.DbProvider.GetStructureProvider();
+            //structureManager.SwitchDatabase(this.DatabaseName);
+            //if (!structureManager.IsDatabaseAvailable(this.DatabaseName))
+            //{
+            //    structureManager.CreateDatabase(this.DatabaseName);
+            //}
 
             if (this.Name != DatabaseConstants.MASTER_DB_NAME)
             {
