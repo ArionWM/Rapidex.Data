@@ -461,6 +461,8 @@ public interface IDbChangesCollection : IEmptyCheckObject
     void Delete(IEntity entity);
 
     void Clear();
+
+    internal (bool Found, string? Desc) FindAndAnalyse(IDbEntityMetadata em, long id);
 }
 
 /// <summary>
@@ -610,7 +612,7 @@ public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader
 
 public interface IDbDataReadScope
 {
-    IDbSchemaScope ParentScope { get; }
+    IDbSchemaScope ParentSchema { get; }
 
     //IDbDataModificationPovider DmProvider { get; }
 
@@ -627,7 +629,8 @@ public interface IDbDataReadScope
 
 public interface IDbDataModificationScope : IDbDataReadScope, IDisposable
 {
-
+    IDbDataModificationStaticHost Parent { get; }
+    bool IsFinalized { get; }
     IEntity New(IDbEntityMetadata em);
 
     void Save(IEntity entity);
@@ -643,6 +646,8 @@ public interface IDbDataModificationScope : IDbDataReadScope, IDisposable
     /// </summary>
     IEntityUpdateResult CommitChanges();
     void Rollback();
+
+    internal (bool Found, string? Desc) FindAndAnalyse(IDbEntityMetadata em, long id);
 }
 
 public interface IDbDataModificationStaticHost : IDbDataReadScope
@@ -659,6 +664,8 @@ public interface IDbDataModificationStaticHost : IDbDataReadScope
     IIntSequence Sequence(string name);
 
     void UnRegister(IDbDataModificationScope scope);
+
+    internal (bool Found, string? Desc) FindAndAnalyseInScopes(IDbEntityMetadata em, long id);
 }
 
 
@@ -724,7 +731,7 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
 
     EntityMapper Mapper { get; }
 
-    IDbSchemaScope IDbDataReadScope.ParentScope => this.Data.ParentScope;
+    IDbSchemaScope IDbDataReadScope.ParentSchema => this.Data.ParentSchema;
     //IDbDataModificationPovider IDbDataReadScope.DmProvider => this.Data.DmProvider;
     IDbDataModificationScope IDbDataModificationStaticHost.CurrentWork => this.Data.CurrentWork;
     IDbDataModificationScope IDbDataModificationStaticHost.BeginWork()
@@ -779,25 +786,10 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
         return this.Data.Find(em, id);
     }
 
-    //void IDbDataModificationScope.Save(IEntity entity)
-    //{
-    //    this.Data.Save(entity);
-    //}
-
-    //void IDbDataModificationScope.Save(IEnumerable<IEntity> entities)
-    //{
-    //    this.Data.Save(entities);
-    //}
-
-    //void IDbDataModificationScope.Add(IQueryUpdater updater)
-    //{
-    //    this.Data.Add(updater);
-    //}
-
-    //void IDbDataModificationScope.Delete(IEntity entity)
-    //{
-    //    this.Data.Delete(entity);
-    //}
+    (bool Found, string? Desc) IDbDataModificationStaticHost.FindAndAnalyseInScopes(IDbEntityMetadata em, long id)
+    {
+        return this.Data.FindAndAnalyseInScopes(em, id);
+    }
 
 
     void Setup();
@@ -858,8 +850,7 @@ public interface IEntity
     bool _IsNew { get; set; }
 
     [JsonIgnore]
-    IDbSchemaScope _Scope { get; internal set; }
-
+    IDbSchemaScope _Schema { get; internal set; }
 
     object this[string columnName] { get; set; }
 

@@ -16,7 +16,7 @@ namespace Rapidex.Data
                 return default(T);
 
             T ent = JsonSerializer.Deserialize<T>(json, JsonHelper.JsonSerializerOptions);
-            ent._Scope = scope;
+            ent._Schema = scope;
 
             if (!ent.IsSupportTo<IPartialEntity>())
             {

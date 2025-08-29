@@ -53,6 +53,7 @@ internal class DbSqlServerConnection : IDisposable
 
     public void BeginTransaction()
     {
+        this.CheckConnectionState();
         this.Transaction = this.Connection.BeginTransaction();
     }
 

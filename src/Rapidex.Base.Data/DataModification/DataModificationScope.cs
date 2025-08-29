@@ -7,16 +7,18 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
-internal class DataModificationScope : DataModificationScopeBase, IDbDataModificationScope
+internal class DataModificationScope : DataModificationReadScopeBase, IDbDataModificationScope
 {
-    protected bool IsFinalized { get; set; } = false;
-    protected IDbDataModificationStaticHost parentHost;
+    private readonly int _debugTracker;
+    public bool IsFinalized { get; protected set; } = false;
+    public IDbDataModificationStaticHost Parent { get; }
     public IDbInternalTransactionScope CurrentTransaction { get; protected set; }
     protected virtual IDbChangesCollection ChangesCollection { get; set; }
 
-    public DataModificationScope(IDbDataModificationStaticHost parentHost) : base(parentHost.ParentScope)
+    public DataModificationScope(IDbDataModificationStaticHost parentHost) : base(parentHost.ParentSchema)
     {
-        this.parentHost = parentHost;
+        this.Parent = parentHost;
+        this._debugTracker = RandomHelper.Random(1000000);
     }
 
     protected override void Initialize()
@@ -24,20 +26,13 @@ internal class DataModificationScope : DataModificationScopeBase, IDbDataModific
         base.Initialize();
 
         this.ChangesCollection = new DbChangesCollection();
-        //this.DmProvider = this.ParentScope.DbProvider.GetDataModificationProvider();
         this.CurrentTransaction = this.DmProvider.BeginTransaction();
-    }
-
-    protected IDbChangesCollection GetChangesCollection()
-    {
-        return this.ChangesCollection;
-
     }
 
     protected virtual void ApplyFinalized()
     {
         this.IsFinalized = true;
-        this.parentHost.UnRegister(this);
+        this.Parent.UnRegister(this);
     }
 
     protected IDbEntityUpdater[] SelectUpdaters(IDbEntityMetadata em, IEnumerable<IEntity> entities)
@@ -112,10 +107,9 @@ internal class DataModificationScope : DataModificationScopeBase, IDbDataModific
     {
         EntityUpdateResult result = new EntityUpdateResult();
 
-        IDbChangesCollection scope = this.GetChangesCollection();
-        scope.CheckNewEntities();
+        this.ChangesCollection.CheckNewEntities();
 
-        var types = scope.SplitForTypesAndDependencies();
+        var types = this.ChangesCollection.SplitForTypesAndDependencies();
 
         foreach (var _scope in types)
         {
@@ -130,73 +124,121 @@ internal class DataModificationScope : DataModificationScopeBase, IDbDataModific
 
     public void Delete(IEntity entity)
     {
-        this.GetChangesCollection().Delete(entity);
+        this.ChangesCollection.Delete(entity);
     }
 
     public virtual void Add(IQueryUpdater updater)
     {
-        this.GetChangesCollection().Add(updater);
+        this.ChangesCollection.Add(updater);
     }
-
 
 
     public virtual IEntity New(IDbEntityMetadata em)
     {
-        if (this.IsFinalized)
-            throw new InvalidOperationException("This scope is finalized");
+        this.CheckActive();
 
         em.NotNull();
 
-        if (em.OnlyBaseSchema && this.ParentScope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME) //?? acaba?
+        if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME) //?? acaba?
             throw new InvalidOperationException($"Entity '{em.Name}' only create for base schema");
 
-        IEntity entity = Database.EntityFactory.Create(em, this.ParentScope, true);
+        IEntity entity = Database.EntityFactory.Create(em, this.ParentSchema, true);
 
         entity = entity.PublishOnNew().Result ?? entity;
 
         return entity;
     }
 
+    protected Exception AnalyseException(Exception ex)
+    {
+        //var tex = Common.ExceptionManager.Translate(ex);
+        //tex.Log();
+        //throw tex;
+
+        switch (ex)
+        {
+            case EntityNotFoundException enfx:
+                var em = this.ParentSchema.ParentDbScope.Metadata.Get(enfx.EntityName);
+                long id = enfx.EntityId.As<long>();
+                IDbDataModificationStaticHost host = this.Parent;
+                var findResult = host.FindAndAnalyseInScopes(em, id);
+                if (findResult.Found)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("Entity not found in this scope, but found in other (or upper) scopes");
+
+                    if(id < 0)
+                    {
+                        sb.AppendLine("You can commit prior scope or create / save entity in this scope");
+                    }
+                    
+                    sb.AppendLine(ex.Message);
+                    return new EntityNotFoundException(enfx.EntityName, enfx.EntityId, sb.ToString());
+                }
+                else
+                {
+                    return enfx;
+                }
+                break;
+        }
+
+        return ex;
+    }
+
     public virtual void Save(IEntity entity)
     {
-        if (this.IsFinalized)
-            throw new InvalidOperationException("This scope is finalized");
+        this.CheckActive();
 
-        if (entity is not IPartialEntity)
-            entity.EnsureDataTypeInitialization();
+        try
+        {
+            if (entity is not IPartialEntity)
+                entity.EnsureDataTypeInitialization();
 
-        IEntity retEntity = entity.PublishOnBeforeSave()
-            .Result;
+            IEntity retEntity = entity.PublishOnBeforeSave()
+                .Result;
 
-        if (retEntity != null)
-            entity = retEntity;
+            if (retEntity != null)
+                entity = retEntity;
 
-        this.GetChangesCollection().Add(entity);
+            this.ChangesCollection.Add(entity);
+        }
+        catch (EntityNotFoundException enf)
+        {
+            Exception rex = this.AnalyseException(enf);
+            throw rex;
+        }
     }
 
     public virtual void Save(IEnumerable<IEntity> entities)
     {
-        if (this.IsFinalized)
-            throw new InvalidOperationException("This scope is finalized");
+        this.CheckActive();
 
         //TODO: Validate 
 
-        List<IEntity> _entities = new List<IEntity>(entities);
-
-        IDbChangesCollection cScope = this.GetChangesCollection();
-        foreach (var entity in _entities)
+        try
         {
-            IEntity _entity = entity;
-            if (_entity is not IPartialEntity)
-                _entity.EnsureDataTypeInitialization();
+            List<IEntity> _entities = new List<IEntity>(entities);
 
-            IEntity retEntity = _entity.PublishOnBeforeSave()
-                .Result;
+            foreach (var entity in _entities)
+            {
+                IEntity _entity = entity;
+                if (_entity is not IPartialEntity)
+                    _entity.EnsureDataTypeInitialization();
 
-            if (retEntity != null)
-                _entity = retEntity;
+                IEntity retEntity = _entity.PublishOnBeforeSave()
+                    .Result;
 
-            cScope.Add(_entity);
+                if (retEntity != null)
+                    _entity = retEntity;
+
+                this.ChangesCollection.Add(_entity);
+            }
+
+        }
+        catch (EntityNotFoundException enf)
+        {
+            Exception rex = this.AnalyseException(enf);
+            throw rex;
         }
     }
 
@@ -214,8 +256,7 @@ internal class DataModificationScope : DataModificationScopeBase, IDbDataModific
 
     public IEntityUpdateResult CommitChanges()
     {
-        if (this.IsFinalized)
-            throw new InvalidOperationException("This scope is finalized");
+        this.CheckActive();
 
         IDbInternalTransactionScope _its = this.CurrentTransaction;
         try
@@ -241,11 +282,16 @@ internal class DataModificationScope : DataModificationScopeBase, IDbDataModific
 
     public void Dispose()
     {
-        this.ChangesCollection?.Clear();
-
         if (this.IsFinalized)
             return;
 
         this.CommitChanges();
+
+        this.ChangesCollection?.Clear();
+    }
+
+    (bool Found, string? Desc) IDbDataModificationScope.FindAndAnalyse(IDbEntityMetadata em, long id)
+    {
+        return this.ChangesCollection.FindAndAnalyse(em, id);
     }
 }

@@ -7,310 +7,272 @@ using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestBase
 {
-    public abstract class CrudTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
-    {
-        protected CrudTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
-        {
-        }
+	public abstract class CrudTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
+	{
+		protected CrudTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+		{
+		}
 
-        //Delete tests: basic delete, delete with criteria, update and delete in same scope, delete related entity
+		//Delete tests: basic delete, delete with criteria, update and delete in same scope, delete related entity
 
-        [Fact]
-        public virtual async Task Crud_01_Insert_Concrete()
-        {
-            this.Fixture.ClearCaches();
+		[Fact]
+		public virtual void Crud_01_Insert_Concrete()
+		{
+			this.Fixture.ClearCaches();
 
-            var db = Database.Dbs.AddMainDbIfNotExists();
-            db.Metadata.AddIfNotExist<ConcreteEntity01>();
-            db.Structure.DropEntity("ConcreteEntity01");
+			var db = Database.Dbs.AddMainDbIfNotExists();
+			db.Metadata.AddIfNotExist<ConcreteEntity01>();
+			db.Structure.DropEntity("ConcreteEntity01");
 
-            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+			db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            using var work = db.BeginWork();
+			using var work = db.BeginWork();
 
 			ConcreteEntity01 entity = work.New<ConcreteEntity01>();
-            Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
-            Assert.True(entity._IsNew);
-            Assert.NotNull(entity.CreditLimit1); //IDataType türünden ise boş değer içeren bir nesne atanmış olmalı
-            Assert.NotNull(entity.Description);
-            Assert.NotNull(entity.Picture);
+			Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
+			Assert.True(entity._IsNew);
+			Assert.NotNull(entity.CreditLimit1); //IDataType türünden ise boş değer içeren bir nesne atanmış olmalı
+			Assert.NotNull(entity.Description);
+			Assert.NotNull(entity.Picture);
 
-            entity.Save();
+			entity.Save();
 
-            work.CommitChanges();
+			work.CommitChanges();
 
-            Assert.True(entity.Id > 9999); //Yeni entity'ler 10 k dan büyük bir Id alır
-            Assert.False(entity._IsNew);
+			Assert.True(entity.Id > 9999); //Yeni entity'ler 10 k dan büyük bir Id alır
+			Assert.False(entity._IsNew);
 
-            Assert.NotNull(entity.CreditLimit1); //IDataType türünden ise boş değer içeren bir nesne atanmış olmalı
-            Assert.NotNull(entity.Description);
-            Assert.NotNull(entity.Picture);
+			Assert.NotNull(entity.CreditLimit1); //IDataType türünden ise boş değer içeren bir nesne atanmış olmalı
+			Assert.NotNull(entity.Description);
+			Assert.NotNull(entity.Picture);
 
-            //var entity2 = dbScope.Data.Select<TestEntity>(1);
+			//var entity2 = dbScope.Data.Select<TestEntity>(1);
 
-            //Assert.True(entity2.Name == entity.Name);
-            //Assert.True(entity2.Description == entity.Description);
-        }
+			//Assert.True(entity2.Name == entity.Name);
+			//Assert.True(entity2.Description == entity.Description);
+		}
 
-        [Fact]
-        public virtual async Task Crud_02_Insert_Multiple_Concrete()
-        {
-            this.Fixture.ClearCaches();
-            var db = Database.Dbs.AddMainDbIfNotExists();
+		[Fact]
+		public virtual void Crud_02_Insert_Multiple_Concrete()
+		{
+			this.Fixture.ClearCaches();
+			var db = Database.Dbs.AddMainDbIfNotExists();
 
-            db.Metadata.AddIfNotExist<ConcreteEntity01>();
-            db.Structure.DropEntity("ConcreteEntity01");
+			db.Metadata.AddIfNotExist<ConcreteEntity01>();
+			db.Structure.DropEntity("ConcreteEntity01");
 
-            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+			db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
 			using var work = db.BeginWork();
 
 			for (int i = 0; i < 10; i++)
-            {
-                ConcreteEntity01 entity = work.New<ConcreteEntity01>();
-                entity.Name = $"Entity Name {i:000}";
-                entity.Save();
-            }
+			{
+				ConcreteEntity01 entity = work.New<ConcreteEntity01>();
+				entity.Name = $"Entity Name {i:000}";
+				entity.Save();
+			}
 
-            work.CommitChanges();
+			work.CommitChanges();
 
-            //Check table
-        }
+			//Check table
+		}
 
-        //[Fact]
-        //public virtual void Crud_03_Insert_Multiple_Json()
-        //{
-        //    throw new NotImplementedException();
-        //}
+		//[Fact]
+		//public virtual void Crud_03_Insert_Multiple_Json()
+		//{
+		//    throw new NotImplementedException();
+		//}
 
-        //[Fact]
-        //public virtual void Crud_04_Insert_Json()
-        //{
-        //    throw new NotImplementedException();
-        //}
+		//[Fact]
+		//public virtual void Crud_04_Insert_Json()
+		//{
+		//    throw new NotImplementedException();
+		//}
 
-        [Fact]
-        public virtual void Crud_05_ManualInsertsCanUseIdsAsBelow10K_Concrete()
-        {
-            this.Fixture.ClearCaches();
-            //Elle bir entity'nin Id'si 10k altında verilebilir (ön tanımlı kayıtlar bu şekilde çalışır)
+		[Fact]
+		public virtual void Crud_05_ManualInsertsCanUseIdsAsBelow10K_Concrete()
+		{
+			this.Fixture.ClearCaches();
+			//Elle bir entity'nin Id'si 10k altında verilebilir (ön tanımlı kayıtlar bu şekilde çalışır)
 
-            var db = Database.Dbs.AddMainDbIfNotExists();
-            db.Metadata.AddIfNotExist<ConcreteEntity01>();
-            db.Structure.DropEntity("ConcreteEntity01");
+			var db = Database.Dbs.AddMainDbIfNotExists();
+			db.Metadata.AddIfNotExist<ConcreteEntity01>();
+			db.Structure.DropEntity("ConcreteEntity01");
 
-            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
-
-			using var work = db.BeginWork();
-
-			ConcreteEntity01 entity = work.New<ConcreteEntity01>();
-            entity.Id = 5;
-            //??? Assert.True(entity.Id < 0); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
-
-            entity.Save();
-
-            Assert.Equal(5, entity.Id);
-
-            work.CommitChanges();
-        }
-
-
-        [Fact]
-        public virtual async Task Crud_06_Update_Concrete()
-        {
-            this.Fixture.ClearCaches();
-
-            var db = Database.Dbs.AddMainDbIfNotExists();
-            db.Metadata.AddIfNotExist<ConcreteEntity01>();
-            db.Structure.DropEntity("ConcreteEntity01");
-
-            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+			db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
 			using var work = db.BeginWork();
 
 			ConcreteEntity01 entity = work.New<ConcreteEntity01>();
-            Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
-            entity.CheckIDataTypeAssignments();
+			entity.Id = 5;
+			//??? Assert.True(entity.Id < 0); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
 
-            string name = RandomHelper.RandomText(10);
+			entity.Save();
 
-            entity.Name = name;
-            entity.Save();
-            work.CommitChanges();
+			Assert.Equal(5, entity.Id);
 
-            long id = entity.Id;
-
-            //TODO: Cache'ler temizlenecek !!
-
-            ConcreteEntity01 loadedEntity = db.Find<ConcreteEntity01>(id);
-            loadedEntity.CheckIDataTypeAssignments();
-
-            Assert.False(loadedEntity._IsNew);
-            Assert.NotNull(loadedEntity);
-            Assert.Equal(name, loadedEntity.Name);
-
-            string name2 = RandomHelper.RandomText(10);
-            loadedEntity.Name = name2;
-            loadedEntity.Save();
-            work.CommitChanges();
-
-            //TODO: Cache'ler temizlenecek !!
-
-            ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id);
-            Assert.NotNull(loadedEntity2);
-            loadedEntity2.CheckIDataTypeAssignments();
-            Assert.Equal(name2, loadedEntity2.Name);
-
-        }
-
-        [Fact]
-        public virtual async Task Crud_06_Update_Json()
-        {
-            this.Fixture.ClearCaches();
-
-            var db = Database.Dbs.AddMainDbIfNotExists();
-            string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity03.base.json");
-
-            db.Metadata.AddIfNotExist<ConcreteEntity01>();
-            db.Metadata.AddIfNotExist<ConcreteEntity02>();
-            var ems1 = db.Metadata.AddJson(content);
-
-            db.Structure.DropEntity("ConcreteEntity01");
-            db.Structure.DropEntity(ems1.First());
-
-            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
-            db.Structure.ApplyEntityStructure<ConcreteEntity02>();
-            db.Structure.ApplyEntityStructure(ems1.First());
-
-			using var work = db.BeginWork();
-
-			IEntity entity = work.New("myJsonEntity03");
-            entity.CheckIDataTypeAssignments();
-
-            Assert.True((long)entity.GetId() < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
-
-            string name = RandomHelper.RandomText(10);
-
-            entity["Subject"] = name;
-            entity.Save();
-            work.CommitChanges();
-
-            long id = (long)entity.GetId();
-
-            //TODO: Cache'ler temizlenecek !!
-
-            IEntity loadedEntity = db.Find("myJsonEntity03", id);
-            Assert.NotNull(loadedEntity);
-            Assert.True((string)loadedEntity["Subject"] == name);
-
-            loadedEntity.CheckIDataTypeAssignments();
-
-            string name2 = RandomHelper.RandomText(10);
-            loadedEntity["Subject"] = name2;
-            loadedEntity.Save();
-            work.CommitChanges();
-
-            //TODO: Cache'ler temizlenecek !!
-
-            IEntity loadedEntity2 = db.Find("myJsonEntity03", id);
-            loadedEntity2.CheckIDataTypeAssignments();
-
-            Assert.NotNull(loadedEntity2);
-            Assert.Equal(name2, (string)loadedEntity2["Subject"]);
-        }
-
-        [Fact]
-        public virtual async Task Crud_07_SimpleDelete()
-        {
-            var db = Database.Dbs.AddMainDbIfNotExists();
-
-            db.Metadata.AddIfNotExist<ConcreteEntity01>();
-            db.Metadata.AddIfNotExist<ConcreteEntity02>();
-
-            db.Structure.DropEntity<ConcreteEntity01>();
-
-            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
-            db.Structure.ApplyEntityStructure<ConcreteEntity02>();
-
-			using var work = db.BeginWork();
-
-			ConcreteEntity01 entity01 = work.New<ConcreteEntity01>();
-            entity01.Name = "Entity 001";
-            entity01.Save();
-
-            ConcreteEntity01 entity02 = work.New<ConcreteEntity01>();
-            entity02.Name = "Entity 002";
-            entity02.Save();
-
-            work.CommitChanges();
-
-            var entCount = db.GetQuery<ConcreteEntity01>().Count();
-            Assert.Equal(2, entCount);
-
-            work.Delete(entity01);
-
-            //Henüz commit olmadı, veritabanında duruyor
-            entCount = db.GetQuery<ConcreteEntity01>().Count();
-            Assert.Equal(2, entCount);
-
-            work.CommitChanges();
-
-            entCount = db.GetQuery<ConcreteEntity01>().Count();
-            Assert.Equal(1, entCount);
-
-            work.Delete(entity02);
-            work.CommitChanges();
-
-            entCount = db.GetQuery<ConcreteEntity01>().Count();
-            Assert.Equal(0, entCount);
+			work.CommitChanges();
+		}
 
 
-        }
+		[Fact]
+		public virtual void Crud_06_Update_Concrete()
+		{
+			this.Fixture.ClearCaches();
 
-        [Fact]
-        public virtual async Task Crud_08_Transaction_Basics()
-        {
-            var db = Database.Dbs.AddMainDbIfNotExists();
+			var db = Database.Dbs.AddMainDbIfNotExists();
+			db.Metadata.AddIfNotExist<ConcreteEntity01>();
+			db.Structure.DropEntity("ConcreteEntity01");
 
-            db.ReAddReCreate<ConcreteEntity01>();
-            db.ReAddReCreate<ConcreteEntity02>();
+			db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-            long count = db.GetQuery<ConcreteEntity01>().Count();
-            Assert.Equal(0, count);
+			using var work1 = db.BeginWork();
 
-			using var work = db.BeginWork();
+			ConcreteEntity01 entity = work1.New<ConcreteEntity01>();
+			Assert.True(entity.Id < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
+			entity.CheckIDataTypeAssignments();
 
-			ConcreteEntity01 ent1 = work.New<ConcreteEntity01>();
-            ent1.Name = "Ent 1";
-            ent1.Save();
+			string name = RandomHelper.RandomText(10);
 
-            work.CommitChanges();
-            count = db.GetQuery<ConcreteEntity01>().Count();
-            Assert.Equal(1, count);
+			entity.Name = name;
+			entity.Save();
+			work1.CommitChanges();
 
-            var tran1 = db.BeginWork();
+			long id = entity.Id;
 
-            ConcreteEntity01 ent2 = work.New<ConcreteEntity01>();
-            ent2.Name = "Ent 2";
-            ent2.Save();
+			//TODO: Cache'ler temizlenecek !!
 
-            tran1.Rollback();
+			using var work2 = db.BeginWork();
+			ConcreteEntity01 loadedEntity = db.Find<ConcreteEntity01>(id);
+			loadedEntity.CheckIDataTypeAssignments();
 
-            count = db.GetQuery<ConcreteEntity01>().Count();
-            Assert.Equal(1, count);
+			Assert.False(loadedEntity._IsNew);
+			Assert.NotNull(loadedEntity);
+			Assert.Equal(name, loadedEntity.Name);
 
-            using (var tran2 = db.BeginWork())
-            {
-                ConcreteEntity01 ent3 = work.New<ConcreteEntity01>();
-                ent3.Name = "Ent 3";
-                ent3.Save();
-            }
+			string name2 = RandomHelper.RandomText(10);
+			loadedEntity.Name = name2;
+			loadedEntity.Save();
+			work2.CommitChanges();
 
-            count = db.GetQuery<ConcreteEntity01>().Count();
-            Assert.Equal(2, count);
-        }
+			//TODO: Cache'ler temizlenecek !!
+
+			ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id);
+			Assert.NotNull(loadedEntity2);
+			loadedEntity2.CheckIDataTypeAssignments();
+			Assert.Equal(name2, loadedEntity2.Name);
+
+		}
+
+		[Fact]
+		public virtual void Crud_06_Update_Json()
+		{
+			this.Fixture.ClearCaches();
+
+			var db = Database.Dbs.AddMainDbIfNotExists();
+			string content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity03.base.json");
+
+			db.Metadata.AddIfNotExist<ConcreteEntity01>();
+			db.Metadata.AddIfNotExist<ConcreteEntity02>();
+			var ems1 = db.Metadata.AddJson(content);
+
+			db.Structure.DropEntity("ConcreteEntity01");
+			db.Structure.DropEntity(ems1.First());
+
+			db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+			db.Structure.ApplyEntityStructure<ConcreteEntity02>();
+			db.Structure.ApplyEntityStructure(ems1.First());
+
+			using var work1 = db.BeginWork();
+
+			IEntity entity = work1.New("myJsonEntity03");
+			entity.CheckIDataTypeAssignments();
+
+			Assert.True((long)entity.GetId() < -9999); //Yeni entity'lerde Id verilir ancak eksi bir değer alır. Commit sırasında bu değer ve ilişkili kayıtlar için güncellenir
+
+			string name = RandomHelper.RandomText(10);
+
+			entity["Subject"] = name;
+			entity.Save();
+			work1.CommitChanges();
+
+			long id = (long)entity.GetId();
+
+			//TODO: Cache'ler temizlenecek !!
+
+			using var work2 = db.BeginWork();
+			IEntity loadedEntity = db.Find("myJsonEntity03", id);
+			Assert.NotNull(loadedEntity);
+			Assert.True((string)loadedEntity["Subject"] == name);
+
+			loadedEntity.CheckIDataTypeAssignments();
+
+			string name2 = RandomHelper.RandomText(10);
+			loadedEntity["Subject"] = name2;
+			loadedEntity.Save();
+			work2.CommitChanges();
+
+			//TODO: Cache'ler temizlenecek !!
+
+			IEntity loadedEntity2 = db.Find("myJsonEntity03", id);
+			loadedEntity2.CheckIDataTypeAssignments();
+
+			Assert.NotNull(loadedEntity2);
+			Assert.Equal(name2, (string)loadedEntity2["Subject"]);
+		}
+
+		[Fact]
+		public virtual void Crud_07_SimpleDelete()
+		{
+			var db = Database.Dbs.AddMainDbIfNotExists();
+
+			db.Metadata.AddIfNotExist<ConcreteEntity01>();
+			db.Metadata.AddIfNotExist<ConcreteEntity02>();
+
+			db.Structure.DropEntity<ConcreteEntity01>();
+
+			db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+			db.Structure.ApplyEntityStructure<ConcreteEntity02>();
+
+			using var work1 = db.BeginWork();
+
+			ConcreteEntity01 entity01 = work1.New<ConcreteEntity01>();
+			entity01.Name = "Entity 001";
+			entity01.Save();
+
+			ConcreteEntity01 entity02 = work1.New<ConcreteEntity01>();
+			entity02.Name = "Entity 002";
+			entity02.Save();
+
+			work1.CommitChanges();
+
+			using var work2 = db.BeginWork();
+			var entCount = db.GetQuery<ConcreteEntity01>().Count();
+			Assert.Equal(2, entCount);
+
+			work2.Delete(entity01);
+
+			//Henüz commit olmadı, veritabanında duruyor
+			entCount = db.GetQuery<ConcreteEntity01>().Count();
+			Assert.Equal(2, entCount);
+
+			work2.CommitChanges();
+
+			using var work3 = db.BeginWork();
+			entCount = db.GetQuery<ConcreteEntity01>().Count();
+			Assert.Equal(1, entCount);
+
+			work3.Delete(entity02);
+			work3.CommitChanges();
+
+			entCount = db.GetQuery<ConcreteEntity01>().Count();
+			Assert.Equal(0, entCount);
+
+
+		}
 
 
 
-    }
+
+	}
 }

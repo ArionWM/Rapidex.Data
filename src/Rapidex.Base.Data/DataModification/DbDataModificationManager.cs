@@ -19,13 +19,17 @@ internal class DbDataModificationManager : IDbDataModificationScope
     protected ThreadLocal<IDbChangesCollection> dbChangesScope;
     protected ThreadLocal<IDbChangesScopeWithTransaction> dbChangesScopeWithTransaction;
 
-    public IDbSchemaScope ParentScope { get; protected set; }
+    public IDbSchemaScope ParentSchema { get; protected set; }
 
     public IDbDataModificationPovider DmProvider { get; protected set; }
 
+    public IDbDataModificationStaticHost Parent => throw new NotImplementedException();
+
+    public bool IsFinalized => throw new NotImplementedException();
+
     public DbDataModificationManager(IDbSchemaScope parentScope, IDbDataModificationPovider dmProvider)
     {
-        ParentScope = parentScope;
+        ParentSchema = parentScope;
         DmProvider = dmProvider;
         dbChangesScope = new ThreadLocal<IDbChangesCollection>();
         dbChangesScopeWithTransaction = new ThreadLocal<IDbChangesScopeWithTransaction>();
@@ -45,12 +49,12 @@ internal class DbDataModificationManager : IDbDataModificationScope
     public IQuery GetQuery(IDbEntityMetadata em)
     {
         em.NotNull("Metadata can't be null");
-        return new Rapidex.Data.Query.DbQuery(this.ParentScope, em);
+        return new Rapidex.Data.Query.DbQuery(this.ParentSchema, em);
     }
 
     public IQuery<T> GetQuery<T>() where T : IConcreteEntity
     {
-        return new Rapidex.Data.Query.Query<T>(this.ParentScope);
+        return new Rapidex.Data.Query.Query<T>(this.ParentSchema);
     }
 
     public IEntityLoadResult Load(IQueryLoader loader)
@@ -103,8 +107,8 @@ internal class DbDataModificationManager : IDbDataModificationScope
 
     public IEntity Find(IDbEntityMetadata em, long id)
     {
-        if (em.OnlyBaseSchema && this.ParentScope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return  this.ParentScope.ParentDbScope.Find(em, id);
+        if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
+            return  this.ParentSchema.ParentDbScope.Find(em, id);
 
         DbEntityId eid = new DbEntityId(id, -1);
         IDbEntityLoader loader = this.SelectLoader(em);
@@ -116,10 +120,10 @@ internal class DbDataModificationManager : IDbDataModificationScope
     {
         em.NotNull();
 
-        if (em.OnlyBaseSchema && this.ParentScope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME) //?? acaba?
+        if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME) //?? acaba?
             throw new InvalidOperationException($"Entity '{em.Name}' only create for base schema");
 
-        IEntity entity = Database.EntityFactory.Create(em, this.ParentScope, true);
+        IEntity entity = Database.EntityFactory.Create(em, this.ParentSchema, true);
 
         entity = entity.PublishOnNew().Result ?? entity;
 
@@ -334,6 +338,11 @@ internal class DbDataModificationManager : IDbDataModificationScope
     }
 
     public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
+
+    (bool Found, string? Desc) IDbDataModificationScope.FindAndAnalyse(IDbEntityMetadata em, long id)
     {
         throw new NotImplementedException();
     }

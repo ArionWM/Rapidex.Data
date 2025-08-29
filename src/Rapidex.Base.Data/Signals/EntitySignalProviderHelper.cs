@@ -26,8 +26,8 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Scope.ParentDbScope.Name,
-            Workspace = entity._Scope.SchemaName,
+            Tenant = entity._Schema.ParentDbScope.Name,
+            Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
@@ -46,8 +46,8 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Scope.ParentDbScope.Name,
-            Workspace = entity._Scope.SchemaName,
+            Tenant = entity._Schema.ParentDbScope.Name,
+            Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
@@ -66,8 +66,8 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Scope.ParentDbScope.Name,
-            Workspace = entity._Scope.SchemaName,
+            Tenant = entity._Schema.ParentDbScope.Name,
+            Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
@@ -81,8 +81,8 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Scope.ParentDbScope.Name,
-            Workspace = entity._Scope.SchemaName,
+            Tenant = entity._Schema.ParentDbScope.Name,
+            Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
@@ -96,8 +96,8 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Scope.ParentDbScope.Name,
-            Workspace = entity._Scope.SchemaName,
+            Tenant = entity._Schema.ParentDbScope.Name,
+            Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
@@ -117,8 +117,8 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Scope.ParentDbScope.Name,
-            Workspace = entity._Scope.SchemaName,
+            Tenant = entity._Schema.ParentDbScope.Name,
+            Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),

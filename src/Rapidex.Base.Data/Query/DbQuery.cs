@@ -115,6 +115,8 @@ namespace Rapidex.Data.Query
             if (this.Mode != QMode.Update)
                 throw new InvalidOperationException("Query is not in update mode");
 
+            workScope.CheckActive();
+
             this.UpdateData = new ObjDictionary();
 
             this.Alias = null;

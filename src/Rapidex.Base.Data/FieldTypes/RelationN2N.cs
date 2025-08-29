@@ -111,7 +111,7 @@ namespace Rapidex.Data
             var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
             var parentEntity = this.GetParent();
 
-            JunctionHelper.SetEntitiesCriteria(parentEntity._Scope, fm, parentEntity, query, additionalCriterias);
+            JunctionHelper.SetEntitiesCriteria(parentEntity._Schema, fm, parentEntity, query, additionalCriterias);
         }
 
         public override IEntityLoadResult GetContent(Action<IQueryCriteria> additionalCriteria = null)
@@ -119,7 +119,7 @@ namespace Rapidex.Data
             var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
             var parentEntity = this.GetParent();
 
-            IEntityLoadResult res = JunctionHelper.GetEntities(parentEntity._Scope, fm, parentEntity, additionalCriteria);
+            IEntityLoadResult res = JunctionHelper.GetEntities(parentEntity._Schema, fm, parentEntity, additionalCriteria);
             return res;
         }
 
@@ -145,7 +145,7 @@ namespace Rapidex.Data
             var parentEntity = this.GetParent();
             var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
             ItemDefinitionExtraData exData = new ItemDefinitionExtraData();
-            fm.GetDefinitionData(parentEntity._Scope, ref exData, true);
+            fm.GetDefinitionData(parentEntity._Schema, ref exData, true);
 
             EntitySerializationOptions nestedOptions = options;
             nestedOptions.IncludeNestedEntities = false;
@@ -186,7 +186,7 @@ namespace Rapidex.Data
             IEntity parent = this.GetParent();
             var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
 
-            JunctionHelper.AddRelation(_this.Parent._Scope, fm, parent, detailEntity, true);
+            JunctionHelper.AddRelation(_this.Parent._Schema, fm, parent, detailEntity, true);
         }
 
         public void Remove(IEntity detailEntity)
@@ -195,7 +195,7 @@ namespace Rapidex.Data
             IEntity parent = this.GetParent();
             var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
 
-            JunctionHelper.RemoveRelation(_this.Parent._Scope, fm, parent, detailEntity, true);
+            JunctionHelper.RemoveRelation(_this.Parent._Schema, fm, parent, detailEntity, true);
         }
     }
 

@@ -8,7 +8,7 @@ namespace Rapidex.Data.Scopes
 {
     internal class DbSchemaScope : IDbSchemaScope
     {
-        private int debugTracker;
+        private readonly int _debugTracker;
         protected readonly IDbScope parentDbScope;
         protected readonly IDbProvider dbProvider;
         protected readonly string name;
@@ -44,7 +44,7 @@ namespace Rapidex.Data.Scopes
             this.dataManager = new DataModificationStaticHost(this);
             this.mapper = new EntityMapper(this);
             this.blobRepository = new DefaultDbBlobRepository(this);
-            this.debugTracker = RandomHelper.Random(int.MaxValue);
+            this._debugTracker = RandomHelper.Random(1000000);
         }
 
         public virtual void Setup()

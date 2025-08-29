@@ -6,14 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
-internal abstract class DataModificationScopeBase : IDbDataReadScope
+internal abstract class DataModificationReadScopeBase : IDbDataReadScope
 {
-    public IDbSchemaScope ParentScope { get; protected set; }
+    public IDbSchemaScope ParentSchema { get; protected set; }
     protected virtual IDbDataModificationPovider DmProvider { get; set; }
 
-    public DataModificationScopeBase(IDbSchemaScope parentScope)
+    public DataModificationReadScopeBase(IDbSchemaScope parentScope)
     {
-        this.ParentScope = parentScope;
+        this.ParentSchema = parentScope;
         this.DmProvider = parentScope.DbProvider.GetDataModificationProvider(); 
 
         this.Initialize();
@@ -39,12 +39,12 @@ internal abstract class DataModificationScopeBase : IDbDataReadScope
     public IQuery GetQuery(IDbEntityMetadata em)
     {
         em.NotNull("Metadata can't be null");
-        return new Rapidex.Data.Query.DbQuery(this.ParentScope, em);
+        return new Rapidex.Data.Query.DbQuery(this.ParentSchema, em);
     }
 
     public IQuery<T> GetQuery<T>() where T : IConcreteEntity
     {
-        return new Rapidex.Data.Query.Query<T>(this.ParentScope);
+        return new Rapidex.Data.Query.Query<T>(this.ParentSchema);
     }
 
     public IEntityLoadResult Load(IQueryLoader queryLoader)
@@ -92,8 +92,8 @@ internal abstract class DataModificationScopeBase : IDbDataReadScope
 
     public IEntity Find(IDbEntityMetadata em, long id)
     {
-        if (em.OnlyBaseSchema && this.ParentScope.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return this.ParentScope.ParentDbScope.Find(em, id);
+        if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
+            return this.ParentSchema.ParentDbScope.Find(em, id);
 
         DbEntityId eid = new DbEntityId(id, -1);
         IDbEntityLoader loader = this.SelectLoader(em);

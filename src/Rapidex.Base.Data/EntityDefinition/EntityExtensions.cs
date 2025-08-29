@@ -28,7 +28,7 @@ public static class EntityExtensions
         if (entity == null)
             return null;
 
-        EntityMapper mapper = targetScope?.Mapper ?? entity._Scope.Mapper;
+        EntityMapper mapper = targetScope?.Mapper ?? entity._Schema.Mapper;
         return mapper.Clone(entity, targetScope);
     }
 
@@ -53,9 +53,9 @@ public static class EntityExtensions
 
     public static void Save(this IEntity entity)
     {
-        entity._Scope.CurrentWork.NotNull("No active work found in current scope");
+        entity._Schema.CurrentWork.NotNull("No active work found in current scope");
 
-        entity._Scope.CurrentWork.Save(entity);
+        entity._Schema.CurrentWork.Save(entity);
     }
 
     public static void Save(this IEnumerable<IEntity> entities)
@@ -64,7 +64,7 @@ public static class EntityExtensions
             return;
 
         //TODO: Farklı scope'lar için ayrı ayrı kaydetme yapılabilir mi?
-        IDbSchemaScope scope = entities.FirstOrDefault()._Scope;
+        IDbSchemaScope scope = entities.FirstOrDefault()._Schema;
 
         scope.CurrentWork.NotNull("No active work found in current scope");
         scope.CurrentWork.Save(entities);
@@ -74,7 +74,7 @@ public static class EntityExtensions
     public static void EnsureDataTypeInitialization(this IEntity entity)
     {
         entity.NotNull();
-        entity._Scope.Mapper.EnsureAdvancedDataTypes(entity);
+        entity._Schema.Mapper.EnsureAdvancedDataTypes(entity);
     }
 
     public static string Caption(this IEntity entity)

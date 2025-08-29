@@ -114,13 +114,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 		//UniqueId: Guid.NewGuid()
 		//Reference01: 10 tane ConcreteEntity01 oluşturuyoruz, index = i % 10 olarak ekliyoruz
 
-		var work = scope.BeginWork();
+		var work1 = scope.BeginWork();
 
 		List<ConcreteEntity01> refEntities = new List<ConcreteEntity01>();
 
         for (int i = 0; i < 10; i++)
         {
-            ConcreteEntity01 entity = work.New<ConcreteEntity01>();
+            ConcreteEntity01 entity = work1.New<ConcreteEntity01>();
             entity.Name = $"Entity Name {i:000}";
             entity.CreditLimit1 = 10000 * i;
             entity.Description = $"Description {i:000}";
@@ -129,14 +129,14 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             refEntities.Add(entity);
         }
 
-        work.CommitChanges();
+        work1.CommitChanges();
 
 
+		var work2 = scope.BeginWork();
 
-
-        for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 100; i++)
         {
-            IEntity entity = work.New(em);
+            IEntity entity = work2.New(em);
             entity["No"] = i + 1;
             entity["Name"] = $"Entity Name {i + 1:000}";
             entity["Value"] = 10000 * (i + 1);
@@ -154,7 +154,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             entity.Save();
         }
 
-        work.CommitChanges();
+		work2.CommitChanges();
 
     }
 
@@ -370,28 +370,28 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         db.Structure.DropEntity<ConcreteEntity01>();
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
-        using var work = db.BeginWork();
+        using var work1 = db.BeginWork();
 
-		ConcreteEntity01 refEnt01 = work.New<ConcreteEntity01>();
+		ConcreteEntity01 refEnt01 = work1.New<ConcreteEntity01>();
         refEnt01.Name = "Ent 01";
         refEnt01.Phone = "5336722201";
         refEnt01.Address = "Address 01";
 
         refEnt01.Save();
 
-        ConcreteEntity01 refEnt02 = work.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt02 = work1.New<ConcreteEntity01>();
         refEnt02.Name = "Ent 02";
         refEnt02.Phone = "5336722202";
         refEnt02.Address = "Address 02";
         refEnt02.Save();
 
-        ConcreteEntity01 refEnt03 = work.New<ConcreteEntity01>();
+        ConcreteEntity01 refEnt03 = work1.New<ConcreteEntity01>();
         refEnt03.Name = "Ent 03";
         refEnt03.Phone = "6336722203";
         refEnt03.Address = "Address 03";
         refEnt03.Save();
 
-        work.CommitChanges();
+        work1.CommitChanges();
 
         long count01 = db.GetQuery<ConcreteEntity01>()
              .Like("Phone", "533672220*")
@@ -405,17 +405,17 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         Assert.Equal(1, count02);
 
-
-        db.GetQuery<ConcreteEntity01>()
+		using var work2 = db.BeginWork();
+		db.GetQuery<ConcreteEntity01>()
              .EnterUpdateMode()
              .Like("Phone", "533672220*")
-             .Update(work, new ObjDictionary() { { "Address", "Updated Address" } });
+             .Update(work2, new ObjDictionary() { { "Address", "Updated Address" } });
 
-        //var data = new ObjDictionary();
-        //data.Add("Address", "Updated Address");
-        //query.Update(data);
+		//var data = new ObjDictionary();
+		//data.Add("Address", "Updated Address");
+		//query.Update(data);
 
-        work.CommitChanges();
+		work2.CommitChanges();
 
         long count03 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")

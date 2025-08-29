@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestBase;
-public class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
+public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
 {
     public MultiDatabaseAndSchemaTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
     {

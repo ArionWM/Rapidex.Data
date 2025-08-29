@@ -171,7 +171,7 @@ public class EntityMapper
         if (targetScope == null)
         {
             clone._DbName = from._DbName;
-            clone._Scope = from._Scope;
+            clone._Schema = from._Schema;
             clone._SchemaName = from._SchemaName;
             clone.SetId((long)from.GetId());
             clone.DbVersion = from.DbVersion;
@@ -179,7 +179,7 @@ public class EntityMapper
         else
         {
             clone._DbName = targetScope.ParentDbScope.Name;
-            clone._Scope = targetScope;
+            clone._Schema = targetScope;
             clone._SchemaName = targetScope.SchemaName;
             clone._IsNew = true;
             clone.SetId(0L);
@@ -241,7 +241,7 @@ public class EntityMapper
             fillTo.SetValue(fm.Name, value);
         }
 
-        fillTo._Scope = this.Parent;
+        fillTo._Schema = this.Parent;
         fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));
 
         return fillTo;
@@ -294,7 +294,7 @@ public class EntityMapper
         fillTo.SetValue(CommonConstants.FIELD_ID, from[CommonConstants.FIELD_ID]);
         fillTo.SetValue(CommonConstants.FIELD_VERSION, from[CommonConstants.FIELD_VERSION]);
 
-        fillTo._Scope = this.Parent;
+        fillTo._Schema = this.Parent;
         fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));
 
         return fillTo;
@@ -322,7 +322,7 @@ public class EntityMapper
             fillTo.SetValue(fm.Name, value);
         }
 
-        fillTo._Scope = this.Parent;
+        fillTo._Schema = this.Parent;
         fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));
 
         return fillTo;
@@ -356,7 +356,7 @@ public class EntityMapper
 
     public static IDictionary<string, object> MapToDict(IEntity entity)
     {
-        var em = entity.GetMetadata() ?? entity._Scope.ParentDbScope.Metadata.Get(entity.GetType().Name);
+        var em = entity.GetMetadata() ?? entity._Schema.ParentDbScope.Metadata.Get(entity.GetType().Name);
         em.NotNull();
         return EntityMapper.MapToDict(em, entity);
     }
@@ -375,7 +375,7 @@ public class EntityMapper
     {
         Type conctType = typeof(T);
 
-        T concEntity = (T)Database.EntityFactory.Create<T>(source._Scope, false);
+        T concEntity = (T)Database.EntityFactory.Create<T>(source._Schema, false);
 
         concEntity._IsNew = source._IsNew;
         concEntity.Id = (long)source.GetId();

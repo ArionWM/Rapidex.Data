@@ -47,7 +47,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            IDbEntityMetadata em = dmm.ParentScope.ParentDbScope.Metadata.Get(entityName);
+            IDbEntityMetadata em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName);
             em.Should().NotBeNull($"Entity metadata not found for '{entityName}'");
 
             IEntity entity = dmm.New(em);
@@ -59,11 +59,11 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            IDbEntityMetadata em = dmm.ParentScope.ParentDbScope.Metadata.Get<TEntity>();
+            IDbEntityMetadata em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
             em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             IEntity entity = dmm.New(em.Name);
-            TEntity concEntity = dmm.ParentScope.Mapper.Map<TEntity>(entity);
+            TEntity concEntity = dmm.ParentSchema.Mapper.Map<TEntity>(entity);
 
             return concEntity;
         }
@@ -72,7 +72,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var query = dmm.ParentScope.GetQuery(em);
+            var query = dmm.ParentSchema.GetQuery(em);
             act?.Invoke(query);
 
             var loadResult = dmm.Load(query);
@@ -84,7 +84,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var em = dmm.ParentScope.ParentDbScope.Metadata.Get(entityName);
+            var em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName);
             return dmm.Load(em, act);
         }
 
@@ -94,7 +94,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var em = dmm.ParentScope.ParentDbScope.Metadata.Get<TEntity>();
+            var em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
             em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             var loadResult = dmm.Load(em, act);
@@ -105,7 +105,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var em = dmm.ParentScope.ParentDbScope.Metadata.Get(entityName);
+            var em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName);
             em.Should().NotBeNull($"Entity metadata not found for '{entityName}'");
 
             return dmm.Find(em, id);
@@ -116,7 +116,7 @@ namespace Rapidex.Data
         {
             dmm.NotNull();
 
-            var em = dmm.ParentScope.ParentDbScope.Metadata.Get<TEntity>();
+            var em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
             em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             var result = dmm.Find(em, id);
@@ -133,7 +133,14 @@ namespace Rapidex.Data
             }
         }
 
+        public static void CheckActive(this IDbDataModificationScope dmm)
+        {
+            if (dmm == null)
+                throw new InvalidOperationException("Data modification scope is null.");
 
+            if (dmm.IsFinalized)
+                throw new WorkScopeNotAvailableException(null, "This scope is finalized");
+        }
 
     }
 }

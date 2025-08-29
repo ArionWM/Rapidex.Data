@@ -42,7 +42,7 @@ namespace Rapidex.Data
             if (id < 0)
                 throw new InvalidOperationException("Cant do for premature entities");
 
-            string key = parent._Scope.SchemaName.ToFriendly() + id.ToString(); //Tenant name'i de eklemek?
+            string key = parent._Schema.SchemaName.ToFriendly() + id.ToString(); //Tenant name'i de eklemek?
             string cryptoText = CRIPTO_TEXT_PREFIX + CryptoHelper.EncryptAes(value, key);
             return cryptoText;
         }
@@ -123,7 +123,7 @@ namespace Rapidex.Data
 
             _value = _value.Remove(0, CRIPTO_TEXT_PREFIX.Length);
 
-            string key = ent._Scope.SchemaName.ToFriendly() + id.ToString(); //Tenant name'i de eklemek?
+            string key = ent._Schema.SchemaName.ToFriendly() + id.ToString(); //Tenant name'i de eklemek?
             string value = CryptoHelper.DecryptAes(_value, key);
             return value;
         }

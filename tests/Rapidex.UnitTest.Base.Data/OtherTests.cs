@@ -1,4 +1,6 @@
-﻿using Rapidex.UnitTest.Data.TestContent;
+﻿using MimeTypes;
+using Rapidex.Data.Entities;
+using Rapidex.UnitTest.Data.TestContent;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +15,7 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void TTT1()
+    public void T01_IndependendEntitiesInDifferentScopes()
     {
         var db = Database.Dbs.Db();
         db.ReAddReCreate<ConcreteEntity03>();
@@ -48,24 +50,105 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void TTT2()
+    public void T02_DependentNewEntitiesInDifferentScopesTurnIntoHell()
+    {
+        Assert.Throws<EntityNotFoundException>(() =>
+        {
+            var db = Database.Dbs.Db();
+            db.ReAddReCreate<ConcreteEntity01>();
+            db.ReAddReCreate<ConcreteEntity02>();
+
+            using var work1 = db.BeginWork();
+            ConcreteEntity01 ent1_1 = work1.New<ConcreteEntity01>();
+            ent1_1.Name = "test 1";
+            ent1_1.Save();
+
+            using (var work1_1 = db.BeginWork())
+            {
+                ConcreteEntity02 ent2_1 = work1_1.New<ConcreteEntity02>();
+                ent2_1.MyReference = ent1_1;
+                ent2_1.Save(); // <- BOOM! 
+            }
+
+            work1.CommitChanges();
+        });
+    }
+
+    [Fact]
+    public void T03_DependentNewEntitiesInDifferentScopes()
     {
         var db = Database.Dbs.Db();
-        db.ReAddReCreate<ConcreteEntity02>();
         db.ReAddReCreate<ConcreteEntity01>();
+        db.ReAddReCreate<ConcreteEntity02>();
 
-        using var work = db.BeginWork();
-        ConcreteEntity01 ent1_1 = work.New<ConcreteEntity01>();
+        using var work1 = db.BeginWork();
+        ConcreteEntity01 ent1_1 = work1.New<ConcreteEntity01>();
         ent1_1.Name = "test 1";
         ent1_1.Save();
 
-        using (var scope = db.BeginWork())
-        {
-            ConcreteEntity02 ent2_1 = scope.New<ConcreteEntity02>();
-            ent2_1.MyReference = ent1_1;
-            ent2_1.Save();
-        }
+        work1.CommitChanges();
 
-        work.CommitChanges();
+        using (var work1_1 = db.BeginWork())
+        {
+            ConcreteEntity02 ent2_1 = work1_1.New<ConcreteEntity02>();
+            ent2_1.MyReference = ent1_1;
+            ent2_1.Save(); // <- BOOM! 
+        }
+    }
+
+    [Fact]
+    public void T03_AlreadyFinalizedScope1()
+    {
+        var db = Database.Dbs.Db();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+
+        using var work1 = db.BeginWork();
+
+        ConcreteEntity01 ent1 = work1.New<ConcreteEntity01>();
+        ent1.Name = "test 1";
+        ent1.Save();
+
+        work1.CommitChanges();
+
+        Assert.Throws<WorkScopeNotAvailableException>(() =>
+        {
+            ConcreteEntity01 ent2 = work1.New<ConcreteEntity01>(); // <- BOOM!
+            ent2.Name = "test 2";
+            ent2.Save();
+        });
+    }
+
+    [Fact]
+    public void T03_AlreadyFinalizedScope2()
+    {
+        Assert.Throws<WorkScopeNotAvailableException>(() =>
+        {
+            var db = Database.Dbs.Db();
+            db.Metadata.AddIfNotExist<BlobRecord>();
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<BlobRecord>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+
+            using var work1 = db.BeginWork();
+
+            byte[] imageContentOriginal01 = this.Fixture.GetFileContentAsBinary("TestContent\\Image01.png");
+            int hash01 = HashHelper.GetStableHashCode(imageContentOriginal01);
+
+            ConcreteEntity01 entity = work1.New<ConcreteEntity01>();
+            entity.Name = "Binary 001";
+            entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
+            entity.Save();
+            work1.CommitChanges();
+
+            //WorkScope is finalized...
+            long entityId01 = entity.Id;
+
+            entity = db.Find<ConcreteEntity01>(entityId01);
+            entity.Picture.SetEmpty(); // <- BOOM!
+            entity.Save();
+
+            work1.CommitChanges();
+        });
     }
 }

@@ -113,12 +113,18 @@ namespace Rapidex.UnitTest.Data.TestBase
         {
             var db = Database.Dbs.AddMainDbIfNotExists();
 
+            db.Metadata.AddIfNotExist<GenericJunction>();
             db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
             db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
+            
+            db.Structure.DropEntity<ConcreteEntityForN2NTest02>();
+            db.Structure.DropEntity<ConcreteEntityForN2NTest01>();
+            db.Structure.DropEntity<GenericJunction>();
 
-            db.ReAddReCreate<ConcreteEntityForN2NTest02>();
-            db.ReAddReCreate<ConcreteEntityForN2NTest01>();
-            db.ReAddReCreate<GenericJunction>();
+            db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest02>();
+            db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
+            db.Structure.ApplyEntityStructure<GenericJunction>();
+
 
             using var work = db.BeginWork();
 

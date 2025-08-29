@@ -34,8 +34,9 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
 		db.Structure.DropEntity<ConcreteEntity03>();
 		db.Structure.DropEntity<ConcreteEntity04>();
 
-		db.Structure.ApplyEntityStructure<ConcreteEntity03>();
 		db.Structure.ApplyEntityStructure<ConcreteEntity04>();
+		db.Structure.ApplyEntityStructure<ConcreteEntity03>();
+
 
 		using var work = db.BeginWork();
 

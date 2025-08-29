@@ -10,7 +10,7 @@ namespace Rapidex.Data
         ObjDictionary _Values { get; }
 
         [JsonIgnore]
-        public IDbSchemaScope _Scope { get; set; }
+        public IDbSchemaScope _Schema { get; set; }
 
         [JsonIgnore]
         IDbEntityMetadata IEntity._Metadata { get; set; }

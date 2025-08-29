@@ -29,7 +29,7 @@ namespace Rapidex.Data
 
             IDataType _this = this;
             IEntity _parent = this.GetParent().NotNull("Parent not set");
-            IResult<StreamContent> fsr = _parent._Scope.Blobs.Get(this.TargetId);
+            IResult<StreamContent> fsr = _parent._Schema.Blobs.Get(this.TargetId);
             return fsr.Content;
         }
 
@@ -80,14 +80,14 @@ namespace Rapidex.Data
                 if (blobId > 0)
                 {
                     //Sil ..
-                    _parent._Scope.Blobs.Delete(blobId);
+                    _parent._Schema.Blobs.Delete(blobId);
                 }
                 this.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
             }
             else
             {
                 //güncelle ya da ekle
-                IResult<BlobRecord> bres = _parent._Scope.Blobs.Set(stream, name, contentType, this.TargetId)
+                IResult<BlobRecord> bres = _parent._Schema.Blobs.Set(stream, name, contentType, this.TargetId)
                     ;
                 blobRec = bres.Content;
                 this.TargetId = blobRec.Id;
@@ -111,7 +111,7 @@ namespace Rapidex.Data
             string fieldName = _this.FieldMetadata.Name;
             IEntity owner = _this.Parent;
             IDbEntityMetadata em = owner.GetMetadata();
-            IDbSchemaScope dbScope = owner._Scope;
+            IDbSchemaScope dbScope = owner._Schema;
 
             string nav = GetFileDescriptorIdForFieldFile(owner, em, fieldName);
             //$"{dbScope.SchemaName}.{em.Name}.{owner.GetId()}.{fieldName}";
@@ -205,7 +205,7 @@ namespace Rapidex.Data
 
         public static string GetFileDescriptorIdForFieldFile(IEntity owner, IDbEntityMetadata em, string fieldName)
         {
-            IDbSchemaScope dbScope = owner._Scope;
+            IDbSchemaScope dbScope = owner._Schema;
             string nav = $"{dbScope.SchemaName}.{em.Name}.{owner.GetId()}.fields.{fieldName}";
             return nav;
         }

@@ -23,7 +23,7 @@ namespace Rapidex.Data
         protected DbEntity Create(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
         {
             DbEntity dbEntity = new DbEntity();
-            dbEntity._Scope = scope;
+            dbEntity._Schema = scope;
             dbEntity._TypeName = entityMetadata.Name;
             dbEntity._DbName = scope?.ParentDbScope.Name;
             dbEntity._SchemaName = scope?.SchemaName;
@@ -36,7 +36,7 @@ namespace Rapidex.Data
         protected PartialEntity CreatePartial(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
         {
             PartialEntity dbEntity = new PartialEntity();
-            dbEntity._Scope = scope;
+            dbEntity._Schema = scope;
             dbEntity._TypeName = entityMetadata.Name;
             dbEntity._DbName = scope?.ParentDbScope.Name;
             dbEntity._SchemaName = scope?.SchemaName;
@@ -69,7 +69,7 @@ namespace Rapidex.Data
 
             IEntity dbEntity = TypeHelper.CreateInstance<IEntity>(concreteType);
 
-            dbEntity._Scope = scope;
+            dbEntity._Schema = scope;
             dbEntity._TypeName = entityMetadata.Name;
             dbEntity._DbName = scope?.ParentDbScope.Name;
             dbEntity._SchemaName = scope?.SchemaName;

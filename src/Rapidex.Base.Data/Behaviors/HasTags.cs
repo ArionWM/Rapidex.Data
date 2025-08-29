@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data
@@ -178,12 +179,13 @@ namespace Rapidex.Data
 
         public static void CheckEntityTagsAsync(IDbSchemaScope dbScope, IDbEntityMetadata em, params string[] tags)
         {
-
+            using var cont = ExecutionContext.SuppressFlow(); //For isolate 'dbScope.BeginWork()' / IDbDataModificationStaticHost.localStack
             Task.Run(() =>
             {
                 try
                 {
                     InternalCheckEntityTags(dbScope, em, tags);
+                    //Thread.Sleep(2000); //for test purposes
                 }
                 catch (Exception ex)
                 {

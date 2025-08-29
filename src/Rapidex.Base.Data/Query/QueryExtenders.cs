@@ -124,7 +124,7 @@ namespace Rapidex.Data
 
         public static IQuery GetQuery(this IDbDataReadScope dmm, string entityName)
         {
-            var em = dmm.ParentScope.ParentDbScope.Metadata.Get(entityName)
+            var em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName)
                 .NotNull($"Metadata for '{entityName}' not found");
             return dmm.GetQuery(em);
         }

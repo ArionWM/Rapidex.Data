@@ -94,7 +94,9 @@ internal class DbChangesCollection : IDbChangesCollection
 
     public bool IsEmpty => !_changedEntities.Any() && !_deletedEntities.Any() && !_bulkUpdates.Any();
 
-    public DbChangesCollection() { }
+    public DbChangesCollection()
+    {
+    }
 
     public DbChangesCollection(IEnumerable<IEntity> changedEntities, IEnumerable<IEntity> deletedEntities, IEnumerable<IQueryUpdater> bulkUpdates)
     {
@@ -124,7 +126,8 @@ internal class DbChangesCollection : IDbChangesCollection
                     return entity;
             }
 
-            throw new InvalidOperationException($"Entity {em.Name}/{id} is not found in new entitites");
+            //TODO: Analyze ?
+            throw new EntityNotFoundException(em.Name, id, $"Entity {em.Name}/{id} is not found in new entitites");
         }
         finally
         {
@@ -268,12 +271,12 @@ internal class DbChangesCollection : IDbChangesCollection
         if (entity._IsNew)
         {
             var em = entity.GetMetadata();
-            TemplateInfo info = Database.EntityFactory.GetTemplate(em, entity._Scope);
+            TemplateInfo info = Database.EntityFactory.GetTemplate(em, entity._Schema);
 
             long oldId = (long)entity.GetId();
             if (entity.HasPrematureId())
             {
-                long newId = entity._Scope.Data.Sequence(info.PersistentSequence).GetNext();
+                long newId = entity._Schema.Data.Sequence(info.PersistentSequence).GetNext();
                 entity.SetId(newId);
 
                 this._newEntityDependencies.UpdateDependedEntities(entity);
@@ -355,5 +358,37 @@ internal class DbChangesCollection : IDbChangesCollection
 
     }
 
+    public (bool Found, string? Desc) FindAndAnalyse(IDbEntityMetadata em, long id)
+    {
+        if (id.IsEmptyId())
+            return (false, null);
 
+
+        try
+        {
+            foreach (var entity in _newEntities)
+            {
+                //TODO: daha verimli bir yöntem
+                //WARN: Referanslar eşit değil, çünkü birisi prematüre vs. olabilir
+                //TODO: IEM için IComparable ya da equal override ...
+                if (entity.GetMetadata().Name == em.Name && id == (long)entity.GetId())
+                    return (true, "in new entities");
+            }
+
+            foreach (var entity in _changedEntities)
+            {
+                //TODO: daha verimli bir yöntem
+                //WARN: Referanslar eşit değil, çünkü birisi prematüre vs. olabilir
+                //TODO: IEM için IComparable ya da equal override ...
+                if (entity.GetMetadata().Name == em.Name && id == (long)entity.GetId())
+                    return (true, "in changed entities");
+            }
+
+            return (false, null);
+        }
+        finally
+        {
+        }
+
+    }
 }

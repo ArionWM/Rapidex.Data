@@ -36,7 +36,9 @@ namespace Rapidex.Data.Scopes
 
                 if (brec != null)
                 {
-                    this.parentScope.CurrentWork.Delete(brec);
+                    var work = this.parentScope.CurrentWork;
+                    work.Delete(brec);
+
                     ures.Deleted(brec);
                     ures.Success = true;
                 }

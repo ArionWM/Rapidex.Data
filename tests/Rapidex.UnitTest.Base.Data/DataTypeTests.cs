@@ -32,20 +32,21 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         byte[] imageContentOriginal01 = this.Fixture.GetFileContentAsBinary("TestContent\\Image01.png");
         int hash01 = HashHelper.GetStableHashCode(imageContentOriginal01);
 
-        using var work = db.BeginWork();
+        using var work1 = db.BeginWork();
 
-        ConcreteEntity01 entity = work.New<ConcreteEntity01>();
+        ConcreteEntity01 entity = work1.New<ConcreteEntity01>();
         entity.Name = "Binary 001";
 
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        work.CommitChanges();
+        work1.CommitChanges();
 
         long blobId01_check = entity.Picture.TargetId;
 
         db.Metadata.ReAdd<ConcreteEntity01>();
 
+        using var work2 = db.BeginWork();
         ConcreteEntity01 ent01 = db.GetQuery<ConcreteEntity01>().First();
 
         long blobId01 = ent01.Picture.TargetId;
@@ -63,7 +64,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.Set(imageContentOriginal02, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        work.CommitChanges();
+        work2.CommitChanges();
 
         //Yeni bir içerik yüklendiğinde Id değişmemeli, önceki blobRecord kaydı güncellenmeli
         long blobId02_check = ent01.Picture.TargetId;
@@ -80,18 +81,19 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         db.ReAddReCreate<BlobRecord>();
         db.ReAddReCreate<ConcreteEntity01>();
 
-        using var work = db.BeginWork();
+        using var work1 = db.BeginWork();
 
         byte[] imageContentOriginal01 = this.Fixture.GetFileContentAsBinary("TestContent\\Image01.png");
         int hash01 = HashHelper.GetStableHashCode(imageContentOriginal01);
 
-        ConcreteEntity01 entity = work.New<ConcreteEntity01>();
+        ConcreteEntity01 entity = work1.New<ConcreteEntity01>();
         entity.Name = "Binary 001";
         entity.Picture.Set(imageContentOriginal01, "image.png", MimeTypeMap.GetMimeType("png"));
         entity.Save();
 
-        work.CommitChanges();
+        work1.CommitChanges();
 
+        using var work2 = db.BeginWork();
         long entityId01 = entity.Id;
 
         long blobRecId01 = entity.Picture.TargetId;
@@ -105,7 +107,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         entity.Picture.SetEmpty();
         entity.Save();
 
-        work.CommitChanges();
+        work2.CommitChanges();
 
         Assert.Equal(DatabaseConstants.DEFAULT_EMPTY_ID, entity.Picture.TargetId);
 
@@ -241,28 +243,28 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         var db = Database.Dbs.Db();
         db.ReAddReCreate<ConcreteEntity01>();
 
-        using var work = db.BeginWork();
+        using var work1 = db.BeginWork();
 
-        ConcreteEntity01 ent01 = work.New<ConcreteEntity01>();
+        ConcreteEntity01 ent01 = work1.New<ConcreteEntity01>();
         DateTimeOffset dtoRef = new DateTimeOffset(2024, 12, 01, 02, 03, 04, TimeSpan.Zero);
         //dto.Offset = TimeSpan.FromHours(3);
 
         ent01.BirthDate = dtoRef;
         ent01.Save();
-        work.CommitChanges();
+        work1.CommitChanges();
 
         long id = ent01.Id;
 
         ConcreteEntity01 ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id);
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
-
+        using var work2 = db.BeginWork();
         //Offset verilmiş olsa da UTC+0 olarak saklanmalı
         DateTimeOffset dtoWithOffset = dtoRef.ToOffset(TimeSpan.FromHours(3));
 
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        work.CommitChanges();
+        work2.CommitChanges();
 
         id = ent01.Id;
 
@@ -271,9 +273,11 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         dtoWithOffset = dtoRef.ToOffset(-1 * TimeSpan.FromHours(3));
 
+        using var work3 = db.BeginWork();
+
         ent01.BirthDate = dtoWithOffset;
         ent01.Save();
-        work.CommitChanges();
+        work3.CommitChanges();
 
         id = ent01.Id;
 

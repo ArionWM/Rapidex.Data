@@ -14,7 +14,7 @@ namespace Rapidex.Data
         IDbEntityMetadata IEntity._Metadata { get; set; }
 
         [JsonIgnore]
-        public IDbSchemaScope _Scope { get; set; }
+        public IDbSchemaScope _Schema { get; set; }
 
         public object this[string columnName]
         {

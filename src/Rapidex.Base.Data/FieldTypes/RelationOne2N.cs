@@ -108,11 +108,11 @@ public class RelationOne2N : RelationBase, ILazy
         //Cachlemek mümkün mü? Eğer cache'lenir ise Add'de?
         var fm = (VirtualRelationOne2NDbFieldMetadata)((IDataType)this).FieldMetadata;
         var parentEntity = this.GetParent();
-        var detailEm = parentEntity._Scope.ParentDbScope.Metadata.Get(fm.DetailEntityName);
+        var detailEm = parentEntity._Schema.ParentDbScope.Metadata.Get(fm.DetailEntityName);
         var detailFm = detailEm.Fields.Get(fm.DetailParentFieldName);
         detailFm.NotNull($"One2N relation detail parent field '{fm.DetailParentFieldName}' not found on '{fm.DetailEntityName}' ");
 
-        var loadResult = parentEntity._Scope.Load(detailEm, crit =>
+        var loadResult = parentEntity._Schema.Load(detailEm, crit =>
         {
             crit.Eq(detailFm.Name, parentEntity.GetId());
             additionalCriteria?.Invoke(crit);
@@ -143,7 +143,7 @@ public class RelationOne2N : RelationBase, ILazy
         var parentEntity = this.GetParent();
         var fm = (VirtualRelationOne2NDbFieldMetadata)((IDataType)this).FieldMetadata;
         ItemDefinitionExtraData exData = new ItemDefinitionExtraData();
-        fm.GetDefinitionData(parentEntity._Scope, ref exData, true);
+        fm.GetDefinitionData(parentEntity._Schema, ref exData, true);
 
         EntitySerializationOptions nestedOptions = options;
         nestedOptions.IncludeNestedEntities = false;

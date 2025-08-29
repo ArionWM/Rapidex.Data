@@ -19,7 +19,7 @@ namespace Rapidex.Data
             string[] tags = this.Get();
             IDataType _this = this;
 
-            var tagInfos = HasTags.GetTagInfo(_this.Parent._Scope, _this.FieldMetadata.ParentMetadata, tags);
+            var tagInfos = HasTags.GetTagInfo(_this.Parent._Schema, _this.FieldMetadata.ParentMetadata, tags);
             return tagInfos;
 
         }
@@ -68,7 +68,7 @@ namespace Rapidex.Data
             if (value.IsNOTNullOrEmpty())
             {
                 //Job yapısına buradan verilebilir mi?
-                HasTags.CheckEntityTags(_this.Parent._Scope, _this.FieldMetadata.ParentMetadata, (string)value);
+                HasTags.CheckEntityTags(_this.Parent._Schema, _this.FieldMetadata.ParentMetadata, (string)value);
             }
         }
 

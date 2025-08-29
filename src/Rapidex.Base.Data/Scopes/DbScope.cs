@@ -9,7 +9,7 @@ namespace Rapidex.Data.Scopes
 {
     internal class DbScope : IDbScope
     {
-        private int debugTracker;
+        private readonly int _debugTracker;
         protected readonly string name;
         protected readonly string defaultSchemaName;
         protected readonly long id;
@@ -59,7 +59,7 @@ namespace Rapidex.Data.Scopes
 
             dbProvider.SetParentScope(this);
 
-            this.debugTracker = RandomHelper.Random(int.MaxValue);
+            this._debugTracker = RandomHelper.Random(1000000);
 
             this.Initialize();
         }

@@ -40,9 +40,9 @@ public class FundamentalStructureTests : DbDependedTestsBase<DbSqlServerProvider
         var schema01 = database.AddSchemaIfNotExists("myTestSchema01");
         var schema02 = database.AddSchemaIfNotExists("myTestSchema02");
 
-        Assert.Equal("myTestSchema01", schema01.Data.ParentScope.SchemaName);
+        Assert.Equal("myTestSchema01", schema01.Data.ParentSchema.SchemaName);
         Assert.Equal("myTestSchema01", schema01.Structure.ParentScope.SchemaName);
 
-        Assert.Equal("myTestSchema02", schema02.Data.ParentScope.SchemaName);
+        Assert.Equal("myTestSchema02", schema02.Data.ParentSchema.SchemaName);
     }
 }
