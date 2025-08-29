@@ -282,8 +282,6 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
     public override void Dispose()
     {
-        base.Dispose();
-
         if (!this.IsFinalized)
             this.CommitChanges();
 
@@ -291,6 +289,8 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         this.ChangesCollection = null;
 
         this.CurrentTransaction = null;
+
+        base.Dispose();
     }
 
     (bool Found, string? Desc) IDbDataModificationScope.FindAndAnalyse(IDbEntityMetadata em, long id)

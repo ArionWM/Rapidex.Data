@@ -44,6 +44,17 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
     }
 
+
+    public virtual void DropAllSchemasInDatabase(IDbProvider provider, bool clearCaches)
+    {
+        var testHelper = provider.GetTestHelper();
+        testHelper.DropEverythingInDatabase(provider.ConnectionString);
+        if (clearCaches)
+        {
+            this.ClearCaches();
+        }
+    }
+
     public virtual void DropAllTablesInDatabase(IDbProvider provider, bool clearCaches)
     {
         var testHelper = provider.GetTestHelper();

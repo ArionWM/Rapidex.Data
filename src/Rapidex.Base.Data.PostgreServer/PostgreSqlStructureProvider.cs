@@ -125,6 +125,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
         try
         {
+            this.ParentDbProvider.CanCreateDatabase();
+
             string sql1 = this.DdlGenerator.CreateDatabase01(dbName, this.Connectionbuilder.Username);
             this.Connection.Execute(sql1);
 
@@ -156,6 +158,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         schemaName = PostgreHelper.CheckObjectName(schemaName);
 
         this.CheckConnection();
+
         if (this.IsSchemaAvailable(schemaName))
         {
             return;
@@ -163,6 +166,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
         try
         {
+            this.ParentDbProvider.CanCreateSchema();
+
             string sql = this.DdlGenerator.CreateSchema(schemaName);
             this.Connection.Execute(sql);
         }
@@ -210,6 +215,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
         HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
         List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
+
+        this.ParentDbProvider.CanCreateTable(this.ParentDbProvider.ParentScope.SchemaName);
 
         var allEms = scope.ParentDbScope.Metadata.GetAll();
         foreach (var em in allEms)

@@ -7,12 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.UnitTest.Data.TestBase
+namespace Rapidex.UnitTest.Data.TestBase;
+
+public abstract class LazyLoadTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
 {
-    public abstract class LazyLoadTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
+    protected LazyLoadTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
     {
-        protected LazyLoadTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
-        {
-        }
     }
 }

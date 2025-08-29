@@ -141,6 +141,8 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
         try
         {
+            this.ParentDbProvider.CanCreateDatabase();
+
             string sql1 = this.DdlGenerator.CreateDatabase01(dbName, this.Connectionbuilder.UserID);
             this.Connection.Execute(sql1);
 
@@ -171,6 +173,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     public void CreateOrUpdateSchema(string schemaName)
     {
         this.CheckConnection();
+
         if (this.IsSchemaAvailable(schemaName))
         {
             return;
@@ -178,6 +181,8 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
         try
         {
+            this.ParentDbProvider.CanCreateSchema();
+
             string sql = this.DdlGenerator.CreateSchema(schemaName);
             this.Connection.Execute(sql);
         }
@@ -227,6 +232,8 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
         HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
         List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
+
+        this.ParentDbProvider.CanCreateTable(this.ParentDbProvider.ParentScope.SchemaName);
 
         var allEms = scope.ParentDbScope.Metadata.GetAll();
         foreach (var em in allEms)

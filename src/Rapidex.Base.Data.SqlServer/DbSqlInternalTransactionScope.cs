@@ -18,7 +18,10 @@ internal class DbSqlInternalTransactionScope : IDbInternalTransactionScope
 
     public void Commit()
     {
-        this.Connection.Transaction.Commit();
+        if (this.Live)
+            this.Connection.Transaction.Commit();
+        else
+            ;
         this.Live = false;
     }
 
@@ -26,7 +29,10 @@ internal class DbSqlInternalTransactionScope : IDbInternalTransactionScope
     {
         try
         {
-            this.Connection.Transaction.Rollback();
+            if (this.Live)
+                this.Connection.Transaction.Rollback();
+            else
+                ;
         }
         finally
         {

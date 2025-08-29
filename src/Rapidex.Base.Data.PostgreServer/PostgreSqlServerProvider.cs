@@ -87,8 +87,6 @@ public class PostgreSqlServerProvider : IDbProvider
         strMan.SwitchDatabase(dbName);
     }
 
-
-
     public void Setup(IServiceCollection services)
     {
 
@@ -121,5 +119,11 @@ public class PostgreSqlServerProvider : IDbProvider
     public IDataUnitTestHelper GetTestHelper()
     {
         return new PostgreTestHelper();
+    }
+
+    public IDbAuthorizationChecker GetAuthorizationChecker()
+    {
+        this.ValidateInitialization();
+        return new PostgreSqlServerAuthorizationChecker(this.ConnectionString);
     }
 }

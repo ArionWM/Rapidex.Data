@@ -114,4 +114,10 @@ public class DbSqlServerProvider : IDbProvider
     {
         return new DbSqlServerTestHelper();
     }
+
+    public IDbAuthorizationChecker GetAuthorizationChecker()
+    {
+        this.ValidateInitialization();
+        return new DbSqlServerAuthorizationChecker(this.ConnectionString);
+    }
 }

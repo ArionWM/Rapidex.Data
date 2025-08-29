@@ -1,4 +1,5 @@
-﻿using Rapidex.Data.Helpers;
+﻿using Rapidex.Data.Exceptions;
+using Rapidex.Data.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -89,5 +90,33 @@ public static class OtherExtensions
         var em = entities.First().GetMetadata();
         var valueDicts = entities.Select(ent => EntityMapper.MapToDict(em, ent));
         coll.Add(em, valueDicts.ToArray());
+    }
+
+
+    public static void CanCreateDatabase(this IDbProvider provider)
+    {
+        using var ac = provider.GetAuthorizationChecker();
+        if (!ac.CanCreateDatabase())
+        {
+            throw new DbInsufficientPermissionsException("CreateDatabase", ac.GetCurrentUserId());
+        }
+    }
+
+    public static void CanCreateSchema(this IDbProvider provider)
+    {
+        using var ac = provider.GetAuthorizationChecker();
+        if (!ac.CanCreateSchema())
+        {
+            throw new DbInsufficientPermissionsException("CreateSchema", ac.GetCurrentUserId());
+        }
+    }
+
+    public static void CanCreateTable(this IDbProvider provider, string schemaName)
+    {
+        using var ac = provider.GetAuthorizationChecker();
+        if (!ac.CanCreateTable(schemaName))
+        {
+            throw new DbInsufficientPermissionsException($"CreateTable in {schemaName}", ac.GetCurrentUserId());
+        }
     }
 }

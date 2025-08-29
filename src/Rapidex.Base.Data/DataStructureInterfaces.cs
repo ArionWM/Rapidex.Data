@@ -414,7 +414,6 @@ public interface IDbProvider : IManager
     string ConnectionString { get; }
     string DatabaseName { get; }
     IDbSchemaScope ParentScope { get; }
-
     IExceptionTranslator ExceptionTranslator { get; }
 
     void UseDb(string dbName);
@@ -428,6 +427,7 @@ public interface IDbProvider : IManager
     IDbDataModificationPovider GetDataModificationProvider();
 
     IDataUnitTestHelper GetTestHelper();
+    IDbAuthorizationChecker GetAuthorizationChecker();
 
     void Start();
 }
@@ -561,13 +561,19 @@ public interface IDbEntityUpdater
 
 }
 
-
-
 public interface IDataUnitTestHelper
 {
     void DropAllTablesInDatabase(string connectionString);
 
+    void DropEverythingInDatabase(string connectionString);
+}
 
+public interface IDbAuthorizationChecker : IDisposable
+{
+    string GetCurrentUserId();
+    bool CanCreateDatabase();
+    bool CanCreateSchema();
+    bool CanCreateTable(string schemaName);
 }
 
 public interface IDbInternalTransactionScope : IDisposable
