@@ -13,7 +13,7 @@ using FluentAssertions.Equivalency;
 
 namespace Rapidex.Data.SqlServer;
 
-internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider
+internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider, IDisposable
 {
     protected DbSqlDdlGenerator DdlGenerator { get; set; } = new DbSqlDdlGenerator();
     internal DbSqlServerConnection Connection { get; set; }
@@ -509,5 +509,15 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider
         }
 
         return uResult;
+    }
+
+    public void Dispose()
+    {
+        if (this.Connection != null)
+        {
+            this.Connection.Dispose();
+            this.Connection = null;
+        }
+
     }
 }

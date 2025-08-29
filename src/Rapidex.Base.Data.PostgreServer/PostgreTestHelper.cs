@@ -20,7 +20,7 @@ internal class PostgreTestHelper : IDataUnitTestHelper
 
         NpgsqlConnectionStringBuilder npgsqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
 
-        PostgreSqlServerConnection pConnection = new PostgreSqlServerConnection(npgsqlConnectionStringBuilder.ConnectionString);
+        using PostgreSqlServerConnection pConnection = new PostgreSqlServerConnection(npgsqlConnectionStringBuilder.ConnectionString);
 
         DataTable schemas = pConnection.Execute(schemasSql);
         foreach (DataRow row in schemas.Rows)

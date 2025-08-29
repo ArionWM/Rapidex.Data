@@ -100,13 +100,6 @@ public class DbSqlServerProvider : IDbProvider
     {
         this.ValidateInitialization();
         return new DbSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
-
-        //var provider = dmProviders.GetOr(this.ParentScope, () =>
-        //{
-        //    return new DbSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
-        //});
-
-        //return provider;
     }
 
     public IDbStructureProvider GetStructureProvider()

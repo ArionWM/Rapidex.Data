@@ -12,7 +12,7 @@ using static Rapidex.Data.DbEntityFactory;
 
 namespace Rapidex.Data.PostgreServer;
 
-internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPovider
+internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPovider, IDisposable
 {
     protected PostgreSqlDdlGenerator DdlGenerator { get; set; } = new PostgreSqlDdlGenerator();
 
@@ -22,7 +22,8 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
     public IDbSchemaScope ParentScope { get; }
 
-    public IDbInternalTransactionScope CurrentTransaction { get; }
+    public IDbInternalTransactionScope CurrentTransaction { get; protected set; }
+
     public IDbProvider ParentProvider { get; protected set; }
 
 
@@ -33,6 +34,15 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         this.ConnectionString = connectionString;
 
         this.CheckConnection();
+    }
+
+    protected void CloseConnection()
+    {
+        if (this.Connection != null)
+        {
+            this.Connection.Dispose();
+            this.Connection = null;
+        }
     }
 
     internal bool CheckConnection(bool tryMaster = false)
@@ -54,7 +64,11 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
     public IDbInternalTransactionScope BeginTransaction(string transactionName = null)
     {
-        throw new NotImplementedException();
+        if (this.CurrentTransaction != null && this.CurrentTransaction.Live)
+            throw new InvalidOperationException("Transaction already active");
+
+        this.CurrentTransaction = new PostgreSqlInternalTransactionScope(this.Connection);
+        return this.CurrentTransaction;
     }
 
     public IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
@@ -487,5 +501,11 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         }
 
         return uResult;
+    }
+
+    public void Dispose()
+    {
+        this.CloseConnection();
+
     }
 }

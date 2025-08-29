@@ -453,8 +453,11 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         db.Structure.DropEntity<ConcreteEntityForN2NTest01>();
         db.Structure.DropEntity<ConcreteEntityForN2NTest02>();
-        db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
+		db.Structure.DropEntity<GenericJunction>(); 
+
+		db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest01>();
         db.Structure.ApplyEntityStructure<ConcreteEntityForN2NTest02>();
+        db.Structure.ApplyEntityStructure<GenericJunction>();
 
 		using var work = db.BeginWork();
 

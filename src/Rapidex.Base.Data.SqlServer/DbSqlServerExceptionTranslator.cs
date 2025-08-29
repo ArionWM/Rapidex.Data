@@ -7,7 +7,7 @@ namespace Rapidex.Data.SqlServer;
 
 internal class DbSqlServerExceptionTranslator : IExceptionTranslator
 {
-    public Exception Translate(Exception ex)
+    public Exception Translate(Exception ex, string? additionalInfo = null)
     {
         if(ex is TranslatedException)
         {
@@ -26,55 +26,55 @@ internal class DbSqlServerExceptionTranslator : IExceptionTranslator
         {
             case 233:
             case 4060:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "Veritabanına bağlantı sağlanamadı. SQL bağlantı metnindeki hedef adres ve veritabanı adını kontrol edin", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "Veritabanına bağlantı sağlanamadı. SQL bağlantı metnindeki hedef adres ve veritabanı adını kontrol edin" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 18456:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "Verilen kullanıcı adı / parola bilgileri ile SQL Sunucusuna oturum açılamıyor", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "Verilen kullanıcı adı / parola bilgileri ile SQL Sunucusuna oturum açılamıyor" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 547:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Foreign key violation.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Foreign key violation." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 2627:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Violation of primary key constraint.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Violation of primary key constraint." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 2601:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Violation of unique index constraint.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Violation of unique index constraint." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 53:
-                return new TranslatedException(ExceptionTarget.ITDepartment_Infrastructure, "Network-related or instance-specific error.", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_Infrastructure, "Network-related or instance-specific error." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 2:
-                return new TranslatedException(ExceptionTarget.ITDepartment_Infrastructure, "SQL Server bağlantısı zaman aşımına uğradı. Bağlantı bilgilerinin doğruluğunu ya da SQL Server'ın çalışır durumda olduğunu kontrol edin.", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_Infrastructure, "SQL Server bağlantısı zaman aşımına uğradı. Bağlantı bilgilerinin doğruluğunu ya da SQL Server'ın çalışır durumda olduğunu kontrol edin." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 1205:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Deadlock victim.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Deadlock victim." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 229:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "SQL kullanıcısının bu SQL veritabanı nesnesini sorgulamak için yetkisi yok. SQL Server'dan sorumlu ekibe bu hatanın tüm bilgileri ile haber verin.", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "SQL kullanıcısının bu SQL veritabanı nesnesini sorgulamak için yetkisi yok. SQL Server'dan sorumlu ekibe bu hatanın tüm bilgileri ile haber verin." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 207:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, $"Açıklamada belirtilen alan adı veritabanı / tabloda bulunmuyor: \r\n{ex.Message}", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, $"Açıklamada belirtilen alan adı veritabanı / tabloda bulunmuyor: \r\n{ex.Message}" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 208:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Hedeflenen tablo vs (açıklamanın içinde) bulunamadı", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Hedeflenen tablo vs (açıklamanın içinde) bulunamadı" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 4064:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "SQL server bağlantı metninde yer alan (hedeflenen) veritabanına oturum açılamıyor. Bağlantı metninde verilen kullanıcının yetkisi olmayabilir, veritabanı adı yanlış ya da veritabanı kapalı olabilir ", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "SQL server bağlantı metninde yer alan (hedeflenen) veritabanına oturum açılamıyor. Bağlantı metninde verilen kullanıcının yetkisi olmayabilir, veritabanı adı yanlış ya da veritabanı kapalı olabilir " + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 18452:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "SQL server bağlantı metninde yer alan kullanıcı ile oturum açılamıyor. Bağlandığınız sistem SQL Server için güvenli işaretlenmemiş. SQL Server'dan sorumlu ekibe bu hatanın tüm bilgileri ile haber verin.", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "SQL server bağlantı metninde yer alan kullanıcı ile oturum açılamıyor. Bağlandığınız sistem SQL Server için güvenli işaretlenmemiş. SQL Server'dan sorumlu ekibe bu hatanın tüm bilgileri ile haber verin." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 11001:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "A network-related or instance-specific error occurred while establishing a connection to SQL Server.", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "A network-related or instance-specific error occurred while establishing a connection to SQL Server." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 10054:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "A transport-level error has occurred when sending the request to the server.", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "A transport-level error has occurred when sending the request to the server." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 10060:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "A network-related or instance-specific error occurred while establishing a connection to SQL Server.", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "A network-related or instance-specific error occurred while establishing a connection to SQL Server." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 121:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "The semaphore timeout period has expired.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "The semaphore timeout period has expired." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 64:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "A connection was successfully established with the server, but then an error occurred during the login process.", ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "A connection was successfully established with the server, but then an error occurred during the login process." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 2714:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "There is already an object named in the database.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "There is already an object named in the database." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 3728:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "'name' is not a constraint.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "'name' is not a constraint." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 3727:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Could not drop constraint. See previous errors.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Could not drop constraint. See previous errors." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 15151:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Cannot drop the login because it does not exist or you do not have permission.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Cannot drop the login because it does not exist or you do not have permission." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 15335:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "The database principal owns a schema in the database, and cannot be dropped.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "The database principal owns a schema in the database, and cannot be dropped." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 2715:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, $"Unsupported or wrong data type: {ex.Message}", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, $"Unsupported or wrong data type: {ex.Message}" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             default:
-                return new TranslatedException(ExceptionTarget.ApplicationSupport, "An unknown SQL error occurred.", ex);
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "An unknown SQL error occurred." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
 
         }
 

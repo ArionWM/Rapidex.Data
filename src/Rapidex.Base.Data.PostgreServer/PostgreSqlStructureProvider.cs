@@ -21,6 +21,15 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public IDbSchemaScope ParentScope => parent.ParentScope;
 
+    protected void CloseConnection()
+    {
+        if (this.Connection != null)
+        {
+            this.Connection.Dispose();
+            this.Connection = null;
+        }
+    }
+
     protected bool CheckConnection(bool tryMaster = false)
     {
         try
@@ -58,6 +67,9 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     {
         // In PostgreSQL, you must reconnect with a new connection string to switch databases.
         // This method is a no-op or can be used to re-instantiate the connection.
+
+        this.CloseConnection();
+
         this.Connection = new PostgreSqlServerConnection(
             new NpgsqlConnectionStringBuilder(this.ConnectionString) { Database = dbName }.ToString()
         );
@@ -546,7 +558,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public void CreateSequenceIfNotExists(string name, int minValue = -1, int startValue = -1)
     {
-        var seq = new PostgreSqlSequence((PostgreSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider(), name);
+        using var provider = (PostgreSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider();
+        var seq = new PostgreSqlSequence(provider, name);
         seq.CreateIfNotExists(minValue, startValue);
     }
 
@@ -555,5 +568,10 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         name.NotNull();
         // PostgreSQL allows lowercase names, but we use a consistent format
         return PostgreHelper.CheckObjectName(name);
+    }
+
+    public void Dispose()
+    {
+        this.CloseConnection();
     }
 }

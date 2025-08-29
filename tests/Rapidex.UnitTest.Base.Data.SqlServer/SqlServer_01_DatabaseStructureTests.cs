@@ -13,7 +13,7 @@ public class SqlServer_01_DatabaseStructureTests : DatabaseStructureTestsBase<Db
         DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
 
-        DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
+        using DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
         DataTable table = connection.Execute($"SELECT SCHEMA_ID('Base') AS SchemaId");
         Assert.Equal(1, table.Rows.Count);
 

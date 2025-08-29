@@ -167,11 +167,11 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
                     StringBuilder sb = new StringBuilder();
                     sb.AppendLine("Entity not found in this scope, but found in other (or upper) scopes");
 
-                    if(id < 0)
+                    if (id < 0)
                     {
                         sb.AppendLine("You can commit prior scope or create / save entity in this scope");
                     }
-                    
+
                     sb.AppendLine(ex.Message);
                     return new EntityNotFoundException(enfx.EntityName, enfx.EntityId, sb.ToString());
                 }
@@ -280,14 +280,17 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        if (this.IsFinalized)
-            return;
+        base.Dispose();
 
-        this.CommitChanges();
+        if (!this.IsFinalized)
+            this.CommitChanges();
 
         this.ChangesCollection?.Clear();
+        this.ChangesCollection = null;
+
+        this.CurrentTransaction = null;
     }
 
     (bool Found, string? Desc) IDbDataModificationScope.FindAndAnalyse(IDbEntityMetadata em, long id)

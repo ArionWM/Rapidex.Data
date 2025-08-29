@@ -105,17 +105,9 @@ public class PostgreSqlServerProvider : IDbProvider
 
     public IDbDataModificationPovider GetDataModificationProvider()
     {
-
         this.ValidateInitialization();
 
         return new PostgreSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
-
-        //var provider = dmProviders.GetOr(this.ParentScope, () =>
-        //{
-        //    return new PostgreSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
-        //});
-
-        //return provider;
     }
 
     public IDbStructureProvider GetStructureProvider()

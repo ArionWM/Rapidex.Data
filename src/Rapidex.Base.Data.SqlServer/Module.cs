@@ -30,7 +30,7 @@ internal class Module : AssemblyDefinitionBase, IRapidexAssemblyDefinition
     {
         DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
-        DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
+        using DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
         connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
         return connection;

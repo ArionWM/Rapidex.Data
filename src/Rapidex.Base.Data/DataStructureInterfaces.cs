@@ -595,7 +595,7 @@ public interface IDbInternalTransactionScope : IDisposable
     }
 }
 
-public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader
+public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader, IDisposable
 {
     IDbProvider ParentProvider { get; }
 
@@ -670,7 +670,7 @@ public interface IDbDataModificationStaticHost : IDbDataReadScope
 
 
 
-public interface IDbStructureProvider
+public interface IDbStructureProvider : IDisposable
 {
     string ConnectionString { get; }
     IDbProvider ParentDbProvider { get; }

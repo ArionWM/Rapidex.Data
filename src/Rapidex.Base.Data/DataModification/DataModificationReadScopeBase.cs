@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
-internal abstract class DataModificationReadScopeBase : IDbDataReadScope
+internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDisposable
 {
     public IDbSchemaScope ParentSchema { get; protected set; }
     protected virtual IDbDataModificationPovider DmProvider { get; set; }
@@ -101,10 +101,9 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope
         return result.FirstOrDefault();
     }
 
-  
-
-
-
-    
-  
+    public virtual void Dispose()
+    {
+        this.DmProvider?.Dispose();
+        this.DmProvider = null;
+    }
 }

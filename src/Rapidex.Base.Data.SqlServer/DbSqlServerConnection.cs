@@ -109,7 +109,7 @@ internal class DbSqlServerConnection : IDisposable
                 Log.Warn("Database", Environment.StackTrace);
                 Log.Error("Database", $"{ex.Message}\r\n{sql}");
 
-                var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex) ?? ex;
+                var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, sql) ?? ex;
                 tex.Log();
                 throw tex;
             }
@@ -143,15 +143,19 @@ internal class DbSqlServerConnection : IDisposable
                 Log.Warn("Database", Environment.StackTrace);
                 Log.Error("Database", $"{ex.Message}\r\n{sql}");
 
-                var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex) ?? ex;
+                var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, sql + " / " + variableTable.TableName) ?? ex;
                 tex.Log();
                 throw tex;
             }
     }
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         Log.Debug("Database", $"Connection [{Thread.CurrentThread.ManagedThreadId} / {this.Connection.ClientConnectionId}]: closed.");
-        this.Connection.Close();
-        this.Connection.Dispose();
+        if (this.Connection != null)
+        {
+            this.Connection.Close();
+            this.Connection.Dispose();
+            this.Connection = null;
+        }
     }
 }

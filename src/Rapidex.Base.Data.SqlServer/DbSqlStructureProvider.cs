@@ -25,6 +25,8 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     {
         try
         {
+            this.CloseConnection();
+
             SqlConnectionStringBuilder cbuilder = new SqlConnectionStringBuilder(this.ConnectionString);
             cbuilder.InitialCatalog = "master";
             this.Connection = new DbSqlServerConnection(cbuilder.ConnectionString);
@@ -34,6 +36,15 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
             var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex) ?? ex;
             tex.Log();
             throw tex;
+        }
+    }
+
+    protected void CloseConnection()
+    {
+        if (this.Connection != null)
+        {
+            this.Connection.Dispose();
+            this.Connection = null;
         }
     }
 
@@ -568,12 +579,18 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public void CreateSequenceIfNotExists(string name, int minValue = -1, int startValue = -1)
     {
-        var seq = new DbSqlSequence((DbSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider(), name);
+        using var provider = (DbSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider();
+        var seq = new DbSqlSequence(provider, name);
         seq.CreateIfNotExists(minValue, startValue);
     }
 
     public string CheckObjectName(string name)
     {
         return name;
+    }
+
+    public void Dispose()
+    {
+        this.CloseConnection();
     }
 }

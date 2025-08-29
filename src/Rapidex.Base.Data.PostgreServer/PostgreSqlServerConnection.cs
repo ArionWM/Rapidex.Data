@@ -18,8 +18,16 @@ internal class PostgreSqlServerConnection : IDisposable
 
     public PostgreSqlServerConnection(string connectionString)
     {
-        this.ConnectionString = connectionString;
-        this.Connection = new NpgsqlConnection(connectionString);
+        NpgsqlConnectionStringBuilder npgsqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
+        if (npgsqlConnectionStringBuilder.Timeout < 30)
+            npgsqlConnectionStringBuilder.Timeout = 30;
+
+        npgsqlConnectionStringBuilder.CommandTimeout = 60;
+        if (npgsqlConnectionStringBuilder.MaxPoolSize < 200)
+            npgsqlConnectionStringBuilder.MaxPoolSize = 200;
+
+        this.ConnectionString = npgsqlConnectionStringBuilder.ConnectionString;
+        this.Connection = new NpgsqlConnection(this.ConnectionString);
         this.Connection.Open();
     }
 
@@ -46,6 +54,12 @@ internal class PostgreSqlServerConnection : IDisposable
                 this.Connection.Open();
                 break;
         }
+    }
+
+    public void BeginTransaction()
+    {
+        this.CheckConnectionState();
+        this.Transaction = this.Connection.BeginTransaction();
     }
 
     public NpgsqlCommand CreateCommand()
@@ -94,7 +108,7 @@ internal class PostgreSqlServerConnection : IDisposable
                 Log.Warn("Database", Environment.StackTrace);
                 Log.Error("Database", $"{ex.Message}\r\n{sql}");
 
-                var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex) ?? ex;
+                var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, sql) ?? ex;
                 tex.Log();
                 throw tex;
             }
@@ -116,17 +130,21 @@ internal class PostgreSqlServerConnection : IDisposable
             Log.Warn("Database", Environment.StackTrace);
             Log.Error("Database", $"{ex.Message}\r\n{variableTable.TableName}");
 
-            var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex) ?? ex;
+            var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, schemaName + ", " + variableTable.TableName) ?? ex;
             tex.Log();
             throw tex;
         }
 
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         Log.Debug("Database", $"Connection [{Thread.CurrentThread.ManagedThreadId} / {this.Connection.ProcessID}]: closed.");
-        this.Connection.Close();
-        this.Connection.Dispose();
+        if (this.Connection != null)
+        {
+            this.Connection.Close();
+            this.Connection.Dispose();
+            this.Connection = null;
+        }
     }
 }
