@@ -20,7 +20,7 @@ namespace Rapidex.Data
         //    var cInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.DEFAULT_DB_NAME);
         //    cInfo.NotNull("Master db connection configuration not found. See: appsettings.json");
 
-        //    DbManagersFactory dbFactory = new DbManagersFactory();
+        //    DbProviderFactory dbFactory = new DbProviderFactory();
         //    IDbProvider provider = dbFactory.CreateProvider(typeof(TProvider).FullName, cInfo.ConnectionString);
 
         //    return sman.AddMainDbIfNotExists(cInfo);
@@ -63,7 +63,7 @@ namespace Rapidex.Data
         //    DbConnectionInfo cInfo = CheckConnectionInfo(sman, dbName, connectionStringOrConnectionNameInConfig);
         //    cInfo.Provider = typeof(TProvider).FullName;
 
-        //    DbManagersFactory dbFactory = new DbManagersFactory();
+        //    DbProviderFactory dbFactory = new DbProviderFactory();
         //    IDbProvider provider = dbFactory.CreateProvider(typeof(TProvider).FullName, cInfo.ConnectionString);
 
         //    return sman.AddDbIfNotExists(provider, dbName);
@@ -75,7 +75,7 @@ namespace Rapidex.Data
 
         //    DbConnectionInfo cInfo = CheckConnectionInfo(sman, dbName, masterDb.ConnectionString);
 
-        //    DbManagersFactory dbFactory = new DbManagersFactory();
+        //    DbProviderFactory dbFactory = new DbProviderFactory();
         //    IDbProvider provider = dbFactory.CreateProvider(cInfo.Provider, masterDb.DbProvider.ConnectionString);
 
         //    IDbScope res = sman.AddDbIfNotExists(provider, dbName);

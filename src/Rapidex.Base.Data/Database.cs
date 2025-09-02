@@ -19,7 +19,7 @@ public static class Database
     public static IDbEntityMetadataFactory EntityMetadataFactory { get; private set; }
 
 
-    [Obsolete("Use Database.Databases instead", true)]
+    [Obsolete("Use Database.Dbs instead", true)]
     public static IDbManager Scopes { get => Database.Dbs; set => Database.Dbs = value; }
 
     /// <summary>

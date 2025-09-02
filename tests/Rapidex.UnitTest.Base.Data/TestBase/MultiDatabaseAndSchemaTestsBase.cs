@@ -18,8 +18,8 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
     public virtual void T01_MultipleSchemas()
     {
         DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
-        DbProviderFactory dbManagersFactory = new DbProviderFactory();
-        IDbProvider provider = dbManagersFactory.CreateProvider(connectionInfo);
+        DbProviderFactory DbProviderFactory = new DbProviderFactory();
+        IDbProvider provider = DbProviderFactory.CreateProvider(connectionInfo);
 
 
         this.Fixture.DropAllSchemasInDatabase(provider, true);

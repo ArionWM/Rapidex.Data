@@ -9,7 +9,7 @@ global using Rapidex.Base;
 
 global using Microsoft.Extensions.DependencyInjection;
 
-global using FluentAssertions;
+
 
 using System.Reflection;
 using System.Runtime.CompilerServices;

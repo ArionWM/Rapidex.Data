@@ -17,7 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Rapidex-Base-Data\Rapidex.Base.Data\Rapidex.Base.Data.csproj" />
+	  <ProjectReference Include="..\..\Rapidex-Base-Data\src\Rapidex.Base.Data\Rapidex.Base.Data.csproj" />
 	</ItemGroup>
 
 </Project>
