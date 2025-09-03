@@ -21,12 +21,12 @@ public static class MessageHubExtensions
     //    topic.Signal = DataReleatedSignalConstants.Signal_New;
 
     //    EntityReleatedMessageArguments args = new EntityReleatedMessageArguments(topic.Signal, entity);
-    //    return await hub.Publish(topic, args);
+    //    return  hub.Publish(topic, args);
     //}
 
-    public static async Task<IResult<int>> SubscribeOnNew(this ISignalHub hub, SignalTopic topic, Func<IEntityReleatedMessageArguments, IEntityReleatedMessageArguments> handler)
+    public static IResult<int> SubscribeOnNew(this ISignalHub hub, SignalTopic topic, Func<IEntityReleatedMessageArguments, IEntityReleatedMessageArguments> handler)
     {
-        return await hub.Subscribe(null, topic, args =>
+        return hub.Subscribe(null, topic, args =>
         {
             IEntityReleatedMessageArguments eArgs = (IEntityReleatedMessageArguments)args;
             try
@@ -42,9 +42,9 @@ public static class MessageHubExtensions
         });
     }
 
-    public static async Task<IResult<int>> SubscribeOnBeforeSave(this ISignalHub hub, SignalTopic topic, Func<IEntityReleatedMessageArguments, IEntityReleatedMessageArguments> handler)
+    public static IResult<int> SubscribeOnBeforeSave(this ISignalHub hub, SignalTopic topic, Func<IEntityReleatedMessageArguments, IEntityReleatedMessageArguments> handler)
     {
-        return await hub.Subscribe(null, topic, args =>
+        return hub.Subscribe(null, topic, args =>
         {
             IEntityReleatedMessageArguments eArgs = (IEntityReleatedMessageArguments)args;
             try
@@ -60,9 +60,9 @@ public static class MessageHubExtensions
         });
     }
 
-    public static async Task<IResult<int>> SubscribeOnAfterSave(this ISignalHub hub, SignalTopic topic, Func<IEntityReleatedMessageArguments, IEntityReleatedMessageArguments> handler)
+    public static IResult<int> SubscribeOnAfterSave(this ISignalHub hub, SignalTopic topic, Func<IEntityReleatedMessageArguments, IEntityReleatedMessageArguments> handler)
     {
-        return await hub.Subscribe(null, topic, args =>
+        return hub.Subscribe(null, topic, args =>
         {
             IEntityReleatedMessageArguments eArgs = (IEntityReleatedMessageArguments)args;
             try

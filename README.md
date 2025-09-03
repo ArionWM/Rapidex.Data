@@ -64,6 +64,8 @@ You can download and run sample projects from the following links:
 
 - [Updating Data](/docs/UpdatingData.md)]
 
+- [Library Declaration] (/docs/LibraryDeclaration.md)
+
 ### Advanced Topics
 
 - [Multithreading](/docs/Multithreading.md)

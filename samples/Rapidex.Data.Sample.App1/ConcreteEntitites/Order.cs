@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Sample.App2.ConcreteEntitites;
+namespace Rapidex.Data.Sample.App1.ConcreteEntities;
 internal class Order : DbConcreteEntityBase
 {
     public DateTimeOffset OrderDate { get; set; }

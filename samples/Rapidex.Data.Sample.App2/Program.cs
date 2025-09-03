@@ -3,7 +3,8 @@ global using Rapidex;
 global using Rapidex.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Rapidex.Sample.Data.Basics.ConcreteEntitites;
+using Rapidex.Data.Sample.App2.ConcreteEntitites;
+
 
 Console.WriteLine("This is single database basic application");
 

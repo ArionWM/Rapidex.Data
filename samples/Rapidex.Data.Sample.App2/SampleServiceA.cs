@@ -1,11 +1,11 @@
-﻿using Rapidex.Sample.Data.Basics.ConcreteEntitites;
+﻿using Rapidex.Data.Sample.App2.ConcreteEntitites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Sample.Data.Basics;
+namespace Rapidex.Data.Sample.App2;
 internal class SampleServiceA
 {
     public void CreateOrderOnMasterDbAndBaseSchema(Contact contact, params string[] itemCodes)

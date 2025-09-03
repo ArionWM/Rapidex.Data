@@ -13,7 +13,7 @@ public class MessageHubTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public async Task T01_OnNew()
+    public void T01_OnNew()
     {
         //ConcreteEntity01
         var db = Database.Dbs.AddMainDbIfNotExists();
@@ -23,7 +23,7 @@ public class MessageHubTests : DbDependedTestsBase<DbSqlServerProvider>
 
         List<string> subs1Invokes = new List<string>();
 
-        IResult<int> subs1Result = await Rapidex.Common.SignalHub.Subscribe("abc", "+/+/+/New/ConcreteEntity01", args =>
+        IResult<int> subs1Result = Rapidex.Common.SignalHub.Subscribe("abc", "+/+/+/New/ConcreteEntity01", args =>
         {
             IEntityReleatedMessageArguments eargs = (IEntityReleatedMessageArguments)args;
             ConcreteEntity01 cent = (ConcreteEntity01)eargs.Entity;

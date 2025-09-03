@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Sample.App2.ConcreteEntitites;
+namespace Rapidex.Data.Sample.App1.ConcreteEntities;
+
 internal class Contact : DbConcreteEntityBase
 {
     public Enumeration<ContactType> Type { get; set; }
@@ -21,10 +22,9 @@ internal class Contact : DbConcreteEntityBase
 
 internal class ContractImplementer : IConcreteEntityImplementer<Contact>
 {
-    protected static IEntityReleatedMessageArguments BeforeSave(IEntityReleatedMessageArguments args)
+    protected static void CalculateContactValues(Contact contact)
     {
-        Contact contact = args.Entity.As<Contact>();
-        if(contact.BirthDate.HasValue)
+        if (contact.BirthDate.HasValue)
         {
             DateTimeOffset now = DateTimeOffset.Now;
             int age = now.Year - contact.BirthDate.Value.Year;
@@ -32,12 +32,16 @@ internal class ContractImplementer : IConcreteEntityImplementer<Contact>
                 age--;
             contact.Age = age;
         }
-
-        if(contact.FullName.IsNullOrEmpty())
+        if (contact.FullName.IsNullOrEmpty())
         {
             contact.FullName = (contact.FirstName + " " + contact.LastName).Trim();
         }
+    }
 
+    protected static IEntityReleatedMessageArguments BeforeSave(IEntityReleatedMessageArguments args)
+    {
+        Contact contact = args.Entity.As<Contact>();
+        CalculateContactValues(contact);
         return args;
     }
     public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
