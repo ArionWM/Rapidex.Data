@@ -13,7 +13,8 @@ internal class DbProviderFactory
         name.NotEmpty();
 
         Type type = Common.Assembly.FindType(name);
-        type.Should().NotBeNull($"Type '{name}' is not found.");
+        
+        type.NotNull($"Type '{name}' is not found.");
 
         IDbProvider provider = TypeHelper.CreateInstance<IDbProvider>(type, connectionString);
         return provider;

@@ -1,4 +1,4 @@
-﻿using FluentAssertions.Equivalency;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -75,7 +75,7 @@ public class EntityMapper
 
     public void EnsureAdvancedDataTypes(IEntity entity)
     {
-        entity.Should().NotBeAssignableTo<IPartialEntity>("Partial entities can't be fill");
+        entity.ShouldNotSupportTo<IPartialEntity>("Partial entities can't be fill");
 
         var em = entity.GetMetadata();
         var map = this.GetMapping(em);

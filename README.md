@@ -16,9 +16,10 @@ Rapidex.Data supports multiple database engines (MS SQL Server, PostgreSQL and o
 - Multiple database support in same application (multi tenant)
 - Different metadata customization for each database connection (each tenant can have different configuration)
 - UnitOfWork pattern
-- ...
+- Unique and extensible *behavior* approach for reusable logic
+- Dynamic logic injection with *signal hub (with Rapidex Common)* 
 
-See: [Features](/docs/Features.md) for more details.
+See: [Features](/docs/Features-detailed.md) for more details.
 
 
 ## Concept
@@ -65,9 +66,11 @@ You can download and run sample projects from the following links:
 
 ### Advanced Topics
 
-- [Multi Schema Support](/docs/MultiSchemaSupport.md)
+- [Multithreading](/docs/Multithreading.md)
 
-- [Multi Database Support](/docs/MultiDatabaseSupport.md)
+- [Multi Schema Support](/docs/MultiSchemaManagement.md)
+
+- [Multi Database Support](/docs/MultiDatabaseManagement.md)
 
 - [Change Metadata (and schema) on Runtime](/docs/RuntimeChanges.md)
 
@@ -87,6 +90,12 @@ See [Roadmap](/docs/Roadmap.md) for planned features and improvements.
 
 ## Licensing and Contribution
 
-Rapidex.Data is licensed under **LGPL v3**. See [`License`](LICENSE) for details.  
+Rapidex.Data is licensed under **LGPL v3**. See [License](LICENSE) for details.  
 
-Contributions require approval of a **Contributor License Agreement (CLA)**. See [`CONTRIBUTOR_LICENSE_AGREEMENT.md`](/docs/license/CONTRIBUTOR_LICENSE_AGREEMENT.md).
+Contributions require approval of a **Contributor License Agreement (CLA)**. See [CLA](/docs/license/CONTRIBUTOR_LICENSE_AGREEMENT.md) for details.
+
+## Thanks 
+
+Thanks to all the contributors and supporters!
+
+Thanks to [SQL Kata](https://sqlkata.com/)

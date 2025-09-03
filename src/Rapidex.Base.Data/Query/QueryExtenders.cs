@@ -1,4 +1,4 @@
-﻿using FluentAssertions.Equivalency;
+﻿
 using Rapidex.Data.Metadata.Relations;
 using Rapidex.Data.Query;
 using SqlKata;

@@ -45,7 +45,7 @@ public static class BExtensions
 
         IDbEntityMetadata em = (IDbEntityMetadata)entity.GetMetadata();
         T behavior = (T)em.BehaviorDefinitions.Get<T>();
-        behavior.Should().NotBeNull($"Entity '{em.Name}' is not have behavior: '{typeof(T).Name}'");
+        behavior.NotNull($"Entity '{em.Name}' is not have behavior: '{typeof(T).Name}'");
         
         T inst = (T)behavior.CreateInstance(entity);
         return inst;
@@ -64,7 +64,7 @@ public static class BExtensions
 
         IDbEntityMetadata em = (IDbEntityMetadata)entity.GetMetadata();
         IEntityBehaviorDefinition behavior = em.BehaviorDefinitions.Get(behaviorName);
-        behavior.Should().NotBeNull($"Entity '{em.Name}' is not have behavior: '{behaviorName}'");
+        behavior.NotNull($"Entity '{em.Name}' is not have behavior: '{behaviorName}'");
 
         IEntityBehaviorInstance inst = behavior.CreateInstance(entity);
         return inst;

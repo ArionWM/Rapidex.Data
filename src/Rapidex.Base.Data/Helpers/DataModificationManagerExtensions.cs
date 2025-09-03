@@ -48,7 +48,7 @@ namespace Rapidex.Data
             dmm.NotNull();
 
             IDbEntityMetadata em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName);
-            em.Should().NotBeNull($"Entity metadata not found for '{entityName}'");
+            em.NotNull($"Entity metadata not found for '{entityName}'");
 
             IEntity entity = dmm.New(em);
             return entity;
@@ -60,7 +60,7 @@ namespace Rapidex.Data
             dmm.NotNull();
 
             IDbEntityMetadata em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
-            em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
+            em.NotNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             IEntity entity = dmm.New(em.Name);
             TEntity concEntity = dmm.ParentSchema.Mapper.Map<TEntity>(entity);
@@ -95,7 +95,7 @@ namespace Rapidex.Data
             dmm.NotNull();
 
             var em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
-            em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
+            em.NotNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             var loadResult = dmm.Load(em, act);
             return loadResult.CastTo<TEntity>();
@@ -106,7 +106,7 @@ namespace Rapidex.Data
             dmm.NotNull();
 
             var em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName);
-            em.Should().NotBeNull($"Entity metadata not found for '{entityName}'");
+            em.NotNull($"Entity metadata not found for '{entityName}'");
 
             return dmm.Find(em, id);
         }
@@ -117,7 +117,7 @@ namespace Rapidex.Data
             dmm.NotNull();
 
             var em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
-            em.Should().NotBeNull($"Entity metadata not found for {typeof(TEntity).Name}");
+            em.NotNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
             var result = dmm.Find(em, id);
             return (TEntity)result;

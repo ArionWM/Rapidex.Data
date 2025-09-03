@@ -381,14 +381,8 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         int updatedRecordCount = 0;
         updatedRecordCount = table.Rows[0].To<int>(0);
 
-        try
-        {
-            updatedRecordCount.Should().Be(1, $"Entity '{entity}' can't update. Possible not found with id: {entity.GetId()}");
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        updatedRecordCount.MustBe(count => count == 1, 
+            string.Format("Entity '{0}' can't update. Possible not found with id: {1}", entity, entity.GetId()));
     }
 
     protected IEntityUpdateResult Update(IDbEntityMetadata em, IEnumerable<IEntity> entities)
@@ -435,7 +429,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return new PostgreSqlSequence(this, name);
     }
 
-    protected IEntityUpdateResult _Delete(IDbEntityMetadata em, IEnumerable<long> ids)
+    protected IEntityUpdateResult DeleteInternal(IDbEntityMetadata em, IEnumerable<long> ids)
     {
         this.CheckConnection();
         EntityUpdateResult result = new EntityUpdateResult();
@@ -456,7 +450,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         var parts = ids.Split(10);
         foreach (var part in parts)
             result.MergeWith(
-                this._Delete(em, part));
+                this.DeleteInternal(em, part));
 
         return result;
     }

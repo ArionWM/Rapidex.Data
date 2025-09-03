@@ -42,13 +42,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Base.Commo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A3FE7EE0-2FC6-4D9F-A6B7-656A1BB0B458}"
 	ProjectSection(SolutionItems) = preProject
+		docs\Behaviors.md = docs\Behaviors.md
 		docs\Concept.md = docs\Concept.md
+		docs\EntityDefinition.md = docs\EntityDefinition.md
 		docs\Features-detailed.md = docs\Features-detailed.md
 		docs\FieldTypes.md = docs\FieldTypes.md
 		docs\Filtering.md = docs\Filtering.md
 		docs\Index.md = docs\Index.md
+		docs\MultiDatabaseManagement.md = docs\MultiDatabaseManagement.md
+		docs\MultiSchemaManagement.md = docs\MultiSchemaManagement.md
+		docs\PredefinedData.md = docs\PredefinedData.md
+		docs\QueryingData.md = docs\QueryingData.md
 		docs\QuickStart.md = docs\QuickStart.md
+		docs\Multithreading.md = docs\Multithreading.md
 		docs\Roadmap.md = docs\Roadmap.md
+		docs\RuntimeChanges.md = docs\RuntimeChanges.md
+		docs\TestDataCreators.md = docs\TestDataCreators.md
+		docs\UpdatingData.md = docs\UpdatingData.md
 		docs\UsageAndTips.md = docs\UsageAndTips.md
 	EndProjectSection
 EndProject
