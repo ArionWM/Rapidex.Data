@@ -1,6 +1,8 @@
 global using Rapidex;
 global using Rapidex.Data;
+
 using Microsoft.Extensions.DependencyInjection;
+using Rapidex.Data.Sample.App1;
 using Rapidex.Data.Sample.App1.ConcreteEntities;
 
 
@@ -12,10 +14,16 @@ builder.Services.UseSerilog(Path.Combine(AppContext.BaseDirectory, "Logs"));
 
 //...
 
+builder.Services.AddApplicationServices(); //<- Add own services
+
+
 //Rapidex ==============================
 builder.Services.AddRapidexDataLevel(); //<- Add Rapidex services
 
-//If we not use IRapidexAssemblyDefinition class (library declaration), we can add manually own assemblies
+
+
+//If we not use IRapidexAssemblyDefinition supported class (library declaration), we can add manually own assemblies
+//See: LibraryDeclaration.md
 Common.Assembly.Add(typeof(Program).Assembly);
 //======================================
 

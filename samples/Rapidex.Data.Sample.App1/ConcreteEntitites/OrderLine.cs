@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.Sample.App1.ConcreteEntities;
-internal class OrderLine : DbConcreteEntityBase
+public class OrderLine : DbConcreteEntityBase
 {
     /// <summary>
     /// If you want add parent reference as concrete field with name "ParentOrder" 

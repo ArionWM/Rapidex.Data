@@ -1,0 +1,18 @@
+﻿_tag: data
+data:
+  - entity: Item
+    id: 100
+    code: bcyc100
+    name: Bcycle Series 100
+    description: null   
+    price: 99.99
+    stockQuantity: 100
+  - entity: Item
+    id: 101
+    code: bcyc200
+    name: Bcycle Series 200
+    description: null
+    price: 199.99
+    stockQuantity: 50
+    
+    

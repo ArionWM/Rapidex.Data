@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.Sample.App1.ConcreteEntities;
-internal class Item : DbConcreteEntityBase
+public class Item : DbConcreteEntityBase
 {
     public string Code { get; set; }
     public string Name { get; set; }

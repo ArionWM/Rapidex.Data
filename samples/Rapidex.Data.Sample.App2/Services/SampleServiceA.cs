@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Sample.App2;
+namespace Rapidex.Data.Sample.App2.Services;
 internal class SampleServiceA
 {
     public void CreateOrderOnMasterDbAndBaseSchema(Contact contact, params string[] itemCodes)
     {
         var myDb = Database.Dbs.Db(); //TODO: Database.MasterDb() ....
-        using var work = myDb.BeginWork();
+
+        using var work = myDb.BeginWork(); 
 
         Order order = work.New<Order>();
         order.Customer = contact;

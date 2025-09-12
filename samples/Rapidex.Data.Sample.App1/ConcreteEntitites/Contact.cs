@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rapidex.Data.Sample.App1.ConcreteEntities;
 
-internal class Contact : DbConcreteEntityBase
+public class Contact : DbConcreteEntityBase
 {
     public Enumeration<ContactType> Type { get; set; }
 

@@ -1,21 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<RootNamespace>Rapidex.Data.Sample.App1</RootNamespace>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="App_Content\SampleDefinitions\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Rapidex-Base-Common\Rapidex.Base.Common.Logging.Serilog\Rapidex.Base.Common.Logging.SerilogImp.Core8.csproj" />
-    <ProjectReference Include="..\..\src\Rapidex.Base.Data.Behaviors\Rapidex.Base.Data.Behaviors.csproj" />
-    <ProjectReference Include="..\..\src\Rapidex.Base.Data.PostgreServer\Rapidex.Base.Data.PostgreServer.csproj" />
-    <ProjectReference Include="..\..\src\Rapidex.Base.Data.SqlServer\Rapidex.Base.Data.SqlServer.csproj" />
-    <ProjectReference Include="..\..\src\Rapidex.Base.Data\Rapidex.Base.Data.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\Rapidex-Base-Common\Rapidex.Base.Common.Logging.Serilog\Rapidex.Base.Common.Logging.SerilogImp.Core8.csproj" />
+		<ProjectReference Include="..\..\src\Rapidex.Base.Data.Behaviors\Rapidex.Base.Data.Behaviors.csproj" />
+		<ProjectReference Include="..\..\src\Rapidex.Base.Data.PostgreServer\Rapidex.Base.Data.PostgreServer.csproj" />
+		<ProjectReference Include="..\..\src\Rapidex.Base.Data.SqlServer\Rapidex.Base.Data.SqlServer.csproj" />
+		<ProjectReference Include="..\..\src\Rapidex.Base.Data\Rapidex.Base.Data.csproj" />
+	</ItemGroup>
 
 </Project>
