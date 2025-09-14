@@ -8,7 +8,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
     protected override string[] GetTableNamesInSchema(IDbSchemaScope schemaScope)
     {
-        using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
+        using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
         DataTable table = connection.Execute($"SELECT t.name FROM sys.tables AS t INNER JOIN sys.schemas AS s ON t.[schema_id] = s.[schema_id] WHERE s.name = N'{schemaScope.SchemaName}';");
 
@@ -27,7 +27,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
         base.Structure_01_CreateTable_FromJson();
 
 
-        using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
+        using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
         connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
 
@@ -68,7 +68,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
     {
         base.Structure_02_CreateTable_FromConcrete();
 
-        using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
+        using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
         DataTable table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntity01'");
         Assert.Equal(1, table.Rows.Count);
@@ -97,7 +97,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
         base.Structure_03_AddColumnInRuntime();
         var dbScope = Database.Dbs.Db();
 
-        using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
+        using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
         DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
 
@@ -134,7 +134,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
         var dbScope = Database.Dbs.Db();
 
-        using DbSqlServerConnection connection = Module.CreateSqlServerConnection();
+        using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
         DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
 

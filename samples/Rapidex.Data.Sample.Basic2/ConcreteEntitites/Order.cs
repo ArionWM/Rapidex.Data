@@ -19,13 +19,13 @@ internal class Order : DbConcreteEntityBase
 
 internal class OrderImplementer : IConcreteEntityImplementer<Order>
 {
-    protected static IEntityReleatedMessageArguments BeforeSave(IEntityReleatedMessageArguments args)
+    protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
     {
         Order order = args.Entity.As<Order>();
         if(order.OrderDate == default)
             order.OrderDate = DateTimeOffset.Now;
 
-        return args;
+        return args.CreateResult();
     }
 
     public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
@@ -35,7 +35,7 @@ internal class OrderImplementer : IConcreteEntityImplementer<Order>
             .AddBehavior<HasTags>(true, false);
 
         //See: 
-        Common.SignalHub.SubscribeOnBeforeSave("/", OrderImplementer.BeforeSave);
+        Common.SignalHub.SubscribeEntityReleated(DataReleatedSignalConstants.Signal_BeforeSave, OrderImplementer.BeforeSave);
 
     }
 }

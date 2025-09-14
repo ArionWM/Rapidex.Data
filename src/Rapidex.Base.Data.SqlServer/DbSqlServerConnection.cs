@@ -26,6 +26,7 @@ internal class DbSqlServerConnection : IDisposable
     protected void CheckConnectionState()
     {
         this.ConnectionString.NotEmpty("ConnectionString can't empty");
+        this.Connection.NotNull("Connection instance is null");
 
         int retryCount = 0;
         while (this.Connection.State == ConnectionState.Connecting)
@@ -150,9 +151,10 @@ internal class DbSqlServerConnection : IDisposable
     }
     public void Dispose()
     {
-        Log.Debug("Database", $"Connection [{Thread.CurrentThread.ManagedThreadId} / {this.Connection.ClientConnectionId}]: closed.");
         if (this.Connection != null)
         {
+            Log.Debug("Database", $"Connection [{Thread.CurrentThread.ManagedThreadId} / {this.Connection.ClientConnectionId}]: closed.");
+
             this.Connection.Close();
             this.Connection.Dispose();
             this.Connection = null;

@@ -52,10 +52,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A3FE7EE0-2
 		docs\LibraryDeclaration.md = docs\LibraryDeclaration.md
 		docs\MultiDatabaseManagement.md = docs\MultiDatabaseManagement.md
 		docs\MultiSchemaManagement.md = docs\MultiSchemaManagement.md
+		docs\Multithreading.md = docs\Multithreading.md
 		docs\PredefinedData.md = docs\PredefinedData.md
 		docs\QueryingData.md = docs\QueryingData.md
 		docs\QuickStart.md = docs\QuickStart.md
-		docs\Multithreading.md = docs\Multithreading.md
 		docs\Roadmap.md = docs\Roadmap.md
 		docs\RuntimeChanges.md = docs\RuntimeChanges.md
 		docs\TestDataCreators.md = docs\TestDataCreators.md
@@ -68,9 +68,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "license", "license", "{CBD8
 		docs\license\CONTRIBUTOR_LICENSE_AGREEMENT.md = docs\license\CONTRIBUTOR_LICENSE_AGREEMENT.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data.Sample.App1", "samples\Rapidex.Data.Sample.App1\Rapidex.Data.Sample.App1.csproj", "{4F671895-55CF-2B41-8E60-98EB9ACCDCEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data.Sample.Basic1", "samples\Rapidex.Data.Sample.Basic1\Rapidex.Data.Sample.Basic1.csproj", "{3F2D9887-A0E4-4D98-EBB7-BD303B1AD8C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data.Sample.App2", "samples\Rapidex.Data.Sample.App2\Rapidex.Data.Sample.App2.csproj", "{68544936-C40B-A341-7E16-592E721AE67C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data.Sample.Basic2", "samples\Rapidex.Data.Sample.Basic2\Rapidex.Data.Sample.Basic2.csproj", "{046472D1-121D-CF26-E1A1-A5703171B51B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,14 +122,14 @@ Global
 		{89651E18-0E05-1D28-59F2-AA50D56BEAE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89651E18-0E05-1D28-59F2-AA50D56BEAE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89651E18-0E05-1D28-59F2-AA50D56BEAE0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4F671895-55CF-2B41-8E60-98EB9ACCDCEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4F671895-55CF-2B41-8E60-98EB9ACCDCEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4F671895-55CF-2B41-8E60-98EB9ACCDCEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4F671895-55CF-2B41-8E60-98EB9ACCDCEE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{68544936-C40B-A341-7E16-592E721AE67C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{68544936-C40B-A341-7E16-592E721AE67C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{68544936-C40B-A341-7E16-592E721AE67C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{68544936-C40B-A341-7E16-592E721AE67C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F2D9887-A0E4-4D98-EBB7-BD303B1AD8C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F2D9887-A0E4-4D98-EBB7-BD303B1AD8C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F2D9887-A0E4-4D98-EBB7-BD303B1AD8C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F2D9887-A0E4-4D98-EBB7-BD303B1AD8C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{046472D1-121D-CF26-E1A1-A5703171B51B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{046472D1-121D-CF26-E1A1-A5703171B51B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{046472D1-121D-CF26-E1A1-A5703171B51B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{046472D1-121D-CF26-E1A1-A5703171B51B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -149,8 +149,8 @@ Global
 		{89651E18-0E05-1D28-59F2-AA50D56BEAE0} = {5DF207CE-1D5A-44CA-97BD-C3712DA80806}
 		{A3FE7EE0-2FC6-4D9F-A6B7-656A1BB0B458} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
 		{CBD8E6A6-63F2-4225-A2C0-830D2572E057} = {A3FE7EE0-2FC6-4D9F-A6B7-656A1BB0B458}
-		{4F671895-55CF-2B41-8E60-98EB9ACCDCEE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{68544936-C40B-A341-7E16-592E721AE67C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{3F2D9887-A0E4-4D98-EBB7-BD303B1AD8C1} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{046472D1-121D-CF26-E1A1-A5703171B51B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7BA78EAA-AAC5-488A-9D07-61F6CB6F437A}

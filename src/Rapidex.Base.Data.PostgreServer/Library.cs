@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Rapidex.Data.PostgreServer;
 
-internal class Module : AssemblyDefinitionBase, IRapidexAssemblyDefinition
+internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 {
     public override string Name => "Data / Orm Library Postgre extensions";
     public override string TablePrefix => "data";

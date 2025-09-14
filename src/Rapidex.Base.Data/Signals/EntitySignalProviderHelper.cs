@@ -26,7 +26,7 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Schema.ParentDbScope.Name,
+            DatabaseOrTenant = entity._Schema.ParentDbScope.Name,
             Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
@@ -36,8 +36,8 @@ internal static class EntitySignalProviderHelper
 
         EntityReleatedMessageArguments inputArg = new EntityReleatedMessageArguments(topic.Signal, entity);
 
-        IResult<IEnumerable<ISignalArguments>> result = await Rapidex.Common.SignalHub.Publish(topic, inputArg);
-        EntityReleatedMessageArguments outputArg = result.Content.FirstOrDefault() as EntityReleatedMessageArguments;
+        ISignalProcessResult result = await Rapidex.Common.SignalHub.PublishAsync(topic, inputArg);
+        EntityReleatedMessageArguments outputArg = result.Arguments as EntityReleatedMessageArguments;
         return outputArg?.Entity;
     }
 
@@ -46,7 +46,7 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Schema.ParentDbScope.Name,
+            DatabaseOrTenant = entity._Schema.ParentDbScope.Name,
             Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
@@ -56,8 +56,8 @@ internal static class EntitySignalProviderHelper
 
         EntityReleatedMessageArguments inputArg = new EntityReleatedMessageArguments(topic.Signal, entity);
 
-        IResult<IEnumerable<ISignalArguments>> result = await Rapidex.Common.SignalHub.Publish(topic, inputArg);
-        EntityReleatedMessageArguments outputArg = result.Content.FirstOrDefault() as EntityReleatedMessageArguments;
+        ISignalProcessResult result = await Rapidex.Common.SignalHub.PublishAsync(topic, inputArg);
+        EntityReleatedMessageArguments outputArg = result.Arguments as EntityReleatedMessageArguments;
         return outputArg?.Entity;
     }
 
@@ -66,14 +66,14 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Schema.ParentDbScope.Name,
+            DatabaseOrTenant = entity._Schema.ParentDbScope.Name,
             Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
             Signal = DataReleatedSignalConstants.Signal_AfterSave
         };
-        Rapidex.Common.SignalHub.Publish(topic, new EntityReleatedMessageArguments(topic.Signal, entity));
+        Rapidex.Common.SignalHub.PublishAsync(topic, new EntityReleatedMessageArguments(topic.Signal, entity));
     }
 
     public static void PublishOnAfterCommit(this IEntity entity)
@@ -81,14 +81,14 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Schema.ParentDbScope.Name,
+            DatabaseOrTenant = entity._Schema.ParentDbScope.Name,
             Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
             Signal = DataReleatedSignalConstants.Signal_AfterCommit
         };
-        Rapidex.Common.SignalHub.Publish(topic, new EntityReleatedMessageArguments(topic.Signal, entity));
+        Rapidex.Common.SignalHub.PublishAsync(topic, new EntityReleatedMessageArguments(topic.Signal, entity));
     }
 
     public static async Task<IEntity> PublishOnBeforeDelete(this IEntity entity)
@@ -96,7 +96,7 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Schema.ParentDbScope.Name,
+            DatabaseOrTenant = entity._Schema.ParentDbScope.Name,
             Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
@@ -106,8 +106,8 @@ internal static class EntitySignalProviderHelper
 
         EntityReleatedMessageArguments inputArg = new EntityReleatedMessageArguments(topic.Signal, entity);
 
-        IResult<IEnumerable<ISignalArguments>> result = await Rapidex.Common.SignalHub.Publish(topic, inputArg);
-        EntityReleatedMessageArguments outputArg = result.Content.FirstOrDefault() as EntityReleatedMessageArguments;
+        ISignalProcessResult result = await Rapidex.Common.SignalHub.PublishAsync(topic, inputArg);
+        EntityReleatedMessageArguments outputArg = result.Arguments as EntityReleatedMessageArguments;
         return outputArg?.Entity;
     }
 
@@ -117,13 +117,13 @@ internal static class EntitySignalProviderHelper
         var em = entity.GetMetadata();
         SignalTopic topic = new SignalTopic()
         {
-            Tenant = entity._Schema.ParentDbScope.Name,
+            DatabaseOrTenant = entity._Schema.ParentDbScope.Name,
             Workspace = entity._Schema.SchemaName,
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
             Signal = DataReleatedSignalConstants.Signal_AfterDelete
         };
-        Rapidex.Common.SignalHub.Publish(topic, new EntityReleatedMessageArguments(topic.Signal, entity));
+        Rapidex.Common.SignalHub.PublishAsync(topic, new EntityReleatedMessageArguments(topic.Signal, entity));
     }
 }

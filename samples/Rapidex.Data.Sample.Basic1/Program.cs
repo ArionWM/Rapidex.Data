@@ -20,7 +20,12 @@ builder.Services.AddApplicationServices(); //<- Add own services
 //Rapidex ==============================
 builder.Services.AddRapidexDataLevel(); //<- Add Rapidex services
 
-
+//For single database and schema application, this useful ...
+builder.Services.AddTransient<IDbSchemaScope>(sp =>
+{
+    var dbScope = Database.Dbs.Db();
+    return dbScope;
+});
 
 //If we not use IRapidexAssemblyDefinition supported class (library declaration), we can add manually own assemblies
 //See: LibraryDeclaration.md

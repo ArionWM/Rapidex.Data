@@ -9,6 +9,7 @@ public class DataReleatedSignalConstants
 {
     //Entity related
     public const string Signal_New = "New";
+    public const string Signal_Validate = "Validate";
     public const string Signal_BeforeSave = "BeforeSave";
     public const string Signal_AfterSave = "AfterSave";
     public const string Signal_AfterCommit = "AfterCommit";

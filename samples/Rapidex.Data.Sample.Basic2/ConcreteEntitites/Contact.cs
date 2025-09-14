@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Sample.App1.ConcreteEntities;
-
-public class Contact : DbConcreteEntityBase
+namespace Rapidex.Data.Sample.App2.ConcreteEntitites;
+internal class Contact : DbConcreteEntityBase
 {
     public Enumeration<ContactType> Type { get; set; }
 
@@ -22,9 +21,10 @@ public class Contact : DbConcreteEntityBase
 
 internal class ContractImplementer : IConcreteEntityImplementer<Contact>
 {
-    protected static void CalculateContactValues(Contact contact)
+    protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
     {
-        if (contact.BirthDate.HasValue)
+        Contact contact = args.Entity.As<Contact>();
+        if(contact.BirthDate.HasValue)
         {
             DateTimeOffset now = DateTimeOffset.Now;
             int age = now.Year - contact.BirthDate.Value.Year;
@@ -32,17 +32,13 @@ internal class ContractImplementer : IConcreteEntityImplementer<Contact>
                 age--;
             contact.Age = age;
         }
-        if (contact.FullName.IsNullOrEmpty())
+
+        if(contact.FullName.IsNullOrEmpty())
         {
             contact.FullName = (contact.FirstName + " " + contact.LastName).Trim();
         }
-    }
 
-    protected static IEntityReleatedMessageArguments BeforeSave(IEntityReleatedMessageArguments args)
-    {
-        Contact contact = args.Entity.As<Contact>();
-        CalculateContactValues(contact);
-        return args;
+        return args.CreateResult();
     }
     public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
     {
@@ -52,6 +48,6 @@ internal class ContractImplementer : IConcreteEntityImplementer<Contact>
             .MarkOnlyBaseSchema();
 
         //See: 
-        Common.SignalHub.SubscribeOnBeforeSave("/", ContractImplementer.BeforeSave);
+        Common.SignalHub.SubscribeEntityReleated(DataReleatedSignalConstants.Signal_BeforeSave, ContractImplementer.BeforeSave);
     }
 }

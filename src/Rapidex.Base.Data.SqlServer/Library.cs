@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Rapidex.Data.SqlServer;
 
-internal class Module : AssemblyDefinitionBase, IRapidexAssemblyDefinition
+internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 {
     public override string Name => "Data / Orm Library SqlServer extensions";
     public override string TablePrefix => "data";
@@ -26,11 +26,15 @@ internal class Module : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 
     }
 
+    /// <summary>
+    /// For tests and tools only.
+    /// </summary>
+    /// <returns></returns>
     internal static DbSqlServerConnection CreateSqlServerConnection()
     {
         DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
-        using DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
+        DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
         connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
         return connection;

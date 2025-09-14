@@ -1027,6 +1027,20 @@ public interface IDataType<T> : IDataType
 
 public interface IEntityReleatedMessageArguments : ISignalArguments
 {
+
     IEntity Entity { get; }
 
 }
+
+public interface IEntityReleatedSignalResult : IValidationResult
+{
+
+}
+
+
+//public interface IEntityReleatedMessageArguments : ISignalArguments
+//{
+
+//    IEntity Entity { get; }
+
+//}

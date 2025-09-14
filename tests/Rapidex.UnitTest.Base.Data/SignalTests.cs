@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.MessageHub;
-public class MessageHubTests : DbDependedTestsBase<DbSqlServerProvider>
+public class SignalTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public MessageHubTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SignalTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 
@@ -29,7 +29,7 @@ public class MessageHubTests : DbDependedTestsBase<DbSqlServerProvider>
             ConcreteEntity01 cent = (ConcreteEntity01)eargs.Entity;
             cent.Name = RandomHelper.RandomText(10);
             subs1Invokes.Add(cent.Name);
-            return args;
+            return args.CreateResult();
         });
 
         Assert.True(subs1Result.Success);

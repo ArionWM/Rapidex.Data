@@ -76,4 +76,59 @@ public class SampleServiceA
 
     }
 
+    internal object GetOrder(IDbSchemaScope db, long id)
+    {
+        var order = db.Find<Order>(id);
+        return order;
+
+    }
+
+    internal IEntityLoadResult<Contact> ListContacts(IDbSchemaScope db, string filter)
+    {
+        var query = db.GetQuery<Contact>()
+            .OrderBy(OrderDirection.Asc, nameof(Contact.FullName))
+            .IsNotArchived();
+
+        if (filter.IsNOTNullOrEmpty())
+        {
+            this.parsers.FindParser(filter)
+                .NotNull($"No parser found for filter: {filter}")
+                .Parse(query, filter);
+        }
+
+        return query.Load();
+
+    }
+
+    internal object GetContact(IDbSchemaScope db, long id)
+    {
+        var contact = db.Find<Contact>(id);
+        return contact;
+    }
+
+    internal object UpdateContact(IDbSchemaScope db, long? id, string firstName, string surname, string email, string phoneNumber, DateTimeOffset? birthDate)
+    {
+        using var work = db.BeginWork();
+        Contact contact;
+        if (id.HasValue)
+        {
+            contact = work.Find<Contact>(id.Value);
+            contact.NotNull($"Contact not found: {id}");
+        }
+        else
+        {
+            contact = work.New<Contact>();
+        }
+        contact.FirstName = firstName;
+        contact.LastName = surname;
+        contact.Email = email;
+        contact.PhoneNumber = phoneNumber;
+
+        if (birthDate.HasValue)
+            contact.BirthDate = birthDate;
+        contact.Save();
+        work.CommitChanges();
+        return contact;
+
+    }
 }
