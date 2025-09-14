@@ -16,7 +16,7 @@ public class DataController
         this.db = dbSchemaScope;
     }
 
-    public IActionResult ListContacts(string filter)
+    public IActionResult ListContacts(string? filter)
     {
         var contacts = this.ServiceA.ListContacts(this.db, filter);
         return new JsonResult(contacts);
@@ -38,7 +38,7 @@ public class DataController
 
 
 
-    public IActionResult ListOrders(string filter)
+    public IActionResult ListOrders(string? filter)
     {
         var orders = this.ServiceA.ListOrders(this.db, filter);
         return new JsonResult(orders);

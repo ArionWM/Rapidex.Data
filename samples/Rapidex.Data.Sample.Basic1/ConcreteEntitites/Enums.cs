@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.Sample.App1.ConcreteEntities;
 public enum ContactType
 {
-    Personal,
-    Business,
-    Other
+    Personal = 1,
+    Business = 2,
+    Other = 10
 }
