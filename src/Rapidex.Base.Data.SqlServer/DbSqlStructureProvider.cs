@@ -64,7 +64,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         catch (SqlException ssx) when (ssx.Number == 4060 || ssx.Number == 233)
         {
             if (!tryMaster)
-                throw ssx;
+                throw;
 
             this.SwitchConnectionToMaster();
             return false;
@@ -91,7 +91,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     {
         this.CheckConnection(false);
 
-        if(!this.IsDatabaseAvailable(dbName))
+        if (!this.IsDatabaseAvailable(dbName))
         {
             this.CreateDatabase(dbName);
         }
@@ -604,5 +604,30 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     public void Dispose()
     {
         this.CloseConnection();
+    }
+
+    public (MasterDbConnectionStatus status, string description) CheckMasterConnection()
+    {
+        try
+        {
+            bool directHit = this.CheckConnection(true);
+            if (!directHit)
+            {
+                this.CreateDatabase(this.Connectionbuilder.InitialCatalog);
+            }
+
+            this.SwitchDatabase(this.Connectionbuilder.InitialCatalog);
+
+            var status = directHit ? MasterDbConnectionStatus.Valid : MasterDbConnectionStatus.Created;
+            return (status, status == MasterDbConnectionStatus.Valid ? "Valid" : "Created");
+        }
+        catch (Exception ex)
+        {
+            ex.Log();
+
+            var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex) ?? ex;
+
+            return (MasterDbConnectionStatus.CantAccess, tex.Message);
+        }
     }
 }

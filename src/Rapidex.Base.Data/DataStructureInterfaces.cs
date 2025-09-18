@@ -685,6 +685,7 @@ public interface IDbStructureProvider : IDisposable
 
     string CheckObjectName(string name);
 
+    (MasterDbConnectionStatus status, string description) CheckMasterConnection();
     bool IsDatabaseAvailable(string dbName);
     bool IsSchemaAvailable(string schemaName);
 
@@ -849,6 +850,7 @@ public interface IDbManager
 public interface IEntity
 {
     [JsonIgnore]
+#pragma warning disable IDE1006 // Naming Styles
     internal IDbEntityMetadata _Metadata { get; set; }
 
     string _TypeName { get; internal set; }
@@ -858,6 +860,8 @@ public interface IEntity
 
     [JsonIgnore]
     IDbSchemaScope _Schema { get; internal set; }
+
+#pragma warning restore IDE1006 // Naming Styles
 
     object this[string columnName] { get; set; }
 

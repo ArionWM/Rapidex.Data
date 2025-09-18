@@ -65,7 +65,7 @@ public class DbSqlServerProvider : IDbProvider
     protected void ValidateInitialization()
     {
         this.ConnectionString.NotEmpty("Connection string cannot be empty or null");
-        this.ParentScope.NotNull("Parent scope cannot be null");
+        //this.ParentScope.NotNull("Parent scope cannot be null");
     }
 
     public IValidationResult ValidateConnection()

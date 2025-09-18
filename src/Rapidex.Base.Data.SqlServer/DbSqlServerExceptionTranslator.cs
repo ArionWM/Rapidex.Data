@@ -26,7 +26,7 @@ internal class DbSqlServerExceptionTranslator : IExceptionTranslator
         {
             case 233:
             case 4060:
-                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "Veritabanına bağlantı sağlanamadı. SQL bağlantı metnindeki hedef adres ve veritabanı adını kontrol edin" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
+                return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "Veritabanına bağlantı sağlanamadı. SQL bağlantı metnindeki hedef adres, veritabanı adı ve kullanıcı bilgilerini kontrol edin" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 18456:
                 return new TranslatedException(ExceptionTarget.ITDepartment_ApplicationManagement, "Verilen kullanıcı adı / parola bilgileri ile SQL Sunucusuna oturum açılamıyor" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 547:
@@ -73,6 +73,8 @@ internal class DbSqlServerExceptionTranslator : IExceptionTranslator
                 return new TranslatedException(ExceptionTarget.ApplicationSupport, "The database principal owns a schema in the database, and cannot be dropped." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 2715:
                 return new TranslatedException(ExceptionTarget.ApplicationSupport, $"Unsupported or wrong data type: {ex.Message}" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
+            case 258:
+                return new TranslatedException(ExceptionTarget.ApplicationSupport, "Possibly database connection configuration problem, is user not assign target database?" + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             default:
                 return new TranslatedException(ExceptionTarget.ApplicationSupport, "An unknown SQL error occurred." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
 

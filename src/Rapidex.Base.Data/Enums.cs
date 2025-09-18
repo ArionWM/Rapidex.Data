@@ -6,7 +6,14 @@ using System.Threading.Tasks;
 
 namespace Rapidex.Data;
 
-//
+
+public enum MasterDbConnectionStatus
+{
+    Valid = 0,
+    CantAccess = 1,
+    Created = 2
+}
+
 // Summary:
 //     Specifies the data type of a field, a property, or a Parameter object of a .NET
 //     data provider.

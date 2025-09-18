@@ -18,6 +18,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Base.Data.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		LICENSE = LICENSE
@@ -44,6 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A3FE7EE0-2
 	ProjectSection(SolutionItems) = preProject
 		docs\Behaviors.md = docs\Behaviors.md
 		docs\Concept.md = docs\Concept.md
+		docs\DatabaseConnectionAndRequiredRights.md = docs\DatabaseConnectionAndRequiredRights.md
 		docs\EntityDefinition.md = docs\EntityDefinition.md
 		docs\Features-detailed.md = docs\Features-detailed.md
 		docs\FieldTypes.md = docs\FieldTypes.md

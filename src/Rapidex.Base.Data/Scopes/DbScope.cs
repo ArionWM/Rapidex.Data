@@ -75,14 +75,6 @@ namespace Rapidex.Data.Scopes
                     mass.SetupMetadata(this);
             });
 
-            //Check db existence
-            //var structureManager = this.DbProvider.GetStructureProvider();
-            //structureManager.SwitchDatabase(this.DatabaseName);
-            //if (!structureManager.IsDatabaseAvailable(this.DatabaseName))
-            //{
-            //    structureManager.CreateDatabase(this.DatabaseName);
-            //}
-
             if (this.Name != DatabaseConstants.MASTER_DB_NAME)
             {
                 this.DbProvider.UseDb(this.Name);
@@ -95,6 +87,8 @@ namespace Rapidex.Data.Scopes
             //Load other schemas
             this.LoadRecordedSchemaInfos();
         }
+
+       
 
         protected IDbSchemaScope AddSchema(string schemaName)
         {

@@ -29,7 +29,7 @@ internal class DbScopeManager : IDbManager
             try
             {
                 DbProviderFactory dbCreator = new DbProviderFactory();
-                IDbScope dbScope = dbCreator.Create(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_NAME);
+                IDbScope dbScope = dbCreator.CheckMasterDb();
 
                 _dbScopes.Add(DatabaseConstants.MASTER_DB_NAME, dbScope);
 
@@ -75,7 +75,7 @@ internal class DbScopeManager : IDbManager
 
         if (throwErrorIfNotExists && !_dbScopes.ContainsKey(dbName))
         {
-            throw new InvalidOperationException($"Database '{dbName}' is not found.");
+            throw new InvalidOperationException($"Database with alias '{dbName}' is not found.");
         }
 
         return _dbScopes.Get(dbName).NotNull($"Database scope '{dbName}' not found");

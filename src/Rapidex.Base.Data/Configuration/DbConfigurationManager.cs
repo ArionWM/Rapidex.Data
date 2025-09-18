@@ -59,7 +59,7 @@ namespace Rapidex.Data
             this.ReadConnectionInfo();
         }
 
-        public void LoadDbScopeDefinition(IServiceProvider sp, string dbName)
+        public void LoadDbScopeDefinition(string dbName)
         {
             DbConnectionInfo cinfo = this.ConnectionInfo.Get(dbName, true);
             cinfo.NotNull($"Connection info found in configuration for '{dbName}'. see appsettings.json");
@@ -79,17 +79,14 @@ namespace Rapidex.Data
                 //Database.Databases.EnableMultiDb();
                 //Database.Databases.AddDbIfNotExists(dbName);
             }
-
-            
-
         }
 
-        public void LoadDbScopeDefinitions(IServiceProvider sp)
+        public void LoadDbScopeDefinitions()
         {
             DbConnectionInfo masterConnInfo = this.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
             masterConnInfo.NotNull("Any `default` db connection configuration not found (Name should be: 'Master'). See: appsettings.json");
 
-            this.LoadDbScopeDefinition(sp, DatabaseConstants.MASTER_DB_NAME);
+            this.LoadDbScopeDefinition(DatabaseConstants.MASTER_DB_NAME);
 
             //Removed, but additional connection definitions is not required for now
             //foreach (var dbName in this.ConnectionInfo.Keys)

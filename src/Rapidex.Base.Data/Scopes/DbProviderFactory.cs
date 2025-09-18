@@ -13,10 +13,12 @@ internal class DbProviderFactory
         name.NotEmpty();
 
         Type type = Common.Assembly.FindType(name);
-        
+
         type.NotNull($"Type '{name}' is not found.");
 
-        IDbProvider provider = TypeHelper.CreateInstance<IDbProvider>(type, connectionString);
+
+        IDbProvider provider = (IDbProvider)Activator.CreateInstance(type, connectionString);
+        //TypeHelper.CreateInstance<IDbProvider>(type, connectionString);
         return provider;
     }
 
@@ -24,8 +26,33 @@ internal class DbProviderFactory
     {
         connectionInfo.NotNull();
 
-        IDbProvider provider = CreateProvider(connectionInfo.Provider, connectionInfo.ConnectionString);
+        IDbProvider provider = this.CreateProvider(connectionInfo.Provider, connectionInfo.ConnectionString);
         return provider;
+    }
+
+    public IDbScope CheckMasterDb()
+    {
+        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+        if (connectionInfo == null)
+        {
+            throw new DataConnectionException($"Master database connection info is not found. See: https://github.com/ArionWM/Rapidex.Base.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md\"");
+        }
+
+        IDbProvider provider = this.CreateProvider(connectionInfo);
+        var structureProvider = provider.GetStructureProvider();
+        var checkResult = structureProvider.CheckMasterConnection();
+
+        switch (checkResult.status)
+        {
+            case MasterDbConnectionStatus.Valid:
+            case MasterDbConnectionStatus.Created:
+                IDbScope dbScope = new DbScope(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_NAME, provider);
+                return dbScope;
+            default:
+                throw new DataConnectionException($"Master database connection is not valid. \r\n{checkResult.description} \r\nSee: https://github.com/ArionWM/Rapidex.Base.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md");
+        }
+
+
     }
 
     public IDbScope Create(long id, string dbAliasName)
@@ -38,7 +65,7 @@ internal class DbProviderFactory
             connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
         }
 
-        provider = CreateProvider(connectionInfo);
+        provider = this.CreateProvider(connectionInfo);
         provider.NotNull("Provider is not found for the given name: " + connectionInfo.Provider);
 
         DbScope scope = new DbScope(id, dbAliasName, provider);

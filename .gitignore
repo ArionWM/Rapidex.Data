@@ -9,4 +9,9 @@ logs
 
 /.vs
 
+/.github/copilot-chatmodes
+/.github/copilot-prompts
+/.github/instructions
+
+
 

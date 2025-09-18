@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.Sample.App1.Services;
 public class SampleServiceA
 {
-    private readonly IEnumerable<IDbCriteriaParser> parsers;
+    private readonly IEnumerable<IDbCriteriaParser> _parsers;
 
     public SampleServiceA(IEnumerable<IDbCriteriaParser> parsers)
     {
-        this.parsers = parsers;
+        this._parsers = parsers;
     }
 
 
@@ -24,7 +24,7 @@ public class SampleServiceA
 
         if (filter.IsNOTNullOrEmpty())
         {
-            this.parsers.FindParser(filter)
+            this._parsers.FindParser(filter)
                 .NotNull($"No parser found for filter: {filter}")
                 .Parse(query, filter);
         }
@@ -77,7 +77,7 @@ public class SampleServiceA
 
         if (filter.IsNOTNullOrEmpty())
         {
-            this.parsers.FindParser(filter)
+            this._parsers.FindParser(filter)
                 .NotNull($"No parser found for filter: {filter}")
                 .Parse(query, filter);
         }

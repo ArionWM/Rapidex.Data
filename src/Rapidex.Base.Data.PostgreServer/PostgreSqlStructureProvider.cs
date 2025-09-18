@@ -590,4 +590,9 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     {
         this.CloseConnection();
     }
+
+    public (MasterDbConnectionStatus status, string description) CheckMasterConnection()
+    {
+        throw new NotImplementedException();
+    }
 }

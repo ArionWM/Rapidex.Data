@@ -50,7 +50,7 @@ public static class Database
     /// Load configuration and prepare for work
     /// </summary>
     /// <param name="configuration"></param>
-    public static void Setup(IServiceCollection services, IConfiguration configuration = null)
+    public static void Setup(IConfiguration configuration = null)
     {
         Database.Configuration = new DbConfigurationManager();
         if (configuration != null)
@@ -79,8 +79,9 @@ public static class Database
         //Database.FieldMetadataFactory = sp.GetRapidexService<IFieldMetadataFactory>()
         //    .NotNull();
 
+        Database.Dbs.AddMainDbIfNotExists();
 
-        Database.Configuration.LoadDbScopeDefinitions(sp);
+        Database.Configuration.LoadDbScopeDefinitions();
     }
 
 }
