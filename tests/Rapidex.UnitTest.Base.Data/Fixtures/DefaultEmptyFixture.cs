@@ -32,9 +32,9 @@ public class DefaultEmptyFixture : ICoreTestFixture
         if (initialized)
             return;
 
-        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
+        Signal.ClearHubForTest();
 
-        //Database.Configuration.DefaultDatabaseNamePrefix = "RapidexAppUnitTest";
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
         string logDir = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "Logs");
         builder.UseSerilog(logDir, Serilog.Events.LogEventLevel.Verbose);

@@ -72,6 +72,8 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         if (initialized)
             return;
 
+        Signal.ClearHubForTest();
+
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
         this.Setup(builder.Services);

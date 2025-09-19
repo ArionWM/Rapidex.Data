@@ -19,11 +19,11 @@ public class SignalTests : DbDependedTestsBase<DbSqlServerProvider>
         var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
-        
+
 
         List<string> subs1Invokes = new List<string>();
 
-        IResult<int> subs1Result = Rapidex.Common.SignalHub.Subscribe("abc", "+/+/+/New/ConcreteEntity01", args =>
+        IResult<int> subs1Result = Rapidex.Signal.Hub.Subscribe("+/+/+/New/ConcreteEntity01", args =>
         {
             IEntityReleatedMessageArguments eargs = (IEntityReleatedMessageArguments)args;
             ConcreteEntity01 cent = (ConcreteEntity01)eargs.Entity;

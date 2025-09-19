@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<RootNamespace>Rapidex.SignalHub</RootNamespace>
+		<AssemblyName>Rapidex.Signal.Hub</AssemblyName>
+		<LangVersion>Latest</LangVersion>
+		<PlatformTarget>x64</PlatformTarget>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>1701;1702;1591;1572;1573;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS1584;CS1658</NoWarn>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<DocumentationFile>.\Rapidex.SignalHub.xml</DocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Arguments\**" />
+	  <EmbeddedResource Remove="Arguments\**" />
+	  <None Remove="Arguments\**" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\..\..\RapidexAssemblyInfo.cs" Link="RapidexAssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Rapidex.Base.Common\Rapidex.Base.Common.csproj" />
+	  
+	</ItemGroup>
+
+</Project>

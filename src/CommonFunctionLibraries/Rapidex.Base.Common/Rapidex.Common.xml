@@ -1,0 +1,442 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Rapidex.Common</name>
+    </assembly>
+    <members>
+        <member name="M:Rapidex.Base.Common.Assemblies.AssemblyManager.FindAssemblyPathsForCheck">
+            <summary>
+            Yüklenerek incelenecek assembly path (.dll) ve adlarını (assemblyName) döndürür
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Rapidex.NullAttribute">
+            <summary>
+            Belirtildiği enum değerinin null anlamına geldiğini belirtir. Bu değer; IsNullOrEmpty: True olarak yorumlanır
+            </summary>
+        </member>
+        <member name="T:Rapidex.IStack`1">
+            <summary>
+            ThreadStatic context yığınları için
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:Rapidex.CollectionExtensions.CreateArray``1(``0,``0[])">
+            <summary>
+            İlgili nesne ve diğerlerinden bir array üretir
+            
+            Örn: int i = 1;
+            i.CreateArray(); -> {1}
+            i.CreateArray(2, 3); -> {1, 2, 3}
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="first">dizinin ilk elemanı</param>
+            <param name="otherItems">diğer elemanlar</param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.CollectionExtensions.Split``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Splits an array into several smaller arrays.
+            </summary>
+            <typeparam name="T">The type of the array.</typeparam>
+            <param name="array">The array to split.</param>
+            <param name="size">The size of the smaller arrays.</param>
+            <returns>An array containing smaller arrays.</returns>
+        </member>
+        <member name="M:Rapidex.CollectionExtensions.First``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Diziden verilen sayıda elemanı (baştan başlayarak) döndürür
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="elements"></param>
+            <param name="count"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.DictionaryHelper.Set``2(System.Collections.Generic.IDictionary{``0,``1},``0,System.Func{``1,``1})">
+            <summary>
+            Set dictionary value with function
+            </summary>
+            <typeparam name="TKey"></typeparam>
+            <typeparam name="TValue"></typeparam>
+            <param name="dict"></param>
+            <param name="key"></param>
+            <param name="action">newValue = Func(currentValueOfKey) </param>
+        </member>
+        <member name="M:Rapidex.DictionaryHelper.Set``1(System.Collections.Generic.SortedList{System.Int32,``0},System.Int32,``0)">
+            <summary>
+            SortedList' te aynı anahtarda bir diğeri mevcut ise anahtarı bir ilerletir ve kaydetmeye zorlar
+            </summary>
+            <typeparam name="TKey"></typeparam>
+            <typeparam name="TValue"></typeparam>
+            <param name="list"></param>
+            <param name="key"></param>
+            <param name="value"></param>
+        </member>
+        <member name="P:Rapidex.Common.EnviromentCode">
+            <summary>
+            Alabileceği değerler; 
+            - Test (birim testleri) 
+            - Development (ya da Development)
+            -- Production (ya da boş ise 'prod' olarak kabul edilir)
+            See: CommonConstants
+            See: IHostingEnvironment.HostingEnvironment
+            See: launchSettings.json
+            </summary>
+            <see cref="!:https://stackoverflow.com/questions/28258227/how-to-set-environment-name-ihostingenvironment-environmentname"/>
+            <see cref="!:https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-5.0"/>"/>
+        </member>
+        <member name="M:Rapidex.Common.Setup(System.String,System.String,Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Load configuration and prepare for work
+            </summary>
+            <param name="configuration"></param>
+        </member>
+        <member name="T:Rapidex.IRapidexAssemblyDefinition">
+            <summary>
+            Rapidex library mark. 
+            IRapidexModule contained libraries are scanned and loaded by Rapidex framework. 
+            Other libraries are ignored.
+            </summary>
+        </member>
+        <member name="T:Rapidex.IManager">
+            <summary>
+            Setup zamanında çalışmayan, start ile çalıştırılan servislerdir.
+            </summary>
+        </member>
+        <member name="M:Rapidex.HashHelper.GetStableHashCode(System.String)">
+            <summary>
+            Unchanged hashcode creator for strings
+            </summary>
+            <param name="text"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.DependencyInjectionExtensions.AddTransientForProd``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Prod ortamı için servis ekler. 
+            </summary>
+            <typeparam name="TService"></typeparam>
+            <typeparam name="TImplementation"></typeparam>
+            <param name="services"></param>
+            <see cref="P:Rapidex.Common.EnviromentCode"/>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.DependencyInjectionExtensions.AddTransientForDevelopment``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Test ortamı için servis ekler. 
+            </summary>
+            <typeparam name="TService"></typeparam>
+            <typeparam name="TImplementation"></typeparam>
+            <param name="services"></param>
+            <see cref="P:Rapidex.Common.EnviromentCode"/>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.DependencyInjectionExtensions.AddTransientForUnitTests``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Birim test ortamı için servis ekler. 
+            </summary>
+            <typeparam name="TService"></typeparam>
+            <typeparam name="TImplementation"></typeparam>
+            <param name="services"></param>
+            <see cref="P:Rapidex.Common.EnviromentCode"/>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.DependencyInjectionExtensions.AddSingletonForProd``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Prod ortamı için servis ekler. 
+            </summary>
+            <typeparam name="TService"></typeparam>
+            <typeparam name="TImplementation"></typeparam>
+            <param name="services"></param>
+            <see cref="P:Rapidex.Common.EnviromentCode"/>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.DependencyInjectionExtensions.AddSingletonForProd``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,``0)">
+            <summary>
+            Prod ortamı için servis ekler. 
+            </summary>
+            <typeparam name="TService"></typeparam>
+            <typeparam name="TImplementation"></typeparam>
+            <param name="services"></param>
+            <see cref="P:Rapidex.Common.EnviromentCode"/>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.DependencyInjectionExtensions.AddSingletonForDevelopment``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Test ortamı için servis ekler. 
+            </summary>
+            <typeparam name="TService"></typeparam>
+            <typeparam name="TImplementation"></typeparam>
+            <param name="services"></param>
+            <see cref="P:Rapidex.Common.EnviromentCode"/>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.DependencyInjectionExtensions.AddSingletonForUnitTests``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Birim test ortamı için servis ekler. 
+            </summary>
+            <typeparam name="TService"></typeparam>
+            <typeparam name="TImplementation"></typeparam>
+            <param name="services"></param>
+            <see cref="P:Rapidex.Common.EnviromentCode"/>
+            <returns></returns>
+        </member>
+        <member name="P:Rapidex.BaseApplicationException.CanShareToUser">
+            <summary>
+            True: Exception metni ve kodunun dış dünya ile paylaşılabileceğini ifade eder.
+            False: Sadece test sunucularında exception metninin dış dünyaya yayınlanmasına izin verilir.
+            </summary>
+        </member>
+        <member name="F:Rapidex.CryptoHelper.PasswordHasherV2.SaltSize">
+            <summary>
+            Size of salt
+            </summary>
+        </member>
+        <member name="F:Rapidex.CryptoHelper.PasswordHasherV2.HashSize">
+            <summary>
+            Size of hash
+            </summary>
+        </member>
+        <member name="M:Rapidex.CryptoHelper.PasswordHasherV2.Verify(System.String,System.Byte[],System.Int32)">
+            <summary>
+            verify a password against a hash
+            </summary>
+            <param name="password">the password</param>
+            <param name="hashedPassword">the hash</param>
+            <param name="iterations"></param>
+            <returns>could be verified?</returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.RandomElement``1(System.Collections.Generic.IList{``0},System.Int32,System.Func{``0,System.Boolean})">
+            <summary>
+            Verilen diziden belirtilen miktarda rasgele eleman seçer.
+            
+            NOT1: count parametresi diziden büyük eşit ise, diziyi karıştırarak geri döner. Yani shuffle için kullanılabilir.
+            NOT2: count sıfırdan küçükse hata fırlatır.
+            </summary>
+            <typeparam name="T">Kaynak dizi tipi</typeparam>
+            <param name="source">Kaynak dizi</param>
+            <param name="count">İstenen miktar</param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.RandomElement``1(System.Collections.Generic.IList{``0},System.Func{``0,System.Boolean})">
+            <summary>
+            Verilen diziden rasgele bir adet eleman seçer.  Not: Dizi boş ise, tipin varsayılanını döner.
+            </summary>
+            <typeparam name="T">Kaynak dizi tipi</typeparam>
+            <param name="source">Kaynak dizi</param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.Shuffle``1(System.Collections.Generic.IList{``0})">
+            <summary>
+            Verilen dizi elemanlarının yerlerini karıştırır.
+            </summary>
+            <typeparam name="T">Kaynak dizi tipi</typeparam>
+            <param name="source">Kaynak dizi</param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.Shuffle``1(``0[])">
+            <summary>
+            IList alan metodun array'ler ile kolay kullanımı için.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="source"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.RandomElement``1(``0[],System.Int32)">
+            <summary>
+            IList alan metodun array'ler ile kolay kullanımı için.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="source"></param>
+            <param name="count"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.RandomElement``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            IList alan metodun array'ler ile kolay kullanımı için.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="source"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.RandomText(System.Int32)">
+            <summary>
+            Generates a random password
+            </summary>
+            <param name="length">length of the password</param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.RandomTextWithRandomSpaces(System.Int32)">
+            <summary>
+            Generates a random password
+            </summary>
+            <param name="length">length of the password</param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.RandomNumeric(System.Int32)">
+            <summary>
+            Generates a random number
+            </summary>
+            <param name="length">length of the number</param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.RandomHelper.Dice(System.Int32)">
+            <summary>
+            Verilen kesirde zar atar ve sonucunu true / false olarak döner
+            Örn: 1/5 olasılık istiyor isek Dice(5):True, olasılığın gerçekleştiği sonucunu döndürür.
+            </summary>
+            <param name="diceValue"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.TextHelper.ToInvariant(System.String)">
+            <summary>
+            Verilen metindeki Türkçe karakterleri ingilizce (invariant)
+            karşılıkları ile değiştirir
+            </summary>
+            <param name="text"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.TextHelper.AbbrFromFirstLetters(System.String)">
+            <summary>
+            Verilen kelimelerin ilk harflerini birleştirerek kısaltma haline getirir. 
+            Örn: Türkiye Büyük Millet Mecisi -> TBMM
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="F:Rapidex.TypeInheritenceHelper._inheritanceCache">
+            <summary>
+            Static cache for type inheritance relationships to improve performance
+            Key: Type, Value: HashSet of base types within the current type array
+            </summary>
+        </member>
+        <member name="F:Rapidex.TypeInheritenceHelper._inheritanceDepthCache">
+            <summary>
+            Static cache for inheritance depth calculations
+            Key: Type full name, Value: inheritance depth
+            </summary>
+        </member>
+        <member name="M:Rapidex.TypeInheritenceHelper.SortTypesByInheritanceHierarchy(System.Type[])">
+            <summary>
+            Sorts an array of types based on inheritance hierarchy, placing derived types before their base types.
+            Uses static caching for improved performance on repeated calls.
+            For example, if type B derives from type A, then B will appear before A in the result.
+            </summary>
+            <param name="types">Array of types to sort</param>
+            <returns>Sorted array with derived types first</returns>
+        </member>
+        <member name="M:Rapidex.TypeInheritenceHelper.BuildInheritanceMap(System.Type[],System.String)">
+            <summary>
+            Builds inheritance relationships map with caching support
+            </summary>
+            <param name="types">Array of types to analyze</param>
+            <param name="cacheKey">Cache key for the type array</param>
+            <returns>Dictionary mapping each type to its base types within the array</returns>
+        </member>
+        <member name="M:Rapidex.TypeInheritenceHelper.GetCachedInheritanceDepth(System.Type,System.Type[])">
+            <summary>
+            Gets cached inheritance depth of a type within the given type array.
+            Higher values indicate more derived types.
+            </summary>
+            <param name="type">Type to calculate depth for</param>
+            <param name="typeArray">Array of types to consider for depth calculation</param>
+            <returns>Inheritance depth</returns>
+        </member>
+        <member name="M:Rapidex.TypeInheritenceHelper.CreateCacheKey(System.Type[])">
+            <summary>
+            Creates a cache key from the types array
+            </summary>
+            <param name="types">Array of types</param>
+            <returns>Cache key string</returns>
+        </member>
+        <member name="M:Rapidex.TypeInheritenceHelper.ClearInheritanceCache">
+            <summary>
+            Clears the static inheritance caches. Call this method if type definitions change at runtime.
+            </summary>
+        </member>
+        <member name="T:Rapidex.LockProvider`1">
+            <summary>
+            A LockProvider based upon the SemaphoreSlim class to selectively lock objects, resources or statement blocks 
+            according to given unique IDs in a sync or async way.
+            
+            SAMPLE USAGE - ADDITIONAL INFO:
+            https://github.com/Darkseal/LockProvider/blob/master/LockProvider.cs
+            - https://www.ryadel.com/en/asp-net-core-lock-threads-async-custom-ids-lockprovider/
+            - https://github.com/Darkseal/LockProvider/
+            </summary>
+        </member>
+        <member name="M:Rapidex.LockProvider`1.Wait(`0)">
+            <summary>
+            Blocks the current thread (according to the given ID) until it can enter the LockProvider
+            </summary>
+            <param name="idToLock">the unique ID to perform the lock</param>
+        </member>
+        <member name="M:Rapidex.LockProvider`1.Wait(`0,System.Int32)">
+            <summary>
+            Blocks the current thread (according to the given ID) until it can enter the LockProvider
+            </summary>
+            <param name="idToLock">the unique ID to perform the lock</param>
+            <param name="millisecondsTimeout"></param>
+        </member>
+        <member name="M:Rapidex.LockProvider`1.Wait(`0,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Blocks the current thread (according to the given ID) until it can enter the LockProvider
+            </summary>
+            <param name="idToLock">the unique ID to perform the lock</param>
+            <param name="millisecondsTimeout"></param>
+            <param name="token"></param>
+        </member>
+        <member name="M:Rapidex.LockProvider`1.WaitAsync(`0)">
+            <summary>
+            Asynchronously puts thread to wait (according to the given ID) until it can enter the LockProvider
+            </summary>
+            <param name="idToLock">the unique ID to perform the lock</param>
+        </member>
+        <member name="M:Rapidex.LockProvider`1.WaitAsync(`0,System.Int32)">
+            <summary>
+            Asynchronously puts thread to wait (according to the given ID) until it can enter the LockProvider
+            </summary>
+            <param name="idToLock">the unique ID to perform the lock</param>
+            <param name="millisecondsTimeout"></param>
+        </member>
+        <member name="M:Rapidex.LockProvider`1.WaitAsync(`0,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously puts thread to wait (according to the given ID) until it can enter the LockProvider
+            </summary>
+            <param name="idToLock">the unique ID to perform the lock</param>
+            <param name="millisecondsTimeout"></param>
+            <param name="token"></param>
+        </member>
+        <member name="M:Rapidex.TimeHelper.WithoutMs(System.DateTimeOffset)">
+            <summary>
+            Milisecond bilgisi olmadan 
+            </summary>
+            <param name="time"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.TimeHelper.GetEndTime(System.DateTimeOffset,Rapidex.Period)">
+            <summary>
+            Verilen periyotun son gününü bulur
+            </summary>
+            <param name="time"></param>
+            <param name="period"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Rapidex.UnitTests.ICoreTestFixture.ClearCaches">
+            <summary>
+            Sadece ön bellekler temizlenir
+            </summary>
+        </member>
+        <member name="M:Rapidex.UnitTests.ICoreTestFixture.Reinit">
+            <summary>
+            Tüm test yapısını kaldırır
+            Örn: Veritabanları silinir vs.
+            </summary>
+        </member>
+        <member name="M:Rapidex.UnitTests.ICoreTestFixture.GetFileContentAsString(System.String)">
+            <summary>
+            Test için kullanılan içerik dosyalarını okur ve string olarak döner. 
+            </summary>
+            <param name="relativeFilePath"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

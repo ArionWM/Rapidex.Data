@@ -10,27 +10,11 @@ using System.Threading.Tasks;
 namespace Rapidex.Data;
 public static class SignalHubExtensions
 {
-    //public static async Task<IResult> SendOnNew(this ISignalHub hub, string tenant, IEntity entity)
-    //{
-    //    var em = entity.GetMetadata();
-
-    //    SignalTopic topic = new SignalTopic();
-    //    topic.Tenant = tenant;
-    //    topic.Workspace = entity._Scope.SchemaName;
-    //    topic.Module = em.ModuleName;
-    //    topic.Entity = em.Name;
-    //    topic.EntityId = entity.GetId().ToString();
-    //    topic.Signal = DataReleatedSignalConstants.Signal_New;
-
-    //    EntityReleatedMessageArguments args = new EntityReleatedMessageArguments(topic.Signal, entity);
-    //    return  hub.Publish(topic, args);
-    //}
-
-    ////+/+/common/beforesave/myEntity/+
+    ////+/+/common/beforesave/myEntity/#
 
     public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, SignalTopic topic, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
     {
-        return hub.Subscribe(null, topic, args =>
+        return hub.Subscribe(topic, args =>
         {
             IEntityReleatedMessageArguments eArgs = (IEntityReleatedMessageArguments)args;
             try
@@ -46,37 +30,37 @@ public static class SignalHubExtensions
         });
     }
 
-    public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, [NotNull] string signal, string? databaseOrTenantShortName, string? workspace, string? module, [NotNull] string entity, string? entityId, string? field, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
+    public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, [NotNull] string @event, string? databaseOrTenantShortName, string? workspace, string? module, [NotNull] string entity, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
     {
 
-        SignalTopic topic = SignalTopic.Create(databaseOrTenantShortName ?? SignalTopic.ANY, workspace ?? SignalTopic.ANY, module ?? SignalTopic.ANY, signal, entity, entityId, field);
+        SignalTopic topic = SignalTopic.Create(databaseOrTenantShortName ?? SignalTopic.ANY, workspace ?? SignalTopic.ANY, module ?? SignalTopic.ANY, @event, entity, SignalTopic.ANY_ALL_SECTIONS);
         return hub.SubscribeEntityReleated(topic, handler);
     }
 
-    public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, [NotNull] string signal, string? databaseOrTenantShortName, string? workspace, string? module, [NotNull] IDbEntityMetadata em, string? field, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
+    public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, [NotNull] string @event, string? databaseOrTenantShortName, string? workspace, string? module, [NotNull] IDbEntityMetadata em, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
     {
-        SignalTopic topic = SignalTopic.Create(databaseOrTenantShortName ?? SignalTopic.ANY, workspace ?? SignalTopic.ANY, module ?? SignalTopic.ANY, signal, em.NavigationName, null, field);
+        SignalTopic topic = SignalTopic.Create(databaseOrTenantShortName ?? SignalTopic.ANY, workspace ?? SignalTopic.ANY, module ?? SignalTopic.ANY, @event, em.NavigationName, SignalTopic.ANY_ALL_SECTIONS);
         return hub.SubscribeEntityReleated(topic, handler);
     }
 
-    public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, [NotNull] string signal, [NotNull] IDbEntityMetadata em, string? field, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
+    public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, [NotNull] string @event, [NotNull] IDbEntityMetadata em, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
     {
-        SignalTopic topic = SignalTopic.Create(SignalTopic.ANY, SignalTopic.ANY, SignalTopic.ANY, signal, em.NavigationName, null, field);
+        SignalTopic topic = SignalTopic.Create(SignalTopic.ANY, SignalTopic.ANY, SignalTopic.ANY, @event, em.NavigationName, SignalTopic.ANY_ALL_SECTIONS);
         return hub.SubscribeEntityReleated(topic, handler);
     }
 
-    public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, [NotNull] string signal, string? databaseOrTenantShortName, string? workspace, string? module, [NotNull] IEntity entity, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
+    public static IResult<int> SubscribeEntityReleated(this ISignalHub hub, [NotNull] string @event, [NotNull] IEntity entity, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
     {
         var em = entity.GetMetadata();
         object id = entity.GetId();
 
-        SignalTopic topic = SignalTopic.Create(databaseOrTenantShortName ?? SignalTopic.ANY, workspace ?? SignalTopic.ANY, module ?? SignalTopic.ANY, signal, em.NavigationName, id.ToString(), null);
+        SignalTopic topic = SignalTopic.Create(entity._DbName, entity._SchemaName, SignalTopic.ANY, @event, em.NavigationName, id.ToString(), SignalTopic.ANY_ALL_SECTIONS);
         return hub.SubscribeEntityReleated(topic, handler);
     }
 
     public static ISignalHandlingResult CreateResult(this IEntityReleatedMessageArguments args)
     {
-        var res = new SignalHandlingResult(args.ClientId);
+        var res = new SignalHandlingResult(args.HandlerId);
         return res;
     }
 

@@ -9,11 +9,27 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\Rapidex-Base-Common\Rapidex.Base.Common.Logging.Serilog\Rapidex.Base.Common.Logging.SerilogImp.Core8.csproj" />
+		<ProjectReference Include="..\..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\Rapidex.Base.Common.Logging.SerilogImp.Core8.csproj" />
+		<ProjectReference Include="..\..\src\CommonFunctionLibraries\Rapidex.Base.Common\Rapidex.Base.Common.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Base.Data.Behaviors\Rapidex.Base.Data.Behaviors.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Base.Data.PostgreServer\Rapidex.Base.Data.PostgreServer.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Base.Data.SqlServer\Rapidex.Base.Data.SqlServer.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Base.Data\Rapidex.Base.Data.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="App_Content\MyAppDefinitions\PredefinedContactValues.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="App_Content\MyAppDefinitions\PredefinedItemValues.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="App_Content\MyAppDefinitions\YamlDefinedInvoiceDetailEntity.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="App_Content\MyAppDefinitions\YamlDefinedInvoiceEntity.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

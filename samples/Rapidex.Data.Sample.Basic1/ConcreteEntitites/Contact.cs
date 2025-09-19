@@ -20,7 +20,7 @@ public class Contact : DbConcreteEntityBase
     public int Age { get; set; }
 }
 
-internal class ContractImplementer : IConcreteEntityImplementer<Contact>
+internal class ContactImplementer : IConcreteEntityImplementer<Contact>
 {
     protected static void CalculateContactValues(Contact contact)
     {
@@ -53,7 +53,13 @@ internal class ContractImplementer : IConcreteEntityImplementer<Contact>
             .AddBehavior<HasTags>(true, false)
             .MarkOnlyBaseSchema();
 
-        //See: 
-        Common.SignalHub.SubscribeEntityReleated(DataReleatedSignalConstants.Signal_BeforeSave, ContractImplementer.BeforeSave);
+        //See: SignalHub.md
+        Signal.Hub.SubscribeEntityReleated(
+            DataReleatedSignalConstants.Signal_BeforeSave,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            nameof(Contact),
+            ContactImplementer.BeforeSave);
     }
 }

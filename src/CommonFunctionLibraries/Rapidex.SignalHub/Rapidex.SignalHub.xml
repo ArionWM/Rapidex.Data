@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Rapidex.Signal.Hub</name>
+    </assembly>
+    <members>
+        <member name="P:Rapidex.ISignalArguments.Id">
+            <summary>
+            Unique id of the message. 
+            </summary>
+        </member>
+        <member name="M:Rapidex.ISignalHub.Subscribe(Rapidex.SignalTopic,System.Func{Rapidex.ISignalArguments,Rapidex.ISignalHandlingResult})">
+            <summary>
+                Subscribe to a signal.
+            </summary>
+            <param name="topic">The signal to subscribe to.</param>
+            <param name="handler">The handler to call when the signal is raised.</param>
+        </member>
+        <member name="M:Rapidex.ISignalHub.Unsubscribe(System.Int32)">
+            <summary>
+                Unsubscribe from a signal.
+            </summary>
+            <param name="topic">The signal to unsubscribe from.</param>
+            <param name="handler">The handler to remove.</param>
+        </member>
+        <member name="M:Rapidex.ISignalHub.PublishAsync(Rapidex.SignalTopic,Rapidex.ISignalArguments)">
+            <summary>
+                Raise a signal.
+            </summary>
+            <param name="topic">The signal to raise.</param>
+        </member>
+        <member name="T:Rapidex.SignalTopic">
+            <summary>
+            <![CDATA[<databaseOrTenantShortName>/<workspace>/<module>/<signal>/<signal type specific>]]>
+            </summary>
+        </member>
+    </members>
+</doc>

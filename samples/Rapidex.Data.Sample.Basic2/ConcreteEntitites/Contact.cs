@@ -19,7 +19,7 @@ internal class Contact : DbConcreteEntityBase
     public int Age { get; set; }
 }
 
-internal class ContractImplementer : IConcreteEntityImplementer<Contact>
+internal class ContactImplementer : IConcreteEntityImplementer<Contact>
 {
     protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
     {
@@ -48,6 +48,15 @@ internal class ContractImplementer : IConcreteEntityImplementer<Contact>
             .MarkOnlyBaseSchema();
 
         //See: 
-        Common.SignalHub.SubscribeEntityReleated(DataReleatedSignalConstants.Signal_BeforeSave, ContractImplementer.BeforeSave);
+        Signal.Hub.SubscribeEntityReleated(DataReleatedSignalConstants.Signal_BeforeSave, ContactImplementer.BeforeSave);
+
+        //See: SignalHub.md
+        Signal.Hub.SubscribeEntityReleated(
+            DataReleatedSignalConstants.Signal_BeforeSave,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            nameof(Contact),
+            ContactImplementer.BeforeSave);
     }
 }

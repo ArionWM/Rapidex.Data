@@ -57,7 +57,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
     {
         MetadataImplementerContainer.Setup();
 
-        EntitySignalProviderHelper.CreatePredefinedContent(Rapidex.Common.SignalHub);
+        EntitySignalProviderHelper.CreatePredefinedContent(Rapidex.Signal.Hub);
     }
 
     public void SetupMetadata(IDbScope db)

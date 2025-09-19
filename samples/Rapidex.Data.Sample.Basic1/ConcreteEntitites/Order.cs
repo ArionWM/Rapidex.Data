@@ -35,8 +35,21 @@ internal class OrderImplementer : IConcreteEntityImplementer<Order>
             .AddBehavior<ArchiveEntity>(true, false)
             .AddBehavior<HasTags>(true, false);
 
-        //See: 
-        Common.SignalHub.SubscribeEntityReleated(DataReleatedSignalConstants.Signal_BeforeSave, OrderImplementer.BeforeSave);
+        //See: SignalHub.md
+        Signal.Hub.SubscribeEntityReleated(
+            DataReleatedSignalConstants.Signal_BeforeSave, 
+            SignalTopic.ANY, 
+            SignalTopic.ANY, 
+            SignalTopic.ANY, 
+            nameof(Order),
+            OrderImplementer.BeforeSave);
+
+        //OR
+        Signal.Hub.Subscribe("+/+/+/BeforeSave/Order/#", args =>
+        {
+            IEntityReleatedMessageArguments eArgs = (IEntityReleatedMessageArguments)args;
+            return OrderImplementer.BeforeSave(eArgs);
+        });
 
     }
 }

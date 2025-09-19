@@ -18,7 +18,6 @@ public static class DependencyInjectionExtensions
             binaryFolder = AppContext.BaseDirectory;
 
         Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration);
-
         Rapidex.Common.Assembly.SetupAssemblyServices(services);
         Rapidex.Data.Database.Setup();
     }

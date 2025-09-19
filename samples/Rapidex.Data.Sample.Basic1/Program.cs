@@ -78,6 +78,6 @@ static void StartMyConfiguration()
 
     // Or you can add each metadata manually
     //--------------------------------------------
-    dbScope.Metadata.AddJson("myJsonContent");
+    dbScope.Metadata.AddJson(@"{ ""type"": ""EntityDefinition"", ""version"": 1, ""name"": ""mySampleJsonEntity01"", ""dbPrefix"": ""utest"", ""primaryKey"":""Id"", ""fields"": [ { ""name"": ""Id"", ""type"": ""long"" }, { ""name"": ""Subject"", ""type"": ""string"" }, { ""name"": ""ChangeField"", ""type"": ""int"" }]}");
     dbScope.Metadata.AddIfNotExist<Order>();
 }
