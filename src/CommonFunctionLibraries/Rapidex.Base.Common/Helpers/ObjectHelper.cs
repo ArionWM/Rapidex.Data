@@ -11,7 +11,7 @@ namespace Rapidex
 {
     public static class ObjectHelper
     {
-        private static DateTimeOffset ZeroTime = new DateTimeOffset(1, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        private static DateTimeOffset zeroTime = new DateTimeOffset(1, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
 
         public static bool IsNullOrEmpty([AllowNull] this object? obj)
@@ -38,7 +38,7 @@ namespace Rapidex
                 return time == CommonConstants.NULL_DATE || time == DateTime.MinValue || time == new DateTime(1, 1, 1, 0, 0, 0);
 
             if (obj is DateTimeOffset time2)
-                return time2 == CommonConstants.NULL_DATE || time2 == DateTimeOffset.MinValue || time2 == ZeroTime;
+                return time2 == CommonConstants.NULL_DATE || time2 == DateTimeOffset.MinValue || time2 == zeroTime;
 
             if (obj is IEmptyCheckObject emptyCheckObject)
                 return emptyCheckObject.IsEmpty;
@@ -54,8 +54,6 @@ namespace Rapidex
 
             if (obj is ICollection coll && coll.Count == 0)
                 return true;
-
-
 
             //if(obj is IEnumerable en && en.) Any?
 

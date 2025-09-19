@@ -26,22 +26,9 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
     protected override void Setup(IServiceCollection services)
     {
-        //base.Setup(services);
-
         services.AddRapidexDataLevel();
 
         Rapidex.Common.Assembly.Add(typeof(DbFixture).Assembly);
-
-        //Rapidex.SignalHub.Library mhLib = new Rapidex.SignalHub.Library();
-        //mhLib.SetupServices(services);
-
-        //Rapidex.Data.Library dataModule = new Rapidex.Data.Library();
-        //dataModule.SetupMetadata(services);
-
-        //dataModule.SetupServices(services);
-
-        //Database.Setup(services);
-
     }
 
 

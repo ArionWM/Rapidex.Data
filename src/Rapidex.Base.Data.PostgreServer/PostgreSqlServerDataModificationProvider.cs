@@ -261,7 +261,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
                 object lowerValue = fm.ValueGetterLower(entity, fm.Name);
                 string columnName = PostgreHelper.CheckObjectName(fm.Name);
-                row[columnName] = lowerValue ?? DBNull.Value;
+                row[columnName] = PostgreHelper.CheckValue(lowerValue);
             }
             variableTable.Rows.Add(row);
         }
@@ -381,7 +381,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         int updatedRecordCount = 0;
         updatedRecordCount = table.Rows[0].To<int>(0);
 
-        updatedRecordCount.MustBe(count => count == 1, 
+        updatedRecordCount.MustBe(count => count == 1,
             string.Format("Entity '{0}' can't update. Possible not found with id: {1}", entity, entity.GetId()));
     }
 

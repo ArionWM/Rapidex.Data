@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Rapidex.Data.Configuration;
 
-[Obsolete("//TODO: To Metadata.Data ...")]
+[Obsolete("//TODO: To Metadata.Data ...", true)]
 internal class PredefinedValueProcessor : IPredefinedValueProcessor
 {
 
 
-    Dictionary<IDbEntityMetadata, PredefinedValueItems> _repository = new Dictionary<IDbEntityMetadata, PredefinedValueItems>();
+    Dictionary<IDbEntityMetadata, PredefinedValueItems> repository = new Dictionary<IDbEntityMetadata, PredefinedValueItems>();
 
 
     protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em, IEnumerable<IEntity> entities)
@@ -36,7 +36,7 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
 
     public async Task Apply(IDbSchemaScope scope)
     {
-        foreach (var em in _repository.Keys)
+        foreach (var em in this.repository.Keys)
         {
             await Apply(scope, em);
         }
@@ -78,7 +78,7 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
 
     public void Clear()
     {
-        this._repository.Clear();
+        this.repository.Clear();
     }
 
     public void Clear(IDbEntityMetadata em)
@@ -93,7 +93,7 @@ internal class PredefinedValueProcessor : IPredefinedValueProcessor
 
     public PredefinedValueItems Get(IDbEntityMetadata em)
     {
-        return this._repository.Get(em);
+        return this.repository.Get(em);
     }
 
     public async Task Apply(IDbSchemaScope scope, IEnumerable<IEntity> unregisteredData, bool @override)

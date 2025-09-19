@@ -40,7 +40,6 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<FilterTextParser, FilterTextParser>();
 
         services.AddTransientForProd<IEntitySerializationDataCreator, EntitySerializationDataCreator>();
-        services.AddTransientForProd<IPredefinedValueProcessor, PredefinedValueProcessor>();
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
         

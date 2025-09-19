@@ -22,7 +22,7 @@ namespace Rapidex.Data;
 
 
 
-[Obsolete("//TODO: To Metadata.Data ...")]
+[Obsolete("//TODO: To Metadata.Data ...", true)]
 public interface IPredefinedValueProcessor
 {
     void Register(IDbEntityMetadata em, bool @override, params ObjDictionary[] entityValues);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.Metadata.Implementers;
@@ -33,6 +34,9 @@ internal class EntityDataItemImplementer : Dictionary<string, object>, IImplemen
                 continue;
 
             object value = field.Value;
+            if (value is JsonElement je)
+                value = je.GetValueAsOriginalType();
+
             entity.SetValue(fm.Name, value);
         }
         ures.Added(entity);

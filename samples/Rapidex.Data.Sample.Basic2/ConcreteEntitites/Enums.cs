@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.Sample.App2.ConcreteEntitites;
-public enum ContactType
+public enum ContactTypeSample2
 {
-    Personal,
-    Business,
-    Other
+    Personal = 1,
+    Business = 2,
+    Other = 10
 }

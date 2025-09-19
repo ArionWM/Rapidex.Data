@@ -8,7 +8,7 @@ namespace Rapidex.Data.Sample.App1.ConcreteEntities;
 
 public class Contact : DbConcreteEntityBase
 {
-    public Enumeration<ContactType> Type { get; set; }
+    public Enumeration<ContactTypeSample> Type { get; set; }
 
     public string FullName { get; set; }
     public string FirstName { get; set; }
@@ -24,7 +24,7 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
 {
     protected static void CalculateContactValues(Contact contact)
     {
-        if (contact.BirthDate.HasValue)
+        if (contact.BirthDate.IsNOTNullOrEmpty())
         {
             DateTimeOffset now = DateTimeOffset.Now;
             int age = now.Year - contact.BirthDate.Value.Year;

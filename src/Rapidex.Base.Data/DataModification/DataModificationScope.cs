@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.DataModification;
 internal class DataModificationScope : DataModificationReadScopeBase, IDbDataModificationScope
 {
-    private readonly int _debugTracker;
+    private readonly int debugTracker;
     public bool IsFinalized { get; protected set; } = false;
     public IDbDataModificationStaticHost Parent { get; }
     public IDbInternalTransactionScope CurrentTransaction { get; protected set; }
@@ -18,7 +18,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
     public DataModificationScope(IDbDataModificationStaticHost parentHost) : base(parentHost.ParentSchema)
     {
         this.Parent = parentHost;
-        this._debugTracker = RandomHelper.Random(1000000);
+        this.debugTracker = RandomHelper.Random(1000000);
     }
 
     protected override void Initialize()

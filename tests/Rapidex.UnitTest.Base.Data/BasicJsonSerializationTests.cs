@@ -115,7 +115,7 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
 		ent01.Name = "ent01";
 		ent01.CreditLimit1 = 1234;
 		ent01.Description = "desc 01";
-		ent01.ContactType = ContactType.Corporate;
+		ent01.ContactType = ContactTypeTest.Corporate;
 		ent01.Save();
 
 		string json01 = ent01.ToJson();
@@ -125,7 +125,7 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
 		Assert.NotNull(ent);
 		Assert.Equal("ent01", ent.Name);
 		Assert.Equal(1234, ent.CreditLimit1.Value);
-		Assert.Equal(ContactType.Corporate, (ContactType)ent.ContactType.Value);
+		Assert.Equal(ContactTypeTest.Corporate, (ContactTypeTest)ent.ContactType.Value);
 	}
 
 	[Fact]
@@ -143,7 +143,7 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
 		//ent01.Name = "ent01";
 		//ent01.CreditLimit1 = 1234;
 		//ent01.Description = "desc 01";
-		//ent01.ContactType = ContactType.Corporate;
+		//ent01.ContactType = ContactTypeTest.Corporate;
 		//ent01.Save();
 
 		string json =
@@ -183,7 +183,7 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
 		Assert.NotNull(ent);
 		Assert.Equal("ent01", ent.Name);
 		Assert.Equal(1234, ent.CreditLimit1.Value);
-		Assert.Equal(ContactType.Department, (ContactType)ent.ContactType.Value);
+		Assert.Equal(ContactTypeTest.Department, (ContactTypeTest)ent.ContactType.Value);
 
 	}
 

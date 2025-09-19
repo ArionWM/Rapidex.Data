@@ -7,11 +7,11 @@ namespace Rapidex.Data
 {
     public class DbVariable : DbVariableType
     {
-        object _value;
+        object value;
 
         public string FieldName { get; set; }
         public string ParameterName { get; set; }
-        public object Value { get { return _value ?? DBNull.Value; } set { _value = value; } }
+        public object Value { get { return this.value ?? DBNull.Value; } set { this.value = value; } }
 
 
         public DbVariable()

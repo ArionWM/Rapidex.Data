@@ -129,11 +129,11 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         using var work = db.BeginWork();
 
         ConcreteEntity01 ent01 = work.New<ConcreteEntity01>();
-        ent01.ContactType = ContactType.Corporate;
+        ent01.ContactType = ContactTypeTest.Corporate;
         ent01.Save();
 
         ConcreteEntity01 ent02 = work.New<ConcreteEntity01>();
-        ent02["ContactType"] = ContactType.Corporate; //Bu durumda farklı bir atama yapısı çalışıyor
+        ent02["ContactTypeTest"] = ContactTypeTest.Corporate; //Bu durumda farklı bir atama yapısı çalışıyor
         ent02.Save();
         work.CommitChanges();
 
@@ -148,10 +148,10 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         db.Metadata.ReAdd<ConcreteEntity01>();
 
         ConcreteEntity01 ent01_check = db.Find<ConcreteEntity01>(id01);
-        Assert.Equal(ContactType.Corporate, (ContactType)ent01_check.ContactType);
+        Assert.Equal(ContactTypeTest.Corporate, (ContactTypeTest)ent01_check.ContactType);
 
         ConcreteEntity01 ent02_check = db.Find<ConcreteEntity01>(id02);
-        Assert.Equal(ContactType.Corporate, (ContactType)ent02_check.ContactType);
+        Assert.Equal(ContactTypeTest.Corporate, (ContactTypeTest)ent02_check.ContactType);
 
     }
 
@@ -162,16 +162,16 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         db.ReAddReCreate<ConcreteEntity01>();
         //Database.Metadata.AddIfNotExist<BlobRecord>();
-        db.Metadata.Remove("ContactType");
+        db.Metadata.Remove("ContactTypeTest");
 
-        var emCT = db.Metadata.AddEnum<ContactType>();
-        db.Structure.DropEntity("ContactType");
+        var emCT = db.Metadata.AddEnum<ContactTypeTest>();
+        db.Structure.DropEntity("ContactTypeTest");
         db.Structure.ApplyEntityStructure(emCT);
         db.Metadata.Data.Apply(db);
 
         using var work = db.BeginWork();
 
-        var lresult = db.GetQuery("ContactType").Asc(CommonConstants.FIELD_ID).Load();
+        var lresult = db.GetQuery("ContactTypeTest").Asc(CommonConstants.FIELD_ID).Load();
         Assert.Equal(5, lresult.ItemCount);
 
         IEntity ct01 = lresult.First();

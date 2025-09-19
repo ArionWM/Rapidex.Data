@@ -31,18 +31,19 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
 
     protected ObjDictionary[] GetValueEntities(IDbEntityMetadata em, Type enumType, Action<Enum, ObjDictionary> callb)
     {
-        var enumValues = Enum.GetValues(enumType);
+        var enumValues = Enum.GetValuesAsUnderlyingType(enumType);
         List<ObjDictionary> result = new List<ObjDictionary>();
-        foreach (Enum eval in enumValues)
+        foreach (int ival in enumValues)
         {
-            int i = Convert.ToInt32(eval);
-            if (i < 1)
+            //int i = Convert.ToInt32(eval);
+            if (ival < 1)
                 throw new InvalidOperationException($"Enumeration '{em.Name}' invalid. Minimum enum value should bigger than 0. Minimum enumeration value is 1. Sample: enum ABC {{ Start = 1; Next = 2; }}");
 
-            string name = Enum.GetName(enumType, i);
+            string name = Enum.GetName(enumType, ival);
+            Enum enumVal = (Enum)Enum.ToObject(enumType, ival);
 
-            ObjDictionary entValues = GetEnumValueEntity(em, i, name, null, null, true, true, null);
-            callb?.Invoke(eval, entValues);
+            ObjDictionary entValues = this.GetEnumValueEntity(em, ival, name, null, null, true, true, null);
+            callb?.Invoke(enumVal, entValues);
             result.Add(entValues);
         }
 

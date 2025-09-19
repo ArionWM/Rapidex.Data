@@ -27,5 +27,9 @@ public static class DependencyInjectionExtensions
         Rapidex.Common.Start(sp);
         Rapidex.Data.Database.Start(sp);
         Rapidex.Common.Assembly.StartAssemblies(sp);
+
+        var dbScope = Database.Dbs.AddMainDbIfNotExists();
+        dbScope.Metadata.ScanConcreteDefinitions();
+        dbScope.Structure.ApplyAllStructure();
     }
 }

@@ -32,7 +32,7 @@ public static class ImplementerExtender
         return cmi.Add(typeof(E), module, prefix);
     }
 
-    public static IDbEntityMetadata Add(this IDbMetadataContainer mContainer, Type concreteType, string module = null, string prefix = null) 
+    public static IDbEntityMetadata Add(this IDbMetadataContainer mContainer, Type concreteType, string module = null, string prefix = null)
     {
         IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
         IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
@@ -46,7 +46,7 @@ public static class ImplementerExtender
         var _em = mContainer.Get(concreteType.Name);
         if (_em == null || _em.IsPremature)
         {
-           _em = mContainer.Add(concreteType, module, prefix);
+            _em = mContainer.Add(concreteType, module, prefix);
 
         }
         return _em;
@@ -114,7 +114,7 @@ public static class ImplementerExtender
 
         IMetadataImplementHost ihost = Rapidex.Common.ServiceProvider.GetRapidexService<IMetadataImplementHost>();
         ihost.SetParent(mContainer);
-        
+
         var ures = ihost.AddYaml(yaml);
 
         var ems = ures.GetModifieds().Where(x => x is IDbEntityMetadata).Cast<IDbEntityMetadata>();
@@ -143,7 +143,7 @@ public static class ImplementerExtender
 
         List<IDbEntityMetadata> entities = new List<IDbEntityMetadata>();
 
-        var files = Directory.GetFiles(folderPath, "*.json|*.yaml|*.yml", SearchOption.AllDirectories);
+        var files = FileHelper.GetFiles(folderPath, true, ".json", ".yaml", ".yml");
         foreach (var file in files)
         {
             try

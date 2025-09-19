@@ -9,10 +9,10 @@ internal class FieldMetadataFactory : IFieldMetadataFactory
 {
     bool started = false;
 
-    
+
     IDbMetadataContainer metadataContainer;
 
-    
+
 
     public FieldMetadataFactory()
     {
@@ -29,14 +29,18 @@ internal class FieldMetadataFactory : IFieldMetadataFactory
         metadataContainer = parent.NotNull();
     }
 
-    
- 
+
+
 
     public IDbFieldMetadata Create(IDbEntityMetadata em, Type type, string name, ObjDictionary values)
     {
         this.metadataContainer.NotNull();
 
         values = values ?? new ObjDictionary();
+
+        var nUnderlyingType = Nullable.GetUnderlyingType(type);
+        if (nUnderlyingType is not null)
+            type = nUnderlyingType;
 
         DbFieldMetadata fm = new DbFieldMetadata();
         fm.ParentMetadata = em;

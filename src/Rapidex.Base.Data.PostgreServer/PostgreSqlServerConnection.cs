@@ -80,7 +80,7 @@ internal class PostgreSqlServerConnection : IDisposable
         {
             DbVariable col = parameters[i];
             var parameter = command.Parameters.Add(col.ParameterName, PostgreHelper.Convert(col.DbType));
-            parameter.Value = col.Value ?? DBNull.Value;
+            parameter.Value = PostgreHelper.CheckValue(col.Value);
         }
 
         return command;

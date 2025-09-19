@@ -137,7 +137,7 @@ internal static class PostgreHelper
         return GetDataTypeName(dbVariableType);
     }
 
-    private static object CheckValue(object value)
+    internal static object CheckValue(object value)
     {
         if (value == null)
             return DBNull.Value;
