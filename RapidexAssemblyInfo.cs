@@ -38,5 +38,5 @@ public static class RapidexAssembly
     //WARN: Yapısında değişiklik yapmayın. TeamCity sürüm numarasını bu satırdan alıyor:
     //^(?<start>\s* public const string VERSION \= \")(?<ver>(([0-9\*])+\.){3})(?<build>([0-9\*])+)(?<end>\"\;)
     //${start}${ver}\%build.number%${end}
-    public const string VERSION = "0.0.1.0001";
+    public const string VERSION = "0.0.2.0001";
 }
