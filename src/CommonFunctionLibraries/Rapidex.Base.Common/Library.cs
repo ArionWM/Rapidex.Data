@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.Json;
 
 [assembly: InternalsVisibleTo("Rapidex.Data")]
-[assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Data")]
+[assembly: InternalsVisibleTo("Rapidex.UnitTest.Data")]
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Application")]
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]

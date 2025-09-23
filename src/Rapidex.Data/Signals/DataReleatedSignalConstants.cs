@@ -8,14 +8,14 @@ namespace Rapidex.Data;
 public class DataReleatedSignalConstants
 {
     //Entity related
-    public const string Signal_New = "New";
-    public const string Signal_Validate = "Validate";
-    public const string Signal_BeforeSave = "BeforeSave";
-    public const string Signal_AfterSave = "AfterSave";
-    public const string Signal_AfterCommit = "AfterCommit";
-    public const string Signal_BeforeDelete = "BeforeDelete";
-    public const string Signal_AfterDelete = "AfterDelete";
-    public const string Signal_Editing = "Editing";
-    public const string Signal_FileAttached = "FileAttached";
-    public const string Signal_NoteAttached = "NoteAttached";
+    public const string SIGNAL_NEW = "New";
+    public const string SIGNAL_VALIDATE = "Validate";
+    public const string SIGNAL_BEFORESAVE = "BeforeSave";
+    public const string SIGNAL_AFTERSAVE = "AfterSave";
+    public const string SIGNAL_AFTERCOMMIT = "AfterCommit";
+    public const string SIGNAL_BEFOREDELETE = "BeforeDelete";
+    public const string SIGNAL_AFTERDELETE = "AfterDelete";
+    public const string SIGNAL_EDITING = "Editing";
+    public const string SIGNAL_FILEATTACHED = "FileAttached";
+    public const string SIGNAL_NOTEATTACHED = "NoteAttached";
 }

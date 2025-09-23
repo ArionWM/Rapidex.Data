@@ -2,7 +2,7 @@
 
 ## What is Rapidex.Data?
 
-Rapidex.Data is an Object Relational Mapping (ORM) library with a focus on *flexibility* and *ease of use*. 
+Rapidex.Data is an Object Relational Mapping (ORM) framework with a focus on *flexibility* and *ease of use*. 
 
 It allows to entity definitions with concrete (classes), JSON, YAML files or with code in runtime. Also entity definitions (metadata) can be change and apply in runtime.
 
@@ -62,9 +62,9 @@ You can download and run sample projects from the following links:
 - [Querying Data](/docs/QueryingData.md)
   - [Filtering](/docs/Filtering.md)
 
-- [Updating Data](/docs/UpdatingData.md)]
+- [Updating Data](/docs/UpdatingData.md)
 
-- [Library Declaration] (/docs/LibraryDeclaration.md)
+- [Library Declaration](/docs/LibraryDeclaration.md)
 
 ### Advanced Topics
 

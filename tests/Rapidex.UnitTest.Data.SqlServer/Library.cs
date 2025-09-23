@@ -21,7 +21,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
-[assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Data")]
+[assembly: InternalsVisibleTo("Rapidex.UnitTest.Data")]
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Application")]
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]

@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.SerializationAndMapping.Dtos;
+namespace Rapidex.Data.Transform;
 public class EntityDataDtoCollection<T> : IReadOnlyCollection<T> where T : EntityDataDto
 {
     private readonly IReadOnlyCollection<T> data;
@@ -16,8 +17,13 @@ public class EntityDataDtoCollection<T> : IReadOnlyCollection<T> where T : Entit
         this.data = data.NotNull();
     }
 
+    public IEnumerator<T> GetEnumerator()
+    {
+        return this.data.GetEnumerator();
+    }
 
-
-    public IEnumerator<T> GetEnumerator() => data.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => data.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return ((IEnumerable)this.data).GetEnumerator();
+    }
 }

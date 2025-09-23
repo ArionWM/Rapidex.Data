@@ -1,4 +1,4 @@
-﻿using Rapidex.Data.SerializationAndMapping.Dtos;
+﻿
 using Rapidex.UnitTest.Data.TestContent;
 using System;
 using System.Collections.Generic;
@@ -64,27 +64,27 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
 		serializationOptions.IncludeTypeName = true;
 
 		//All fields requested
-		EntityDataDtoBase dto01 = dataCreator.ConvertToEntityData(ent04, serializationOptions);
+		EntityDataDto dto01 = dataCreator.ConvertToEntityData(ent04, serializationOptions);
 		Assert.NotNull(dto01);
 		Assert.Equal("ConcreteEntity04", dto01.Entity);
 
 
 		object detailData = dto01["Details01"];
 		Assert.NotNull(detailData);
-		Assert.IsAssignableFrom<IEnumerable<EntityDataDtoBase>>(detailData);
+		Assert.IsAssignableFrom<IEnumerable<EntityDataDto>>(detailData);
 
-		IEnumerable<EntityDataDtoBase> _detailData = (IEnumerable<EntityDataDtoBase>)detailData;
+		IEnumerable<EntityDataDto> _detailData = (IEnumerable<EntityDataDto>)detailData;
 		Assert.Equal(2, _detailData.Count());
 
-		EntityDataDtoBase detail01 = _detailData.First();
-		EntityDataDtoBase detail02 = _detailData.Last();
+		EntityDataDto detail01 = _detailData.First();
+		EntityDataDto detail02 = _detailData.Last();
 
 		Assert.Equal("ent03_01", detail01["Name"]);
 		Assert.Equal("ent03_02", detail02["Name"]);
 
 
 		//Only Number requested
-		EntityDataDtoBase dto02 = dataCreator.ConvertToEntityData(ent04, serializationOptions, "number"); //<- case insensitive
+		EntityDataDto dto02 = dataCreator.ConvertToEntityData(ent04, serializationOptions, "number"); //<- case insensitive
 		Assert.NotNull(dto02);
 
 		Assert.Equal(6, dto02.Keys.Count());

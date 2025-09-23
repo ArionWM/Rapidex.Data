@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Rapidex.Data.Sample.App1.Services;
-using Rapidex.Data.SerializationAndMapping.Dtos;
+using Rapidex.Data.Transform;
 using System.ComponentModel.DataAnnotations;
 
 namespace Rapidex.Data.Sample.App1.Controllers;
@@ -76,7 +76,7 @@ public class DataController : ControllerBase
     [HttpPost("contacts")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public IActionResult UpdateContact([FromBody] EntityDataDtoBase request)
+    public IActionResult UpdateContact([FromBody] EntityDataDto request)
     {
         if (!this.ModelState.IsValid)
             return this.BadRequest(this.ModelState);

@@ -27,7 +27,7 @@
 
 
 	<ItemGroup>
-    <ProjectReference Include="..\Rapidex.UnitTest.Base.Data\Rapidex.UnitTest.Base.Data.csproj" />
+    <ProjectReference Include="..\Rapidex.UnitTest.Data\Rapidex.UnitTest.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

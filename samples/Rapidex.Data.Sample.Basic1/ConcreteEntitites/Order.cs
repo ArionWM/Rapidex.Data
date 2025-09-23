@@ -10,6 +10,7 @@ public class Order : DbConcreteEntityBase
     public DateTimeOffset OrderDate { get; set; }
     public Reference<Contact> Customer { get; set; }
     public decimal PriceSum { get; set; }
+    public Text Description { get; set; }
 
     /// <summary>
     /// Add a one-to-many relation to OrderLine entity.
@@ -23,10 +24,11 @@ internal class OrderImplementer : IConcreteEntityImplementer<Order>
     protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
     {
         Order order = args.Entity.As<Order>();
-        if (order.OrderDate == default)
+
+        if (order.OrderDate.IsNullOrEmpty())
             order.OrderDate = DateTimeOffset.Now;
 
-        return args.CreateResult();
+        return args.CreateHandlingResult();
     }
 
     public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
@@ -37,10 +39,10 @@ internal class OrderImplementer : IConcreteEntityImplementer<Order>
 
         //See: SignalHub.md
         Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.Signal_BeforeSave, 
-            SignalTopic.ANY, 
-            SignalTopic.ANY, 
-            SignalTopic.ANY, 
+            DataReleatedSignalConstants.SIGNAL_BEFORESAVE,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
             nameof(Order),
             OrderImplementer.BeforeSave);
 

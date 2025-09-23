@@ -12,12 +12,12 @@ internal static class EntitySignalProviderHelper
 {
     public static void CreatePredefinedContent(ISignalHub hub)
     {
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.Signal_New, "On New", "Entity", true));
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.Signal_BeforeSave, "Before Save", "Entity", true));
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.Signal_AfterSave, "After Save", "Entity", false));
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.Signal_AfterCommit, "After Commit", "Entity", false));
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.Signal_BeforeDelete, "Before Delete", "Entity", true));
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.Signal_AfterDelete, "After Delete", "Entity", false));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_NEW, "On New", "Entity", true));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_BEFORESAVE, "Before Save", "Entity", true));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERSAVE, "After Save", "Entity", false));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERCOMMIT, "After Commit", "Entity", false));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_BEFOREDELETE, "Before Delete", "Entity", true));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERDELETE, "After Delete", "Entity", false));
 
         //hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.Signal_WorkspaceCreated, "Workspace Created", "System", false));
         //hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.Signal_WorkspaceDeleted, "Workspace Deleted", "System", false));
@@ -38,7 +38,7 @@ internal static class EntitySignalProviderHelper
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
-            Event = DataReleatedSignalConstants.Signal_New
+            Event = DataReleatedSignalConstants.SIGNAL_NEW
         };
 
         EntityReleatedMessageArguments inputArg = new EntityReleatedMessageArguments(topic.Event, entity);
@@ -58,7 +58,7 @@ internal static class EntitySignalProviderHelper
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
-            Event = DataReleatedSignalConstants.Signal_BeforeSave
+            Event = DataReleatedSignalConstants.SIGNAL_BEFORESAVE
         };
 
         EntityReleatedMessageArguments inputArg = new EntityReleatedMessageArguments(topic.Event, entity);
@@ -78,7 +78,7 @@ internal static class EntitySignalProviderHelper
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
-            Event = DataReleatedSignalConstants.Signal_AfterSave
+            Event = DataReleatedSignalConstants.SIGNAL_AFTERSAVE
         };
         Rapidex.Signal.Hub.PublishAsync(topic, new EntityReleatedMessageArguments(topic.Event, entity));
     }
@@ -93,7 +93,7 @@ internal static class EntitySignalProviderHelper
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
-            Event = DataReleatedSignalConstants.Signal_AfterCommit
+            Event = DataReleatedSignalConstants.SIGNAL_AFTERCOMMIT
         };
         Rapidex.Signal.Hub.PublishAsync(topic, new EntityReleatedMessageArguments(topic.Event, entity));
     }
@@ -108,7 +108,7 @@ internal static class EntitySignalProviderHelper
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
-            Event = DataReleatedSignalConstants.Signal_BeforeDelete
+            Event = DataReleatedSignalConstants.SIGNAL_BEFOREDELETE
         };
 
         EntityReleatedMessageArguments inputArg = new EntityReleatedMessageArguments(topic.Event, entity);
@@ -129,7 +129,7 @@ internal static class EntitySignalProviderHelper
             Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
             Entity = em.NavigationName,
             EntityId = entity.GetId().ToString(),
-            Event = DataReleatedSignalConstants.Signal_AfterDelete
+            Event = DataReleatedSignalConstants.SIGNAL_AFTERDELETE
         };
         Rapidex.Signal.Hub.PublishAsync(topic, new EntityReleatedMessageArguments(topic.Event, entity));
     }

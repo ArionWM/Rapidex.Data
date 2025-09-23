@@ -43,7 +43,7 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
     {
         Contact contact = args.Entity.As<Contact>();
         CalculateContactValues(contact);
-        return args.CreateResult();
+        return args.CreateHandlingResult();
     }
 
     public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
@@ -55,7 +55,7 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
 
         //See: SignalHub.md
         Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.Signal_BeforeSave,
+            DataReleatedSignalConstants.SIGNAL_BEFORESAVE,
             SignalTopic.ANY,
             SignalTopic.ANY,
             SignalTopic.ANY,

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace Rapidex.Data.SerializationAndMapping.Dtos;
+namespace Rapidex.Data.Transform;
 
 public enum EntityUpdateDtoType
 {

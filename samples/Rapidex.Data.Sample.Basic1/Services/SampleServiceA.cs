@@ -1,5 +1,5 @@
 ﻿using Rapidex.Data.Sample.App1.ConcreteEntities;
-using Rapidex.Data.SerializationAndMapping.Dtos;
+using Rapidex.Data.Transform;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +40,7 @@ public class SampleServiceA
         return contact;
     }
 
-    internal Contact UpdateContact(IDbSchemaScope db, EntityDataDtoBase entityValues)
+    internal Contact UpdateContact(IDbSchemaScope db, EntityDataDto entityValues)
     {
         using var work = db.BeginWork();
 

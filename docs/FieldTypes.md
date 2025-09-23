@@ -27,7 +27,6 @@
 - [relationOne2N](#relationone2n)  
 - [relationN2N](#relationn2n)  
 - [enumeration](#enumeration)  
-- 
 - [url](#url)  
 - [date](#date)  
 - [time](#time)  
@@ -37,7 +36,7 @@
 
 # Field Types
 
-A **field** can represent a simple column in a database or a more complex structure, such as **one-to-many (1:N)** or **many-to-many (N:N)** relationships.
+A *field* can represent a simple column in a database or a more complex structure, such as **one-to-many (1:N)** or **many-to-many (N:N)** relationships.
 
 This approach:
 
@@ -182,7 +181,7 @@ _Not yet implemented._
 ## currency
 
 See: `Currency.cs`  
-A currency field. This type automatically adds an extra text field named `<FieldName>Currency` to store the ISO 4217 currency code.
+A currency field. This type automatically adds an extra text field named `<FieldName>Currency` (Eq: For `Price` field, it will add `PriceCurrency` type field) to store the ISO 4217 currency code.
 
 | | |
 |---|---|
@@ -285,6 +284,7 @@ Represents a start and end date/time pair.
 
 **Note:**  
 The `datetimeStartEnd` field is virtual and relies on two underlying fields: `<FieldName>Start` and `<FieldName>End`.
+Eg: For `EventPeriod` field, it will add `EventPeriodStart` and `EventPeriodEnd` fields with type `datetime`.
 
 ---
 
@@ -306,7 +306,7 @@ A binary blob field for images.
 - Value is stored in a `BlobRecord` entry and not loaded directly with the entity.
 - Use `GetContent()` to retrieve the content.
 
-Example API response:
+Sample API response:
 
 ```json
 "FieldName": {
@@ -315,6 +315,8 @@ Example API response:
    "id": "<schemaName>.<OwnerEntityName>.<OwnerEntityId>.<FieldName>"
 }
 ```
+
+> See: abc
 
 ---
 
@@ -372,6 +374,8 @@ An unlimited-length text field (blob) with support for different content types (
 | `html` | HTML content |
 | `markdown` | Markdown content |
 
+> See: abc
+
 ---
 
 ## json
@@ -415,42 +419,6 @@ vector:
 
 ---
 
-## richText
-
-(Deprecated, will be merged into `text`.)
-
-An unlimited-length text field (blob) for storing **rich text (HTML)** content.
-
-| | |
-|---|---|
-| C# Type | RichText |
-| JSON Type | richText |
-| SQL Type | nvarchar(max) |
-| SQLite Type | --- |
-| PostgreSQL Type | --- |
-| Lazy Loading | No |
-| Extra Field | No |
-
----
-
-## markdown
-
-(Deprecated, will be merged into `text`.)
-
-An unlimited-length text field (blob) for storing **Markdown** content.
-
-| | |
-|---|---|
-| C# Type | Markdown |
-| JSON Type | markdown |
-| SQL Type | nvarchar(max) |
-| SQLite Type | --- |
-| PostgreSQL Type | --- |
-| Lazy Loading | No |
-| Extra Field | No |
-
----
-
 ## password
 
 A field for **encrypted data** with two-way encryption (encrypt/decrypt).
@@ -471,11 +439,13 @@ A field for **encrypted data** with two-way encryption (encrypt/decrypt).
 - During JSON serialization, the actual password is hidden and replaced with `*****`.  
 - Encryption uses the schema name and entity ID. Copying encrypted data to another schema/entity will make it **non-decryptable**.
 
+> See: abc
+
 ---
 
 ## oneWayPassword
 
-A field for **one-way encrypted** (non-reversible) passwords.  
+A field for **one-way encrypted** (non-reversible) passwords (hash).  
 Use `OneWayPassword.IsEqual()` to compare input values.
 
 | | |
@@ -491,6 +461,8 @@ Use `OneWayPassword.IsEqual()` to compare input values.
 
 - Stores irreversible encrypted data.  
 - JSON serialization masks the content as `*****`.  
+
+> See: abc
 
 ---
 
@@ -519,6 +491,8 @@ A `Parent<ParentEntityName>` field is added to the detail entity (e.g., `ParentI
 ### Data Update
 
 #### Add/Remove Relation
+
+> See: abc
 
 ```json
 {
@@ -573,6 +547,8 @@ Represents a **Many-to-Many** relationship.
 | PostgreSQL Type | --- |
 | Lazy Loading | Yes |
 
+> See: abc
+
 ### Lazy Loading
 
 - For concrete types: Implicit conversion to `OtherEntity[]`. Use `GetContent()` for lazy fetch.
@@ -585,7 +561,6 @@ A linking table will be created for N2N relationships (details pending).
 ---
 
 ## enumeration
-
 
 | | |
 |---|---|

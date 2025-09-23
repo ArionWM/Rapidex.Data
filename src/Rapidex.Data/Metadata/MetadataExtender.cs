@@ -84,21 +84,13 @@ public static class MetadataExtender
         return mman.AddIfNotExist<T>();
     }
 
-    //public static void Remove(this IDbMetadataContainer emman, string name)
-    //{
-    //    IDbEntityMetadata em = emman.Get(name);
-    //    if (em != null)
-    //        emman.Remove(em.Name);
-    //}
-
-
     public static void Remove<T>(this IDbMetadataContainer emman) where T : IConcreteEntity
     {
         if (emman.Get<T>() != null)
             emman.Remove(typeof(T).Name);
     }
 
-
+    //TODO: Move to application level libraries
     public static IDbEntityMetadata MarkShowInSettings(this IDbEntityMetadata em, bool onlyDeveloperMode) //TODO: Ui level'a taşınacak ..
     {
         if (onlyDeveloperMode)
@@ -113,12 +105,14 @@ public static class MetadataExtender
         return em;
     }
 
+    //TODO: Move to application level libraries
     public static IDbEntityMetadata MarkShowInPreview(this IDbEntityMetadata em) //TODO: Ui level'a taşınacak ..
     {
         em.Tags.Add("ShowInPreview");
         return em;
     }
 
+    //TODO: Move to application level libraries
     public static IDbEntityMetadata MarkShowAllFields(this IDbEntityMetadata em) //TODO: Ui level'a taşınacak ..
     {
         em.Tags.Add("ShowAllFields");

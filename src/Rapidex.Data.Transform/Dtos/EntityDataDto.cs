@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.SerializationAndMapping.Dtos;
+namespace Rapidex.Data.Transform;
 
 [JsonDerivedBase]
 public class EntityDataDto : IJsonOnDeserialized

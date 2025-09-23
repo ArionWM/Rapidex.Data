@@ -58,7 +58,7 @@ public static class SignalHubExtensions
         return hub.SubscribeEntityReleated(topic, handler);
     }
 
-    public static ISignalHandlingResult CreateResult(this IEntityReleatedMessageArguments args)
+    public static ISignalHandlingResult CreateHandlingResult(this IEntityReleatedMessageArguments args)
     {
         var res = new SignalHandlingResult(args.HandlerId);
         return res;

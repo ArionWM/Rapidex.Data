@@ -1,5 +1,5 @@
 ﻿using Rapidex.Data.Helpers;
-using Rapidex.Data.SerializationAndMapping.Dtos;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -534,15 +534,6 @@ public class DbEntityIdEqualityComparerById : IEqualityComparer<DbEntityId>
 
 
 
-public interface IEntitySerializationDataCreator
-{
-    object ConvertToFieldData(IEntity entity, IDbFieldMetadata fm);
-    T ConvertToEntityData<T>(IEntity entity, EntitySerializationOptions options, params string[] fields) where T : EntityDataDto, new();
-    EntityDataDto ConvertToEntityData(IEntity entity, EntitySerializationOptions options, params string[] fields);
-
-    EntityDataDtoCollection<T> ConvertToListData<T>(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields) where T : EntityDataDto, new();
-    EntityDataDtoCollection<EntityDataDto> ConvertToListData(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields);
-}
 
 public interface IDbEntityLoader
 {

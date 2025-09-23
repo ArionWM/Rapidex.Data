@@ -13,9 +13,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 
-[assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Data")]
-[assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Data.SqlServer")]
-[assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Data.PostgreServer")]
+[assembly: InternalsVisibleTo("Rapidex.UnitTest.Data")]
+[assembly: InternalsVisibleTo("Rapidex.UnitTest.Data.SqlServer")]
+[assembly: InternalsVisibleTo("Rapidex.UnitTest.Data.PostgreServer")]
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Application")]
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
@@ -39,7 +39,6 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<IDbCriteriaParser, FilterTextParser>();
         services.AddTransientForProd<FilterTextParser, FilterTextParser>();
 
-        services.AddTransientForProd<IEntitySerializationDataCreator, EntitySerializationDataCreator>();
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
         

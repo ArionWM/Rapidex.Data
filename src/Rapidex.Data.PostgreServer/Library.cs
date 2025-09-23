@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-[assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Data")]
-[assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Data.PostgreServer")]
+[assembly: InternalsVisibleTo("Rapidex.UnitTest.Data")]
+[assembly: InternalsVisibleTo("Rapidex.UnitTest.Data.PostgreServer")]
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Application")]
 
 namespace Rapidex.Data.PostgreServer;

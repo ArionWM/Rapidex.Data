@@ -16,6 +16,7 @@
 		<ProjectReference Include="..\..\src\Rapidex.Data.Behaviors\Rapidex.Data.Behaviors.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Data.PostgreServer\Rapidex.Data.PostgreServer.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Data.SqlServer\Rapidex.Data.SqlServer.csproj" />
+		<ProjectReference Include="..\..\src\Rapidex.Data.Transform\Rapidex.Data.Transform.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Data\Rapidex.Data.csproj" />
 	</ItemGroup>
 

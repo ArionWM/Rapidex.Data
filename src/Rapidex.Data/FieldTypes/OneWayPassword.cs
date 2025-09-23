@@ -7,8 +7,8 @@ namespace Rapidex.Data
 
     public class OneWayPassword : BasicBaseDataType<string, OneWayPassword>
     {
-        private static string CRIPTO_TEXT_PREFIX = "|S|";
-        private static string CRIPTO_TEXT_DUMMY = "*****";
+        private const string CRIPTO_TEXT_PREFIX = "|S|";
+        private const string CRIPTO_TEXT_DUMMY = "*****";
 
         public override string TypeName => "oneWayPassword";
 
