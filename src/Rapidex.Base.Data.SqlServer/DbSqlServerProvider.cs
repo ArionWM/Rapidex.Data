@@ -84,7 +84,7 @@ public class DbSqlServerProvider : IDbProvider
         this.ParentScope = parent;
     }
 
-    public void UseDb(string dbNameOrAlias)
+    public void SwitchDb(string dbNameOrAlias)
     {
         var strMan = this.GetStructureProvider();
         dbNameOrAlias = this.GetDatabaseName(dbNameOrAlias);

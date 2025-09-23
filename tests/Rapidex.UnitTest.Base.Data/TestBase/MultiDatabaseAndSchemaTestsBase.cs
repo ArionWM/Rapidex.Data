@@ -17,10 +17,9 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
     [Fact]
     public virtual void T01_MultipleSchemas()
     {
-        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         DbProviderFactory DbProviderFactory = new DbProviderFactory();
         IDbProvider provider = DbProviderFactory.CreateProvider(connectionInfo);
-
 
         this.Fixture.DropAllSchemasInDatabase(provider, true);
 
@@ -51,6 +50,10 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
 
     }
 
+    protected virtual string GetRandomDbName()
+    {
+        return "TestDb" + RandomHelper.RandomText(5);
+    }
 
     [Fact]
     public virtual void T01_MultipleDatabases()
@@ -58,11 +61,11 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
         var db = Database.Dbs.AddMainDbIfNotExists();
 
 
-        string dbName1 = "TestDb" + RandomHelper.RandomText(5);
+        string dbName1 = this.GetRandomDbName();
 
         var newDb1 = Database.Dbs.AddDbIfNotExists(2, dbName1);
         newDb1.Structure.ApplyAllStructure();
-        
+
         newDb1.Structure.DestroyDatabase(newDb1.DatabaseName);
     }
 

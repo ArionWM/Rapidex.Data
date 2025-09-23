@@ -6,7 +6,7 @@ namespace Rapidex.Data
 {
     public static class DatabaseConstants
     {
-        public const string MASTER_DB_NAME = "Master";
+        public const string MASTER_DB_ALIAS_NAME = "Master";
         public const string DEFAULT_SCHEMA_NAME = "Base";
 
         public const string PREFIX_ENUMERATION = "enum";

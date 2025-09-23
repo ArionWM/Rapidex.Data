@@ -69,7 +69,7 @@ namespace Rapidex.Data
             cinfo.Name.NotEmpty($"Name found in configuration for '{dbName}'. see appsettings.json");
 
             IDbScope db;
-            if (cinfo.Name == DatabaseConstants.MASTER_DB_NAME)
+            if (cinfo.Name == DatabaseConstants.MASTER_DB_ALIAS_NAME)
             {
                 db = Database.Dbs.AddMainDbIfNotExists();
             }
@@ -83,10 +83,10 @@ namespace Rapidex.Data
 
         public void LoadDbScopeDefinitions()
         {
-            DbConnectionInfo masterConnInfo = this.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+            DbConnectionInfo masterConnInfo = this.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
             masterConnInfo.NotNull("Any `default` db connection configuration not found (Name should be: 'Master'). See: appsettings.json");
 
-            this.LoadDbScopeDefinition(DatabaseConstants.MASTER_DB_NAME);
+            this.LoadDbScopeDefinition(DatabaseConstants.MASTER_DB_ALIAS_NAME);
 
             //Removed, but additional connection definitions is not required for now
             //foreach (var dbName in this.ConnectionInfo.Keys)

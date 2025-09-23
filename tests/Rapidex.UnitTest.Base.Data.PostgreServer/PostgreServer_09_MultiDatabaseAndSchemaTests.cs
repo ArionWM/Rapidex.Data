@@ -12,4 +12,9 @@ public class PostgreServer_09_MultiDatabaseAndSchemaTests : MultiDatabaseAndSche
     public PostgreServer_09_MultiDatabaseAndSchemaTests(SingletonFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
     {
     }
+
+    protected override string GetRandomDbName()
+    {
+        return "testdb" + RandomHelper.RandomText(5).ToLowerInvariant();
+    }
 }

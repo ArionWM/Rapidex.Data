@@ -189,10 +189,10 @@ internal static class DbSqlServerHelper
             if (dto.Offset != TimeSpan.Zero)
             {
                 //Her zaman UTC+0
-                return dto.ToOffset(TimeSpan.Zero).DateTime;
+                return dto.ToOffset(TimeSpan.Zero);
             }
 
-            return dto.DateTime;
+            return dto;
         }
 
         return value;

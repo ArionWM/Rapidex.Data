@@ -32,7 +32,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
     /// <returns></returns>
     internal static DbSqlServerConnection CreateSqlServerConnection()
     {
-        DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+        DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
         DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 

@@ -29,7 +29,7 @@ namespace Rapidex.Data.SqlServer
 
         public IValidationResult Validate(IDbProvider provider)
         {
-            if (provider.ParentScope.ParentDbScope.Name == DatabaseConstants.MASTER_DB_NAME)
+            if (provider.ParentScope.ParentDbScope.Name == DatabaseConstants.MASTER_DB_ALIAS_NAME)
             {
                 return this.ValidateMaster(provider);
             }

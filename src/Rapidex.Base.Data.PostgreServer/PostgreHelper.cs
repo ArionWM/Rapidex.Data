@@ -213,4 +213,11 @@ internal static class PostgreHelper
 
         return objectName;
     }
+
+    public static void ValidateObjectName(string objectName)
+    {
+        string lower = objectName.ToLowerInvariant();
+        if (lower != objectName)
+            throw new BaseValidationException($"Invalid object name: '{objectName}'. Postgre object names must be invariant lowercase (seperate words with '_' if required). See: abc");
+    }
 }

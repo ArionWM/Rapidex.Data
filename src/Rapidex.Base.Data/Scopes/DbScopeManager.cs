@@ -10,52 +10,52 @@ namespace Rapidex.Data.Scopes;
 internal class DbScopeManager : IDbManager
 {
     internal bool IsMultiDb { get; set; } = false;
-    internal Dictionary<string, IDbScope> _dbScopes = new Dictionary<string, IDbScope>(StringComparer.InvariantCultureIgnoreCase);
+    internal Dictionary<string, IDbScope> DbScopes { get; private set; } = new Dictionary<string, IDbScope>(StringComparer.InvariantCultureIgnoreCase);
 
-    ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+    private ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
 
     public IDbScope AddMainDbIfNotExists()
     {
-        _lock.EnterUpgradeableReadLock();
+        this.locker.EnterUpgradeableReadLock();
         try
         {
-            if (_dbScopes.ContainsKey(DatabaseConstants.MASTER_DB_NAME))
+            if (this.DbScopes.ContainsKey(DatabaseConstants.MASTER_DB_ALIAS_NAME))
             {
-                return _dbScopes.Get(DatabaseConstants.MASTER_DB_NAME);
+                return this.DbScopes.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
             }
 
-            _lock.EnterWriteLock();
+            this.locker.EnterWriteLock();
 
             try
             {
                 DbProviderFactory dbCreator = new DbProviderFactory();
                 IDbScope dbScope = dbCreator.CheckMasterDb();
 
-                _dbScopes.Add(DatabaseConstants.MASTER_DB_NAME, dbScope);
+                this.DbScopes.Add(DatabaseConstants.MASTER_DB_ALIAS_NAME, dbScope);
 
                 return dbScope;
             }
             finally
             {
-                _lock.ExitWriteLock();
+                this.locker.ExitWriteLock();
             }
         }
         finally
         {
-            _lock.ExitUpgradeableReadLock();
+            this.locker.ExitUpgradeableReadLock();
         }
     }
 
 
     public IDbScope AddDbIfNotExists(long id, string dbNameOrAliasName)
     {
-        if (_dbScopes.ContainsKey(dbNameOrAliasName))
-            return _dbScopes.Get(dbNameOrAliasName);
+        if (this.DbScopes.ContainsKey(dbNameOrAliasName))
+            return this.DbScopes.Get(dbNameOrAliasName);
 
-        DbProviderFactory dbCreator = new DbProviderFactory();
+        DbProviderFactory dbCreator = new DbProviderFactory(); //TODO: to DI
         IDbScope dbScope = dbCreator.Create(id, dbNameOrAliasName);
 
-        _dbScopes.Add(dbNameOrAliasName, dbScope);
+        this.DbScopes.Add(dbNameOrAliasName, dbScope);
         return dbScope;
     }
 
@@ -63,28 +63,28 @@ internal class DbScopeManager : IDbManager
     {
         if (dbName.IsNullOrEmpty())
         {
-            dbName = DatabaseConstants.MASTER_DB_NAME;
+            dbName = DatabaseConstants.MASTER_DB_ALIAS_NAME;
         }
 
-        if (!string.Equals(dbName, DatabaseConstants.MASTER_DB_NAME, StringComparison.InvariantCultureIgnoreCase) && !this.IsMultiDb)
+        if (!string.Equals(dbName, DatabaseConstants.MASTER_DB_ALIAS_NAME, StringComparison.InvariantCultureIgnoreCase) && !this.IsMultiDb)
         {
             throw new InvalidOperationException("MultiDb enviroment is not enabled. Use EnableMultiDb() method to enable it.");
         }
 
         dbName.ValidateInvariantName();
 
-        if (throwErrorIfNotExists && !_dbScopes.ContainsKey(dbName))
+        if (throwErrorIfNotExists && !this.DbScopes.ContainsKey(dbName))
         {
             throw new InvalidOperationException($"Database with alias '{dbName}' is not found.");
         }
 
-        return _dbScopes.Get(dbName).NotNull($"Database scope '{dbName}' not found");
+        return this.DbScopes.Get(dbName).NotNull($"Database scope '{dbName}' not found");
     }
 
     public void EnableMultiDb()
     {
         DbValidator dbValidator = new DbValidator();
-        var dbMaster = Database.Dbs.Db(DatabaseConstants.MASTER_DB_NAME);
+        var dbMaster = Database.Dbs.Db(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         var dbMasterScope = dbMaster.Base;
         var validation = dbValidator.ValidateMultiDb(dbMasterScope.DbProvider);
         if (!validation.Success)
@@ -98,7 +98,7 @@ internal class DbScopeManager : IDbManager
 
     internal void ClearCache()
     {
-        _dbScopes.Clear();
+        this.DbScopes.Clear();
         Database.EntityFactory.Clear();
     }
 }

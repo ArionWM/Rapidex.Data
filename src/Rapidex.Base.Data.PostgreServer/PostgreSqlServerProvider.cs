@@ -20,13 +20,13 @@ public class PostgreSqlServerProvider : IDbProvider
     internal static IExceptionTranslator PostgreServerExceptionTranslator { get; }
 
     public IDbSchemaScope ParentScope { get; private set; }
-    public string ConnectionString { get { return _connectionString; } set { SetConnectionString(value); } }
+    public string ConnectionString { get { return _connectionString; } set { this.SetConnectionString(value); } }
     public string DatabaseName
     {
         get { return _databaseName; }
         set
         {
-            SetDatabaseName(value);
+            this.SetDatabaseName(value);
         }
     }
 
@@ -57,15 +57,20 @@ public class PostgreSqlServerProvider : IDbProvider
         this.Connectionbuilder = new NpgsqlConnectionStringBuilder(connectionString);
         //this.Connectionbuilder.Database = PostgreHelper.CheckObjectName(this.Connectionbuilder.Database);
 
-        this._databaseName = this.Connectionbuilder.Database;
+        string databaseName = this.Connectionbuilder.Database;
+        PostgreHelper.ValidateObjectName(databaseName);
+
+        this._databaseName = databaseName;
         this.StartDbName = this._databaseName;
     }
+
+
 
     private string GetDatabaseName(string dbName)
     {
         if (this.StartDbName.IsNOTNullOrEmpty() && !dbName.StartsWith(this.StartDbName))
         {
-            string databaseName = this.StartDbName + PostgreHelper.CheckObjectName(dbName.Trim());
+            string databaseName = this.StartDbName + '_' + PostgreHelper.CheckObjectName(dbName.Trim());
             dbName = databaseName;
         }
         return dbName;
@@ -81,7 +86,7 @@ public class PostgreSqlServerProvider : IDbProvider
     protected void ValidateInitialization()
     {
         this.ConnectionString.NotEmpty("Connection string cannot be empty or null");
-        this.ParentScope.NotNull("Parent scope cannot be null");
+        //this.ParentScope.NotNull("Parent scope cannot be null");
     }
 
     public IValidationResult ValidateConnection()
@@ -100,8 +105,11 @@ public class PostgreSqlServerProvider : IDbProvider
         this.ParentScope = parent;
     }
 
-    public void UseDb(string dbName)
+    public void SwitchDb(string dbName)
     {
+        dbName.NotEmpty();
+        PostgreHelper.ValidateObjectName(dbName);
+
         var strMan = this.GetStructureProvider();
 
         dbName = this.GetDatabaseName(dbName);

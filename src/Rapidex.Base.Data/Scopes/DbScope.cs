@@ -75,10 +75,10 @@ namespace Rapidex.Data.Scopes
                     mass.SetupMetadata(this);
             });
 
-            if (this.Name != DatabaseConstants.MASTER_DB_NAME)
-            {
-                this.DbProvider.UseDb(this.Name);
-            }
+            //if (this.Name != DatabaseConstants.MASTER_DB_ALIAS_NAME)
+            //{
+            //    this.DbProvider.SwitchDb(this.Name);
+            //}
 
             //Check 'base' schema
             this.baseScope = this.AddSchemaIfNotExists(this.DefaultSchemaName, 1);

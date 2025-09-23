@@ -66,7 +66,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         this.Setup(builder.Services);
 
         //??
-        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         DbProviderFactory DbProviderFactory = new DbProviderFactory();
         IDbProvider provider = DbProviderFactory.CreateProvider(connectionInfo);
         this.DropAllTablesInDatabase(provider, false);
@@ -87,7 +87,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
     internal virtual DbSqlServerConnection CreateSqlServerConnection()
     {
-        DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+        DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
         DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 

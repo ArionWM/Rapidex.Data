@@ -68,7 +68,9 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         // In PostgreSQL, you must reconnect with a new connection string to switch databases.
         // This method is a no-op or can be used to re-instantiate the connection.
 
-        if(!this.IsDatabaseAvailable(dbName))
+        //dbName = 
+
+        if (!this.IsDatabaseAvailable(dbName))
         {
             this.CreateDatabase(dbName);
         }
@@ -126,12 +128,11 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     {
         dbName.NotEmpty();
 
+
         this.CheckConnection();
 
         try
         {
-            //dbName = PostgreHelper.CheckObjectName(dbName);
-
             this.ParentDbProvider.CanCreateDatabase();
 
             string sql1 = this.DdlGenerator.CreateDatabase01(dbName, this.Connectionbuilder.Username);
@@ -537,6 +538,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public void DestroyDatabase(string dbName)
     {
+        //TODO: create 'Master' connection and use it.
+
         this.CheckConnection();
 
         // No master database in PostgreSQL, so just connect and drop
@@ -593,6 +596,26 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public (MasterDbConnectionStatus status, string description) CheckMasterConnection()
     {
-        throw new NotImplementedException();
+        try
+        {
+            bool directHit = this.CheckConnection(true);
+            if (!directHit)
+            {
+                this.CreateDatabase(this.Connectionbuilder.Database);
+            }
+
+            this.SwitchDatabase(this.Connectionbuilder.Database);
+
+            var status = directHit ? MasterDbConnectionStatus.Valid : MasterDbConnectionStatus.Created;
+            return (status, status == MasterDbConnectionStatus.Valid ? "Valid" : "Created");
+        }
+        catch (Exception ex)
+        {
+            ex.Log();
+
+            var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex) ?? ex;
+
+            return (MasterDbConnectionStatus.CantAccess, tex.Message);
+        }
     }
 }

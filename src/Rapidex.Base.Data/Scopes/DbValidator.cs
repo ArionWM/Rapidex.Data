@@ -76,7 +76,7 @@ internal class DbValidator
 
     public IValidationResult ValidateMultiDb(IDbProvider provider)
     {
-        if (provider.ParentScope.ParentDbScope.Name == DatabaseConstants.MASTER_DB_NAME)
+        if (provider.ParentScope.ParentDbScope.Name == DatabaseConstants.MASTER_DB_ALIAS_NAME)
         {
             return this.ValidateMultiDbMaster(provider);
         }

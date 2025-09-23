@@ -44,7 +44,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 
     internal static PostgreSqlServerConnection CreatePostgreServerConnection()
     {
-        DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+        DbConnectionInfo dbc = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         NpgsqlConnectionStringBuilder sqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(dbc.ConnectionString);
         sqlConnectionStringBuilder.Database = Database.Dbs.Db().DatabaseName;
         PostgreSqlServerConnection connection = new PostgreSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);

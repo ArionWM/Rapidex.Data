@@ -8,17 +8,14 @@ namespace Rapidex.Data.Scopes;
 
 internal class DbProviderFactory
 {
-    public IDbProvider CreateProvider(string name, string connectionString = null)
+    public IDbProvider CreateProvider(string dbProviderTypeName, string connectionString = null)
     {
-        name.NotEmpty();
+        dbProviderTypeName.NotEmpty();
 
-        Type type = Common.Assembly.FindType(name);
-
-        type.NotNull($"Type '{name}' is not found.");
-
+        Type type = Common.Assembly.FindType(dbProviderTypeName)
+            .NotNull($"Type '{dbProviderTypeName}' is not found.");
 
         IDbProvider provider = (IDbProvider)Activator.CreateInstance(type, connectionString);
-        //TypeHelper.CreateInstance<IDbProvider>(type, connectionString);
         return provider;
     }
 
@@ -32,7 +29,7 @@ internal class DbProviderFactory
 
     public IDbScope CheckMasterDb()
     {
-        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         if (connectionInfo == null)
         {
             throw new DataConnectionException($"Master database connection info is not found. See: https://github.com/ArionWM/Rapidex.Base.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md\"");
@@ -46,7 +43,7 @@ internal class DbProviderFactory
         {
             case MasterDbConnectionStatus.Valid:
             case MasterDbConnectionStatus.Created:
-                IDbScope dbScope = new DbScope(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_NAME, provider);
+                IDbScope dbScope = new DbScope(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_ALIAS_NAME, provider);
                 return dbScope;
             default:
                 throw new DataConnectionException($"Master database connection is not valid. \r\n{checkResult.description} \r\nSee: https://github.com/ArionWM/Rapidex.Base.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md");
@@ -55,20 +52,25 @@ internal class DbProviderFactory
 
     }
 
-    public IDbScope Create(long id, string dbAliasName)
+    public IDbScope Create(long id, string dbNameOrAliasName)
     {
         IDbProvider provider;
 
-        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(dbAliasName);
+        bool trySwitchDb = false;
+        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(dbNameOrAliasName);
         if (connectionInfo == null)
         {
-            connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_NAME);
+            trySwitchDb = !string.Equals(dbNameOrAliasName, DatabaseConstants.MASTER_DB_ALIAS_NAME, StringComparison.InvariantCultureIgnoreCase);
+            connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         }
 
         provider = this.CreateProvider(connectionInfo);
         provider.NotNull("Provider is not found for the given name: " + connectionInfo.Provider);
 
-        DbScope scope = new DbScope(id, dbAliasName, provider);
+        if (trySwitchDb)
+            provider.SwitchDb(dbNameOrAliasName);
+
+        DbScope scope = new DbScope(id, dbNameOrAliasName, provider);
         return scope;
     }
 

@@ -417,7 +417,11 @@ public interface IDbProvider : IManager
     IDbSchemaScope ParentScope { get; }
     IExceptionTranslator ExceptionTranslator { get; }
 
-    void UseDb(string dbNameOrAlias);
+    /// <summary>
+    /// Switch given database
+    /// </summary>
+    /// <param name="dbNameOrAlias"></param>
+    void SwitchDb(string dbNameOrAlias);
 
     void SetParentScope(IDbSchemaScope parent);
 
