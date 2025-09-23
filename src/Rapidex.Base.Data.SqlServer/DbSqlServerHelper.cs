@@ -176,11 +176,9 @@ internal static class DbSqlServerHelper
         if (value == null)
             return DBNull.Value;
 
-        if (value is string)
+        if (value is string strValue && strValue.IsNullOrEmpty())
         {
-            string strValue = (string)value;
-            if (string.IsNullOrEmpty(strValue))
-                return DBNull.Value;
+            return DBNull.Value;
         }
 
         if (value is DateTimeOffset dto)

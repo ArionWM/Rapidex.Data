@@ -142,10 +142,9 @@ internal static class PostgreHelper
         if (value == null)
             return DBNull.Value;
 
-        if (value is string strValue)
+        if (value is string strValue && strValue.IsNullOrEmpty())
         {
-            if (string.IsNullOrEmpty(strValue))
-                return DBNull.Value;
+            return DBNull.Value;
         }
 
         if (value is DateTimeOffset dto)
