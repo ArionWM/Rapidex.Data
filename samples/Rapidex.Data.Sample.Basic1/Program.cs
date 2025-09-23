@@ -26,7 +26,7 @@ builder.Services.AddSwaggerGen(c =>
         Contact = new OpenApiContact
         {
             Name = "Rapidex.Data",
-            Url = new Uri("https://github.com/ArionWM/Rapidex.Base.Data")
+            Url = new Uri("https://github.com/ArionWM/Rapidex.Data")
         }
     });
 

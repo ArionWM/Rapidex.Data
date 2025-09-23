@@ -2,19 +2,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Base.Data", "src\Rapidex.Base.Data\Rapidex.Base.Data.csproj", "{88A8AA3E-DC7D-9AED-AED3-B27BDC9A0FDE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data", "src\Rapidex.Data\Rapidex.Data.csproj", "{88A8AA3E-DC7D-9AED-AED3-B27BDC9A0FDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Base.Data.Behaviors", "src\Rapidex.Base.Data.Behaviors\Rapidex.Base.Data.Behaviors.csproj", "{7ED9C099-D949-498D-A159-0204A805D74B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data.Behaviors", "src\Rapidex.Data.Behaviors\Rapidex.Data.Behaviors.csproj", "{7ED9C099-D949-498D-A159-0204A805D74B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Base.Data.PostgreServer", "src\Rapidex.Base.Data.PostgreServer\Rapidex.Base.Data.PostgreServer.csproj", "{684DB07B-610A-D4BE-B223-AC6E3ECA4ED4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data.PostgreServer", "src\Rapidex.Data.PostgreServer\Rapidex.Data.PostgreServer.csproj", "{684DB07B-610A-D4BE-B223-AC6E3ECA4ED4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Base.Data.SqlServer", "src\Rapidex.Base.Data.SqlServer\Rapidex.Base.Data.SqlServer.csproj", "{5682A376-12CF-9AF3-F19F-F0FBBBE16006}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data.SqlServer", "src\Rapidex.Data.SqlServer\Rapidex.Data.SqlServer.csproj", "{5682A376-12CF-9AF3-F19F-F0FBBBE16006}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Base.Data", "tests\Rapidex.UnitTest.Base.Data\Rapidex.UnitTest.Base.Data.csproj", "{35459A5B-6DAB-D419-A524-BCCD39A55BF6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Data", "tests\Rapidex.UnitTest.Data\Rapidex.UnitTest.Data.csproj", "{35459A5B-6DAB-D419-A524-BCCD39A55BF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Base.Data.PostgreServer", "tests\Rapidex.UnitTest.Base.Data.PostgreServer\Rapidex.UnitTest.Base.Data.PostgreServer.csproj", "{6DE72173-99D9-0E5D-2323-CB0B146CAD85}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Data.PostgreServer", "tests\Rapidex.UnitTest.Data.PostgreServer\Rapidex.UnitTest.Data.PostgreServer.csproj", "{6DE72173-99D9-0E5D-2323-CB0B146CAD85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Base.Data.SqlServer", "tests\Rapidex.UnitTest.Base.Data.SqlServer\Rapidex.UnitTest.Base.Data.SqlServer.csproj", "{BB200032-CA1B-71CF-D046-5B5522F13578}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Data.SqlServer", "tests\Rapidex.UnitTest.Data.SqlServer\Rapidex.UnitTest.Data.SqlServer.csproj", "{BB200032-CA1B-71CF-D046-5B5522F13578}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject

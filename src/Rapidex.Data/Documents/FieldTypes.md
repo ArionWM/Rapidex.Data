@@ -4,7 +4,7 @@ Metada içerisinde ifade edilen adları ile türler aşağıda
 
 İfade şekli : `Tür Adı` (`Alternatif adı`)
 
-Bkz: [EntityMetadata.Task.json](/Rapidex.Base.Data/Documents/SampleData/EntityMetadata.Task.json)
+Bkz: [EntityMetadata.Task.json](/Rapidex.Data/Documents/SampleData/EntityMetadata.Task.json)
 
 
 ## string

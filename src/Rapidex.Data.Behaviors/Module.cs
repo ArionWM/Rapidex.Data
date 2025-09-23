@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
 
-namespace Rapidex.Base.Data.Behaviors;
+namespace Rapidex.Data.Behaviors;
 
 internal class Module:AssemblyDefinitionBase, IRapidexAssemblyDefinition
 {

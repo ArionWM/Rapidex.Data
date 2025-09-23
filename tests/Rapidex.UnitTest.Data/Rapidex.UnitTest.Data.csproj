@@ -47,10 +47,10 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\Rapidex.Base.Common.Logging.SerilogImp.Core8.csproj" />
-	  <ProjectReference Include="..\..\src\Rapidex.Base.Data.Behaviors\Rapidex.Base.Data.Behaviors.csproj" />
-	  <ProjectReference Include="..\..\src\Rapidex.Base.Data.PostgreServer\Rapidex.Base.Data.PostgreServer.csproj" />
-	  <ProjectReference Include="..\..\src\Rapidex.Base.Data.SqlServer\Rapidex.Base.Data.SqlServer.csproj" />
-	  <ProjectReference Include="..\..\src\Rapidex.Base.Data\Rapidex.Base.Data.csproj" />
+	  <ProjectReference Include="..\..\src\Rapidex.Data.Behaviors\Rapidex.Data.Behaviors.csproj" />
+	  <ProjectReference Include="..\..\src\Rapidex.Data.PostgreServer\Rapidex.Data.PostgreServer.csproj" />
+	  <ProjectReference Include="..\..\src\Rapidex.Data.SqlServer\Rapidex.Data.SqlServer.csproj" />
+	  <ProjectReference Include="..\..\src\Rapidex.Data\Rapidex.Data.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

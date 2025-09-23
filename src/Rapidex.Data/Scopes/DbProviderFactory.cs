@@ -32,7 +32,7 @@ internal class DbProviderFactory
         DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
         if (connectionInfo == null)
         {
-            throw new DataConnectionException($"Master database connection info is not found. See: https://github.com/ArionWM/Rapidex.Base.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md\"");
+            throw new DataConnectionException($"Master database connection info is not found. See: https://github.com/ArionWM/Rapidex.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md\"");
         }
 
         IDbProvider provider = this.CreateProvider(connectionInfo);
@@ -46,7 +46,7 @@ internal class DbProviderFactory
                 IDbScope dbScope = new DbScope(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_ALIAS_NAME, provider);
                 return dbScope;
             default:
-                throw new DataConnectionException($"Master database connection is not valid. \r\n{checkResult.description} \r\nSee: https://github.com/ArionWM/Rapidex.Base.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md");
+                throw new DataConnectionException($"Master database connection is not valid. \r\n{checkResult.description} \r\nSee: https://github.com/ArionWM/Rapidex.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md");
         }
 
 

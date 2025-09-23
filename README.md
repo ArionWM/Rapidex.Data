@@ -1,4 +1,4 @@
-# Rapidex.Base.Data
+# Rapidex.Data
 
 ## What is Rapidex.Data?
 
