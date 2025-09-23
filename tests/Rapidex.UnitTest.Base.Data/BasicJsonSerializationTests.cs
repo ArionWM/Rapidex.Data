@@ -1,5 +1,4 @@
-﻿
-using Rapidex.Data;
+﻿using Rapidex.Data.SerializationAndMapping.Dtos;
 using Rapidex.UnitTest.Data.TestContent;
 using System;
 using System.Collections.Generic;

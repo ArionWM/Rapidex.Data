@@ -9,31 +9,38 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.DataModification;
 internal class DataModificationStaticHost : DataModificationReadScopeBase, IDbDataModificationStaticHost
 {
+#if DEBUG
+#pragma warning disable IDE1006 // Naming Styles
     private readonly int _debugTracker;
-    private AsyncLocalStack<IDbDataModificationScope> _localStack = new AsyncLocalStack<IDbDataModificationScope>();
-    private ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
+#pragma warning restore IDE1006 // Naming Styles
+#endif
+
+    private AsyncLocalStack<IDbDataModificationScope> localStack = new AsyncLocalStack<IDbDataModificationScope>();
+    private ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim();
 
     public IDbDataModificationScope CurrentWork
     {
         get
         {
-            _rwLock.EnterReadLock();
+            rwLock.EnterReadLock();
             try
             {
-                IDbDataModificationScope current = _localStack.Peek();
+                IDbDataModificationScope current = localStack.Peek();
                 current.NotNull<IDbDataModificationScope, WorkScopeNotAvailableException>("Active scope not available. Are you use 'BeginWork()'? See: abc"); //TODO: Create doc and add link
                 return current;
             }
             finally
             {
-                _rwLock.ExitReadLock();
+                rwLock.ExitReadLock();
             }
         }
     }
 
     public DataModificationStaticHost(IDbSchemaScope parentScope) : base(parentScope)
     {
+#if DEBUG
         this._debugTracker = RandomHelper.Random(1000000);
+#endif
     }
 
     public IDbDataModificationScope BeginWork()
@@ -50,40 +57,40 @@ internal class DataModificationStaticHost : DataModificationReadScopeBase, IDbDa
 
     protected void Register(IDbDataModificationScope scope)
     {
-        _rwLock.EnterWriteLock();
+        rwLock.EnterWriteLock();
         try
         {
-            _localStack.Push(scope);
+            localStack.Push(scope);
         }
         finally
         {
-            _rwLock.ExitWriteLock();
+            rwLock.ExitWriteLock();
         }
     }
 
     public void UnRegister(IDbDataModificationScope scope)
     {
-        _rwLock.EnterWriteLock();
+        rwLock.EnterWriteLock();
         try
         {
-            var top = _localStack.Peek();
+            var top = localStack.Peek();
             if (top != scope)
                 throw new InvalidOperationException("Scope collision detected. " +
                     "\r\nThis finalized scope is not top on the stack. " +
                     "\r\nAre you using 'Task.Run'?" +
                     "\r\nClose scopes with reverse order");
 
-            _localStack.Pop();
+            localStack.Pop();
         }
         finally
         {
-            _rwLock.ExitWriteLock();
+            rwLock.ExitWriteLock();
         }
     }
 
     (bool Found, string? Desc) IDbDataModificationStaticHost.FindAndAnalyseInScopes(IDbEntityMetadata em, long id)
     {
-        var scopes = _localStack.ToList();
+        var scopes = localStack.ToList();
         foreach (var scope in scopes)
         {
             var result = scope.FindAndAnalyse(em, id);

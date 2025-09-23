@@ -1,4 +1,5 @@
 ﻿using Rapidex.Data.Helpers;
+using Rapidex.Data.SerializationAndMapping.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -531,20 +532,16 @@ public class DbEntityIdEqualityComparerById : IEqualityComparer<DbEntityId>
     }
 }
 
-public interface ISerializationDataProvider
-{
-    object GetSerializationData(EntitySerializationOptions options);
-    object SetWithSerializationData(string memberName, object value);
-}
+
 
 public interface IEntitySerializationDataCreator
 {
     object ConvertToFieldData(IEntity entity, IDbFieldMetadata fm);
-    T ConvertToEntityData<T>(IEntity entity, EntitySerializationOptions options, params string[] fields) where T : EntityDataDtoBase, new();
-    EntityDataDtoBase ConvertToEntityData(IEntity entity, EntitySerializationOptions options, params string[] fields);
+    T ConvertToEntityData<T>(IEntity entity, EntitySerializationOptions options, params string[] fields) where T : EntityDataDto, new();
+    EntityDataDto ConvertToEntityData(IEntity entity, EntitySerializationOptions options, params string[] fields);
 
-    ListDataDtoCollection<T> ConvertToListData<T>(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields) where T : EntityDataDtoBase, new();
-    ListDataDtoCollection<EntityDataDtoBase> ConvertToListData(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields);
+    EntityDataDtoCollection<T> ConvertToListData<T>(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields) where T : EntityDataDto, new();
+    EntityDataDtoCollection<EntityDataDto> ConvertToListData(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields);
 }
 
 public interface IDbEntityLoader
@@ -956,7 +953,7 @@ public interface IEntityLoadResult : IEntityLoadResult<IEntity>
 }
 
 
-public interface IDataType : ICloneable, ISerializationDataProvider
+public interface IDataType : ICloneable
 {
     IEntity Parent { get; set; }
     IDbFieldMetadata FieldMetadata { get; set; }
@@ -1023,6 +1020,21 @@ public interface IDataType : ICloneable, ISerializationDataProvider
     IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values);
 
     IValidationResult Validate();
+
+    /// <summary>
+    /// Used for serialization
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    object GetSerializationData(EntitySerializationOptions options);
+
+    /// <summary>
+    /// Used for deserialization
+    /// </summary>
+    /// <param name="memberName"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    object SetWithSerializationData(string memberName, object value);
 }
 
 

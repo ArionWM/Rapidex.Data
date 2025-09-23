@@ -15,6 +15,7 @@ internal class ConcreteEntity01 : DbConcreteEntityBase
     public string Name { get; set; }
     public string Address { get; set; }
     public Phone Phone { get; set; }
+    public int Number { get; set; }
 
     public Currency CreditLimit1 { get; set; }
 

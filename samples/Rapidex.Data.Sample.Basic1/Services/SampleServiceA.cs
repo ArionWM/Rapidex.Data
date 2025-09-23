@@ -1,4 +1,5 @@
 ﻿using Rapidex.Data.Sample.App1.ConcreteEntities;
+using Rapidex.Data.SerializationAndMapping.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +9,11 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.Sample.App1.Services;
 public class SampleServiceA
 {
-    private readonly IEnumerable<IDbCriteriaParser> _parsers;
+    private readonly IEnumerable<IDbCriteriaParser> parsers;
 
     public SampleServiceA(IEnumerable<IDbCriteriaParser> parsers)
     {
-        this._parsers = parsers;
+        this.parsers = parsers;
     }
 
 
@@ -24,7 +25,7 @@ public class SampleServiceA
 
         if (filter.IsNOTNullOrEmpty())
         {
-            this._parsers.FindParser(filter)
+            this.parsers.FindParser(filter)
                 .NotNull($"No parser found for filter: {filter}")
                 .Parse(query, filter);
         }
@@ -33,15 +34,18 @@ public class SampleServiceA
 
     }
 
-    internal object GetContact(IDbSchemaScope db, long id)
+    internal Contact GetContact(IDbSchemaScope db, long id)
     {
         var contact = db.Find<Contact>(id);
         return contact;
     }
 
-    internal object UpdateContact(IDbSchemaScope db, long? id, string firstName, string surname, string email, string phoneNumber, DateTimeOffset? birthDate)
+    internal Contact UpdateContact(IDbSchemaScope db, EntityDataDtoBase entityValues)
     {
         using var work = db.BeginWork();
+
+        long? id = entityValues.Values.Get(nameof(Contact.Id), true).As<long?>();
+
         Contact contact;
         if (id.HasValue)
         {
@@ -53,11 +57,12 @@ public class SampleServiceA
             contact = work.New<Contact>();
         }
 
-        contact.FirstName = firstName;
-        contact.LastName = surname;
-        contact.Email = email;
-        contact.PhoneNumber = phoneNumber;
+        contact.FirstName = entityValues.Values.Get(nameof(Contact.FirstName)).As<string>();
+        contact.LastName = entityValues.Values.Get(nameof(Contact.LastName)).As<string>();
+        contact.Email = entityValues.Values.Get(nameof(Contact.Email)).As<string>();
+        contact.PhoneNumber = entityValues.Values.Get(nameof(Contact.PhoneNumber)).As<string>();
 
+        DateTimeOffset? birthDate = entityValues.Values.Get(nameof(Contact.BirthDate)).As<DateTimeOffset?>();
         if (birthDate.HasValue)
             contact.BirthDate = birthDate;
         contact.Save();
@@ -77,7 +82,7 @@ public class SampleServiceA
 
         if (filter.IsNOTNullOrEmpty())
         {
-            this._parsers.FindParser(filter)
+            this.parsers.FindParser(filter)
                 .NotNull($"No parser found for filter: {filter}")
                 .Parse(query, filter);
         }
@@ -130,7 +135,7 @@ public class SampleServiceA
 
     }
 
-    internal object GetOrder(IDbSchemaScope db, long id)
+    internal Order GetOrder(IDbSchemaScope db, long id)
     {
         var order = db.Find<Order>(id);
         return order;

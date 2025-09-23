@@ -27,4 +27,4 @@ fields:
 
 # other fields in concrete definition
 
-behaviors: [archiveEntity, unAvailBehavior]  
+behaviors: [archiveEntity]  

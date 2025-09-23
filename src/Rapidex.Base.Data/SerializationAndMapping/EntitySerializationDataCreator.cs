@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rapidex.Data.SerializationAndMapping.Dtos;
 
 namespace Rapidex.Data;
 
@@ -18,9 +19,9 @@ public class EntitySerializationDataCreator : IEntitySerializationDataCreator
         fm.NotNull();
 
         object upperValue = fm.ValueGetterUpper(entity, fm.Name);
-        if (upperValue is ISerializationDataProvider sdp)
+        if (upperValue is IDataType dtype)
         {
-            object data = sdp.GetSerializationData(EntitySerializationOptions.Default); //fm.Name, 
+            object data = dtype.GetSerializationData(EntitySerializationOptions.Default); //fm.Name, 
             return data;
         }
 
@@ -68,7 +69,7 @@ public class EntitySerializationDataCreator : IEntitySerializationDataCreator
                 continue;
             }
 
-            object value = ConvertToFieldData(entity, fm);
+            object value = this.ConvertToFieldData(entity, fm);
             eddto[fm.Name] = value;
         }
 
@@ -80,22 +81,22 @@ public class EntitySerializationDataCreator : IEntitySerializationDataCreator
         return this.ConvertToEntityData<EntityDataDtoBase>(entity, options, fields);
     }
 
-    public virtual ListDataDtoCollection<T> ConvertToListData<T>(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields) where T : EntityDataDtoBase, new()
+    public virtual EntityDataDtoCollection<T> ConvertToListData<T>(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields) where T : EntityDataDtoBase, new()
     {
         List<T> list = new List<T>();
         foreach (IEntity entity in entities)
         {
-            T eddto = ConvertToEntityData<T>(entity, options, fields);
+            T eddto = this.ConvertToEntityData<T>(entity, options, fields);
             list.Add(eddto);
         }
 
-        ListDataDtoCollection<T> coll = new ListDataDtoCollection<T>(list);
+        EntityDataDtoCollection<T> coll = new EntityDataDtoCollection<T>(list);
         coll.Properties = properties;
 
         return coll;
     }
 
-    public virtual ListDataDtoCollection<EntityDataDtoBase> ConvertToListData(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields)
+    public virtual EntityDataDtoCollection<EntityDataDtoBase> ConvertToListData(IEnumerable<IEntity> entities, EntitySerializationOptions options, Dictionary<string, object> properties, params string[] fields)
     {
         return this.ConvertToListData<EntityDataDtoBase>(entities, options, properties, fields);
     }

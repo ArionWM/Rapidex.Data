@@ -9,7 +9,12 @@ namespace Rapidex.Data.Scopes
 {
     internal class DbScope : IDbScope
     {
+#if DEBUG
+#pragma warning disable IDE1006 // Naming Styles
         private readonly int _debugTracker;
+#pragma warning restore IDE1006 // Naming Styles
+#endif
+
         protected readonly string name;
         protected readonly string defaultSchemaName;
         protected readonly long id;
@@ -59,7 +64,9 @@ namespace Rapidex.Data.Scopes
 
             dbProvider.SetParentScope(this);
 
+#if DEBUG
             this._debugTracker = RandomHelper.Random(1000000);
+#endif
 
             this.Initialize();
         }
@@ -88,7 +95,7 @@ namespace Rapidex.Data.Scopes
             this.LoadRecordedSchemaInfos();
         }
 
-       
+
 
         protected IDbSchemaScope AddSchema(string schemaName)
         {

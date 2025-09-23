@@ -7,8 +7,11 @@ namespace Rapidex.Data
 {
     public abstract class DbConcreteEntityBase : IConcreteEntity, IIntEntity, IDbDefinition
     {
+#pragma warning disable IDE1006 // Naming Styles
+        [JsonIgnore]
         protected Type _Type { get; set; }
         protected ObjDictionary _Values { get; }
+#pragma warning restore IDE1006 // Naming Styles
 
         [JsonIgnore]
         IDbEntityMetadata IEntity._Metadata { get; set; }
@@ -26,11 +29,6 @@ namespace Rapidex.Data
         public string _DbName { get; set; }
         public string _SchemaName { get; set; }
         public bool _IsNew { get; set; }
-
-
-
-        //public IEntityRelationCollection Details => throw new NotImplementedException();
-
 
         public long Id { get; set; }
         public virtual string ExternalId { get; set; }

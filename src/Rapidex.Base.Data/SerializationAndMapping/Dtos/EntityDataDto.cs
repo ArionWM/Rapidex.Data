@@ -5,11 +5,12 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data;
+namespace Rapidex.Data.SerializationAndMapping.Dtos;
 
 [JsonDerivedBase]
-public class EntityDataDtoBase : IJsonOnDeserialized
+public class EntityDataDto : IJsonOnDeserialized
 {
+    [JsonPropertyOrder(-9000)]
     public string Entity { get; set; }
 
     public object this[string key]
@@ -18,8 +19,8 @@ public class EntityDataDtoBase : IJsonOnDeserialized
         set { this.Values[key] = value; }
     }
 
+    //Note; We not use JsonExtensionData there. Only use '$.Values.*' for serialization. Eg. in swagger.  
     [JsonPropertyOrder(7000)]
-    //Dikkat; JsonExtensionData kullanmıyoruz !!
     public virtual ObjDictionary Values { get; set; } = new ObjDictionary();
 
     [JsonIgnore]
