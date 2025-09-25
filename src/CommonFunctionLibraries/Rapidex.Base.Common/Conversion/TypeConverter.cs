@@ -7,7 +7,7 @@ namespace Rapidex;
 
 public class TypeConverter : IManager
 {
-    private static readonly TwoLevelDictionary<Type, Type, IBaseConverter> _converters = new TwoLevelDictionary<Type, Type, IBaseConverter>();
+    private static readonly TwoLevelDictionary<Type, Type, IBaseConverter> converters = new TwoLevelDictionary<Type, Type, IBaseConverter>();
 
 
     static TypeConverter()
@@ -21,7 +21,7 @@ public class TypeConverter : IManager
 
     internal static void RegisterInternal(IBaseConverter converter)
     {
-        _converters.Set(converter.FromType, converter.ToType, converter);
+        converters.Set(converter.FromType, converter.ToType, converter);
     }
 
     internal static void RegisterInternal<T>() where T : IBaseConverter, new()
@@ -32,7 +32,7 @@ public class TypeConverter : IManager
 
     public void Register(IBaseConverter converter)
     {
-        _converters.Set(converter.FromType, converter.ToType, converter);
+        converters.Set(converter.FromType, converter.ToType, converter);
     }
 
     [Obsolete("Use TryConvert instead. This method will be removed in future versions.")]
@@ -82,7 +82,7 @@ public class TypeConverter : IManager
 
             var fromType = value.GetType();
 
-            var converter = _converters.Get(fromType, targetType);
+            var converter = converters.Get(fromType, targetType);
             if (converter != null)
             {
                 return converter.Convert(value, targetType);
@@ -169,7 +169,7 @@ public class TypeConverter : IManager
 
             var fromType = value.GetType();
 
-            var converter = _converters.Get(fromType, targetType);
+            var converter = converters.Get(fromType, targetType);
             if (converter != null)
             {
                 return converter.TryConvert(value, targetType, out convertedValue);

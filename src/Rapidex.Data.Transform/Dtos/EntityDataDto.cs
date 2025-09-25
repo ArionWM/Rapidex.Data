@@ -23,7 +23,7 @@ public class EntityDataDto : IJsonOnDeserialized
     [JsonPropertyOrder(7000)]
     public virtual ObjDictionary Values { get; set; } = new ObjDictionary();
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public IEnumerable<string> Keys => this.Values.Keys;
 
     public virtual void OnDeserialized()

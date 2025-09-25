@@ -8,24 +8,27 @@ using System.Threading.Tasks;
 
 namespace Rapidex.Data.Transform;
 
+[Obsolete]
 public class EntitySerializationDataCreator : IEntitySerializationDataCreator
 {
 
 
     public virtual object ConvertToFieldData(IEntity entity, IDbFieldMetadata fm)
     {
-        entity.NotNull();
-        fm.NotNull();
+        //entity.NotNull();
+        //fm.NotNull();
 
-        object upperValue = fm.ValueGetterUpper(entity, fm.Name);
-        if (upperValue is IDataType dtype)
-        {
-            object data = dtype.GetSerializationData(EntitySerializationOptions.Default); //fm.Name, 
-            return data;
-        }
+        //object upperValue = fm.ValueGetterUpper(entity, fm.Name);
+        //if (upperValue is IDataType dtype)
+        //{
+        //    object data = dtype.GetSerializationData(EntitySerializationOptions.Default); //fm.Name, 
+        //    return data;
+        //}
 
-        object lowerValue = fm.ValueGetterLower(entity, fm.Name);
-        return lowerValue;
+        //object lowerValue = fm.ValueGetterLower(entity, fm.Name);
+        //return lowerValue;
+
+        throw new NotImplementedException();
     }
 
 

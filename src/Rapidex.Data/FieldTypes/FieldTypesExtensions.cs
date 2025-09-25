@@ -1,4 +1,5 @@
-﻿using Rapidex.Data;
+﻿using MimeTypes;
+using Rapidex.Data;
 using Rapidex.Data.Entities;
 using System;
 using System.Collections.Generic;
@@ -18,13 +19,7 @@ namespace Rapidex.Data
             return clone;
         }
 
-        //public static void Add(this RelationOne2N rel, IEnumerable<IEntity> entities)
-        //{
-        //    foreach (var entity in entities)
-        //    {
-        //        rel.Add(entity);
-        //    }
-        //}
+
 
         public static BlobRecord Set(this ILazyBlob blob, byte[] value, string name, string contentType)
         {
@@ -38,6 +33,21 @@ namespace Rapidex.Data
         {
             return blob.SetContent(stream, name, contentType);
         }
+
+        public static BlobRecord LoadFromFile(this ILazyBlob blob, string filePath, string contentType = null)
+        {
+            if (contentType.IsNullOrEmpty())
+            {
+                string ext = Path.GetExtension(filePath).ToLowerInvariant().TrimStart('.');
+                contentType = MimeTypeMap.GetMimeType(ext);
+            }
+
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                return blob.SetContent(fs, Path.GetFileName(filePath), contentType);
+            }
+        }
+
 
         public static void SetEmpty(this ILazyBlob blob)
         {

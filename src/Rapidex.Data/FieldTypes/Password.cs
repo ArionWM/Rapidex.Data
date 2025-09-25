@@ -6,8 +6,8 @@ namespace Rapidex.Data
 {
     public class Password : BasicBaseDataType<string, Password>
     {
-        private static string CRIPTO_TEXT_PREFIX = "|C|";
-        private static string CRIPTO_TEXT_DUMMY = "*****";
+        private const string CRIPTO_TEXT_PREFIX = "|C|";
+        private const string CRIPTO_TEXT_DUMMY = "*****";
 
         public override string TypeName => "password";
 
@@ -104,11 +104,11 @@ namespace Rapidex.Data
             return passw;
         }
 
-        public override object GetSerializationData(EntitySerializationOptions options)
-        {
-            //Serileştirme verisine içeriği vermiyoruz.
-            return CRIPTO_TEXT_DUMMY;
-        }
+        //public override object GetSerializationData(EntitySerializationOptions options)
+        //{
+        //    //Serileştirme verisine içeriği vermiyoruz.
+        //    return CRIPTO_TEXT_DUMMY;
+        //}
 
         public string Decrypt()
         {

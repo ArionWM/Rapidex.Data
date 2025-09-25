@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Base.Common;
 
-internal class Module : AssemblyDefinitionBase, IRapidexAssemblyDefinition
+internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 {
     public override string Name => "UnitTest.Common";
     public override string TablePrefix => "utest";

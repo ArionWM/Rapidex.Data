@@ -1,5 +1,5 @@
 ﻿using Rapidex.Data.Helpers;
-
+using Rapidex.Data.SerializationAndMapping.JsonConverters;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -108,11 +108,11 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
 
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     IDbEntityMetadata ParentMetadata { get; set; }
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     Type Type { get; set; }
 
     [JsonPropertyName("type")]
@@ -125,11 +125,11 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     string Caption { get; set; }
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     Type BaseType { get; set; }
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     //[YamlMember(Order = -9996)]
     //[JsonPropertyOrder(-9996)]
     DbFieldType? DbType { get; set; }
@@ -148,33 +148,33 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     /// False ise bu alan veritabanı işlemlerine dahil edilmez (sanaldır)
     /// </summary>
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     bool IsPersisted { get; set; }
 
     /// <summary>
     /// True ise veritabanından yükler iken bu alan sorgulanmaz
     /// </summary>
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     bool SkipDirectLoad { get; set; }
 
     /// <summary>
     /// True ise bu alan güncellenmeye çalışılmaz
     /// </summary>
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     bool SkipDirectSet { get; set; }
 
     /// <summary>
     /// True ise bu alanın değişikliği veritabanı kaydında sürüm arttırmaya neden olmaz
     /// </summary>
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     bool SkipDbVersioning { get; set; } //Karmaşıklaştırıyor mu?
 
     //[JsonPropertyOrder(100)]
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     DbFieldProperties DbProperties { get; }
 
 
@@ -182,7 +182,7 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     /// Alt seviyeden (veritabanına yazılacak) değerini döndürür. Örn; bir reference için id değeri
     /// </summary>
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     EntityFieldValueGetterDelegate ValueGetterLower { get; }
 
     /// <summary>
@@ -190,11 +190,11 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     /// Basit bir değerse ValueGetterLower ile aynı olabilir
     /// </summary>
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     EntityFieldValueGetterDelegate ValueGetterUpper { get; }
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     ValueSetterDelegate ValueSetter { get; }
 
     //DictionaryA<object> ExtraData { get; }
@@ -262,15 +262,15 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
 
     List<string> Tags { get; }
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     IDbFieldMetadata PrimaryKey { get; internal set; }
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     IDbFieldMetadata Caption { get; internal set; }
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     DbFieldMetadataList Fields { get; }
 
@@ -279,7 +279,7 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
     [YamlMember(Alias = "Fields", Order = 9999)]
     List<IDbFieldMetadata> FieldsList { get; set; }
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     ComponentDictionary<IEntityBehaviorDefinition> BehaviorDefinitions { get; }
 
@@ -839,9 +839,12 @@ public interface IDbManager
     IDbScope Db(string dbName = null, bool throwErrorIfNotExists = true);
 }
 
+//[JsonDerivedBase]
+//[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
+//[JsonConverter(typeof(EntityJsonConverter))]
 public interface IEntity
 {
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
 #pragma warning disable IDE1006 // Naming Styles
     internal IDbEntityMetadata _Metadata { get; set; }
 
@@ -850,7 +853,7 @@ public interface IEntity
     string _SchemaName { get; internal set; }
     bool _IsNew { get; set; }
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     IDbSchemaScope _Schema { get; internal set; }
 
 #pragma warning restore IDE1006 // Naming Styles
@@ -967,6 +970,9 @@ public interface IDataType : ICloneable
     bool? SkipDbVersioning { get; }
 
     string TypeName { get; }
+
+    [YamlIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     Type BaseType { get; }
 
 
@@ -1012,20 +1018,20 @@ public interface IDataType : ICloneable
 
     IValidationResult Validate();
 
-    /// <summary>
-    /// Used for serialization
-    /// </summary>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    object GetSerializationData(EntitySerializationOptions options);
+    ///// <summary>
+    ///// Used for serialization
+    ///// </summary>
+    ///// <param name="options"></param>
+    ///// <returns></returns>
+    //object GetSerializationData(EntitySerializationOptions options);
 
-    /// <summary>
-    /// Used for deserialization
-    /// </summary>
-    /// <param name="memberName"></param>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    object SetWithSerializationData(string memberName, object value);
+    ///// <summary>
+    ///// Used for deserialization
+    ///// </summary>
+    ///// <param name="memberName"></param>
+    ///// <param name="value"></param>
+    ///// <returns></returns>
+    //object SetWithSerializationData(string memberName, object value);
 }
 
 

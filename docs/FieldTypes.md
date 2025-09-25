@@ -198,7 +198,7 @@ A currency field. This type automatically adds an extra text field named `<Field
 
 ## percentage
 
-Stores percentage values in a 0-100 range.
+Stores percentage values
 
 | | |
 |---|---|
@@ -209,6 +209,10 @@ Stores percentage values in a 0-100 range.
 | PostgreSQL Type | --- |
 | Length | 2 |
 | Lazy Loading | No |
+
+### Note
+
+This field type is basic `short` type with a different name. For to be distinguishable on the UI side.
 
 ---
 

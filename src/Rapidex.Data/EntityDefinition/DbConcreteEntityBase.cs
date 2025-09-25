@@ -8,15 +8,15 @@ namespace Rapidex.Data
     public abstract class DbConcreteEntityBase : IConcreteEntity, IIntEntity, IDbDefinition
     {
 #pragma warning disable IDE1006 // Naming Styles
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         protected Type _Type { get; set; }
         protected ObjDictionary _Values { get; }
 #pragma warning restore IDE1006 // Naming Styles
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         IDbEntityMetadata IEntity._Metadata { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public IDbSchemaScope _Schema { get; set; }
 
         public object this[string columnName]

@@ -98,12 +98,14 @@ namespace Rapidex
 
 
 
-            MappingHelper.Setup();
+            //MappingHelper.Setup();
 
         }
 
         public static void Start(IServiceProvider serviceProvider)
         {
+            MappingHelper.Setup();
+
             ExceptionManager = serviceProvider.GetRapidexService<IExceptionManager>();
             ServiceProvider = serviceProvider;
         }

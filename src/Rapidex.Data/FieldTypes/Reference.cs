@@ -15,11 +15,11 @@ namespace Rapidex.Data
         [JsonPropertyOrder(100)]
         public string ReferencedEntity { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         [YamlIgnore]
         public IDbEntityMetadata ReferencedEntityMetadata { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         [YamlIgnore]
         public Action<IDbSchemaScope, ItemDefinitionExtraData, ReferenceDbFieldMetadata, bool> DefinitionDataCallback;
 
@@ -58,6 +58,10 @@ namespace Rapidex.Data
 
     }
 
+
+    //[JsonDerivedBase
+    //
+    //Converter for ReferenceBase<TThis>
     public abstract class ReferenceBase<TThis> : BasicBaseDataType<long, TThis>, ILazy, IReference
         where TThis : ReferenceBase<TThis>, new()
     {
@@ -75,7 +79,9 @@ namespace Rapidex.Data
 
 
         public override string TypeName => "reference";
-        public override Type BaseType => typeof(long);// typeof(Reference);
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public override Type BaseType => typeof(long);
 
         public bool IsEmpty { get { return this.TargetId == DatabaseConstants.DEFAULT_EMPTY_ID || this.TargetId == 0; } }
 
@@ -220,28 +226,28 @@ namespace Rapidex.Data
             return clone;
         }
 
-        public override object GetSerializationData(EntitySerializationOptions options)
-        {
-            ObjDictionary data = new ObjDictionary();
-            data["value"] = this.Value;
+        //public override object GetSerializationData(EntitySerializationOptions options)
+        //{
+        //    ObjDictionary data = new ObjDictionary();
+        //    data["value"] = this.Value;
 
-            ILazy _this = (ILazy)this;
-            IEntity ent = (IEntity)_this.GetContent();
-            string caption = ent?.Caption();
-            data["text"] = caption;
-            return data;
-        }
+        //    ILazy _this = (ILazy)this;
+        //    IEntity ent = (IEntity)_this.GetContent();
+        //    string caption = ent?.Caption();
+        //    data["text"] = caption;
+        //    return data;
+        //}
 
-        public override object SetWithSerializationData(string memberName, object value)
-        {
-            if (value is IDictionary<string, object> dict)
-            {
-                long _value = dict.Get("value", true).As<long>();
-                this.Value = _value;
-            }
+        //public override object SetWithSerializationData(string memberName, object value)
+        //{
+        //    if (value is IDictionary<string, object> dict)
+        //    {
+        //        long _value = dict.Get("value", true).As<long>();
+        //        this.Value = _value;
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
         //public override IPartialEntity[] SetValue(IEntity entity, string fieldName, ObjDictionary value)
         //{
@@ -253,6 +259,7 @@ namespace Rapidex.Data
 
     }
 
+    //[JsonDerivedBase]
     public class Reference : ReferenceBase<Reference>, ILazy, IReference
     {
         public static implicit operator Reference(DbEntity entity)
@@ -281,7 +288,7 @@ namespace Rapidex.Data
         public override string TypeName => "referenceConcrete";
 
 
-        public T GetContent()
+        public new T GetContent()
         {
             object item = ((ILazy)this).GetContent();
             return (T)item;

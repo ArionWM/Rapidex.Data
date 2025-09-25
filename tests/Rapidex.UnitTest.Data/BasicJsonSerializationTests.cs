@@ -10,11 +10,11 @@ namespace Rapidex.UnitTest.Data;
 
 public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-	public BasicJsonSerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
-	{
-	}
+    public BasicJsonSerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    {
+    }
 
-	/*
+    /*
      * Serialization; Her dataType olması gerektiği gibi EntityData dict item üretiyor mu? (??? doğrudan serileştirsek?)
      * EntityData dict doğru serialize ediliyor mu?
      * 
@@ -22,168 +22,225 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
      
      */
 
-	[Fact]
-	public void Serialization_01_ConvertToEntityDataDto()
-	{
-		var db = Database.Dbs.AddMainDbIfNotExists();
+    [Fact]
+    public void Serialization_01_ConvertToJson01()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
-		db.Metadata.AddIfNotExist<ConcreteEntity04>(); //Master
-		db.Metadata.AddIfNotExist<ConcreteEntity03>(); //Detail
+        db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
 
-		db.Structure.DropEntity<ConcreteEntity03>();
-		db.Structure.DropEntity<ConcreteEntity04>();
-
-		db.Structure.ApplyEntityStructure<ConcreteEntity04>();
-		db.Structure.ApplyEntityStructure<ConcreteEntity03>();
+        db.Structure.DropEntity<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
 
-		using var work = db.BeginWork();
+        using var work = db.BeginWork();
 
-		ConcreteEntity03 ent03_01 = work.New<ConcreteEntity03>();
-		ent03_01.Name = "ent03_01";
-		ent03_01.Save();
-
-		ConcreteEntity03 ent03_02 = work.New<ConcreteEntity03>();
-		ent03_02.Name = "ent03_02";
-		ent03_02.Save();
-
-		ConcreteEntity04 ent04 = work.New<ConcreteEntity04>();
-		ent04.Number = RandomHelper.Random(100000);
-		ent04.Save();
-
-		ent04.Details01.Add(ent03_01);
-		ent04.Details01.Add(ent03_02);
-
-		work.CommitChanges();
-
-		IEntitySerializationDataCreator dataCreator = this.Fixture.ServiceProvider.GetRapidexService<IEntitySerializationDataCreator>() ?? new EntitySerializationDataCreator();
-
-		EntitySerializationOptions serializationOptions = new EntitySerializationOptions();
-		serializationOptions.IncludeNestedEntities = true;
-		serializationOptions.IncludeBaseFields = true;
-		serializationOptions.IncludeTypeName = true;
-
-		//All fields requested
-		EntityDataDto dto01 = dataCreator.ConvertToEntityData(ent04, serializationOptions);
-		Assert.NotNull(dto01);
-		Assert.Equal("ConcreteEntity04", dto01.Entity);
+        ConcreteEntity01 ent01_01 = work.New<ConcreteEntity01>();
+        ent01_01.ContactType = ContactTypeTest.Personal;
+        ent01_01.BirthDate = new DateTimeOffset(1990, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        ent01_01.Name = "ent01_01";
+        ent01_01.Phone = "555-1234";
+        ent01_01.Number = 123;
+        ent01_01.CreditLimit1 = 10000;
+        ent01_01.CreditLimit1.Type = "USD";
+        ent01_01.Description = "Description for ent01";
+        ent01_01.Description.Type = TextType.Plain;
+        ent01_01.Picture.LoadFromFile(this.Fixture.GetPath("TestContent\\Image01.png"));
+        ent01_01.Save();
 
 
-		object detailData = dto01["Details01"];
-		Assert.NotNull(detailData);
-		Assert.IsAssignableFrom<IEnumerable<EntityDataDto>>(detailData);
+        work.CommitChanges();
 
-		IEnumerable<EntityDataDto> _detailData = (IEnumerable<EntityDataDto>)detailData;
-		Assert.Equal(2, _detailData.Count());
-
-		EntityDataDto detail01 = _detailData.First();
-		EntityDataDto detail02 = _detailData.Last();
-
-		Assert.Equal("ent03_01", detail01["Name"]);
-		Assert.Equal("ent03_02", detail02["Name"]);
+        long entityId = ent01_01.GetId().As<long>();
 
 
-		//Only Number requested
-		EntityDataDto dto02 = dataCreator.ConvertToEntityData(ent04, serializationOptions, "number"); //<- case insensitive
-		Assert.NotNull(dto02);
+        string json01 = ((IEntity)ent01_01).ToJson();
 
-		Assert.Equal(6, dto02.Keys.Count());
-		Assert.Equal(ent04.GetId(), dto02[CommonConstants.FIELD_ID]);
-		Assert.Equal(ent04.GetId(), dto02[CommonConstants.DATA_FIELD_ID]);
-		Assert.Equal(ent04.DbVersion, dto02[CommonConstants.FIELD_VERSION]);
-		Assert.Equal(ent04.Caption(), dto02[CommonConstants.DATA_FIELD_CAPTION]);
-		Assert.Equal(ent04.Number, dto02["Number"]);
+        var dict01 = json01.FromJsonToDictionary();
 
-		Assert.Null(dto02["Details01"]);
+        Assert.NotNull(dict01);
+        Assert.Equal("ConcreteEntity01", dict01["_entity"]);
 
-	}
+        var values01 = dict01["Values"] as IDictionary<string, object>;
+        Assert.NotNull(values01);
 
-	[Fact]
-	public void Serialization_01_EntityToJsonAndReverse()
-	{
-		var db = Database.Dbs.AddMainDbIfNotExists();
-		db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
-		db.Structure.ApplyEntityStructure<ConcreteEntity01>();
-		//var dbscope = Database.Databases.AddMainDbIfNotExists();
-		//dbscope.Structure.DropEntity<ConcreteEntity01>();
-		//dbscope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        var desc01 = values01["Description"] as IDictionary<string, object>;
+        Assert.NotNull(desc01);
+        Assert.Equal("Description for ent01", desc01["value"]);
+        Assert.Equal("Plain", desc01["type"]);
 
-		using var work = db.BeginWork();
+        var contactType01 = values01["ContactType"] as IDictionary<string, object>;
+        Assert.NotNull(contactType01);
+        Assert.Equal(16, contactType01["value"]);
+        Assert.Equal("Personal", contactType01["text"]);
 
-		ConcreteEntity01 ent01 = work.New<ConcreteEntity01>();
-		ent01.Name = "ent01";
-		ent01.CreditLimit1 = 1234;
-		ent01.Description = "desc 01";
-		ent01.ContactType = ContactTypeTest.Corporate;
-		ent01.Save();
+        var picture01 = values01["Picture"] as IDictionary<string, object>; 
+        Assert.NotNull(picture01);
+        Assert.Equal("Image01.png", picture01["text"]); 
+        Assert.Equal($"Base.ConcreteEntity01.{entityId}.fields.Picture", picture01["id"]);
 
-		string json01 = ent01.ToJson();
-		Assert.NotNull(json01);
 
-		ConcreteEntity01 ent = json01.FromJson<ConcreteEntity01>(db);
-		Assert.NotNull(ent);
-		Assert.Equal("ent01", ent.Name);
-		Assert.Equal(1234, ent.CreditLimit1.Value);
-		Assert.Equal(ContactTypeTest.Corporate, (ContactTypeTest)ent.ContactType.Value);
-	}
+    }
 
-	[Fact]
-	public void Serialization_02_EntityJsonDataDeserialization()
-	{
-		var db = Database.Dbs.AddMainDbIfNotExists();
-		db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
+    [Fact]
+    public void Serialization_01_ConvertToJson02()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
 
-		//var dbscope = Database.Databases.AddMainDbIfNotExists();
-		//dbscope.Structure.DropEntity<ConcreteEntity01>();
+        db.Metadata.AddIfNotExist<ConcreteEntity04>(); //Master
+        db.Metadata.AddIfNotExist<ConcreteEntity03>(); //Detail
 
-		//dbscope.Structure.ApplyAllStructure();
+        db.Structure.DropEntity<ConcreteEntity03>();
+        db.Structure.DropEntity<ConcreteEntity04>();
 
-		//ConcreteEntity01 ent01 = dbscope.New<ConcreteEntity01>();
-		//ent01.Name = "ent01";
-		//ent01.CreditLimit1 = 1234;
-		//ent01.Description = "desc 01";
-		//ent01.ContactType = ContactTypeTest.Corporate;
-		//ent01.Save();
+        db.Structure.ApplyEntityStructure<ConcreteEntity04>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity03>();
 
-		string json =
-		@"{
-              ""name"": ""ent01"",
-              ""address"": null,
-              ""phone"": null,
-              ""creditLimit1"": {
-                ""value"": 1234,
-                ""type"": null
-              },
-              ""creditLimit2"": {
-                ""value"": 0,
-                ""type"": null
-              },
-              ""total"": {
-                ""value"": 1234,
-                ""type"": null
-              },
-              ""description"": ""desc 01"",
-              ""picture"": ""-10062.Picture"",
-              ""birthDate"": ""0001-01-01T00:00:00+00:00"",
-              ""contactType"": {
-                ""value"": 2,
-                ""text"": ""Corporate""
-              },
-              ""_TypeName"": ""ConcreteEntity01"",
-              ""_DbName"": ""Master"",
-              ""_SchemaName"": ""Base"",
-              ""_IsNew"": true,
-              ""id"": -10062,
-              ""externalId"": null,
-              ""dbVersion"": 0
+
+        using var work = db.BeginWork();
+
+        ConcreteEntity01 ent01_01 = work.New<ConcreteEntity01>();
+        ent01_01.Name = "ent01_01";
+        ent01_01.Save();
+
+        ConcreteEntity03 ent03_01 = work.New<ConcreteEntity03>();
+        ent03_01.Ref1 = ent01_01;
+        ent03_01.Name = "ent03_01";
+        ent03_01.Save();
+
+        ConcreteEntity03 ent03_02 = work.New<ConcreteEntity03>();
+        ent03_02.Name = "ent03_02";
+        ent03_02.Save();
+
+        ConcreteEntity04 ent04 = work.New<ConcreteEntity04>();
+        ent04.Number = RandomHelper.Random(100000);
+        ent04.Description = "Description for ent04";
+
+        ent04.Save();
+
+        ent04.Details01.Add(ent03_01);
+        ent04.Details01.Add(ent03_02);
+
+        work.CommitChanges();
+
+        long detailId1 = ent03_01.GetId().As<long>();
+        long detailId2 = ent03_02.GetId().As<long>();
+
+
+        string json01 = ((IEntity)ent04).ToJson();
+
+        var dict01 = json01.FromJsonToDictionary();
+
+        Assert.NotNull(dict01);
+        Assert.Equal("ConcreteEntity04", dict01["_entity"]);
+
+        var values01 = dict01["Values"] as IDictionary<string, object>;
+        Assert.NotNull(values01);
+
+        var desc01 = values01["Description"] as IDictionary<string, object>;
+        Assert.NotNull(desc01);
+
+        Assert.Equal("Description for ent04", desc01["value"]);
+        Assert.Equal("Plain", desc01["type"]);
+
+        var detais01 = values01["Details01"] as IList<object>;
+        Assert.NotNull(detais01);
+        Assert.Equal(2, detais01.Count());
+
+        var detail01 = detais01.FirstOrDefault(x => ((IDictionary<string, object>)x)["id"].As<long>() == detailId1) as IDictionary<string, object>;
+        Assert.NotNull(detail01);
+
+        var detail01Values = detail01["Values"] as IDictionary<string, object>;
+        Assert.Equal("ent03_01", detail01Values["Name"].As<string>());
+
+
+
+
+
+        ///Assert.Equal(2, dict01["Details01"].Count());
+
+    }
+
+    [Fact]
+    public void Serialization_02_EntityToJsonAndReverse()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        //var dbscope = Database.Databases.AddMainDbIfNotExists();
+        //dbscope.Structure.DropEntity<ConcreteEntity01>();
+        //dbscope.Structure.ApplyEntityStructure<ConcreteEntity01>();
+
+        using var work = db.BeginWork();
+
+        ConcreteEntity01 ent01 = work.New<ConcreteEntity01>();
+        ent01.Name = "ent01";
+        ent01.CreditLimit1 = 1234;
+        ent01.Description = "desc 01";
+        ent01.ContactType = ContactTypeTest.Corporate;
+        ent01.Save();
+
+        string json01 = ent01.ToJson();
+        Assert.NotNull(json01);
+
+        ConcreteEntity01 ent = json01.FromJson<ConcreteEntity01>(db);
+        Assert.NotNull(ent);
+        Assert.Equal("ent01", ent.Name);
+        Assert.Equal(1234, ent.CreditLimit1.Value);
+        Assert.Equal(ContactTypeTest.Corporate, (ContactTypeTest)ent.ContactType.Value);
+    }
+
+    [Fact]
+    public void Serialization_03_EntityJsonDataDeserialization()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
+
+        //var dbscope = Database.Databases.AddMainDbIfNotExists();
+        //dbscope.Structure.DropEntity<ConcreteEntity01>();
+
+        //dbscope.Structure.ApplyAllStructure();
+
+        //ConcreteEntity01 ent01 = dbscope.New<ConcreteEntity01>();
+        //ent01.Name = "ent01";
+        //ent01.CreditLimit1 = 1234;
+        //ent01.Description = "desc 01";
+        //ent01.ContactType = ContactTypeTest.Corporate;
+        //ent01.Save();
+
+        string json =
+        @"{
+              ""Entity"": ""ConcreteEntity01"",
+              ""Values"": {
+                ""Id"": 123,
+                ""Name"": ""Test Entity"",
+                ""Address"": ""abc abc"",
+                ""Phone"": ""1234567890"",
+                ""Number"": 5,
+                ""CreditLimit1"": 1000.50,
+                ""CreditLimit1Currency"": ""USD"",
+                ""Total"": 1500.75,
+                ""TotalCurrency"": ""USD"",
+                ""Description"": ""This is a test entity."",
+                ""Picture"": {
+                  ""value"": ""<BlobRecordId>"",
+                  ""text"": ""picture"",
+                  ""id"": ""<schemaName>.<OwnerEntityName>.<OwnerEntityId>.<FieldName>""
+                },
+                ""BirthDate"": ""2012-04-21T18:25:43-05:00"",
+                ""ContactType"": {
+                  ""value"": ""1"",
+                  ""text"": ""Customer""
+                    }
+                }
             }";
 
-		ConcreteEntity01 ent = json.FromJson<ConcreteEntity01>();
-		Assert.NotNull(ent);
-		Assert.Equal("ent01", ent.Name);
-		Assert.Equal(1234, ent.CreditLimit1.Value);
-		Assert.Equal(ContactTypeTest.Department, (ContactTypeTest)ent.ContactType.Value);
+        ConcreteEntity01 ent = json.FromJson<ConcreteEntity01>();
+        Assert.NotNull(ent);
+        Assert.Equal("ent01", ent.Name);
+        Assert.Equal(1234, ent.CreditLimit1.Value);
+        Assert.Equal(ContactTypeTest.Department, (ContactTypeTest)ent.ContactType.Value);
 
-	}
+    }
 
 }

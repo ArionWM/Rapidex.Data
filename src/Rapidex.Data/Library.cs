@@ -6,6 +6,7 @@ using Rapidex.Data.Metadata.Implementers;
 using Rapidex.Data.Parsing;
 using Rapidex.Data.Query;
 using Rapidex.Data.Scopes;
+using Rapidex.Data.SerializationAndMapping.JsonConverters;
 using Rapidex.SignalHub;
 using System;
 using System.Collections.Generic;
@@ -42,10 +43,28 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
         
-        FieldTypeJsonConverterBDT.Register();
+        //FieldTypeJsonConverterBDT.Register();
         JsonImplementerInterfaceConverter.Register();
         EntityDataListImplementerJsonConverter.Register();
         EntityDataNestedListImplementerJsonConverter.Register();
+
+        RapidexDataConverterFactory.Register();
+        DataTypeDefaultJsonConverter.Register();
+        ReferenceJsonConverter<Image>.Register();
+        ReferenceJsonConverter<Reference>.Register();
+        EntityReferenceJsonConverter.Register();
+
+        RelationN2NJsonConverter.Register();
+        RelationOne2NJsonConverter.Register();
+        ImageJsonConverter.Register();
+        EntityJsonConverter.Register();
+        EnumerationJsonConverter.Register();
+        TagsJsonConverter.Register();
+        DateTimeStartEndJsonConverter.Register();
+        OneWayPasswordJsonConverter.Register();
+        PasswordJsonConverter.Register();
+        TextJsonConverter.Register();
+
 
         FieldMetadataCollection fmc = new();
         fmc.Setup(services);

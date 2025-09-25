@@ -1,0 +1,26 @@
+﻿{
+  "Entity": "ConcreteEntity01",
+  "Values": {
+    "Id": 123,
+    "Name": "Test Entity",
+    "Address": "abc abc",
+    "Phone": "1234567890",
+    "Number": 5,
+    "CreditLimit1": 1000.50,
+    "CreditLimit1Currency": "USD",
+    "Total": 1500.75,
+    "TotalCurrency": "USD",
+    "Description": "This is a test entity.",
+    "Picture": {
+      "value": "<BlobRecordId>",
+      "text": "picture",
+      "id": "<schemaName>.<OwnerEntityName>.<OwnerEntityId>.<FieldName>"
+    },
+    "BirthDate": "2012-04-21T18:25:43-05:00",
+    "ContactType": {
+      "value": "1",
+      "text": "Customer"
+    }
+
+  }
+}

@@ -10,5 +10,6 @@ namespace Rapidex.UnitTest.Data.TestContent
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public Reference<ConcreteEntity01> Ref1 { get; set; }   
     }
 }

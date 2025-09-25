@@ -12,5 +12,7 @@ namespace Rapidex.UnitTest.Data.TestContent
         public int Number { get; set; }
         public RelationOne2N<ConcreteEntity03> Details01 { get; set; }
 
+        public Text Description { get; set; }
+
     }
 }

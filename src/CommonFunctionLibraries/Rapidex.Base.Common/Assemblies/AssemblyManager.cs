@@ -258,7 +258,7 @@ namespace Rapidex.Base.Common.Assemblies
             return FindDerivedClassTypesWithAssemblyInfo(typeof(T));
         }
 
-        public Type[] FindTypesHasAttribute(Type attributeType)
+        public Type[] FindTypesHasAttribute(Type attributeType, bool inherit)
         {
             var assemblies = this.AssemblyDefinitions;
 
@@ -270,7 +270,7 @@ namespace Rapidex.Base.Common.Assemblies
 
                 foreach (var type in atypes)
                 {
-                    var attributes = type.GetCustomAttributes(attributeType);
+                    var attributes = type.GetCustomAttributes(attributeType, inherit);
 
                     if (attributes.Any())
                     {
@@ -282,9 +282,9 @@ namespace Rapidex.Base.Common.Assemblies
             return types.ToArray();
         }
 
-        public Type[] FindTypesHasAttribute<T>() where T : Attribute
+        public Type[] FindTypesHasAttribute<T>(bool inherit) where T : Attribute
         {
-            return FindTypesHasAttribute(typeof(T));
+            return this.FindTypesHasAttribute(typeof(T), inherit);
         }
 
         public AssemblyInfo FindAssemblyInfo(Assembly assembly)

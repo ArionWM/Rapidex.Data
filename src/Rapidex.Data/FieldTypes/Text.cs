@@ -49,9 +49,9 @@ namespace Rapidex.Data
 
         public override string TypeName => "text";
 
-        private string prematureTextType { get; set; }
+        private TextType PrematureTextType { get; set; }
 
-        public string Type
+        public TextType Type
         {
             get
             {
@@ -76,30 +76,35 @@ namespace Rapidex.Data
             throw new NotImplementedException();
         }
 
-        protected string GetTextType()
+        protected TextType GetTextType()
         {
             IDataType _this = this;
             if (_this.FieldMetadata == null)
-                return this.prematureTextType;
+                return this.PrematureTextType;
 
             string typeFieldName = GetTypeFieldName(this);
 
             string typeValue = _this.Parent.NotNull().GetValue<string>(typeFieldName);
-            return typeValue;
+            if (typeValue.IsNOTNullOrEmpty() && Enum.TryParse<TextType>(typeValue, out TextType textType))
+            {
+                return textType;
+            }
+
+            return TextType.Plain;
         }
 
-        protected void SetTextType(string TextCode)
+        protected void SetTextType(TextType textType)
         {
             IDataType _this = this;
             if (_this.FieldMetadata == null)
             {
-                this.prematureTextType = TextCode;
+                this.PrematureTextType = textType;
             }
             else
             {
-                this.prematureTextType = null;
+                this.PrematureTextType =  TextType.Plain;
                 string typeFieldName = GetTypeFieldName(this);
-                _this.Parent.NotNull().SetValue(typeFieldName, TextCode);
+                _this.Parent.NotNull().SetValue(typeFieldName, textType.ToString());
             }
         }
 

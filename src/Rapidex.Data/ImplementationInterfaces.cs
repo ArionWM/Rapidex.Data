@@ -32,7 +32,7 @@ public interface IMetadataImplementHost
 
 //See: JsonImplementerInterfaceConverter
 //[JsonConverter(typeof(JsonImplementerInterfaceConverter))]
-[JsonDerivedBase]
+//[JsonDerivedBase]
 public interface IImplementer
 {
     string[] SupportedTags { get; }

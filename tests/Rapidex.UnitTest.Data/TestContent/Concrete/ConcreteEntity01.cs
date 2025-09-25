@@ -9,9 +9,8 @@ using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestContent;
 
-internal class ConcreteEntity01 : DbConcreteEntityBase
+public class ConcreteEntity01 : DbConcreteEntityBase
 {
-    //public Text CustomerNumber { get; set; } ??
     public string Name { get; set; }
     public string Address { get; set; }
     public Phone Phone { get; set; }

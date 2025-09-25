@@ -14,15 +14,15 @@ namespace Rapidex.Data
             return base.SetupMetadata(container, self, values);
         }
 
-        public override object GetSerializationData(EntitySerializationOptions options)
-        {
-            string[] tags = this.Get();
-            IDataType _this = this;
+        //public override object GetSerializationData(EntitySerializationOptions options)
+        //{
+        //    string[] tags = this.Get();
+        //    IDataType _this = this;
 
-            var tagInfos = HasTags.GetTagInfo(_this.Parent._Schema, _this.FieldMetadata.ParentMetadata, tags);
-            return tagInfos;
+        //    var tagInfos = HasTags.GetTagInfo(_this.Parent._Schema, _this.FieldMetadata.ParentMetadata, tags);
+        //    return tagInfos;
 
-        }
+        //}
 
         public override IValidationResult Validate()
         {
@@ -53,12 +53,12 @@ namespace Rapidex.Data
 
             if (value is string)
             {
-                string _strVal = (string)value;
-                _strVal = _strVal?.Trim();
+                string strVal = (string)value;
+                strVal = strVal?.Trim();
 
-                string[] tagParts = _strVal.Split('|', ',', ';').DistinctWithTrimElements();
-                _strVal = '|' + tagParts.Select(tstr => HasTags.SplitTag(tstr).Name).Join("|") + '|';
-                value = _strVal;
+                string[] tagParts = strVal.Split('|', ',', ';').DistinctWithTrimElements();
+                strVal = '|' + tagParts.Select(tstr => HasTags.SplitTag(tstr).Name).Join("|") + '|';
+                value = strVal;
             }
 
             base.SetValue(entity, fieldName, value, applyToEntity);
@@ -85,22 +85,6 @@ namespace Rapidex.Data
         /// <param name="tags">| ile ayrılmış tag'ler</param>
         protected void Set(string tags)
         {
-            //string value = null;
-            //if (tags.IsNOTNullOrEmpty())
-            //{
-            //    value =
-            //        '|' +
-            //        tags.Split('|').DistinctWithTrimElements().Join("|") +
-            //        '|';
-
-            //    //value = tags.Trim();
-            //    //if (!value.StartsWith('|'))
-            //    //    value = '|' + value;
-
-            //    //if (!value.EndsWith('|'))
-            //    //    value += '|';
-            //}
-
             IDataType _this = this;
             this.SetValue(_this.Parent, _this.FieldMetadata.Name, tags, true);
         }

@@ -13,15 +13,15 @@ namespace Rapidex.Data.Metadata.Columns
         public string Expression { get; set; }
 
         [YamlIgnore]
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public override DbFieldProperties DbProperties { get; set; } = new DbFieldProperties();
 
         [YamlIgnore]
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public override EntityFieldValueGetterDelegate ValueGetterLower { get; set; }
 
         [YamlIgnore]
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public override ValueSetterDelegate ValueSetter { get; set; }
 
     }

@@ -26,39 +26,39 @@ public class DbFieldMetadata : IDbFieldMetadata
 
     public virtual string Caption { get; set; }
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     public virtual bool IsPersisted { get; set; } = true;
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     public virtual bool SkipDirectLoad { get; set; } = false;
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     public virtual bool SkipDirectSet { get; set; } = false;
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     public virtual bool SkipDbVersioning { get; set; }
 
     //?? Ui ile ilgili bir şey olmamalı?
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     public virtual bool Invisible { get; set; }
 
     public virtual bool IsSealed { get; set; } = false;
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     public virtual Type Type { get { return this._type; } set { this.SetType(value); } }
 
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
     public virtual Type BaseType { get; set; }
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     //[YamlMember(Order = -9996)]
     //[JsonPropertyOrder(-9996)]
     public virtual DbFieldType? DbType { get; set; }
@@ -67,23 +67,23 @@ public class DbFieldMetadata : IDbFieldMetadata
 
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual DbFieldProperties DbProperties { get; set; } = new DbFieldProperties();
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual EntityFieldValueGetterDelegate ValueGetterUpper { get; set; }
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual EntityFieldValueGetterDelegate ValueGetterLower { get; set; }
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual ValueSetterDelegate ValueSetter { get; set; }
 
     [YamlIgnore]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public IDbEntityMetadata ParentMetadata { get; set; }
 
     public DbFieldMetadata()

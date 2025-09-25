@@ -8,7 +8,7 @@ namespace Rapidex.Data.Metadata
 {
     internal class DbEntityMetadata : IDbEntityMetadata
     {
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         [YamlIgnore]
         public IDbMetadataContainer Parent { get; set; }
 
@@ -40,17 +40,17 @@ namespace Rapidex.Data.Metadata
 
         public bool OnlyBaseSchema { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         [YamlIgnore]
         public IDbFieldMetadata PrimaryKey { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         [YamlIgnore]
         public IDbFieldMetadata Caption { get; set; }
 
         public List<string> Tags { get; } = new List<string>();
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         [YamlIgnore]
         public DbFieldMetadataList Fields { get; protected set; }
 
@@ -69,7 +69,7 @@ namespace Rapidex.Data.Metadata
             }
         }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         [YamlIgnore]
         public ComponentDictionary<IEntityBehaviorDefinition> BehaviorDefinitions { get; }
 

@@ -42,7 +42,7 @@ namespace Rapidex
 
         bool IPaging.IncludeTotalItemCount { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         int IReadOnlyCollection<T>.Count => this._items.Count;
 
         public bool IsEmpty => !this._items.Any();

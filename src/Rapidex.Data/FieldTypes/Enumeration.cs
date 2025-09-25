@@ -128,25 +128,25 @@ namespace Rapidex.Data
             base.SetValue(entity, fieldName, value, applyToEntity);
         }
 
-        public override object GetSerializationData(EntitySerializationOptions options)
-        {
-            return base.GetSerializationData(options);
-        }
+        //public override object GetSerializationData(EntitySerializationOptions options)
+        //{
+        //    return base.GetSerializationData(options);
+        //}
 
-        public override object SetWithSerializationData(string memberName, object value)
-        {
-            if (value is IDictionary<string, object> data)
-            {
-                this.Value = data["value"].As<long>();
+        //public override object SetWithSerializationData(string memberName, object value)
+        //{
+        //    if (value is IDictionary<string, object> data)
+        //    {
+        //        this.Value = data["value"].As<long>();
 
-            }
-            else
-            {
-                this.Value = value.As<long>();
-            }
+        //    }
+        //    else
+        //    {
+        //        this.Value = value.As<long>();
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
     }
 
     /// <summary>
@@ -155,13 +155,9 @@ namespace Rapidex.Data
     /// <typeparam name="T"></typeparam>
     public class Enumeration<T> : Enumeration where T : System.Enum
     {
+        [System.Text.Json.Serialization.JsonIgnore]
         public override Type BaseType => typeof(Enumeration<>);
         public override string TypeName => "enumConcrete";
-
-
-        //[YamlMember(Alias = "enum", Order = 100)]
-        //[JsonPropertyOrder(100)]
-        //public string ReferencedEnumName => typeof(T).Name;
 
         public T EnumValue { get { return (T)Enum.ToObject(typeof(T), Convert.ToInt32(this.Value)); } }
 

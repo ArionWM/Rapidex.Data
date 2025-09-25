@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.SymbolStore;
 using System.Text;
 
@@ -7,7 +8,7 @@ namespace Rapidex;
 
 public static class DictionaryHelper
 {
-    public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, TValue value)
+    public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dict, [NotNull] TKey key, [AllowNull] TValue value)
     {
         dict.NotNull();
 
@@ -21,7 +22,7 @@ public static class DictionaryHelper
     }
 
 
-    public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dict, IDictionary<TKey, TValue> with)
+    public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dict, [NotNull] IDictionary<TKey, TValue> with)
     {
         if (with == null)
             return;
@@ -40,7 +41,7 @@ public static class DictionaryHelper
     /// <param name="dict"></param>
     /// <param name="key"></param>
     /// <param name="action">newValue = Func(currentValueOfKey) </param>
-    public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue, TValue> action)
+    public static void Set<TKey, TValue>(this IDictionary<TKey, TValue> dict, [NotNull] TKey key, Func<TValue, TValue> action)
     {
         dict.NotNull();
 

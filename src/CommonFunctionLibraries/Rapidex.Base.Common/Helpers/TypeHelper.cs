@@ -9,8 +9,9 @@ namespace Rapidex
 {
     public static class TypeHelper
     {
-        //static Dictionary<string, Type> types = new Dictionary<string, Type>();
-        static TwoLevelDictionary<Type, string, PropertyInfo> _properties = new TwoLevelDictionary<Type, string, PropertyInfo>();
+
+        readonly static TwoLevelDictionary<Type, string, PropertyInfo> properties = new TwoLevelDictionary<Type, string, PropertyInfo>();
+        readonly static TwoLevelList<Type, Type> baseTypes = new TwoLevelList<Type, Type>();
 
         public readonly static Type Type_Int = typeof(int);
         public readonly static Type Type_String = typeof(string);
@@ -141,17 +142,45 @@ namespace Rapidex
 
         public static PropertyInfo GetPropertyCached(this Type type, string propertyName)
         {
-            var propDict = _properties.Get(type);
+            var propDict = properties.Get(type);
             var propInfo = propDict?.Get(propertyName);
             if (propInfo == null)
             {
                 propInfo = type.GetProperty(propertyName);
                 if (propInfo != null)
-                    _properties.Set(type, propertyName, propInfo);
+                    properties.Set(type, propertyName, propInfo);
 
             }
 
             return propInfo;
+        }
+
+        public static IList<Type> GetBaseTypesChainCached(this Type type, bool includeInterfaces)
+        {
+            if (baseTypes.ContainsKey(type) && baseTypes[type] != null)
+            {
+                return baseTypes[type];
+            }
+
+            List<Type> list = new List<Type>();
+            Type bType = type.BaseType;
+            while (bType != null)
+            {
+                list.Add(bType);
+                bType = bType.BaseType;
+            }
+            baseTypes.Set(type, list);
+
+            if (includeInterfaces)
+            {
+                Type[] interfaces = type.GetInterfaces();
+                foreach (Type iface in interfaces)
+                {
+                    if (!list.Contains(iface))
+                        list.Add(iface);
+                }
+            }
+            return list;
         }
 
         public static string ToStringAdv(this Type type)

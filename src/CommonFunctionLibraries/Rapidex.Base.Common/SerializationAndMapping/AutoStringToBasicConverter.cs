@@ -146,7 +146,63 @@ public class AutoStringToBasicConverter : JsonConverter<object>
 
     public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
     {
-        JsonSerializer.Serialize(writer, value);
+        if (value.IsNullOrEmpty())
+        {
+            writer.WriteNullValue();
+            return;
+        }
+
+        TypeCode tcode = Type.GetTypeCode(value.GetType());
+        switch (tcode)
+        {
+            case TypeCode.Byte:
+                writer.WriteNumberValue((byte)value);
+                return;
+            case TypeCode.SByte:
+                writer.WriteNumberValue((sbyte)value);
+                return;
+            case TypeCode.UInt16:
+                writer.WriteNumberValue((ushort)value);
+                return;
+            case TypeCode.UInt32:
+                writer.WriteNumberValue((uint)value);
+                return;
+            case TypeCode.UInt64:
+                writer.WriteNumberValue((ulong)value);
+                return;
+            case TypeCode.Int16:
+                writer.WriteNumberValue((short)value);
+                return;
+            case TypeCode.Int32:
+                writer.WriteNumberValue((int)value);
+                return;
+            case TypeCode.Int64:
+                writer.WriteNumberValue((long)value);
+                return;
+            case TypeCode.Decimal:
+                writer.WriteNumberValue((decimal)value);
+                return;
+            case TypeCode.Double:
+                writer.WriteNumberValue((double)value);
+                return;
+            case TypeCode.Single:
+                writer.WriteNumberValue((float)value);
+                return;
+            case TypeCode.Boolean:
+                writer.WriteBooleanValue((bool)value);
+                return;
+            default:
+                throw new Exception($"unable to parse {value} to number");
+                break;
+        }
+
+
+
+
+        //JsonSerializer.Serialize(writer, value, options);
+
+
+
         //var str = value.ToString();             // I don't want to write int/decimal/double/...  for each case, so I just convert it to string . You might want to replace it with strong type version.
         //if (int.TryParse(str, out var i))
         //{

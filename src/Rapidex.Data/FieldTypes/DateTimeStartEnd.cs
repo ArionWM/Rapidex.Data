@@ -14,11 +14,11 @@ namespace Rapidex.Data
     {
         public class VirtualDateTimeStartEndDbFieldMetadata : Metadata.Columns.VirtualDbFieldMetadata
         {
-            [JsonIgnore]
+            [System.Text.Json.Serialization.JsonIgnore]
             [YamlIgnore]
             public IDbFieldMetadata StartFm { get; set; }
 
-            [JsonIgnore]
+            [System.Text.Json.Serialization.JsonIgnore]
             [YamlIgnore]
             public IDbFieldMetadata EndFm { get; set; }
 
@@ -93,6 +93,8 @@ namespace Rapidex.Data
         private object prematureValue = null;
 
         public override string TypeName => "datetimestartend";
+
+        [System.Text.Json.Serialization.JsonIgnore]
         public override Type BaseType => typeof(DateTimeOffset);
 
         public DateTimeOffset Start
@@ -167,9 +169,10 @@ namespace Rapidex.Data
 
         public override object GetValueLower()
         {
-            object sData = this.GetSerializationData(EntitySerializationOptions.Default);
+            return this.ToJson();
 
-            return sData.ToJson();
+            //object sData = this.GetSerializationData(EntitySerializationOptions.Default);
+            //return sData.ToJson();
         }
 
         public override void SetValue(IEntity entity, string fieldName, object value, bool applyToEntity)
@@ -225,38 +228,38 @@ namespace Rapidex.Data
             this.prematureValue = value;
         }
 
-        public override object GetSerializationData(EntitySerializationOptions options)
-        {
-            IDataType _this = this;
-            IDbFieldMetadata fm = _this?.FieldMetadata;
-            string startFieldName = fm?.Name + "Start";
-            string endFieldName = fm?.Name + "End";
+        //public override object GetSerializationData(EntitySerializationOptions options)
+        //{
+        //    IDataType _this = this;
+        //    IDbFieldMetadata fm = _this?.FieldMetadata;
+        //    string startFieldName = fm?.Name + "Start";
+        //    string endFieldName = fm?.Name + "End";
 
-            DateTimeOffset startTime = _this.Parent.NotNull().GetValue<DateTimeOffset>(startFieldName);
-            DateTimeOffset endTime = _this.Parent.NotNull().GetValue<DateTimeOffset>(endFieldName);
+        //    DateTimeOffset startTime = _this.Parent.NotNull().GetValue<DateTimeOffset>(startFieldName);
+        //    DateTimeOffset endTime = _this.Parent.NotNull().GetValue<DateTimeOffset>(endFieldName);
 
-            ObjDictionary keyValuePairs = new ObjDictionary();
-            keyValuePairs["start"] = startTime == DateTimeOffset.MinValue ? null : startTime;
-            keyValuePairs["end"] = endTime == DateTimeOffset.MinValue ? null : endTime;
-            return keyValuePairs;
-        }
+        //    ObjDictionary keyValuePairs = new ObjDictionary();
+        //    keyValuePairs["start"] = startTime == DateTimeOffset.MinValue ? null : startTime;
+        //    keyValuePairs["end"] = endTime == DateTimeOffset.MinValue ? null : endTime;
+        //    return keyValuePairs;
+        //}
 
-        public override object SetWithSerializationData(string memberName, object value)
-        {
-            if (this.GetParent() == null || memberName.IsNullOrEmpty())
-            {
-                this.SetValuePremature(value);
-                return this;
-            }
+        //public override object SetWithSerializationData(string memberName, object value)
+        //{
+        //    if (this.GetParent() == null || memberName.IsNullOrEmpty())
+        //    {
+        //        this.SetValuePremature(value);
+        //        return this;
+        //    }
 
-            if (value is IDictionary<string, object> dict)
-            {
-                this.SetValue(GetParent(), memberName, dict, true);
-                return this;
-            }
-            else
-                throw new InvalidOperationException($"Value '{value}' is not of type " + typeof(IDictionary<string, object>).Name);
+        //    if (value is IDictionary<string, object> dict)
+        //    {
+        //        this.SetValue(GetParent(), memberName, dict, true);
+        //        return this;
+        //    }
+        //    else
+        //        throw new InvalidOperationException($"Value '{value}' is not of type " + typeof(IDictionary<string, object>).Name);
 
-        }
+        //}
     }
 }

@@ -46,7 +46,7 @@ namespace Rapidex.Data
         }
 
 
-        private string prematureCurrencyType { get; set; }
+        private string PrematureCurrencyType { get; set; }
 
         public string Type
         {
@@ -107,7 +107,7 @@ namespace Rapidex.Data
         {
             IDataType _this = this;
             if (_this.FieldMetadata == null)
-                return this.prematureCurrencyType;
+                return this.PrematureCurrencyType;
 
             string typeFieldName = GetTypeFieldName(this);
 
@@ -120,11 +120,11 @@ namespace Rapidex.Data
             IDataType _this = this;
             if (_this.FieldMetadata == null)
             {
-                this.prematureCurrencyType = currencyCode;
+                this.PrematureCurrencyType = currencyCode;
             }
             else
             {
-                this.prematureCurrencyType = null;
+                this.PrematureCurrencyType = null;
                 string typeFieldName = GetTypeFieldName(this);
                 _this.Parent.NotNull().SetValue(typeFieldName, currencyCode);
             }
@@ -142,10 +142,10 @@ namespace Rapidex.Data
         {
             base.SetupInstance(entity, fm);
 
-            if (this.prematureCurrencyType.IsNOTNullOrEmpty())
+            if (this.PrematureCurrencyType.IsNOTNullOrEmpty())
             {
-                this.SetCurrencyType(this.prematureCurrencyType);
-                this.prematureCurrencyType = null;
+                this.SetCurrencyType(this.PrematureCurrencyType);
+                this.PrematureCurrencyType = null;
             }
         }
 
@@ -162,32 +162,32 @@ namespace Rapidex.Data
             return clone;
         }
 
-        public override object GetSerializationData(EntitySerializationOptions options)
-        {
-            ObjDictionary data = new ObjDictionary();
-            data["value"] = this.Value;
-            data["type"] = this.Type;
-            //symbolText
-            //symbolHtml
-            //symbolIcon
-            return data;
-        }
+        //public override object GetSerializationData(EntitySerializationOptions options)
+        //{
+        //    ObjDictionary data = new ObjDictionary();
+        //    data["value"] = this.Value;
+        //    data["type"] = this.Type;
+        //    //symbolText
+        //    //symbolHtml
+        //    //symbolIcon
+        //    return data;
+        //}
 
-        public override object SetWithSerializationData(string memberName, object value)
-        {
-            if (value is IDictionary<string, object> data)
-            {
-                this.Value = data["value"].As<decimal>(); //?.Get<decimal>("value", true)
-                this.Type = data["type"].As<string>();
-            }
-            else
-            {
-                this.Value = value.As<decimal>();
-            }
+        //public override object SetWithSerializationData(string memberName, object value)
+        //{
+        //    if (value is IDictionary<string, object> data)
+        //    {
+        //        this.Value = data["value"].As<decimal>(); //?.Get<decimal>("value", true)
+        //        this.Type = data["type"].As<string>();
+        //    }
+        //    else
+        //    {
+        //        this.Value = value.As<decimal>();
+        //    }
 
 
-            return null;
-        }
+        //    return null;
+        //}
 
         public override string ToString()
         {

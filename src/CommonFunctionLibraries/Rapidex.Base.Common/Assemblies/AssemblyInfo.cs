@@ -13,10 +13,10 @@ namespace Rapidex.Base.Common.Assemblies
         public string NavigationName { get; internal set; }
         public string DatabaseEntityPrefix { get; internal set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public Assembly Assembly { get; internal set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public Type InitializatorType { get; internal set; }
 
         //For log 

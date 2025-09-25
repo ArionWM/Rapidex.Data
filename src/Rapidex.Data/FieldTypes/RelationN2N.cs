@@ -1,13 +1,15 @@
-﻿using Rapidex.Data.Metadata.Relations;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Rapidex.Data.Metadata.Relations;
 using static Rapidex.Data.RelationOne2N;
 
 namespace Rapidex.Data;
 
+//[JsonDerivedBase]
 public class RelationN2N : RelationBase, ILazy
 {
     public class VirtualRelationN2NDbFieldMetadata : Metadata.Columns.VirtualDbFieldMetadata
@@ -99,6 +101,8 @@ public class RelationN2N : RelationBase, ILazy
 
 
     public override string TypeName => "relationN2N";
+
+    [System.Text.Json.Serialization.JsonIgnore]
     public override Type BaseType => typeof(RelationN2N);
 
     public override object Clone()
@@ -123,42 +127,42 @@ public class RelationN2N : RelationBase, ILazy
         return res;
     }
 
-    public override object GetSerializationData(EntitySerializationOptions options)
-    {
-        IEntityLoadResult? loadResult = (IEntityLoadResult)((ILazy)this).GetContent();
-        if (loadResult == null)
-            return null;
+    //public override object GetSerializationData(EntitySerializationOptions options)
+    //{
+    //    IEntityLoadResult? loadResult = (IEntityLoadResult)((ILazy)this).GetContent();
+    //    if (loadResult == null)
+    //        return null;
 
-        if (options.IncludeNestedEntities)
-        {
-            ObjDictionary data = new ObjDictionary();
-            data["_description"] = "Nested content available";
-            return data;
-        }
+    //    if (options.IncludeNestedEntities)
+    //    {
+    //        ObjDictionary data = new ObjDictionary();
+    //        data["_description"] = "Nested content available";
+    //        return data;
+    //    }
 
-        IEntitySerializationDataCreator dataCreator = Common.ServiceProvider?.GetRapidexService<IEntitySerializationDataCreator>();
-        if (dataCreator == null)
-        { //WARN: Kötü bir çözüm, bu seviyede DI kullanılmıyor idi, nasıl çözebiliriz?
-            dataCreator = new EntitySerializationDataCreator();
-        }
+    //    IEntitySerializationDataCreator dataCreator = Common.ServiceProvider?.GetRapidexService<IEntitySerializationDataCreator>();
+    //    if (dataCreator == null)
+    //    { //WARN: Kötü bir çözüm, bu seviyede DI kullanılmıyor idi, nasıl çözebiliriz?
+    //        dataCreator = new EntitySerializationDataCreator();
+    //    }
 
-        var parentEntity = this.GetParent();
-        var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
-        ItemDefinitionExtraData exData = new ItemDefinitionExtraData();
-        fm.GetDefinitionData(parentEntity._Schema, ref exData, true);
+    //    var parentEntity = this.GetParent();
+    //    var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
+    //    ItemDefinitionExtraData exData = new ItemDefinitionExtraData();
+    //    fm.GetDefinitionData(parentEntity._Schema, ref exData, true);
 
-        EntitySerializationOptions nestedOptions = options;
-        nestedOptions.IncludeNestedEntities = false;
-        nestedOptions.IncludeTypeName = true;
-        var entityData = dataCreator.ConvertToListData(loadResult, nestedOptions, exData.Data, null);
+    //    EntitySerializationOptions nestedOptions = options;
+    //    nestedOptions.IncludeNestedEntities = false;
+    //    nestedOptions.IncludeTypeName = true;
+    //    var entityData = dataCreator.ConvertToListData(loadResult, nestedOptions, exData.Data, null);
 
-        return entityData;
-    }
+    //    return entityData;
+    //}
 
-    public override object SetWithSerializationData(string memberName, object value)
-    {
-        throw new NotImplementedException("!!!!");
-    }
+    //public override object SetWithSerializationData(string memberName, object value)
+    //{
+    //    throw new NotImplementedException("!!!!");
+    //}
 
     public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
     {
@@ -202,6 +206,8 @@ public class RelationN2N : RelationBase, ILazy
 public class RelationN2N<TEntity> : RelationN2N where TEntity : IConcreteEntity
 {
     public override string TypeName => "relationN2NConcrete";
+
+    [System.Text.Json.Serialization.JsonIgnore]
     public override Type BaseType => typeof(RelationN2N<>);
 
     public RelationN2N()

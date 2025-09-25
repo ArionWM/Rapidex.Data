@@ -1,19 +1,21 @@
-﻿using Rapidex.SerializationAndMapping;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using Microsoft.Extensions.Options;
+using Rapidex.SerializationAndMapping;
 
 namespace Rapidex;
 
 public static class JsonHelper
 {
-    static DefaultJsonTypeInfoResolver defaultJsonTypeInfoResolver;
-    public static List<JsonConverter> jsonConverters = new List<JsonConverter>();
+    private static DefaultJsonTypeInfoResolver defaultJsonTypeInfoResolver;
+    internal static Dictionary<Type, JsonConverter> JsonConverters { get; private set; } = new();
     public static JsonSerializerOptions JsonSerializerOptions { get; private set; } = new JsonSerializerOptions();
 
     static JsonHelper()
@@ -31,15 +33,17 @@ public static class JsonHelper
         if (!options.IsReadOnly)
         {
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             options.PropertyNameCaseInsensitive = true;
             options.WriteIndented = true;
             options.AllowTrailingCommas = true;
             options.ReadCommentHandling = JsonCommentHandling.Skip;
 
-            options.Converters.Add(new JsonStringEnumConverter());
-            options.Converters.Add(new AutoStringToBasicConverter());
 
-            foreach (JsonConverter converter in jsonConverters)
+            options.Converters.Add(new JsonStringEnumConverter());
+            //options.Converters.Add(new AutoStringToBasicConverter());
+
+            foreach (JsonConverter converter in JsonConverters.Values)
             {
                 Type ctype = converter.GetType();
                 if (excludedConverters != null && excludedConverters.Any(c => c == ctype))
@@ -56,43 +60,80 @@ public static class JsonHelper
             }
 
             // Configure either a DefaultJsonTypeInfoResolver or some JsonSerializerContext and add the required modifier:
-            options.TypeInfoResolver = new DefaultJsonTypeInfoResolver();
+            options.TypeInfoResolver = defaultJsonTypeInfoResolver;
         }
     }
 
     public static void Register(JsonConverter converter)
     {
-        if (jsonConverters.Any(c => c.GetType() == converter.GetType()))
+        if (JsonConverters.Values.Any(c => c.GetType() == converter.GetType()))
             return;
 
-        jsonConverters.Add(converter);
+        if (converter.Type != null)
+            JsonConverters.Set(converter.Type, converter);
         JsonSerializerOptions.Converters.Add(converter);
     }
 
-    public static void AddDerivedTypes(IJsonTypeInfoResolver tiResolver, Type[] types)
+    public static void AddDerivedTypes(DefaultJsonTypeInfoResolver tiResolver, Type baseType, Type[] types)
     {
+        JsonPolymorphismOptions defaultOpt = new();
+        defaultOpt.IgnoreUnrecognizedTypeDiscriminators = false;
+        defaultOpt.TypeDiscriminatorPropertyName = "$type";
+        defaultOpt.UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType;
+
+
         foreach (var type in types)
         {
-            tiResolver.WithAddedModifier(JsonHelper.AddPolymorphismOptions(
-                type.BaseType,
-                new()
-                {
-                    DerivedTypes = { new(type.BaseType), new(type) },
-                }
-            ));
+            var derivedTypeAttr = type.GetCustomAttribute<JsonDerivedTypeAttribute>(false);
+            if (derivedTypeAttr != null)
+                continue; //Has own attribute
 
-            Type[] subTypes = Common.Assembly.FindDerivedClassTypes(type);
+            var converterAttr = type.GetCustomAttribute<JsonConverterAttribute>(false);
+            if (converterAttr != null)
+                continue; //Has own converter
+
+            if (!type.IsAbstract && type.IsAssignableTo(baseType))
+                defaultOpt.DerivedTypes.Add(new JsonDerivedType(type));
+        }
+
+        tiResolver.Modifiers.Add(typeInfo =>
+        {
+            if (typeInfo.Type.IsAssignableTo(baseType) && !typeInfo.Type.IsSealed)
+            {
+
+            }
+
+            if (typeInfo.Type == baseType && !typeInfo.Type.IsSealed)
+            {
+                if (typeInfo.PolymorphismOptions == null)
+                    typeInfo.PolymorphismOptions = new JsonPolymorphismOptions();
+
+                typeInfo.PolymorphismOptions.IgnoreUnrecognizedTypeDiscriminators = defaultOpt.IgnoreUnrecognizedTypeDiscriminators;
+                typeInfo.PolymorphismOptions.TypeDiscriminatorPropertyName = defaultOpt.TypeDiscriminatorPropertyName;
+                typeInfo.PolymorphismOptions.UnknownDerivedTypeHandling = defaultOpt.UnknownDerivedTypeHandling;
+
+                foreach (var derivedType in defaultOpt.DerivedTypes.Where(t => !t.DerivedType.IsAbstract && t.DerivedType.IsAssignableTo(typeInfo.Type)))
+                    typeInfo.PolymorphismOptions.DerivedTypes.Add(derivedType);
+            }
+        });
+    }
+
+    public static void AddDerivedRootTypes(DefaultJsonTypeInfoResolver tiResolver, Type[] types)
+    {
+        foreach (var rootType in types)
+        {
+            Type[] subTypes = Common.Assembly.FindDerivedClassTypes(rootType);
             if (subTypes.IsNOTNullOrEmpty())
             {
-                AddDerivedTypes(tiResolver, subTypes);
+                AddDerivedTypes(tiResolver, rootType, subTypes);
             }
         }
     }
 
-    public static void AddDerivedTypes(IJsonTypeInfoResolver tiResolver)
+    public static void AddDerivedTypes(DefaultJsonTypeInfoResolver tiResolver)
     {
-        Type[] types = Common.Assembly.FindTypesHasAttribute<JsonDerivedBaseAttribute>();
-        AddDerivedTypes(tiResolver, types);
+        Type[] types = Common.Assembly.FindTypesHasAttribute<JsonDerivedBaseAttribute>(false);
+        AddDerivedRootTypes(tiResolver, types);
     }
 
     public static void MsDeserializationCorrection(Dictionary<string, object> data)
@@ -173,11 +214,13 @@ public static class JsonHelper
         return JsonSerializer.Serialize<T>(obj, JsonSerializerOptions);
     }
 
+    [Obsolete("", true)]
     //https://stackoverflow.com/questions/77857543/how-can-i-add-jsonderivedtype-without-attributes-in-runtime-in-system-text-json
     public static Action<JsonTypeInfo> AddPolymorphismOptions(Type baseType, JsonPolymorphismOptions options) => (typeInfo) =>
     {
         if (baseType.IsSealed)
             throw new ArgumentException($"Cannot add JsonPolymorphismOptions to sealed base type {baseType.FullName}");
+
         if (typeInfo.Type.IsAssignableTo(baseType) && !typeInfo.Type.IsSealed)
         {
             typeInfo.PolymorphismOptions = new()
@@ -186,6 +229,7 @@ public static class JsonHelper
                 TypeDiscriminatorPropertyName = options.TypeDiscriminatorPropertyName,
                 UnknownDerivedTypeHandling = options.UnknownDerivedTypeHandling,
             };
+
             foreach (var derivedType in options.DerivedTypes.Where(t => !t.DerivedType.IsAbstract && t.DerivedType.IsAssignableTo(typeInfo.Type)))
                 typeInfo.PolymorphismOptions.DerivedTypes.Add(derivedType);
         }

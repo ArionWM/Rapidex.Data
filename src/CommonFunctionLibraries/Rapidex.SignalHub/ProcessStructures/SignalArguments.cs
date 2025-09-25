@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rapidex;
 
-[JsonDerivedBase]
+//[JsonDerivedBase]
 public class SignalArguments : ISignalArguments
 {
     public Guid Id { get; set; }

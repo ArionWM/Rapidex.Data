@@ -9,10 +9,10 @@ namespace Rapidex.Data
     {
         ObjDictionary _Values { get; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public IDbSchemaScope _Schema { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         IDbEntityMetadata IEntity._Metadata { get; set; }
 
         public object this[string columnName]
