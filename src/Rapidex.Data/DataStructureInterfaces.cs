@@ -632,6 +632,8 @@ public interface IDbDataModificationScope : IDbDataReadScope, IDisposable
     bool IsFinalized { get; }
     IEntity New(IDbEntityMetadata em);
 
+    void Attach(IEntity entity, bool checkIntegrity = true);
+
     void Save(IEntity entity);
 
     void Save(IEnumerable<IEntity> entities);
@@ -743,22 +745,6 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
     {
         this.Data.UnRegister(scope);
     }
-
-    //IEntityUpdateResult IDbDataModificationStaticHost.ApplyChanges()
-    //{
-    //    return this.Data.ApplyChanges();
-    //}
-
-
-    //IDbSchemaScope IDbDataModificationScope.ParentScope => this;
-
-    //IDbChangesScopeWithTransaction IDbDataModificationManager.CurrentTransaction => this.Data.CurrentTransaction;
-
-
-    //IEntity IDbDataModificationScope.New(IDbEntityMetadata em)
-    //{
-    //    return this.Data.New(em);
-    //}
 
     IQuery IDbDataReadScope.GetQuery(IDbEntityMetadata em)
     {
@@ -885,6 +871,8 @@ public interface IEntity
 public interface IPartialEntity : IEntity
 {
     bool IsDeleted { get; set; }
+
+    string[] GetFieldNames();
 }
 
 public interface IEntity<IdType> : IEntity

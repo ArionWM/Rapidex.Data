@@ -38,9 +38,7 @@ internal class FieldMetadataFactory : IFieldMetadataFactory
 
         values = values ?? new ObjDictionary();
 
-        var nUnderlyingType = Nullable.GetUnderlyingType(type);
-        if (nUnderlyingType is not null)
-            type = nUnderlyingType;
+        type = type.StripNullable();
 
         DbFieldMetadata fm = new DbFieldMetadata();
         fm.ParentMetadata = em;

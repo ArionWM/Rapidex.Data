@@ -7,7 +7,9 @@ namespace Rapidex.Data
 {
     public class DbEntity : IIntEntity, IJsonOnDeserialized
     {
-        ObjDictionary _Values { get; }
+#pragma warning disable IDE1006 // Naming Styles
+        protected ObjDictionary _Values { get; }
+#pragma warning restore IDE1006 // Naming Styles
 
         [System.Text.Json.Serialization.JsonIgnore]
         public IDbSchemaScope _Schema { get; set; }
@@ -93,12 +95,19 @@ namespace Rapidex.Data
 
         public void SetValue(string fieldName, object value)
         {
-            var em = this.GetMetadata();
-            var fm = em.Fields[fieldName];
+            if (this._Schema.IsNullOrEmpty())
+            {
+                //Deattached entity
+                this._Values.Set(fieldName, value);
+            }
+            else
+            {
+                var em = this.GetMetadata();
+                var fm = em.Fields[fieldName];
 
-            var evalue = EntityMapper.EnsureValueType(fm, this, value);
-
-            this._Values.Set(fieldName, evalue);
+                var evalue = EntityMapper.EnsureValueType(fm, this, value);
+                this._Values.Set(fieldName, evalue);
+            }
         }
 
         public ObjDictionary GetAllValues()
@@ -119,12 +128,17 @@ namespace Rapidex.Data
 
         public virtual void OnDeserialized()
         {
-
+            this.EnsureDataTypeInitialization();
         }
     }
 
     public class PartialEntity : DbEntity, IPartialEntity
     {
         public bool IsDeleted { get; set; } = false;
+
+        public string[] GetFieldNames()
+        {
+            return this._Values.Keys.ToArray();
+        }
     }
 }

@@ -89,7 +89,7 @@ namespace Rapidex
 
 
                 default:
-                    throw new NotSupportedException($"Usupported value format: {jsonElement.ValueKind}");
+                    throw new NotSupportedException($"Usupported value format: {jsonElement.ValueKind}"); //Try?? JsonSerializer.Deserialize<object>(fieldElement.GetRawText(), options)
             }
         }
 

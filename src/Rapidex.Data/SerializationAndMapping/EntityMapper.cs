@@ -75,13 +75,50 @@ public class EntityMapper
 
     public void EnsureAdvancedDataTypes(IEntity entity)
     {
-        entity.ShouldNotSupportTo<IPartialEntity>("Partial entities can't be fill");
+        entity.ShouldNotSupportTo<IPartialEntity>("Partial entities can't be check. Use EnsureAdvancedDataTypesForPartial");
 
         var em = entity.GetMetadata();
         var map = this.GetMapping(em);
 
         foreach (IDbFieldMetadata fm in map.AdvancedFields)
         {
+            object value = entity.GetValue(fm.Name);
+            IDataType available = value as IDataType;
+
+            //EnsureValueType?
+            if (available == null)
+            {
+                var dt = TypeHelper.CreateInstance<IDataType>(fm.Type);
+                dt.SetupInstance(entity, fm);
+
+                if (value != null)
+                {
+                    dt.SetValue(entity, fm.Name, value, true);
+                }
+
+                entity.SetValue(fm.Name, dt);
+
+            }
+            else
+            {
+                available.SetupInstance(entity, fm);
+            }
+        }
+    }
+
+    public void EnsureAdvancedDataTypesForPartial(IPartialEntity entity)
+    {
+        var em = entity.GetMetadata();
+        var map = this.GetMapping(em);
+
+        var availableFields = entity.GetFieldNames();
+
+        foreach (IDbFieldMetadata fm in map.AdvancedFields)
+        {
+            bool avail = availableFields.Contains(fm.Name, StringComparer.InvariantCultureIgnoreCase);
+            if (!avail)
+                continue;
+
             object value = entity.GetValue(fm.Name);
             IDataType available = value as IDataType;
 

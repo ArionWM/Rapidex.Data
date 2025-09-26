@@ -34,6 +34,14 @@
 
 ...
 
+**Direct JSON support for CRUD operations**
+
+...
+
+**Predefined data and demo data support**
+
+...
+
 ## Other Features
 
 **Support for complex queries, filtering and pagination**

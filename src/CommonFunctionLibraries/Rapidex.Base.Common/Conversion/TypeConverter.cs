@@ -47,12 +47,7 @@ public class TypeConverter : IManager
                 return null;
             }
 
-            if (targetType.IsGenericType && targetType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
-            {
-                //https://stackoverflow.com/questions/18015425/invalid-cast-from-system-int32-to-system-nullable1system-int32-mscorlib
-
-                targetType = Nullable.GetUnderlyingType(targetType);
-            }
+            targetType = targetType.StripNullable();
 
             if (value.IsSupportTo(targetType))
             {
@@ -130,12 +125,7 @@ public class TypeConverter : IManager
             return true;
         }
 
-        if (targetType.IsGenericType && targetType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
-        {
-            //https://stackoverflow.com/questions/18015425/invalid-cast-from-system-int32-to-system-nullable1system-int32-mscorlib
-
-            targetType = Nullable.GetUnderlyingType(targetType);
-        }
+        targetType = targetType.StripNullable();
 
         if (value.IsSupportTo(targetType))
         {
@@ -244,13 +234,13 @@ public abstract class ConverterBase<TFrom, TTo> : ConverterBase, IBaseConverter<
 
     public virtual TTo Convert(TFrom from, TTo to)
     {
-        return (TTo)Convert(from, typeof(TTo));
+        return (TTo)this.Convert(from, typeof(TTo));
     }
 
     public virtual bool TryConvert(TFrom from, Type toType, out TTo to)
     {
         object obj = null;
-        bool result = TryConvert(from, toType, out obj);
+        bool result = this.TryConvert(from, toType, out obj);
         to = (TTo)obj;
         return result;
     }

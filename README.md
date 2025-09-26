@@ -18,6 +18,8 @@ Rapidex.Data supports multiple database engines (MS SQL Server, PostgreSQL and o
 - UnitOfWork pattern
 - Unique and extensible *behavior* approach for reusable logic
 - Dynamic logic injection with *signal hub (with Rapidex Common)* 
+- Direct JSON support for CRUD operations
+- Predefined data and demo data support
 
 See: [Features](/docs/Features-detailed.md) for more details.
 

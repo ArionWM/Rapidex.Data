@@ -114,6 +114,7 @@ internal static class ImplementationMappingHelper
             }
             else
             {
+                //TODO: Support nullables
                 Type propUndType = Nullable.GetUnderlyingType(impProp.PropertyType);
                 if (trgProp.PropertyType != impProp.PropertyType && trgProp.PropertyType != propUndType)
                     continue;

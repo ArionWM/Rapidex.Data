@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Rapidex.Data.Exceptions;
 
 namespace Rapidex.Data;
 
@@ -53,6 +54,11 @@ public static class EntityExtensions
 
     public static void Save(this IEntity entity)
     {
+        entity.NotNull();
+
+        if (!entity.IsAttached())
+            throw new EntityAttachScopeException("AttachNeeded", "Entity is not attached to any schema");
+
         entity._Schema.CurrentWork.NotNull("No active work found in current scope");
 
         entity._Schema.CurrentWork.Save(entity);
@@ -74,7 +80,11 @@ public static class EntityExtensions
     public static void EnsureDataTypeInitialization(this IEntity entity)
     {
         entity.NotNull();
-        entity._Schema.Mapper.EnsureAdvancedDataTypes(entity);
+
+        if (entity is IPartialEntity partialEntity)
+            entity._Schema.Mapper.EnsureAdvancedDataTypesForPartial(partialEntity);
+        else
+            entity._Schema.Mapper.EnsureAdvancedDataTypes(entity);
     }
 
     public static string Caption(this IEntity entity)
@@ -153,5 +163,10 @@ public static class EntityExtensions
             dict[id] = entity;
         }
         return dict;
+    }
+
+    public static bool IsAttached(this IEntity entity)
+    {
+        return entity._Schema.IsNOTNullOrEmpty();
     }
 }

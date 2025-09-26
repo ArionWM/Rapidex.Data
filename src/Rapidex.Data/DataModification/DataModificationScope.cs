@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Rapidex.Data.Exceptions;
 
 namespace Rapidex.Data.DataModification;
 internal class DataModificationScope : DataModificationReadScopeBase, IDbDataModificationScope
@@ -33,6 +34,21 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
     {
         this.IsFinalized = true;
         this.Parent.UnRegister(this);
+    }
+
+    protected virtual void CheckIntegrity(IEntity entity)
+    {
+        var em = entity.GetMetadata();
+        if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME) //?? acaba?
+            throw new EntityAttachScopeException("OnlyBase", $"Entity '{em.Name}' only create for base schema");
+
+        var dict = entity.GetAllValues();
+        foreach (string fieldName in dict.Keys)
+        {
+            var fm = em.Fields.Get(fieldName);
+            if (fm == null)
+                throw new EntityAttachScopeException("FieldNotFound", $"Field '{fieldName}' not found in entity '{em.Name}'");
+        }
     }
 
     protected IDbEntityUpdater[] SelectUpdaters(IDbEntityMetadata em, IEnumerable<IEntity> entities)
@@ -191,8 +207,12 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
         try
         {
-            if (entity is not IPartialEntity)
-                entity.EnsureDataTypeInitialization();
+            if (!entity.IsAttached() || entity._Schema != this.ParentSchema)
+            {
+                this.Attach(entity);
+            }
+
+            entity.EnsureDataTypeInitialization();
 
             IEntity retEntity = entity.PublishOnBeforeSave()
                 .Result;
@@ -222,8 +242,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             foreach (var entity in _entities)
             {
                 IEntity _entity = entity;
-                if (_entity is not IPartialEntity)
-                    _entity.EnsureDataTypeInitialization();
+                _entity.EnsureDataTypeInitialization();
 
                 IEntity retEntity = _entity.PublishOnBeforeSave()
                     .Result;
@@ -296,5 +315,14 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
     (bool Found, string? Desc) IDbDataModificationScope.FindAndAnalyse(IDbEntityMetadata em, long id)
     {
         return this.ChangesCollection.FindAndAnalyse(em, id);
+    }
+
+    public void Attach(IEntity entity, bool checkIntegrity = true)
+    {
+        if (checkIntegrity)
+            this.CheckIntegrity(entity);
+
+        entity._Schema = this.ParentSchema;
+        entity._SchemaName = this.ParentSchema.SchemaName;
     }
 }

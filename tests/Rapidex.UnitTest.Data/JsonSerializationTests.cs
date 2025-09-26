@@ -1,16 +1,16 @@
-﻿
-using Rapidex.UnitTest.Data.TestContent;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rapidex.Data.Exceptions;
+using Rapidex.UnitTest.Data.TestContent;
 
 namespace Rapidex.UnitTest.Data;
 
-public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
+public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public BasicJsonSerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public JsonSerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 
@@ -74,9 +74,9 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
         Assert.Equal(16, contactType01["value"]);
         Assert.Equal("Personal", contactType01["text"]);
 
-        var picture01 = values01["Picture"] as IDictionary<string, object>; 
+        var picture01 = values01["Picture"] as IDictionary<string, object>;
         Assert.NotNull(picture01);
-        Assert.Equal("Image01.png", picture01["text"]); 
+        Assert.Equal("Image01.png", picture01["text"]);
         Assert.Equal($"Base.ConcreteEntity01.{entityId}.fields.Picture", picture01["id"]);
 
 
@@ -223,12 +223,25 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
                 }
             }";
 
-        ConcreteEntity01 ent = json.FromJson<ConcreteEntity01>();
-        Assert.NotNull(ent);
-        Assert.Equal("ent01", ent.Name);
-        Assert.Equal(1234, ent.CreditLimit1.Value);
-        Assert.Equal(ContactTypeTest.Department, (ContactTypeTest)ent.ContactType.Value);
 
+        IEntity entDynamic = json.FromJson<IEntity>();
+        Assert.NotNull(entDynamic);
+        Assert.Equal("ConcreteEntity01", entDynamic._TypeName);
+        Assert.Equal("Test Entity", entDynamic["Name"].As<string>());
+        Assert.Equal(1000.50m, (entDynamic["CreditLimit1"].As<Currency>()).Value);
+
+        Assert.Throws<DataSerializationException>(() =>
+        {
+            //Basic Json deserialization creates deattached entities ...
+            ConcreteEntity01 entConcrete = json.FromJson<ConcreteEntity01>();
+        });
+
+
+
+        //ConcreteEntity01 entConcrete = json.FromJson<ConcreteEntity01>();
+        //Assert.NotNull(entConcrete);
+        //Assert.Equal("Test Entity", entConcrete.Name); // Fixed to match JSON data
+        //Assert.Equal(1000.50m, entConcrete.CreditLimit1.Value); // Fixed to match JSON data
+        //Assert.Equal(1, entConcrete.ContactType.Value); // Fixed to match JSON data - value is 1
     }
-
 }

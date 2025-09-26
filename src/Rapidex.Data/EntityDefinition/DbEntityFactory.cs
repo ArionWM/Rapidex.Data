@@ -1,9 +1,11 @@
 ﻿
-using Rapidex.Data.Scopes;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Rapidex.Data.Metadata;
+using Rapidex.Data.Scopes;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Rapidex.Data
 {
@@ -181,7 +183,7 @@ namespace Rapidex.Data
 
             if (forNew)
             {
-                TemplateInfo templateInfo = GetTemplate(em, dbScope);
+                TemplateInfo templateInfo = this.GetTemplate(em, dbScope);
 
                 newEntity._IsNew = true;
                 long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext();
@@ -194,8 +196,40 @@ namespace Rapidex.Data
                 newEntity.IsDeleted = true;
             }
 
-            //ObjDictionary objDict = newEntity.GetAllValues();
-            ////newEntity.EnsureInitialization();
+            return newEntity;
+        }
+
+        /// <summary>
+        /// Create partial entity without dbScope (detached)
+        /// </summary>
+        /// <param name="em"></param>
+        /// <param name="forNew"></param>
+        /// <param name="forDeleted"></param>
+        /// <returns></returns>
+        public IPartialEntity CreatePartialDetached(string entityName, long? id, bool forNew, bool forDeleted)
+        {
+            entityName.NotEmpty();
+
+            PartialEntity newEntity = new PartialEntity();
+            newEntity._TypeName = entityName;
+            newEntity.Id = id ?? DatabaseConstants.DEFAULT_EMPTY_ID;
+            newEntity.ExternalId = null;
+            newEntity.DbVersion = 0;
+
+            if (forNew)
+            {
+                newEntity._IsNew = true;
+                if (id.HasValue)
+                {
+                    id = id * -1;
+                    newEntity.SetId(id);
+                }
+            }
+
+            if (forDeleted)
+            {
+                newEntity.IsDeleted = true;
+            }
 
             return newEntity;
         }

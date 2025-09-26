@@ -85,7 +85,7 @@ internal class DbDataModificationManager : IDbDataModificationScope
                 totalCounter.Alias = loader.Alias;
                 totalCounter.ClearPaging();
                 //totalCounter.Page(int.MaxValue, 0);
-                loadedResult.TotalItemCount =  totalCounter.Count();
+                loadedResult.TotalItemCount = totalCounter.Count();
                 loadedResult.IncludeTotalItemCount = true;
                 loadedResult.PageCount = (long)Math.Ceiling(Convert.ToDecimal(loadedResult.TotalItemCount) / Convert.ToDecimal(loadedResult.PageSize.Value));
 
@@ -99,7 +99,7 @@ internal class DbDataModificationManager : IDbDataModificationScope
     public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
     {
 
-                return this.DmProvider.LoadRaw(loader);
+        return this.DmProvider.LoadRaw(loader);
 
     }
 
@@ -107,7 +107,7 @@ internal class DbDataModificationManager : IDbDataModificationScope
     public IEntity Find(IDbEntityMetadata em, long id)
     {
         if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return  this.ParentSchema.ParentDbScope.Find(em, id);
+            return this.ParentSchema.ParentDbScope.Find(em, id);
 
         DbEntityId eid = new DbEntityId(id, -1);
         IDbEntityLoader loader = this.SelectLoader(em);
@@ -164,8 +164,7 @@ internal class DbDataModificationManager : IDbDataModificationScope
     {
         //TODO: Validate 
 
-        if (entity is not IPartialEntity)
-            entity.EnsureDataTypeInitialization();
+        entity.EnsureDataTypeInitialization();
 
         IEntity retEntity = entity.PublishOnBeforeSave()
             .Result;
@@ -186,8 +185,7 @@ internal class DbDataModificationManager : IDbDataModificationScope
         foreach (var entity in _entities)
         {
             IEntity _entity = entity;
-            if (_entity is not IPartialEntity)
-                _entity.EnsureDataTypeInitialization();
+            _entity.EnsureDataTypeInitialization();
 
             IEntity retEntity = _entity.PublishOnBeforeSave()
                 .Result;
@@ -286,10 +284,10 @@ internal class DbDataModificationManager : IDbDataModificationScope
 
             foreach (var _scope in types)
             {
-                result.MergeWith( this.InsertOrUpdate(_scope));
+                result.MergeWith(this.InsertOrUpdate(_scope));
             }
 
-             _its?.Commit();
+            _its?.Commit();
             //this.CurrentTransaction?.Commit();
 
             result.Success = true;
@@ -318,7 +316,7 @@ internal class DbDataModificationManager : IDbDataModificationScope
         _its.NotNull("No transaction available");
         this.dbChangesScope.Value = null;
         this.dbChangesScopeWithTransaction.Value = null;
-         _its.Rollback();
+        _its.Rollback();
     }
 
     public IIntSequence Sequence(string name)

@@ -43,9 +43,7 @@ public class AutoStringToBasicConverter : JsonConverter<object>
                 return Activator.CreateInstance(typeToConvert);
             }
 
-            Type undType = Nullable.GetUnderlyingType(typeToConvert);
-            if (undType != null)
-                typeToConvert = undType;
+            typeToConvert = typeToConvert.StripNullable();
 
             switch (Type.GetTypeCode(typeToConvert))
             {

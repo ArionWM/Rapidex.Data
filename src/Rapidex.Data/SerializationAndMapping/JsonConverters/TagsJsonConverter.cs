@@ -11,7 +11,60 @@ internal class TagsJsonConverter : JsonConverter<Tags>
 {
     public override Tags? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        throw new NotImplementedException();
+        if (reader.TokenType == JsonTokenType.Null)
+            return null;
+
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            // Handle simple string value (comma-separated tags)
+            string value = reader.GetString();
+            Tags tags = new Tags();
+            if (!string.IsNullOrEmpty(value))
+            {
+                string[] tagArray = value.Split(new[] { ',', '|' }, StringSplitOptions.RemoveEmptyEntries)
+                                       .Select(t => t.Trim())
+                                       .ToArray();
+                tags.Add(tagArray);
+            }
+            return tags;
+        }
+
+        if (reader.TokenType == JsonTokenType.StartArray)
+        {
+            Tags tags = new Tags();
+            List<string> tagList = new List<string>();
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndArray)
+                    break;
+
+                if (reader.TokenType == JsonTokenType.StartObject)
+                {
+                    // Handle tag info objects with name and color
+                    using (JsonDocument doc = JsonDocument.ParseValue(ref reader))
+                    {
+                        JsonElement root = doc.RootElement;
+                        if (root.TryGetProperty("name", out JsonElement nameElement))
+                        {
+                            tagList.Add(nameElement.GetString());
+                        }
+                    }
+                }
+                else if (reader.TokenType == JsonTokenType.String)
+                {
+                    // Handle simple string array
+                    tagList.Add(reader.GetString());
+                }
+            }
+
+            if (tagList.Count > 0)
+                tags.Add(tagList.ToArray());
+
+            return tags;
+        }
+
+        throw new JsonException($"Unexpected token {reader.TokenType} when parsing Tags.");
     }
 
     public override void Write(Utf8JsonWriter writer, Tags value, JsonSerializerOptions options)

@@ -9,8 +9,10 @@ namespace Rapidex.Data
 {
     public static class EntitySerializationExtender
     {
-        public static T FromJson<T>(this string json, IDbSchemaScope scope) where T: IEntity
+        public static T FromJson<T>(this string json, IDbSchemaScope scope) where T : IEntity
         {
+            aaaa
+
             json = json?.Trim();
             if (json.IsNullOrEmpty())
                 return default(T);
@@ -18,10 +20,7 @@ namespace Rapidex.Data
             T ent = JsonSerializer.Deserialize<T>(json, JsonHelper.JsonSerializerOptions);
             ent._Schema = scope;
 
-            if (!ent.IsSupportTo<IPartialEntity>())
-            {
-                ent.EnsureDataTypeInitialization();
-            }
+            ent.EnsureDataTypeInitialization();
 
             return ent;
         }
