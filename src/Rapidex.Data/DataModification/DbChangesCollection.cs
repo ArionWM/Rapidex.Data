@@ -20,9 +20,9 @@ internal class DbChangesCollection : IDbChangesCollection
 
         public EntityDependency(IEntity from, IEntity to, string fromPropertyName)
         {
-            From = from;
-            To = to;
-            FromPropertyName = fromPropertyName;
+            this.From = from;
+            this.To = to;
+            this.FromPropertyName = fromPropertyName;
         }
     }
 
@@ -42,8 +42,8 @@ internal class DbChangesCollection : IDbChangesCollection
             }
 
             this.Dependencies.Add(dep);
-            if (!Score.ContainsKey(dep.To))
-                Score.Add(dep.To, 0);
+            if (!this.Score.ContainsKey(dep.To))
+                this.Score.Add(dep.To, 0);
 
             this.Score[dep.To]++;
 
@@ -73,26 +73,26 @@ internal class DbChangesCollection : IDbChangesCollection
     }
 
 
-    HashSet<IEntity> _deletedEntities = new HashSet<IEntity>();
+    HashSet<IEntity> deletedEntities = new HashSet<IEntity>();
 
-    HashSet<IEntity> _changedEntities = new HashSet<IEntity>();
+    HashSet<IEntity> changedEntities = new HashSet<IEntity>();
 
-    HashSet<IEntity> _newEntities = new HashSet<IEntity>();
-    TwoLevelDictionary<IDbEntityMetadata, long, long> _prematureIds = new();
+    HashSet<IEntity> newEntities = new HashSet<IEntity>();
+    TwoLevelDictionary<IDbEntityMetadata, long, long> prematureIds = new();
 
-    List<IQueryUpdater> _bulkUpdates = new List<IQueryUpdater>();
+    List<IQueryUpdater> bulkUpdates = new List<IQueryUpdater>();
 
-    EntityDependencyCollection _newEntityDependencies = new EntityDependencyCollection();
+    EntityDependencyCollection newEntityDependencies = new EntityDependencyCollection();
 
-    ReaderWriterLockSlim _locker = new ReaderWriterLockSlim();
+    ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
 
-    public IReadOnlyCollection<IEntity> ChangedEntities => _changedEntities.ToArray();
+    public IReadOnlyCollection<IEntity> ChangedEntities => changedEntities.ToArray();
 
-    public IReadOnlyCollection<IEntity> DeletedEntities => _deletedEntities.ToArray();
+    public IReadOnlyCollection<IEntity> DeletedEntities => deletedEntities.ToArray();
 
-    public IReadOnlyCollection<IQueryUpdater> BulkUpdates => _bulkUpdates.ToArray();
+    public IReadOnlyCollection<IQueryUpdater> BulkUpdates => bulkUpdates.ToArray();
 
-    public bool IsEmpty => !_changedEntities.Any() && !_deletedEntities.Any() && !_bulkUpdates.Any();
+    public bool IsEmpty => !changedEntities.Any() && !deletedEntities.Any() && !bulkUpdates.Any();
 
     public DbChangesCollection()
     {
@@ -107,7 +107,18 @@ internal class DbChangesCollection : IDbChangesCollection
             this.Delete(deletedEntities);
 
         if (bulkUpdates.IsNOTNullOrEmpty())
-            this._bulkUpdates.AddRange(bulkUpdates);
+            this.bulkUpdates.AddRange(bulkUpdates);
+    }
+
+    protected void ValidateEntity(IEntity entity)
+    {
+        entity.NotNull();
+
+        if(entity._IsNew && entity._IsDeleted)
+            throw new InvalidOperationException("Entity cannot be both new and deleted");
+
+        if (entity._IsDeleted && changedEntities.Contains(entity))
+            throw new InvalidOperationException("Entity cannot be both changed and deleted");
     }
 
     protected IEntity FindNewEntity(IDbEntityMetadata em, long id)
@@ -117,7 +128,7 @@ internal class DbChangesCollection : IDbChangesCollection
 
         try
         {
-            foreach (var entity in _newEntities)
+            foreach (var entity in newEntities)
             {
                 //TODO: daha verimli bir yöntem
                 //WARN: Referanslar eşit değil, çünkü birisi prematüre vs. olabilir
@@ -160,7 +171,7 @@ internal class DbChangesCollection : IDbChangesCollection
                     //Bu bizim scope içerisinde olmalı..
                     IEntity targetEntity = this.FindNewEntity(refEm, targetId);
 
-                    _newEntityDependencies.Add(entity, targetEntity, fm.Name);
+                    newEntityDependencies.Add(entity, targetEntity, fm.Name);
                 }
             }
         }
@@ -169,31 +180,39 @@ internal class DbChangesCollection : IDbChangesCollection
 
     protected void InternalAdd(IEntity entity)
     {
+        if(entity._IsDeleted)
+        {
+            this.InternalDelete(entity);
+            return;
+        }
+
         if (entity._IsNew)
         {
-            _newEntities.Add(entity);
+            newEntities.Add(entity);
         }
 
         this.CheckDependencies(entity);
-        _changedEntities.Add(entity);
+        changedEntities.Add(entity);
     }
 
     public void Add(IEntity entity)
     {
-        _locker.EnterWriteLock();
+        this.ValidateEntity(entity);
+
+        locker.EnterWriteLock();
         try
         {
             this.InternalAdd(entity);
         }
         finally
         {
-            _locker.ExitWriteLock();
+            locker.ExitWriteLock();
         }
     }
 
     public void Add(IEnumerable<IEntity> entities)
     {
-        _locker.EnterWriteLock();
+        locker.EnterWriteLock();
         try
         {
             foreach (var entity in entities)
@@ -203,47 +222,48 @@ internal class DbChangesCollection : IDbChangesCollection
         }
         finally
         {
-            _locker.ExitWriteLock();
+            locker.ExitWriteLock();
         }
     }
 
     protected void InternalAdd(IQueryUpdater updater)
     {
-        if (this._bulkUpdates.Contains(updater))
+        if (this.bulkUpdates.Contains(updater))
             throw new InvalidOperationException("Updater already added");
 
-        this._bulkUpdates.Add(updater);
+        this.bulkUpdates.Add(updater);
     }
 
     public void Add(IQueryUpdater updater)
     {
-        _locker.EnterWriteLock();
+        locker.EnterWriteLock();
         try
         {
             this.InternalAdd(updater);
         }
         finally
         {
-            _locker.ExitWriteLock();
+            locker.ExitWriteLock();
         }
     }
 
     protected void InternalDelete(IEntity entity)
     {
-        this._deletedEntities.Add(entity);
+        this.deletedEntities.Add(entity);
     }
 
 
     public void Delete(IEntity entity)
     {
-        _locker.EnterWriteLock();
+        locker.EnterWriteLock();
         try
         {
+            entity._IsDeleted = true;
             this.InternalDelete(entity);
         }
         finally
         {
-            _locker.ExitWriteLock();
+            locker.ExitWriteLock();
         }
 
 
@@ -251,7 +271,7 @@ internal class DbChangesCollection : IDbChangesCollection
 
     public void Delete(IEnumerable<IEntity> entities)
     {
-        _locker.EnterWriteLock();
+        locker.EnterWriteLock();
         try
         {
             foreach (var entity in entities)
@@ -261,7 +281,7 @@ internal class DbChangesCollection : IDbChangesCollection
         }
         finally
         {
-            _locker.ExitWriteLock();
+            locker.ExitWriteLock();
         }
     }
 
@@ -279,31 +299,31 @@ internal class DbChangesCollection : IDbChangesCollection
                 long newId = entity._Schema.Data.Sequence(info.PersistentSequence).GetNext();
                 entity.SetId(newId);
 
-                this._newEntityDependencies.UpdateDependedEntities(entity);
+                this.newEntityDependencies.UpdateDependedEntities(entity);
 
-                _prematureIds.Set(em, oldId, newId);
+                prematureIds.Set(em, oldId, newId);
             }
         }
     }
 
     public void CheckNewEntities()
     {
-        _locker.EnterWriteLock();
+        locker.EnterWriteLock();
         try
         {
-            foreach (var entity in _newEntities)
+            foreach (var entity in newEntities)
             {
                 this.CheckNewEntity(entity);
             }
 
-            foreach (var entity in _changedEntities)
+            foreach (var entity in changedEntities)
             {
                 if (entity.HasPrematureId() && !entity._IsNew)
                 {
                     long entityId = entity.GetId().As<long>();
                     var em = entity.GetMetadata();
                     //Eğer değişiklik scope içerisinde ise, yeni Id'yi atayalım
-                    long newId = this._prematureIds.Get(em)
+                    long newId = this.prematureIds.Get(em)
                         .NotNull()
                         .Get(entityId);
 
@@ -316,14 +336,14 @@ internal class DbChangesCollection : IDbChangesCollection
         }
         finally
         {
-            _locker.ExitWriteLock();
+            locker.ExitWriteLock();
         }
     }
 
 
     public IDbChangesCollection[] SplitForTypesAndDependencies()
     {
-        _locker.EnterReadLock();
+        locker.EnterReadLock();
         try
         {
             List<IDbChangesCollection> list = new List<IDbChangesCollection>();
@@ -336,24 +356,24 @@ internal class DbChangesCollection : IDbChangesCollection
         }
         finally
         {
-            _locker.ExitReadLock();
+            locker.ExitReadLock();
         }
     }
 
     public void Clear()
     {
-        _locker.EnterWriteLock();
+        locker.EnterWriteLock();
         try
         {
-            this._changedEntities.Clear();
-            this._deletedEntities.Clear();
-            this._newEntities.Clear();
-            this._prematureIds.Clear();
-            this._newEntityDependencies = new EntityDependencyCollection();
+            this.changedEntities.Clear();
+            this.deletedEntities.Clear();
+            this.newEntities.Clear();
+            this.prematureIds.Clear();
+            this.newEntityDependencies = new EntityDependencyCollection();
         }
         finally
         {
-            _locker.ExitWriteLock();
+            locker.ExitWriteLock();
         }
 
     }
@@ -366,7 +386,7 @@ internal class DbChangesCollection : IDbChangesCollection
 
         try
         {
-            foreach (var entity in _newEntities)
+            foreach (var entity in newEntities)
             {
                 //TODO: daha verimli bir yöntem
                 //WARN: Referanslar eşit değil, çünkü birisi prematüre vs. olabilir
@@ -375,7 +395,7 @@ internal class DbChangesCollection : IDbChangesCollection
                     return (true, "in new entities");
             }
 
-            foreach (var entity in _changedEntities)
+            foreach (var entity in changedEntities)
             {
                 //TODO: daha verimli bir yöntem
                 //WARN: Referanslar eşit değil, çünkü birisi prematüre vs. olabilir

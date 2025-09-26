@@ -150,7 +150,7 @@ namespace Rapidex.Data
             {
                 //dbScope.NotNull("Scope required for new entitites");
 
-                TemplateInfo templateInfo = GetTemplate(em, dbScope);
+                TemplateInfo templateInfo = this.GetTemplate(em, dbScope);
 
                 newEntity._IsNew = true;
                 long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext();

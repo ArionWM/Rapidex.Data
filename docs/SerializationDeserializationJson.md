@@ -61,11 +61,41 @@ Simple serialization result for `ConcreteEntity01` entity (See: Rapidex.UnitTest
 - Complex types such as `Currency`, `Text`, `Image`, and `Enumeration<T>` are serialized into structured JSON objects to preserve their data. This structures generally has `value`, `text` or `type` properties. Field value, metadata and useful information are included in the serialized output. See: [Field types](FieldTypes.md)
 - Serialization result has not include db or schema specific information.
 
-### Sample 2
+#### Deattached Deserialization
 
-```json
+Create partial entities from JSON representation.
 
+```csharp
 
+string json = "{....}";
+
+IEntity entDeattached = EntityJson.Deserialize(json).FirstOrDefault();
+
+```
+
+#### Attached and Concrete Deserialization
+
+With db context and map to concrete type.
+
+```csharp
+
+string json = "{....}";
+
+var db = Database.Dbs.Db();
+
+ConcreteEntity01 ent = EntityJson.Deserialize<ConcreteEntity01>(json, db).FirstOrDefault();
+
+```
+
+With db context and map to dynamic type.
+
+```csharp
+
+string json = "{....}";
+
+var db = Database.Dbs.Db();
+
+var ent = EntityJson.Deserialize(json, db).FirstOrDefault();
 
 ```
 

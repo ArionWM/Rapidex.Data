@@ -148,6 +148,7 @@ public static class JsonHelper
 
     }
 
+    //TODO: Remove for confusion
     public static T FromJson<T>(this string json)
     {
         json = json?.Trim();

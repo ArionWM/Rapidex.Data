@@ -30,6 +30,8 @@ namespace Rapidex.Data
         public string _SchemaName { get; set; }
         public bool _IsNew { get; set; }
 
+        bool IEntity._IsDeleted { get; set; }
+
         public long Id { get; set; }
         public virtual string ExternalId { get; set; }
         public int DbVersion { get; set; }

@@ -746,6 +746,11 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
         this.Data.UnRegister(scope);
     }
 
+    void Attach(IEntity entity, bool checkIntegrity = true)
+    {
+        this.CurrentWork.Attach(entity, checkIntegrity);
+    }
+
     IQuery IDbDataReadScope.GetQuery(IDbEntityMetadata em)
     {
         return this.Data.GetQuery(em);
@@ -838,6 +843,7 @@ public interface IEntity
     string _DbName { get; internal set; }
     string _SchemaName { get; internal set; }
     bool _IsNew { get; set; }
+    bool _IsDeleted { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore]
     IDbSchemaScope _Schema { get; internal set; }

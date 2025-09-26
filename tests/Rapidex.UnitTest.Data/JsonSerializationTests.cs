@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Rapidex.Data.Exceptions;
+using Rapidex.Data.SerializationAndMapping;
 using Rapidex.UnitTest.Data.TestContent;
 
 namespace Rapidex.UnitTest.Data;
@@ -167,9 +168,6 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
         var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
-        //var dbscope = Database.Databases.AddMainDbIfNotExists();
-        //dbscope.Structure.DropEntity<ConcreteEntity01>();
-        //dbscope.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
         using var work = db.BeginWork();
 
@@ -183,7 +181,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
         string json01 = ent01.ToJson();
         Assert.NotNull(json01);
 
-        ConcreteEntity01 ent = json01.FromJson<ConcreteEntity01>(db);
+        ConcreteEntity01 ent = EntityJson.Deserialize<ConcreteEntity01>(json01, db).FirstOrDefault();
         Assert.NotNull(ent);
         Assert.Equal("ent01", ent.Name);
         Assert.Equal(1234, ent.CreditLimit1.Value);
@@ -224,7 +222,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
             }";
 
 
-        IEntity entDynamic = json.FromJson<IEntity>();
+        IEntity entDynamic = EntityJson.Deserialize(json).FirstOrDefault();
         Assert.NotNull(entDynamic);
         Assert.Equal("ConcreteEntity01", entDynamic._TypeName);
         Assert.Equal("Test Entity", entDynamic["Name"].As<string>());
@@ -243,5 +241,11 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
         //Assert.Equal("Test Entity", entConcrete.Name); // Fixed to match JSON data
         //Assert.Equal(1000.50m, entConcrete.CreditLimit1.Value); // Fixed to match JSON data
         //Assert.Equal(1, entConcrete.ContactType.Value); // Fixed to match JSON data - value is 1
+    }
+
+    [Fact]
+    public void Serialization_04_MultipleEntityJsonDataDeserialization()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -371,6 +371,13 @@ public class EntityMapper
         return this.Map(em, from, instance);
     }
 
+    public IEntity Map(IDbEntityMetadata em, IDictionary<string, object> from)
+    {
+        IEntity instance = Database.EntityFactory.Create(em, this.Parent, false);
+        return this.Map(em, from, instance);
+    }
+
+
     public static ObjDictionary MapToDict(IDbEntityMetadata em, IEntity entity)
     {
         ObjDictionary dict = new ObjDictionary();
