@@ -135,7 +135,7 @@ namespace Rapidex.Data
 
     public class PartialEntity : DbEntity, IPartialEntity
     {
-        public bool IsDeleted { get; set; } = false;
+        public bool _IsDeleted { get; set; } = false;
 
         public string[] GetFieldNames()
         {

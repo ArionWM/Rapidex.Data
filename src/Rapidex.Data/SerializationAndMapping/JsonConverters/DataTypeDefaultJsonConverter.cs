@@ -11,7 +11,18 @@ internal class DataTypeDefaultJsonConverter : JsonConverter<IDataType>
 {
     public override IDataType? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        throw new NotImplementedException();
+        object value = reader.GetValueAsOriginalType(node =>
+        {
+            throw new InvalidOperationException($"Unsupported data type: {node}");
+        });
+
+        Type undType = typeToConvert.StripNullable();
+        undType.ShouldSupportTo<IDataType>();
+
+        IDataType dt = (IDataType)Activator.CreateInstance(undType);
+        dt.SetValuePremature(value);
+
+        return dt;
     }
 
     public override void Write(Utf8JsonWriter writer, IDataType value, JsonSerializerOptions options)
@@ -24,7 +35,6 @@ internal class DataTypeDefaultJsonConverter : JsonConverter<IDataType>
         }
 
         JsonSerializer.Serialize(writer, lowerValue, lowerValue.GetType(), options);
-        //JsonSerializer.Serialize(writer, value, options);
     }
 
     public static void Register()

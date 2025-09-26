@@ -64,6 +64,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         OneWayPasswordJsonConverter.Register();
         PasswordJsonConverter.Register();
         TextJsonConverter.Register();
+        CurrencyJsonConverter.Register();
 
 
         FieldMetadataCollection fmc = new();

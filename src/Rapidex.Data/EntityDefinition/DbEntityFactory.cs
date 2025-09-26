@@ -128,7 +128,7 @@ namespace Rapidex.Data
             }
         }
 
-        public IEntity Create(IDbEntityMetadata em, IDbSchemaScope dbScope, bool forNew)
+        public IEntity Create(IDbEntityMetadata em, IDbSchemaScope dbScope, bool forNew, bool? forDeleted = null)
         {
             em.NotNull();
             dbScope.NotNull();
@@ -157,6 +157,13 @@ namespace Rapidex.Data
                 id = id * -1;
                 newEntity.SetId(id);
             }
+
+            if (forDeleted.HasValue && forDeleted.Value)
+            {
+                newEntity._IsDeleted = true;
+            }
+
+
 
             newEntity.EnsureDataTypeInitialization();
 
@@ -193,7 +200,7 @@ namespace Rapidex.Data
 
             if (forDeleted)
             {
-                newEntity.IsDeleted = true;
+                newEntity._IsDeleted = true;
             }
 
             return newEntity;
@@ -228,7 +235,7 @@ namespace Rapidex.Data
 
             if (forDeleted)
             {
-                newEntity.IsDeleted = true;
+                newEntity._IsDeleted = true;
             }
 
             return newEntity;

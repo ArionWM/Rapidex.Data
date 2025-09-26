@@ -324,5 +324,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
         entity._Schema = this.ParentSchema;
         entity._SchemaName = this.ParentSchema.SchemaName;
+
+        entity.EnsureDataTypeInitialization();
     }
 }

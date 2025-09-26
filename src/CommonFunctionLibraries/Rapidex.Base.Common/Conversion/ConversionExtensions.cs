@@ -125,7 +125,7 @@ namespace Rapidex
         }
 
         //https://josef.codes/custom-dictionary-string-object-jsonconverter-for-system-text-json/
-        public static object GetValueAsOriginalType(this Utf8JsonReader jsonReader, Func<Type> getObjectType)
+        public static object GetValueAsOriginalType(this Utf8JsonReader jsonReader, Func<JsonNode, Type> getObjectType)
         {
             switch (jsonReader.TokenType)
             {
@@ -142,7 +142,7 @@ namespace Rapidex
                     return jsonReader.GetString();
                 case JsonTokenType.StartObject:
                     JsonNode node = JsonObject.Parse(ref jsonReader);
-                    Type type = getObjectType.Invoke();
+                    Type type = getObjectType.NotNull().Invoke(node);
                     TypeInfo tInfo = type.GetTypeInfo();
                     return JsonSerializer.Deserialize(node, tInfo, JsonHelper.JsonSerializerOptions); // JsonHelper.JsonSerializerOptions);
 

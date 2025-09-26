@@ -876,7 +876,6 @@ public interface IEntity
 /// </summary>
 public interface IPartialEntity : IEntity
 {
-    bool IsDeleted { get; set; }
 
     string[] GetFieldNames();
 }

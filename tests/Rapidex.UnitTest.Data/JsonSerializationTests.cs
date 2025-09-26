@@ -84,7 +84,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void Serialization_01_ConvertToJson02()
+    public void Serialization_02_ConvertToJson02()
     {
         var db = Database.Dbs.AddMainDbIfNotExists();
 
@@ -163,7 +163,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void Serialization_02_EntityToJsonAndReverse()
+    public void Serialization_03_EntityToJsonAndReverse()
     {
         var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
@@ -189,7 +189,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void Serialization_03_EntityJsonDataDeserialization()
+    public void Serialization_04_EntityJsonDataDeserialization()
     {
         var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
@@ -222,17 +222,13 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
             }";
 
 
-        IEntity entDynamic = EntityJson.Deserialize(json).FirstOrDefault();
+        IEntity entDynamic = EntityJson.Deserialize(json, db).FirstOrDefault();
         Assert.NotNull(entDynamic);
         Assert.Equal("ConcreteEntity01", entDynamic._TypeName);
         Assert.Equal("Test Entity", entDynamic["Name"].As<string>());
         Assert.Equal(1000.50m, (entDynamic["CreditLimit1"].As<Currency>()).Value);
 
-        Assert.Throws<DataSerializationException>(() =>
-        {
-            //Basic Json deserialization creates deattached entities ...
-            ConcreteEntity01 entConcrete = json.FromJson<ConcreteEntity01>();
-        });
+        ConcreteEntity01 entConcrete = EntityJson.Deserialize<ConcreteEntity01>(json, db).FirstOrDefault();
 
 
 
@@ -244,7 +240,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void Serialization_04_MultipleEntityJsonDataDeserialization()
+    public void Serialization_05_MultipleEntityJsonDataDeserialization()
     {
         throw new NotImplementedException();
     }

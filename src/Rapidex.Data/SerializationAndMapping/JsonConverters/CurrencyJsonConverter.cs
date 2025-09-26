@@ -60,4 +60,10 @@ internal class CurrencyJsonConverter : JsonConverter<Currency>
         writer.WriteEndObject();
 
     }
+
+    public static void Register()
+    {
+        CurrencyJsonConverter conv = new CurrencyJsonConverter();
+        JsonHelper.Register(conv);
+    }
 }

@@ -53,7 +53,7 @@ public static class AssertionHelper
     public static T NotEmpty<T>([NotNull] this T obj, string? message = null)
     {
         obj.NotNull(message);
-        
+
         if (obj.IsNullOrEmpty())
         {
             DebugBreak();
@@ -85,11 +85,11 @@ public static class AssertionHelper
             DebugBreak();
             throw new InvalidOperationException(message ?? $"Object '{obj}' is not support to {typeof(TObj).Name}");
         }
-        
+
         return (TObj)obj;
     }
 
-    public static void ShouldSupportTo(this Type type, Type desiredType, string? message = null)
+    public static Type ShouldSupportTo(this Type type, Type desiredType, string? message = null)
     {
         message = message ?? $"Type does not support to {desiredType.Name}, type is '{type.Name}'";
 
@@ -98,14 +98,16 @@ public static class AssertionHelper
             DebugBreak();
             throw new InvalidOperationException(message ?? $"Type '{type.Name}' is not support to {desiredType.Name}");
         }
-        
+        return type;
     }
 
-    public static void ShouldSupportTo<TType>(this Type type, string? message = null)
+    public static Type ShouldSupportTo<TType>(this Type type, string? message = null)
     {
         message = message ?? $"Type does not support to {typeof(TType).Name}, type is '{type.Name}'";
 
-        type.ShouldSupportTo(typeof(TType), message);
+        Type desiredType = typeof(TType);
+        type.ShouldSupportTo(desiredType, message);
+        return type;
     }
 
     public static void ShouldNotSupportTo<TObj>(this object obj, string? message = null)

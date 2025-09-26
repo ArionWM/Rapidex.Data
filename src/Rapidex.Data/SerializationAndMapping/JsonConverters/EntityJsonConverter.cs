@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Rapidex.Data.Exceptions;
+using Rapidex.Data.Metadata;
 using Rapidex.Data.Metadata.Implementers;
 
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
@@ -22,6 +23,8 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
         if (reader.TokenType != JsonTokenType.StartObject)
             throw new JsonException("Expected StartObject token");
 
+        EntityJson.DeserializationContext.NotNull("Invalid deserialization context");
+
         using (JsonDocument doc = JsonDocument.ParseValue(ref reader))
         {
             JsonElement root = doc.RootElement;
@@ -32,24 +35,20 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
             bool idRequired = !(isNew ?? false);
             long? entityId = this.GetEntityId(root, idRequired);
 
-            IPartialEntity entity = Database.EntityFactory.CreatePartialDetached(entityTypeName, entityId, isNew ?? false, isDeleted ?? false);
+            var em = EntityJson.DeserializationContext.ParentDbScope.Metadata.Get(entityTypeName)
+                 .NotNull($"Entity type '{entityTypeName}' not found in metadata.");
+
+            IEntity entity = Database.EntityFactory.Create(em, EntityJson.DeserializationContext, isNew ?? false, isDeleted ?? false);
 
             if (root.TryGetProperty("Values", out JsonElement valuesElement))
             {
-                this.SetEntityFields(entity, valuesElement, options);
+                this.SetEntityFields(em, entity, valuesElement, options);
             }
             else
             {
                 //We support direct field definitions on root level as well
-                this.SetEntityFields(entity, root, options, skipReservedFields: true);
+                this.SetEntityFields(em, entity, root, options, skipReservedFields: true);
             }
-
-            if (!typeToConvert.IsAssignableFrom(typeof(IPartialEntity)))
-            {
-                throw new DataSerializationException("DeserializationSupport", $"Cannot deserialize json detached entity of type {typeToConvert}. For direct deserialize for defined entity type (concrete) use 'abc'. See: SerializationDeserializationJson.md ");
-            }
-
-            entity.EnsureDataTypeInitialization();
 
             return entity;
         }
@@ -107,7 +106,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
         return null;
     }
 
-    private void SetEntityFields(IEntity entity, JsonElement sourceElement, JsonSerializerOptions options, bool skipReservedFields = false)
+    private void SetEntityFields(IDbEntityMetadata em, IEntity entity, JsonElement sourceElement, JsonSerializerOptions options, bool skipReservedFields = false)
     {
         var reservedFields = new HashSet<string> {
             "Entity", CommonConstants.DATA_FIELD_TYPENAME,
@@ -116,29 +115,36 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
             "IsNew", "IsDeleted"
         };
 
-        // Direkt JSON property'lerini oku ve entity'ye ata
-        foreach (JsonProperty property in sourceElement.EnumerateObject())
+        // Iterate through metadata fields to ensure we only process defined fields
+        foreach (var fieldMetadata in em.Fields.Values)
         {
-            string fieldName = property.Name;
-            JsonElement fieldElement = property.Value;
+            if (skipReservedFields && reservedFields.Contains(fieldMetadata.Name))
+                continue;
 
-            // Reserved field'ları atla
-            if (skipReservedFields && reservedFields.Contains(fieldName))
+            if (!sourceElement.TryGetProperty(fieldMetadata.Name, out JsonElement fieldElement))
                 continue;
 
             try
             {
-                object value = this.DeserializeFieldValue(fieldElement, options);
-                entity.SetValue(fieldName, value);
+                object value = this.DeserializeFieldValue(fieldElement, fieldMetadata, options);
+                entity.SetValue(fieldMetadata.Name, value);
             }
             catch (Exception ex)
             {
-                throw new JsonException($"Error deserializing field '{fieldName}': {ex.Message}", ex);
+                throw new JsonException($"Error deserializing field '{fieldMetadata.Name}': {ex.Message}", ex);
             }
         }
 
         // Set version if present
         this.SetEntityVersion(entity, sourceElement);
+    }
+
+    private object DeserializeFieldValue(JsonElement fieldElement, IDbFieldMetadata fieldMetadata, JsonSerializerOptions options)
+    {
+        if (fieldElement.ValueKind == JsonValueKind.Null)
+            return null;
+
+        return JsonSerializer.Deserialize(fieldElement.GetRawText(), fieldMetadata.Type, options);
     }
 
     private void SetEntityVersion(IEntity entity, JsonElement sourceElement)
@@ -147,14 +153,6 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
         {
             entity.DbVersion = versionElement.GetInt32();
         }
-    }
-
-    private object DeserializeFieldValue(JsonElement fieldElement, JsonSerializerOptions options)
-    {
-        if (fieldElement.ValueKind == JsonValueKind.Null)
-            return null;
-
-        return fieldElement.GetValueAsOriginalType();
     }
 
     public override void Write(Utf8JsonWriter writer, IEntity entity, JsonSerializerOptions options)
