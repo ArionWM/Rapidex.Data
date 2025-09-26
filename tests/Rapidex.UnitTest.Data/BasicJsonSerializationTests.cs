@@ -196,18 +196,6 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
         var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
 
-        //var dbscope = Database.Databases.AddMainDbIfNotExists();
-        //dbscope.Structure.DropEntity<ConcreteEntity01>();
-
-        //dbscope.Structure.ApplyAllStructure();
-
-        //ConcreteEntity01 ent01 = dbscope.New<ConcreteEntity01>();
-        //ent01.Name = "ent01";
-        //ent01.CreditLimit1 = 1234;
-        //ent01.Description = "desc 01";
-        //ent01.ContactType = ContactTypeTest.Corporate;
-        //ent01.Save();
-
         string json =
         @"{
               ""Entity"": ""ConcreteEntity01"",
@@ -223,9 +211,9 @@ public class BasicJsonSerializationTests : DbDependedTestsBase<DbSqlServerProvid
                 ""TotalCurrency"": ""USD"",
                 ""Description"": ""This is a test entity."",
                 ""Picture"": {
-                  ""value"": ""<BlobRecordId>"",
-                  ""text"": ""picture"",
-                  ""id"": ""<schemaName>.<OwnerEntityName>.<OwnerEntityId>.<FieldName>""
+                  ""value"": ""10006"",
+                  ""text"": ""Image01.png"",
+                  ""id"": ""Base.ConcreteEntity01.10041.fields.Picture""
                 },
                 ""BirthDate"": ""2012-04-21T18:25:43-05:00"",
                 ""ContactType"": {
