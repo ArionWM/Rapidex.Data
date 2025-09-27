@@ -90,7 +90,6 @@ public abstract class BasicBaseDataType : IDataType
 
 }
 
-//[TypeConverter(typeof(BbdTypeConverter<>))]
 public abstract class BasicBaseDataType<TBasicDataType, TThis>
     : BasicBaseDataType, IDataType<TBasicDataType>
     where TThis : BasicBaseDataType<TBasicDataType, TThis>, new()

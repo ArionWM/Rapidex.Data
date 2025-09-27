@@ -5,9 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestContent;
-
-internal class ConcreteEntityForN2NTest01 : DbConcreteEntityBase
+internal class ConcreteEntityForSerializationTest01 : DbConcreteEntityBase
 {
     public string Name { get; set; }
-    public RelationN2N<ConcreteEntityForN2NTest02> Relation01 { get; set; }
+    public RelationN2N<ConcreteEntityForSerializationTest03> Relation01 { get; set; }
 }

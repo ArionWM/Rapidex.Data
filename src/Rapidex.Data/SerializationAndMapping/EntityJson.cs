@@ -14,29 +14,29 @@ public static class EntityJson
 
     internal static IDbSchemaScope DeserializationContext
     {
-        get => deserializationContext; 
+        get => deserializationContext;
         private set => deserializationContext = value;
     }
 
-    //public static IEnumerable<IEntity> Deserialize(string json)
-    //{
-    //    string pJson = json?.Trim();
-    //    if (pJson.IsNullOrEmpty())
-    //        return Array.Empty<IPartialEntity>();
 
-    //    JsonNode node = JsonNode.Parse(json);
+    public static string Serialize(IEntity entity)
+    {
+        if (entity == null)
+            return "null";
 
-    //    if (node.GetValueKind() == JsonValueKind.Array)
-    //    {
-    //        IEntity[] ents = JsonSerializer.Deserialize<IEntity[]>(json, JsonHelper.JsonSerializerOptions);
-    //        return ents;
-    //    }
-    //    else
-    //    {
-    //        IEntity ent = JsonSerializer.Deserialize<IEntity>(node, JsonHelper.JsonSerializerOptions);
-    //        return new IEntity[] { ent };
-    //    }
-    //}
+        string json = entity.ToJson();
+        return json;
+    }
+
+    public static string Serialize(IEnumerable<IEntity> entities)
+    {
+        if (entities == null)
+            return "null";
+
+        string json = entities.ToJson();
+        return json;
+    }
+
 
     private static IEnumerable<IEntity> DeserializeInternal(string json, IDbSchemaScope scope)
     {

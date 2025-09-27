@@ -209,6 +209,28 @@ public static class JsonHelper
         return d;
     }
 
+    public static IEnumerable<Dictionary<string, object>> FromJsonToListOfDictionary(this string json)
+    {
+        json = json?.Trim();
+        if (json.IsNullOrEmpty())
+            return null;
+        //??
+        if (json.StartsWith("{") && json.EndsWith("}"))
+            if (json == "{}")
+                return null;
+        if (json.StartsWith("[") && json.EndsWith("]"))
+            if (json == "[]")
+                return null;
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonToDictionaryConverter(floatFormat: FloatFormat.Double, unknownNumberFormat: UnknownNumberFormat.Error, objectFormat: ObjectFormat.Dictionary) },
+            WriteIndented = true,
+        };
+        
+        dynamic d = JsonSerializer.Deserialize<IEnumerable<Dictionary<string, object>>>(json, options);
+        return d;
+    }
+
 
     public static string ToJson<T>(this T obj)
     {

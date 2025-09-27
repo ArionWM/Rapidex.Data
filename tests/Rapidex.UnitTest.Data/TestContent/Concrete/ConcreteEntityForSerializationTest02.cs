@@ -5,10 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestContent;
-
-internal class ConcreteEntityForN2NTest02 : DbConcreteEntityBase
+internal class ConcreteEntityForSerializationTest02 : DbConcreteEntityBase
 {
-    public string Name { get; set; }
-
-    public int NumberField { get; set; }
+    public DateTimeOffset TimeField { get; set; }
+    public Text TextField { get; set; }
 }
