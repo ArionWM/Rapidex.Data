@@ -77,7 +77,7 @@ public class Currency : BasicBaseDataType<decimal>
 
         public override bool CanConvertTo(ITypeDescriptorContext? context, [NotNullWhen(true)] Type? destinationType)
         {
-            if (fromSupportedTypes.Contains(destinationType))
+            if (toSupportedTypes.Contains(destinationType))
                 return true;
 
             return base.CanConvertTo(context, destinationType);
