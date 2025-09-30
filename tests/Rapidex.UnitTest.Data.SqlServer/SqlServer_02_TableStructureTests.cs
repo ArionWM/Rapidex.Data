@@ -54,7 +54,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
         dv.RowFilter = "COLUMN_NAME = 'StartTime'";
         Assert.Single(dv);
         Assert.Equal("YES", dv[0]["IS_NULLABLE"]);
-        Assert.Equal("datetime2", dv[0]["DATA_TYPE"]);
+        Assert.Equal("datetimeoffset", dv[0]["DATA_TYPE"]);
         Assert.Equal(DBNull.Value, dv[0]["CHARACTER_MAXIMUM_LENGTH"]);
 
         dv.RowFilter = "COLUMN_NAME = 'ConcreteReference01'";

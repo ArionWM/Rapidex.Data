@@ -28,7 +28,7 @@ namespace Rapidex.Data
         public string _TypeName { get; set; }
         public string _DbName { get; set; }
         public string _SchemaName { get; set; }
-        public bool _IsNew { get; set; }
+        public bool _IsNew { get; set; } = true;
 
         bool IEntity._IsDeleted { get; set; }
 

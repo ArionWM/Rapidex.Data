@@ -157,6 +157,10 @@ namespace Rapidex.Data
                 id = id * -1;
                 newEntity.SetId(id);
             }
+            else
+            {
+                newEntity._IsNew = false;
+            }
 
             if (forDeleted.HasValue && forDeleted.Value)
             {
@@ -196,6 +200,10 @@ namespace Rapidex.Data
                 long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext();
                 id = id * -1;
                 newEntity.SetId(id);
+            }
+            else
+            {
+                newEntity._IsNew = false;
             }
 
             if (forDeleted)

@@ -228,38 +228,6 @@ namespace Rapidex.Data
             this.prematureValue = value;
         }
 
-        //public override object GetSerializationData(EntitySerializationOptions options)
-        //{
-        //    IDataType _this = this;
-        //    IDbFieldMetadata fm = _this?.FieldMetadata;
-        //    string startFieldName = fm?.Name + "Start";
-        //    string endFieldName = fm?.Name + "End";
-
-        //    DateTimeOffset startTime = _this.Parent.NotNull().GetValue<DateTimeOffset>(startFieldName);
-        //    DateTimeOffset endTime = _this.Parent.NotNull().GetValue<DateTimeOffset>(endFieldName);
-
-        //    ObjDictionary keyValuePairs = new ObjDictionary();
-        //    keyValuePairs["start"] = startTime == DateTimeOffset.MinValue ? null : startTime;
-        //    keyValuePairs["end"] = endTime == DateTimeOffset.MinValue ? null : endTime;
-        //    return keyValuePairs;
-        //}
-
-        //public override object SetWithSerializationData(string memberName, object value)
-        //{
-        //    if (this.GetParent() == null || memberName.IsNullOrEmpty())
-        //    {
-        //        this.SetValuePremature(value);
-        //        return this;
-        //    }
-
-        //    if (value is IDictionary<string, object> dict)
-        //    {
-        //        this.SetValue(GetParent(), memberName, dict, true);
-        //        return this;
-        //    }
-        //    else
-        //        throw new InvalidOperationException($"Value '{value}' is not of type " + typeof(IDictionary<string, object>).Name);
-
-        //}
+        
     }
 }

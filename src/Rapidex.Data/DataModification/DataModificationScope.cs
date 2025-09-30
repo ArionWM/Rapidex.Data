@@ -319,11 +319,12 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
     public void Attach(IEntity entity, bool checkIntegrity = true)
     {
-        if (checkIntegrity)
-            this.CheckIntegrity(entity);
 
         entity._Schema = this.ParentSchema;
         entity._SchemaName = this.ParentSchema.SchemaName;
+
+        if (checkIntegrity)
+            this.CheckIntegrity(entity);
 
         entity.EnsureDataTypeInitialization();
     }

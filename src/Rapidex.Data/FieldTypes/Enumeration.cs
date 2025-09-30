@@ -127,26 +127,7 @@ namespace Rapidex.Data
 
             base.SetValue(entity, fieldName, value, applyToEntity);
         }
-
-        //public override object GetSerializationData(EntitySerializationOptions options)
-        //{
-        //    return base.GetSerializationData(options);
-        //}
-
-        //public override object SetWithSerializationData(string memberName, object value)
-        //{
-        //    if (value is IDictionary<string, object> data)
-        //    {
-        //        this.Value = data["value"].As<long>();
-
-        //    }
-        //    else
-        //    {
-        //        this.Value = value.As<long>();
-        //    }
-
-        //    return null;
-        //}
+       
     }
 
     /// <summary>

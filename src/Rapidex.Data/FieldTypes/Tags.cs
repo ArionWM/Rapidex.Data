@@ -14,16 +14,6 @@ namespace Rapidex.Data
             return base.SetupMetadata(container, self, values);
         }
 
-        //public override object GetSerializationData(EntitySerializationOptions options)
-        //{
-        //    string[] tags = this.Get();
-        //    IDataType _this = this;
-
-        //    var tagInfos = HasTags.GetTagInfo(_this.Parent._Schema, _this.FieldMetadata.ParentMetadata, tags);
-        //    return tagInfos;
-
-        //}
-
         public override IValidationResult Validate()
         {
             throw new NotImplementedException();

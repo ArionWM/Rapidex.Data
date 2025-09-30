@@ -962,20 +962,6 @@ public interface IDataType : ICloneable
 
     IValidationResult Validate();
 
-    ///// <summary>
-    ///// Used for serialization
-    ///// </summary>
-    ///// <param name="options"></param>
-    ///// <returns></returns>
-    //object GetSerializationData(EntitySerializationOptions options);
-
-    ///// <summary>
-    ///// Used for deserialization
-    ///// </summary>
-    ///// <param name="memberName"></param>
-    ///// <param name="value"></param>
-    ///// <returns></returns>
-    //object SetWithSerializationData(string memberName, object value);
 }
 
 

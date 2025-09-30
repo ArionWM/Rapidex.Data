@@ -55,7 +55,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             IEntity ent03 =  db.Find("myJsonEntity07", 3);
             Assert.NotNull(ent03);
             Assert.Equal("Meeting 2", ent03["Subject"]);
-            Assert.Equal(333, ent03["Price"].As<decimal>());
+            Assert.Equal(333, ent03["Price"].As<Currency>().Value);
 
 
         }

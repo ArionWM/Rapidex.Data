@@ -76,6 +76,24 @@ public static class EntityExtensions
         scope.CurrentWork.Save(entities);
     }
 
+    public static void Attach(this IDbDataModificationScope scope, IEnumerable<IEntity> entities)
+    {
+        foreach (IEntity ent in entities)
+            scope.Attach(ent);
+    }
+
+    public static void SaveOn(this IEntity entity, IDbDataModificationScope scope)
+    {
+        scope.Attach(entity);
+        entity.Save();
+    }
+
+    public static void SaveOn(this IEnumerable<IEntity> entities, IDbDataModificationScope scope)
+    {
+        scope.Attach(entities);
+        entities.Save();
+    }
+
 
     public static void EnsureDataTypeInitialization(this IEntity entity)
     {

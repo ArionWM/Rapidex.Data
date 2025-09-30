@@ -127,42 +127,7 @@ public class RelationN2N : RelationBase, ILazy
         return res;
     }
 
-    //public override object GetSerializationData(EntitySerializationOptions options)
-    //{
-    //    IEntityLoadResult? loadResult = (IEntityLoadResult)((ILazy)this).GetContent();
-    //    if (loadResult == null)
-    //        return null;
-
-    //    if (options.IncludeNestedEntities)
-    //    {
-    //        ObjDictionary data = new ObjDictionary();
-    //        data["_description"] = "Nested content available";
-    //        return data;
-    //    }
-
-    //    IEntitySerializationDataCreator dataCreator = Common.ServiceProvider?.GetRapidexService<IEntitySerializationDataCreator>();
-    //    if (dataCreator == null)
-    //    { //WARN: Kötü bir çözüm, bu seviyede DI kullanılmıyor idi, nasıl çözebiliriz?
-    //        dataCreator = new EntitySerializationDataCreator();
-    //    }
-
-    //    var parentEntity = this.GetParent();
-    //    var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
-    //    ItemDefinitionExtraData exData = new ItemDefinitionExtraData();
-    //    fm.GetDefinitionData(parentEntity._Schema, ref exData, true);
-
-    //    EntitySerializationOptions nestedOptions = options;
-    //    nestedOptions.IncludeNestedEntities = false;
-    //    nestedOptions.IncludeTypeName = true;
-    //    var entityData = dataCreator.ConvertToListData(loadResult, nestedOptions, exData.Data, null);
-
-    //    return entityData;
-    //}
-
-    //public override object SetWithSerializationData(string memberName, object value)
-    //{
-    //    throw new NotImplementedException("!!!!");
-    //}
+    
 
     public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
     {

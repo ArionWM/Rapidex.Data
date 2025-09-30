@@ -68,6 +68,7 @@ public class Currency : BasicBaseDataType<decimal>
 
             return base.CanConvertFrom(context, sourceType);
         }
+
         public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         {
             switch (value)
@@ -212,32 +213,6 @@ public class Currency : BasicBaseDataType<decimal>
         return clone;
     }
 
-    //public override object GetSerializationData(EntitySerializationOptions options)
-    //{
-    //    ObjDictionary data = new ObjDictionary();
-    //    data["value"] = this.Value;
-    //    data["type"] = this.Type;
-    //    //symbolText
-    //    //symbolHtml
-    //    //symbolIcon
-    //    return data;
-    //}
-
-    //public override object SetWithSerializationData(string memberName, object value)
-    //{
-    //    if (value is IDictionary<string, object> data)
-    //    {
-    //        this.Value = data["value"].As<decimal>(); //?.Get<decimal>("value", true)
-    //        this.Type = data["type"].As<string>();
-    //    }
-    //    else
-    //    {
-    //        this.Value = value.As<decimal>();
-    //    }
-
-
-    //    return null;
-    //}
 
     public override string ToString()
     {

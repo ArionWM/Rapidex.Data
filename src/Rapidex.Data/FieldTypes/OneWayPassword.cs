@@ -94,11 +94,6 @@ public class OneWayPassword : BasicBaseDataType<string>
         return passw;
     }
 
-    //public override object GetSerializationData(EntitySerializationOptions options)
-    //{
-    //    //Serileştirme verisine içeriği vermiyoruz.
-    //    return CRIPTO_TEXT_DUMMY;
-    //}
 
     public bool IsEqual(string comparedValue)
     {

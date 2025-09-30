@@ -273,36 +273,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
         return clone;
     }
 
-    //public override object GetSerializationData(EntitySerializationOptions options)
-    //{
-    //    ObjDictionary data = new ObjDictionary();
-    //    data["value"] = this.Value;
-
-    //    ILazy _this = (ILazy)this;
-    //    IEntity ent = (IEntity)_this.GetContent();
-    //    string caption = ent?.Caption();
-    //    data["text"] = caption;
-    //    return data;
-    //}
-
-    //public override object SetWithSerializationData(string memberName, object value)
-    //{
-    //    if (value is IDictionary<string, object> dict)
-    //    {
-    //        long _value = dict.Get("value", true).As<long>();
-    //        this.Value = _value;
-    //    }
-
-    //    return null;
-    //}
-
-    //public override IPartialEntity[] SetValue(IEntity entity, string fieldName, ObjDictionary value)
-    //{
-    //    object _value = value.Get("value", true);
-    //    this.SetValue(entity, fieldName, _value);
-
-    //    return null;
-    //}
+   
 
 }
 

@@ -1,9 +1,10 @@
-﻿using Rapidex.UnitTest.Data.TestContent;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rapidex.Data.Exceptions;
+using Rapidex.UnitTest.Data.TestContent;
 
 namespace Rapidex.UnitTest.Data.TestBase
 {
@@ -283,15 +284,25 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             using var work1 = db.BeginWork();
 
-            //Prefer to use work.New<T> method to create new entities within a work scope
+            //Use work.New<T> method to create new entities within a work scope
             ConcreteEntity01 entity01 = work1.New<ConcreteEntity01>();
             entity01.Name = "Entity 001";
             entity01.Save();
 
-            //But also can use constructor directly
-            ConcreteEntity01 entity02 = new ConcreteEntity01();
-            entity02.Name = "Entity 002";
-            entity02.Save();
+            //Work scope attach required
+            Assert.Throws<EntityAttachScopeException>(() =>
+            {
+                ConcreteEntity01 entity02 = new ConcreteEntity01();
+                entity02.Name = "Entity 002";
+                entity02.Save();
+            });
+
+
+            //But we can attach before save
+            ConcreteEntity01 entity03 = new ConcreteEntity01();
+            entity03.Name = "Entity 003";
+            entity03.SaveOn(work1);
+
 
             work1.CommitChanges();
 
