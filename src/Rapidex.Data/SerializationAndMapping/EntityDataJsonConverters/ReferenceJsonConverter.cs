@@ -7,10 +7,9 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
-internal class ReferenceJsonConverter<T> : JsonConverter<ReferenceBase<T>>
-    where T : ReferenceBase<T>, new()
+internal class ReferenceJsonConverter<T> : JsonConverter<ReferenceBase>
 {
-    public override ReferenceBase<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ReferenceBase? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null)
             return null;
@@ -19,7 +18,7 @@ internal class ReferenceJsonConverter<T> : JsonConverter<ReferenceBase<T>>
         {
             // Handle direct ID reference
             long id = reader.GetInt64();
-            T reference = new T();
+            ReferenceBase reference = Activator.CreateInstance(typeToConvert) as ReferenceBase;
             reference.TargetId = id;
             return reference;
         }
@@ -29,7 +28,7 @@ internal class ReferenceJsonConverter<T> : JsonConverter<ReferenceBase<T>>
             using (JsonDocument doc = JsonDocument.ParseValue(ref reader))
             {
                 JsonElement root = doc.RootElement;
-                T reference = new T();
+                ReferenceBase reference = Activator.CreateInstance(typeToConvert) as ReferenceBase;
 
                 if (root.TryGetProperty("value", out JsonElement valueElement))
                 {
@@ -53,7 +52,7 @@ internal class ReferenceJsonConverter<T> : JsonConverter<ReferenceBase<T>>
         throw new JsonException($"Unexpected token {reader.TokenType} when parsing Reference.");
     }
 
-    public override void Write(Utf8JsonWriter writer, ReferenceBase<T> value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ReferenceBase value, JsonSerializerOptions options)
     {
         JsonConvertersHelper.WriteReference(writer, value, options);
     }

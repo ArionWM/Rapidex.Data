@@ -40,6 +40,7 @@ public class SampleServiceA
         return contact;
     }
 
+    [Obsolete]
     internal Contact UpdateContact(IDbSchemaScope db, EntityDataDto entityValues)
     {
         using var work = db.BeginWork();

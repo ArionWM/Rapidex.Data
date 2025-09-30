@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Rapidex.Data;
 
-internal static class ImplementationMappingHelper
+internal static class ImplementerHelper
 {
     private static bool IsNullableProperty(PropertyInfo property)
     {

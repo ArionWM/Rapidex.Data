@@ -14,17 +14,31 @@ namespace Rapidex;
 
 public static class JsonHelper
 {
+    private static object optionRegisterLocker = new object();
     private static DefaultJsonTypeInfoResolver defaultJsonTypeInfoResolver;
-    internal static Dictionary<Type, JsonConverter> JsonConverters { get; private set; } = new();
-    public static JsonSerializerOptions JsonSerializerOptions { get; private set; } = new JsonSerializerOptions();
+    internal static List<JsonConverter> JsonConverters { get; private set; } = new();
+    internal static Dictionary<Type, JsonConverter> TypedJsonConverters { get; private set; } = new();
+    public static JsonSerializerOptions JsonSerializerOptions { get; private set; }
 
     static JsonHelper()
     {
-        //JsonHelper.JsonSerializerOptions.SetDefaultOptions();
+
+    }
+
+    private static void CheckInitialized()
+    {
+        if (JsonSerializerOptions == null)
+            throw new InvalidOperationException("JsonHelper is not initialized. Please call JsonHelper.Start() in application startup.");
     }
 
     public static void Setup()
     {
+
+    }
+
+    public static void Start()
+    {
+        JsonHelper.JsonSerializerOptions = new();
         JsonHelper.JsonSerializerOptions.SetDefaultOptions();
     }
 
@@ -39,11 +53,10 @@ public static class JsonHelper
             options.AllowTrailingCommas = true;
             options.ReadCommentHandling = JsonCommentHandling.Skip;
 
-
             options.Converters.Add(new JsonStringEnumConverter());
-            //options.Converters.Add(new AutoStringToBasicConverter());
+            options.Converters.Add(new AutoStringToBasicConverter());
 
-            foreach (JsonConverter converter in JsonConverters.Values)
+            foreach (JsonConverter converter in JsonConverters)
             {
                 Type ctype = converter.GetType();
                 if (excludedConverters != null && excludedConverters.Any(c => c == ctype))
@@ -53,27 +66,143 @@ public static class JsonHelper
             }
 
 
-            if (defaultJsonTypeInfoResolver == null)
-            {
-                defaultJsonTypeInfoResolver = new DefaultJsonTypeInfoResolver();
-                AddDerivedTypes(defaultJsonTypeInfoResolver);
-            }
-
-            // Configure either a DefaultJsonTypeInfoResolver or some JsonSerializerContext and add the required modifier:
-            options.TypeInfoResolver = defaultJsonTypeInfoResolver;
+            //if (defaultJsonTypeInfoResolver == null)
+            //{
+            //    defaultJsonTypeInfoResolver = new DefaultJsonTypeInfoResolver();
+            //    AddDerivedTypes(defaultJsonTypeInfoResolver);
+            //}
+            //options.TypeInfoResolver = defaultJsonTypeInfoResolver;
         }
     }
 
     public static void Register(JsonConverter converter)
     {
-        if (JsonConverters.Values.Any(c => c.GetType() == converter.GetType()))
-            return;
+        lock (optionRegisterLocker)
+        {
+            if (JsonConverters.Any(c => c.GetType() == converter.GetType()))
+                return;
 
-        if (converter.Type != null)
-            JsonConverters.Set(converter.Type, converter);
-        JsonSerializerOptions.Converters.Add(converter);
+            if (converter.Type != null)
+                TypedJsonConverters.Set(converter.Type, converter);
+
+            JsonConverters.Add(converter);
+        }
     }
 
+
+
+    public static void MsDeserializationCorrection(Dictionary<string, object> data)
+    {
+        foreach (var item in data)
+        {
+            if (item.Value is JsonElement jsonElement)
+            {
+                data[item.Key] = jsonElement.GetValueAsOriginalType();
+            }
+        }
+
+    }
+
+    //TODO: Remove for confusion
+    public static T FromJson<T>(this string json)
+    {
+        CheckInitialized();
+
+        json = json?.Trim();
+        if (json.IsNullOrEmpty())
+            return default(T);
+
+        //??
+        if (json.StartsWith("{") && json.EndsWith("}"))
+            if (json == "{}")
+                return default(T);
+
+        if (json.StartsWith("[") && json.EndsWith("]"))
+            if (json == "[]")
+                return default(T);
+
+        return JsonSerializer.Deserialize<T>(json, JsonSerializerOptions);
+    }
+
+    public static object FromJson(this string json, Type targetType)
+    {
+        CheckInitialized();
+
+        json = json?.Trim();
+        if (json.IsNullOrEmpty())
+            return null;
+
+        //??
+        if (json.StartsWith("{") && json.EndsWith("}"))
+            if (json == "{}")
+                return null;
+
+        if (json.StartsWith("[") && json.EndsWith("]"))
+            if (json == "[]")
+                return null;
+
+        return JsonSerializer.Deserialize(json, targetType, JsonSerializerOptions);
+    }
+
+    public static Dictionary<string, object> FromJsonToDictionary(this string json)
+    {
+        CheckInitialized();
+
+        json = json?.Trim();
+        if (json.IsNullOrEmpty())
+            return null;
+
+        //??
+        if (json.StartsWith("{") && json.EndsWith("}"))
+            if (json == "{}")
+                return null;
+
+        if (json.StartsWith("[") && json.EndsWith("]"))
+            if (json == "[]")
+                return null;
+
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonToDictionaryConverter(floatFormat: FloatFormat.Double, unknownNumberFormat: UnknownNumberFormat.Error, objectFormat: ObjectFormat.Dictionary) },
+            WriteIndented = true,
+        };
+        dynamic d = JsonSerializer.Deserialize<dynamic>(json, options);
+        return d;
+    }
+
+    public static IEnumerable<Dictionary<string, object>> FromJsonToListOfDictionary(this string json)
+    {
+        CheckInitialized();
+
+        json = json?.Trim();
+        if (json.IsNullOrEmpty())
+            return null;
+        //??
+        if (json.StartsWith("{") && json.EndsWith("}"))
+            if (json == "{}")
+                return null;
+        if (json.StartsWith("[") && json.EndsWith("]"))
+            if (json == "[]")
+                return null;
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonToDictionaryConverter(floatFormat: FloatFormat.Double, unknownNumberFormat: UnknownNumberFormat.Error, objectFormat: ObjectFormat.Dictionary) },
+            WriteIndented = true,
+        };
+
+        dynamic d = JsonSerializer.Deserialize<IEnumerable<Dictionary<string, object>>>(json, options);
+        return d;
+    }
+
+
+    public static string ToJson<T>(this T obj)
+    {
+        CheckInitialized();
+
+        return JsonSerializer.Serialize<T>(obj, JsonSerializerOptions);
+    }
+
+    [Obsolete("", true)]
     public static void AddDerivedTypes(DefaultJsonTypeInfoResolver tiResolver, Type baseType, Type[] types)
     {
         JsonPolymorphismOptions defaultOpt = new();
@@ -118,6 +247,7 @@ public static class JsonHelper
         });
     }
 
+    [Obsolete("", true)]
     public static void AddDerivedRootTypes(DefaultJsonTypeInfoResolver tiResolver, Type[] types)
     {
         foreach (var rootType in types)
@@ -130,111 +260,11 @@ public static class JsonHelper
         }
     }
 
+    [Obsolete("", true)]
     public static void AddDerivedTypes(DefaultJsonTypeInfoResolver tiResolver)
     {
         Type[] types = Common.Assembly.FindTypesHasAttribute<JsonDerivedBaseAttribute>(false);
         AddDerivedRootTypes(tiResolver, types);
-    }
-
-    public static void MsDeserializationCorrection(Dictionary<string, object> data)
-    {
-        foreach (var item in data)
-        {
-            if (item.Value is JsonElement jsonElement)
-            {
-                data[item.Key] = jsonElement.GetValueAsOriginalType();
-            }
-        }
-
-    }
-
-    //TODO: Remove for confusion
-    public static T FromJson<T>(this string json)
-    {
-        json = json?.Trim();
-        if (json.IsNullOrEmpty())
-            return default(T);
-
-        //??
-        if (json.StartsWith("{") && json.EndsWith("}"))
-            if (json == "{}")
-                return default(T);
-
-        if (json.StartsWith("[") && json.EndsWith("]"))
-            if (json == "[]")
-                return default(T);
-
-        return JsonSerializer.Deserialize<T>(json, JsonSerializerOptions);
-    }
-
-    public static object FromJson(this string json, Type targetType)
-    {
-        json = json?.Trim();
-        if (json.IsNullOrEmpty())
-            return null;
-
-        //??
-        if (json.StartsWith("{") && json.EndsWith("}"))
-            if (json == "{}")
-                return null;
-
-        if (json.StartsWith("[") && json.EndsWith("]"))
-            if (json == "[]")
-                return null;
-
-        return JsonSerializer.Deserialize(json, targetType, JsonSerializerOptions);
-    }
-
-    public static Dictionary<string, object> FromJsonToDictionary(this string json)
-    {
-        json = json?.Trim();
-        if (json.IsNullOrEmpty())
-            return null;
-
-        //??
-        if (json.StartsWith("{") && json.EndsWith("}"))
-            if (json == "{}")
-                return null;
-
-        if (json.StartsWith("[") && json.EndsWith("]"))
-            if (json == "[]")
-                return null;
-
-        var options = new JsonSerializerOptions
-        {
-            Converters = { new JsonToDictionaryConverter(floatFormat: FloatFormat.Double, unknownNumberFormat: UnknownNumberFormat.Error, objectFormat: ObjectFormat.Dictionary) },
-            WriteIndented = true,
-        };
-        dynamic d = JsonSerializer.Deserialize<dynamic>(json, options);
-        return d;
-    }
-
-    public static IEnumerable<Dictionary<string, object>> FromJsonToListOfDictionary(this string json)
-    {
-        json = json?.Trim();
-        if (json.IsNullOrEmpty())
-            return null;
-        //??
-        if (json.StartsWith("{") && json.EndsWith("}"))
-            if (json == "{}")
-                return null;
-        if (json.StartsWith("[") && json.EndsWith("]"))
-            if (json == "[]")
-                return null;
-        var options = new JsonSerializerOptions
-        {
-            Converters = { new JsonToDictionaryConverter(floatFormat: FloatFormat.Double, unknownNumberFormat: UnknownNumberFormat.Error, objectFormat: ObjectFormat.Dictionary) },
-            WriteIndented = true,
-        };
-        
-        dynamic d = JsonSerializer.Deserialize<IEnumerable<Dictionary<string, object>>>(json, options);
-        return d;
-    }
-
-
-    public static string ToJson<T>(this T obj)
-    {
-        return JsonSerializer.Serialize<T>(obj, JsonSerializerOptions);
     }
 
     [Obsolete("", true)]

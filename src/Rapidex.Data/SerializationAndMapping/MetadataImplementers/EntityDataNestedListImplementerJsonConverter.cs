@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Metadata.Implementers;
+namespace Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 
 internal class EntityDataNestedListImplementerJsonConverter : JsonConverter<EntityDataNestedListImplementer>
 {

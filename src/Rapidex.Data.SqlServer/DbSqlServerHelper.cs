@@ -10,8 +10,8 @@ namespace Rapidex.Data.SqlServer;
 
 internal static class DbSqlServerHelper
 {
-    public const SqlDbType Json = (SqlDbType)35;
-    public const SqlDbType Vector = (SqlDbType)36;
+    public const SqlDbType JSON = (SqlDbType)35;
+    public const SqlDbType VECTOR = (SqlDbType)36;
 
     //SELECT * FROM sys.messages WHERE language_id = 1033 and text like '%permission%'
     public static int[] SQL_Errors_Permission = new int[] { 229, 230, 262, 297, 300 };
@@ -32,6 +32,9 @@ internal static class DbSqlServerHelper
             case DbFieldType.DateTime2:
                 return SqlDbType.DateTime2;
 
+            case DbFieldType.DateTimeOffset:
+                return SqlDbType.DateTimeOffset;
+
             case DbFieldType.Guid:
                 return SqlDbType.UniqueIdentifier;
 
@@ -51,7 +54,7 @@ internal static class DbSqlServerHelper
                 return SqlDbType.Bit;
 
             case DbFieldType.Vector:
-                return DbSqlServerHelper.Vector;
+                return DbSqlServerHelper.VECTOR;
 
             default:
                 throw new NotSupportedException($"Not supported dbtype {dbType}");
@@ -125,6 +128,9 @@ internal static class DbSqlServerHelper
             case SqlDbType.DateTime2:
                 return "datetime2";
 
+            case SqlDbType.DateTimeOffset:
+                return "datetimeoffset";
+
             case SqlDbType.UniqueIdentifier:
                 return "uniqueidentifier";
 
@@ -143,7 +149,7 @@ internal static class DbSqlServerHelper
             case SqlDbType.Bit:
                 return "bit";
 
-            case DbSqlServerHelper.Vector:
+            case DbSqlServerHelper.VECTOR:
                 int lenght2 = variableType.Lenght;
                 if (lenght2 == 0)
                     lenght2 = 1024;

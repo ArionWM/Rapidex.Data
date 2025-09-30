@@ -7,11 +7,16 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
-internal class RapidexDataConverterFactory : JsonConverterFactory
+internal class RapidexEntityDataConverterFactory : JsonConverterFactory
 {
     readonly static Dictionary<Type, Type?> converterTypes = new();
     readonly static Dictionary<Type, JsonConverter> converters = new();
 
+
+    public RapidexEntityDataConverterFactory()
+    {
+        
+    }
 
     public override bool CanConvert(Type typeToConvert)
     {
@@ -21,7 +26,7 @@ internal class RapidexDataConverterFactory : JsonConverterFactory
             return canConvert;
         }
 
-        if (JsonHelper.JsonConverters.TryGetValue(typeToConvert, out JsonConverter? conv1))
+        if (JsonHelper.TypedJsonConverters.TryGetValue(typeToConvert, out JsonConverter? conv1))
         {
             converterTypes[typeToConvert] = conv1.GetType();
             converters[typeToConvert] = conv1;
@@ -31,7 +36,7 @@ internal class RapidexDataConverterFactory : JsonConverterFactory
         IList<Type> baseTypes = TypeHelper.GetBaseTypesChainCached(typeToConvert, !typeToConvert.IsValueType);
         for (int i = 0; i < baseTypes.Count; i++)
         {
-            if (JsonHelper.JsonConverters.TryGetValue(baseTypes[i], out JsonConverter? conv2))
+            if (JsonHelper.TypedJsonConverters.TryGetValue(baseTypes[i], out JsonConverter? conv2))
             {
                 converterTypes[typeToConvert] = conv2.GetType();
                 converters[typeToConvert] = conv2;
@@ -55,7 +60,7 @@ internal class RapidexDataConverterFactory : JsonConverterFactory
 
     public static void Register()
     {
-        RapidexDataConverterFactory conv = new RapidexDataConverterFactory();
+        RapidexEntityDataConverterFactory conv = new RapidexEntityDataConverterFactory();
         JsonHelper.Register(conv);
     }
 }

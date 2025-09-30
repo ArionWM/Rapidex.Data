@@ -15,7 +15,7 @@ namespace Rapidex.Data;
 /// Ancak BlobRepository'ler farklı türlerde olabilir. Bu neden ile bu veri tipi, sistemden aktif repository'yi alır.
 /// </summary>
 /// <typeparam name="TThis"></typeparam>
-public abstract class BlobFieldBase<TThis> : ReferenceBase<TThis>, IDataType<long>, ILazyBlob
+public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILazyBlob
     where TThis : BlobFieldBase<TThis>, new()
 {
     public override bool? SkipDirectLoad => false;

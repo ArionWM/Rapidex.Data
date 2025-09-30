@@ -13,6 +13,11 @@ namespace Rapidex
         {
             JsonHelper.Setup();
             YamlHelper.Setup();
+        }
+
+        public static void Start()
+        {
+            JsonHelper.Start();
 
             Type[] mapsterRegisterTypes = Common.Assembly.FindDerivedClassTypes<IRegister>();
             IEnumerable<IRegister> mapsterRegisters = mapsterRegisterTypes.Select(x => (IRegister)Activator.CreateInstance(x));

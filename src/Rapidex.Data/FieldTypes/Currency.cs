@@ -8,8 +8,8 @@ using System.Text;
 
 namespace Rapidex.Data;
 
-[TypeConverter(typeof(Currency.CurrencyConverter))]
-public class Currency : BasicBaseDataType<decimal, Currency>
+[TypeConverter(typeof(Currency.CurrencyTypeConverter))]
+public class Currency : BasicBaseDataType<decimal>
 {
     public class CurrencyDbFieldMetadata : DbFieldMetadata
     {
@@ -49,7 +49,7 @@ public class Currency : BasicBaseDataType<decimal, Currency>
         }
     }
 
-    public class CurrencyConverter : System.ComponentModel.TypeConverter
+    public class CurrencyTypeConverter : System.ComponentModel.TypeConverter
     {
         static Type[] supportedTypes = new Type[]
         {
@@ -182,8 +182,8 @@ public class Currency : BasicBaseDataType<decimal, Currency>
 
     public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
     {
-        BasicBaseDataTypeConverter converter = new BasicBaseDataTypeConverter();
-        Common.Converter.Register(converter);
+        //BasicBaseDataTypeConverter converter = new BasicBaseDataTypeConverter();
+        //Common.Converter.Register(converter);
 
         return new CurrencyDbFieldMetadata(self);
     }

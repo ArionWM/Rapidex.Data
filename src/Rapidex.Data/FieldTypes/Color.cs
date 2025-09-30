@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Rapidex.Data
 {
-    public class Color : BasicBaseDataType<string, Color>
+    public class Color : BasicBaseDataType<string>
     {
         public override string TypeName => "color";
 

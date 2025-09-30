@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Metadata.Implementers;
+namespace Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 internal class MetadataImplementerContainer
 {
     public static Dictionary<string, Type> ImplementerTagMapping = new Dictionary<string, Type>();
@@ -50,7 +50,7 @@ internal class MetadataImplementerContainer
     public static Type FindType(object obj)
     {
         if (obj.IsNullOrEmpty())
-            throw new InvalidOperationException("Object is null or empty");
+            throw new BaseValidationException("Object is null or empty");
 
         string tag = null;
         object objDict = obj as IDictionary<string, object>;
@@ -68,7 +68,7 @@ internal class MetadataImplementerContainer
                 tag = (node["_tag"] ?? node["type"] ?? node["Type"])?.GetValue<string>();
                 break;
             default:
-                throw new InvalidOperationException("Object is not a dictionary");
+                throw new BaseValidationException("Object is not a dictionary");
         }
 
         tag.NotNull($"'tag' property not found. Can't find implementer");
@@ -77,7 +77,7 @@ internal class MetadataImplementerContainer
         Type type = MetadataImplementerContainer.ImplementerTagMapping.Get(lowerTag);
         if (type == null)
         {
-            throw new InvalidOperationException($"Tag '{tag}' not supported");
+            throw new BaseValidationException($"Tag '{tag}' not supported");
         }
 
         return type;

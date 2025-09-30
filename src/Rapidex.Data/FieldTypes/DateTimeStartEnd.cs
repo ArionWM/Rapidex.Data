@@ -69,7 +69,7 @@ namespace Rapidex.Data
                 startFm.Caption = this.Caption;
                 startFm.Type = typeof(DateTimeOffset);
                 startFm.BaseType = typeof(DateTimeOffset);
-                startFm.DbType = DbFieldType.DateTime2;
+                startFm.DbType = DbFieldType.DateTimeOffset;
                 startFm.SkipDbVersioning = this.SkipDbVersioning;
 
                 this.StartFm = startFm;
@@ -81,7 +81,7 @@ namespace Rapidex.Data
                 endFm.Caption = this.Caption;
                 endFm.Type = typeof(DateTimeOffset);
                 endFm.BaseType = typeof(DateTimeOffset);
-                endFm.DbType = DbFieldType.DateTime2;
+                endFm.DbType = DbFieldType.DateTimeOffset;
                 endFm.SkipDbVersioning = this.SkipDbVersioning;
 
                 this.EndFm = endFm;

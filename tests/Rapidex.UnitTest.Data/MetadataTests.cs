@@ -49,7 +49,7 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
         Assert.Equal("utest", em01.Prefix);
         Assert.Equal("ConcreteEntity01", em01.Name);
         Assert.Equal(em01.Fields["Id"], em01.PrimaryKey);
-        Assert.Equal(17, em01.Fields.Count);
+        Assert.Equal(18, em01.Fields.Count);
         Assert.Equal("Id", em01.Fields["Id"].Name);
         Assert.Equal(typeof(long), em01.Fields["Id"].Type);
         Assert.Equal(typeof(long), em01.Fields["Id"].BaseType);

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Rapidex.Data
 {
-    public class Password : BasicBaseDataType<string, Password>
+    public class Password : BasicBaseDataType<string>
     {
         private const string CRIPTO_TEXT_PREFIX = "|C|";
         private const string CRIPTO_TEXT_DUMMY = "*****";

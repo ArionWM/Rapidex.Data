@@ -8,8 +8,6 @@ using Rapidex.Data.SerializationAndMapping.JsonConverters;
 
 namespace Rapidex.Data;
 
-//[JsonDerivedBase]
-//[JsonConverter(typeof(DataTypeDefaultJsonConverter))]
 public abstract class BasicBaseDataType : IDataType
 {
     IEntity IDataType.Parent { get; set; }
@@ -37,9 +35,6 @@ public abstract class BasicBaseDataType : IDataType
     public abstract void SetValue(IEntity entity, string fieldName, object value, bool applyToEntity);
     public abstract IPartialEntity[] SetValue(IEntity entity, string fieldName, ObjDictionary value);
     public abstract void SetValuePremature(object value);
-
-    //public abstract object GetSerializationData(EntitySerializationOptions options);
-    //public abstract object SetWithSerializationData(string memberName, object value);
 
     protected virtual IEntity GetParent()
     {
@@ -90,45 +85,13 @@ public abstract class BasicBaseDataType : IDataType
 
 }
 
-public abstract class BasicBaseDataType<TBasicDataType, TThis>
+public abstract class BasicBaseDataType<TBasicDataType>
     : BasicBaseDataType, IDataType<TBasicDataType>
-    where TThis : BasicBaseDataType<TBasicDataType, TThis>, new()
 {
-    public class BasicBaseDataTypeConverter : ConverterBase
-    {
-        public override Type FromType => typeof(TThis);
-
-        public override Type ToType => typeof(TBasicDataType);
-
-        public override object Convert(object from, Type toType)
-        {
-            TThis _from = (TThis)from;
-            return _from.Value.As(toType);
-        }
-
-        public override bool TryConvert(object from, Type toType, out object to)
-        {
-            TThis _from = (TThis)from;
-            if (_from.Value == null)
-            {
-                to = null;
-                return true;
-            }
-            if (_from.Value.GetType() == toType)
-            {
-                to = _from.Value;
-                return true;
-            }
-            return Common.Converter.TryConvert(_from.Value, toType, out to);
-        }
-    }
-
-
     public TBasicDataType Value { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore]
     public override Type BaseType => typeof(TBasicDataType);
-
 
 
     public override object GetValueUpper(IEntity entity, string fieldName)
@@ -184,24 +147,12 @@ public abstract class BasicBaseDataType<TBasicDataType, TThis>
 
     public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
     {
-        BasicBaseDataTypeConverter converter = new BasicBaseDataTypeConverter();
-        Common.Converter.Register(converter);
+        //BasicBaseDataTypeConverter converter = new BasicBaseDataTypeConverter();
+        //Common.Converter.Register(converter);
 
         self.BaseType = typeof(TBasicDataType);
         return base.SetupMetadata(container, self, values);
     }
-
-    //public override object GetSerializationData(EntitySerializationOptions options)
-    //{
-    //    return this.Value;
-    //}
-
-    //public override object SetWithSerializationData(string memberName, object value)
-    //{
-    //    value.ShouldSupportTo<TBasicDataType>();
-    //    this.Value = value.As<TBasicDataType>();
-    //    return this;
-    //}
 
     public override IPartialEntity[] SetValue(IEntity entity, string fieldName, ObjDictionary value)
     {

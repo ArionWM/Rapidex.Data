@@ -6,11 +6,19 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.SerializationAndMapping;
-public static class EntityJson
+namespace Rapidex.Data;
+public static class EntityDataJsonConverter
 {
     [ThreadStatic]
     static IDbSchemaScope deserializationContext = null;
+
+    public static void AddDefaultJsonOptions(this IServiceCollection services)
+    {
+        services.Configure<JsonSerializerOptions>(options =>
+        {
+            options.SetDefaultOptions();
+        });
+    }
 
     internal static IDbSchemaScope DeserializationContext
     {

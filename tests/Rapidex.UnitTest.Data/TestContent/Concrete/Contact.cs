@@ -16,5 +16,5 @@ public class Contact : DbConcreteEntityBase
     public Text Description { get; set; }
     public Image Picture { get; set; }
     public DateTimeOffset BirthDate { get; set; }
-    public Enumeration<ContactTypeTest> ContactType { get; set; }
+    public Enumeration<ContactType> ContactType { get; set; }
 }

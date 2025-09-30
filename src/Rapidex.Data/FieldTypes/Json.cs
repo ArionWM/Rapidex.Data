@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 
 namespace Rapidex.Data
 {
-    public class Json : BasicBaseDataType<string, Json>
+    public class Json : BasicBaseDataType<string>
     {
         public override string TypeName => "json";
 

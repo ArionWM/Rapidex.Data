@@ -13,6 +13,7 @@ public enum EntityUpdateDtoType
     RemoveRelation,
 }
 
+[Obsolete("", true)]
 public class EntityUpdateDataDto : EntityDataDto, IJsonOnDeserialized
 {
     [JsonPropertyOrder(-9000)]

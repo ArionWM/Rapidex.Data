@@ -10,9 +10,9 @@ using Rapidex.UnitTest.Data.TestContent;
 
 namespace Rapidex.UnitTest.Data;
 
-public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
+public class DataSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public JsonSerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public DataSerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 
@@ -30,7 +30,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
         using var work = db.BeginWork();
 
         ConcreteEntity01 ent01_01 = work.New<ConcreteEntity01>();
-        ent01_01.ContactType = ContactTypeTest.Personal;
+        ent01_01.ContactType = ContactType.Personal;
         ent01_01.BirthDate = new DateTimeOffset(1990, 1, 1, 0, 0, 0, TimeSpan.Zero);
         ent01_01.Name = "ent01_01";
         ent01_01.Phone = "555-1234";
@@ -158,6 +158,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
         db.Metadata.AddIfNotExist<ConcreteEntityForSerializationTest01>();
         db.Metadata.AddIfNotExist<ConcreteEntityForSerializationTest02>();
         db.Metadata.AddIfNotExist<ConcreteEntityForSerializationTest03>();
+        db.Structure.ApplyAllStructure();
 
         using var work = db.BeginWork();
         ConcreteEntityForSerializationTest01 ent01_01 = work.New<ConcreteEntityForSerializationTest01>();
@@ -195,7 +196,7 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
 
         var ent01s = new ConcreteEntityForSerializationTest01[] { ent01_01, ent01_02 };
 
-        string json01 = EntityJson.Serialize(ent01s);
+        string json01 = EntityDataJsonConverter.Serialize(ent01s);
 
         var listDict01 = json01.FromJsonToListOfDictionary();
 
@@ -222,17 +223,17 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
         ent01.Name = "ent01";
         ent01.CreditLimit1 = 1234;
         ent01.Description = "desc 01";
-        ent01.ContactType = ContactTypeTest.Corporate;
+        ent01.ContactType = ContactType.Corporate;
         ent01.Save();
 
         string json01 = ent01.ToJson();
         Assert.NotNull(json01);
 
-        ConcreteEntity01 ent = EntityJson.Deserialize<ConcreteEntity01>(json01, db).FirstOrDefault();
+        ConcreteEntity01 ent = EntityDataJsonConverter.Deserialize<ConcreteEntity01>(json01, db).FirstOrDefault();
         Assert.NotNull(ent);
         Assert.Equal("ent01", ent.Name);
         Assert.Equal(1234, ent.CreditLimit1.Value);
-        Assert.Equal(ContactTypeTest.Corporate, (ContactTypeTest)ent.ContactType.Value);
+        Assert.Equal(ContactType.Corporate, (ContactType)ent.ContactType.Value);
     }
 
     [Fact]
@@ -269,13 +270,13 @@ public class JsonSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
             }";
 
 
-        IEntity entDynamic = EntityJson.Deserialize(json, db).FirstOrDefault();
+        IEntity entDynamic = EntityDataJsonConverter.Deserialize(json, db).FirstOrDefault();
         Assert.NotNull(entDynamic);
         Assert.Equal("ConcreteEntity01", entDynamic._TypeName);
         Assert.Equal("Test Entity", entDynamic["Name"].As<string>());
         Assert.Equal(1000.50m, (entDynamic["CreditLimit1"].As<Currency>()).Value);
 
-        ConcreteEntity01 entConcrete = EntityJson.Deserialize<ConcreteEntity01>(json, db).FirstOrDefault();
+        ConcreteEntity01 entConcrete = EntityDataJsonConverter.Deserialize<ConcreteEntity01>(json, db).FirstOrDefault();
         Assert.NotNull(entConcrete);
         Assert.Equal("Test Entity", entConcrete.Name);
         Assert.Equal(1000.50m, entConcrete.CreditLimit1.Value);

@@ -13,9 +13,9 @@ namespace Rapidex;
 
 public static class YamlHelper
 {
-    private static YamlDotNet.Serialization.ISerializer _defaultSerializer; // = new YamlDotNet.Serialization.Serializer();
-    private static YamlDotNet.Serialization.IDeserializer _defaultDeserializer;
-    private static YamlDotNet.Serialization.IDeserializer _expandoDeserializer;
+    private static YamlDotNet.Serialization.ISerializer defaultSerializer; // = new YamlDotNet.Serialization.Serializer();
+    private static YamlDotNet.Serialization.IDeserializer defaultDeserializer;
+    private static YamlDotNet.Serialization.IDeserializer expandoDeserializer;
 
     private static object CheckStringDict(object dict)
     {
@@ -30,31 +30,37 @@ public static class YamlHelper
         }
     }
 
-    public static void Setup()
+    static YamlHelper()
     {
-        YamlHelper._defaultSerializer = new SerializerBuilder()
+        YamlHelper.defaultSerializer = new SerializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
 
-        YamlHelper._defaultDeserializer = new DeserializerBuilder()
+        YamlHelper.defaultDeserializer = new DeserializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)  // see height_in_inches in sample yml 
             .Build();
 
-        YamlHelper._expandoDeserializer = new DeserializerBuilder()
+        YamlHelper.expandoDeserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .IgnoreUnmatchedProperties()
             .Build();
     }
 
 
+    public static void Setup()
+    {
+        
+    }
+
+
     public static string ToYaml<T>(this T obj)
     {
-        return _defaultSerializer.Serialize(obj);
+        return defaultSerializer.Serialize(obj);
     }
 
     public static T FromYaml<T>(this string yaml)
     {
-        return _defaultDeserializer.Deserialize<T>(yaml);
+        return defaultDeserializer.Deserialize<T>(yaml);
 
     }
 
@@ -62,6 +68,8 @@ public static class YamlHelper
 
     public static IEnumerable<object> DeserializeMany(this IDeserializer deserializer, TextReader input)
     {
+        deserializer.NotNull();
+
         var reader = new Parser(input);
         reader.Consume<StreamStart>();
 
@@ -87,7 +95,7 @@ public static class YamlHelper
     {
         using (var reader = new StringReader(input))
         {
-            return _defaultDeserializer.DeserializeMany(reader).ToArray();
+            return defaultDeserializer.DeserializeMany(reader).ToArray();
         }
     }
 
@@ -110,7 +118,7 @@ public static class YamlHelper
     {
         using (var reader = new StringReader(input))
         {
-            return _defaultDeserializer.DeserializeMany<TItem>(reader).ToArray();
+            return defaultDeserializer.DeserializeMany<TItem>(reader).ToArray();
         }
     }
 
@@ -119,7 +127,7 @@ public static class YamlHelper
     public static IEnumerable<object> FromYamlManyToExpando(string yaml)
     {
         string _yaml = yaml.Replace("\t", " ").Trim();
-        object result = _expandoDeserializer.DeserializeMany(_yaml);
+        object result = expandoDeserializer.DeserializeMany(_yaml);
         IList<object> objects = (result as IEnumerable<object>)?.ToList();
         if (objects is null)
             objects = new List<object> { result };
@@ -136,7 +144,7 @@ public static class YamlHelper
     public static IEnumerable<string> FromYamlManyToJson(string yaml)
     {
         string _yaml = yaml.Replace("\t", " ").Trim();
-        object result = _expandoDeserializer.DeserializeMany(_yaml);
+        object result = expandoDeserializer.DeserializeMany(_yaml);
 
         //Each object is IDictionary<string, object>
         IEnumerable<object> objects = result as IEnumerable<object>;

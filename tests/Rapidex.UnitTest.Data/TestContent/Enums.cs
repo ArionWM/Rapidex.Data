@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestContent;
-public enum ContactTypeTest
+public enum ContactType
 {
     Employee = 1,
     Department = 2,

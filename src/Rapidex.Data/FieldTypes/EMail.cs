@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Rapidex.Data
 {
-    public class EMail : BasicBaseDataType<string, EMail>
+    public class EMail : BasicBaseDataType<string>
     {
         public override string TypeName => "email";
 

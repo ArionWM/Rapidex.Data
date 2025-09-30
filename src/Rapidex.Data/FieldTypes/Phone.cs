@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Rapidex.Data
 {
-    public class Phone : BasicBaseDataType<string, Phone>
+    public class Phone : BasicBaseDataType<string>
     {
         public override string TypeName => "phone";
 

@@ -33,7 +33,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 
         services.AddSingletonForProd<ITimeProvider, DefaultTimeProvider>();
 
-        services.AddSingletonForProd<TypeConverter>(Common.Converter);
+        services.AddSingletonForProd<RapidexTypeConverter>(Common.Converter);
         services.AddSingletonForProd<ExceptionManager, ExceptionManager>();
         services.AddSingletonForProd<IExceptionManager, ExceptionManager>();
         services.AddSingletonForProd<IExceptionTranslator, CommonExceptionTranslator>();

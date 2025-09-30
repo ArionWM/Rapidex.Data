@@ -8,8 +8,8 @@ namespace Rapidex.Data.PostgreServer;
 
 internal static class PostgreHelper
 {
-    public const NpgsqlDbType Jsonb = NpgsqlDbType.Jsonb;
-    public const NpgsqlDbType Vector = (NpgsqlDbType)9001; // Placeholder for custom vector type, adjust as needed
+    public const NpgsqlDbType JSONB = NpgsqlDbType.Jsonb;
+    public const NpgsqlDbType VECTOR = (NpgsqlDbType)9001; // Placeholder for custom vector type, adjust as needed
 
     public static NpgsqlDbType Convert(DbFieldType dbType)
     {
@@ -23,6 +23,7 @@ internal static class PostgreHelper
                 return NpgsqlDbType.Varchar;
             case DbFieldType.DateTime:
             case DbFieldType.DateTime2:
+            case DbFieldType.DateTimeOffset:
                 return NpgsqlDbType.TimestampTz;
             case DbFieldType.Guid:
                 return NpgsqlDbType.Uuid;
@@ -37,7 +38,7 @@ internal static class PostgreHelper
             case DbFieldType.Boolean:
                 return NpgsqlDbType.Boolean;
             case DbFieldType.Vector:
-                return PostgreHelper.Vector;
+                return PostgreHelper.VECTOR;
             default:
                 throw new NotSupportedException($"Not supported dbtype {dbType}");
         }
@@ -56,7 +57,7 @@ internal static class PostgreHelper
                 return DbFieldType.String;
             case NpgsqlDbType.Timestamp:
             case NpgsqlDbType.TimestampTz:
-                return DbFieldType.DateTime;
+                return DbFieldType.DateTimeOffset;
             case NpgsqlDbType.Uuid:
                 return DbFieldType.Guid;
             case NpgsqlDbType.Numeric:
@@ -110,7 +111,7 @@ internal static class PostgreHelper
                 return "smallint";
             case NpgsqlDbType.Boolean:
                 return "boolean";
-            case PostgreHelper.Vector:
+            case PostgreHelper.VECTOR:
                 int length2 = variableType.Lenght;
                 if (length2 == 0)
                     length2 = 1024;

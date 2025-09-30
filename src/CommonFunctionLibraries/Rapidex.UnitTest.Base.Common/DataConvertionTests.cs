@@ -22,7 +22,7 @@ public class DataConvertionTests : IClassFixture<SingletonFixtureFactory<Default
         var date = new DateTime(2019, 1, 1);
         var offset = new DateTimeOffset(date, TimeSpan.Zero);
 
-        var converter = new TypeConverter();
+        var converter = new RapidexTypeConverter();
 
         DateTime dt = (DateTime)converter.Convert(offset, typeof(DateTime));
         Assert.Equal(date, dt);

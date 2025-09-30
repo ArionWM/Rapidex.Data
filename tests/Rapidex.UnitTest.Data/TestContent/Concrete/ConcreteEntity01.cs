@@ -28,6 +28,6 @@ public class ConcreteEntity01 : DbConcreteEntityBase
 
     public DateTimeOffset BirthDate { get; set; }
 
-    public Enumeration<ContactTypeTest> ContactType { get; set; }
+    public Enumeration<ContactType> ContactType { get; set; }
 
 }

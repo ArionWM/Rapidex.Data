@@ -12,15 +12,15 @@ namespace Rapidex.Data.Sample.App1.Controllers;
 public class DataController : ControllerBase
 {
     private readonly IDbSchemaScope db;
-    private readonly IEntitySerializationDataCreator serializationCreator;
+    //private readonly IEntitySerializationDataCreator serializationCreator;
     private readonly EntitySerializationOptions serializationOptions;
     protected SampleServiceA ServiceA { get; }
 
-    public DataController(SampleServiceA serviceA, IDbSchemaScope dbSchemaScope, IEntitySerializationDataCreator serializationCreator)
+    public DataController(SampleServiceA serviceA, IDbSchemaScope dbSchemaScope)
     {
         this.ServiceA = serviceA;
         this.db = dbSchemaScope;
-        this.serializationCreator = serializationCreator;
+        //this.serializationCreator = serializationCreator;
 
         this.serializationOptions = new EntitySerializationOptions
         {
@@ -40,10 +40,11 @@ public class DataController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult ListContacts([FromQuery] string? filter)
     {
+        throw new NotImplementedException();
         var contacts = this.ServiceA.ListContacts(this.db, filter);
 
-        var listResult = serializationCreator.ConvertToListData(contacts, this.serializationOptions, null, null);
-        return this.Ok(listResult);
+        //var listResult = serializationCreator.ConvertToListData(contacts, this.serializationOptions, null, null);
+        //return this.Ok(listResult);
     }
 
     /// <summary>
@@ -62,8 +63,10 @@ public class DataController : ControllerBase
         if (contact == null)
             return this.NotFound($"Contact with ID {id} not found");
 
-        var entityResult = serializationCreator.ConvertToEntityData(contact, this.serializationOptions, null, null);
-        return this.Ok(entityResult);
+        throw new NotImplementedException();
+
+        //var entityResult = serializationCreator.ConvertToEntityData(contact, this.serializationOptions, null, null);
+        //return this.Ok(entityResult);
     }
 
     /// <summary>
@@ -73,6 +76,7 @@ public class DataController : ControllerBase
     /// <returns>The updated or created contact</returns>
     /// <response code="200">Returns the updated contact</response>
     /// <response code="400">If the request data is invalid</response>
+    [Obsolete("")]
     [HttpPost("contacts")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -92,13 +96,15 @@ public class DataController : ControllerBase
     /// <param name="filter">Optional filter string to search orders</param>
     /// <returns>List of orders matching the filter criteria</returns>
     /// <response code="200">Returns the list of orders</response>
+    [Obsolete("")]
     [HttpGet("orders")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult ListOrders([FromQuery] string? filter)
     {
-        var orders = this.ServiceA.ListOrders(this.db, filter);
-        var listResult = serializationCreator.ConvertToListData(orders, this.serializationOptions, null, null);
-        return this.Ok(listResult);
+        throw new NotImplementedException();
+        //var orders = this.ServiceA.ListOrders(this.db, filter);
+        //var listResult = serializationCreator.ConvertToListData(orders, this.serializationOptions, null, null);
+        //return this.Ok(listResult);
     }
 
     /// <summary>
@@ -108,6 +114,8 @@ public class DataController : ControllerBase
     /// <returns>The order details</returns>
     /// <response code="200">Returns the order</response>
     /// <response code="404">If the order is not found</response>
+
+    [Obsolete("")]
     [HttpGet("orders/{id:long}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -117,8 +125,9 @@ public class DataController : ControllerBase
         if (order == null)
             return this.NotFound($"Order with ID {id} not found");
 
-        var entityResult = serializationCreator.ConvertToEntityData(order, this.serializationOptions, null, null);
-        return this.Ok(entityResult);
+        throw new NotImplementedException();
+        //var entityResult = serializationCreator.ConvertToEntityData(order, this.serializationOptions, null, null);
+        //return this.Ok(entityResult);
     }
 
     ///// <summary>

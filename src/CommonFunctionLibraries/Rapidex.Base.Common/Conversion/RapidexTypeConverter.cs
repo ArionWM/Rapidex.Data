@@ -5,18 +5,18 @@ using System.Text;
 
 namespace Rapidex;
 
-public class TypeConverter : IManager
+public class RapidexTypeConverter : IManager
 {
     private static readonly TwoLevelDictionary<Type, Type, IBaseConverter> converters = new TwoLevelDictionary<Type, Type, IBaseConverter>();
 
 
-    static TypeConverter()
+    static RapidexTypeConverter()
     {
-        TypeConverter.RegisterInternal<DateTimeOffsetConverter>();
-        TypeConverter.RegisterInternal<DateTimeOffsetNullableConverter>();
-        TypeConverter.RegisterInternal<DateTimeOffsetToDateTimeConverter>();
-        TypeConverter.RegisterInternal<DateTimeOffsetNullableToDateTimeNullableConverter>();
-        TypeConverter.RegisterInternal<DateTimeOffsetStrConverter>();
+        RapidexTypeConverter.RegisterInternal<DateTimeOffsetConverter>();
+        RapidexTypeConverter.RegisterInternal<DateTimeOffsetNullableConverter>();
+        RapidexTypeConverter.RegisterInternal<DateTimeOffsetToDateTimeConverter>();
+        RapidexTypeConverter.RegisterInternal<DateTimeOffsetNullableToDateTimeNullableConverter>();
+        RapidexTypeConverter.RegisterInternal<DateTimeOffsetStrConverter>();
     }
 
     internal static void RegisterInternal(IBaseConverter converter)

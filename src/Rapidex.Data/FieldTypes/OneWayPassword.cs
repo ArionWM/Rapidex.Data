@@ -5,7 +5,7 @@ using System.Text;
 namespace Rapidex.Data;
 
 
-public class OneWayPassword : BasicBaseDataType<string, OneWayPassword>
+public class OneWayPassword : BasicBaseDataType<string>
 {
     private const string CRIPTO_TEXT_PREFIX = "|S|";
     internal const string CRIPTO_TEXT_DUMMY = "*****";

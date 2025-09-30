@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rapidex.Data.Transform;
 
+[Obsolete("", true)]
 [JsonDerivedBase]
 public class EntityDataDto : IJsonOnDeserialized
 {

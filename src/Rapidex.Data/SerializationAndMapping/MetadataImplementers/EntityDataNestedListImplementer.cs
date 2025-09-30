@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Metadata.Implementers;
+namespace Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 
 
 

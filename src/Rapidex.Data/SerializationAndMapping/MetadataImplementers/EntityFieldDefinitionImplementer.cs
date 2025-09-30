@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
-namespace Rapidex.Data.Metadata.Implementers;
+namespace Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 
 internal class EntityFieldDefinitionImplementer : Dictionary<string, object>, IImplementer<IDbFieldMetadata>
 {

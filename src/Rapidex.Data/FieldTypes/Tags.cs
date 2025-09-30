@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Rapidex.Data
 {
-    public class Tags : BasicBaseDataType<string, Tags>
+    public class Tags : BasicBaseDataType<string>
     {
         public override string TypeName => "tags";
 

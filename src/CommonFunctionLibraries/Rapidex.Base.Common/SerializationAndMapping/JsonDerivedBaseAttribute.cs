@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rapidex;
 
+[Obsolete("", true)]
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct, AllowMultiple = true)]
 public class JsonDerivedBaseAttribute : Attribute
 {

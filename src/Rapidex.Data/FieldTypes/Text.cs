@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Rapidex.Data
 {
-    public class Text : BasicBaseDataType<string, Text>
+    public class Text : BasicBaseDataType<string>
     {
 
         public class TextDbFieldMetadata : DbFieldMetadata

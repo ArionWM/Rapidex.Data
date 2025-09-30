@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.Transform;
+[Obsolete("", true)]
 public class EntityDataDtoCollection<T> : IReadOnlyCollection<T> where T : EntityDataDto
 {
     private readonly IReadOnlyCollection<T> data;

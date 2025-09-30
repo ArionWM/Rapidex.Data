@@ -1,4 +1,4 @@
-﻿//using Rapidex.Data.Metadata.Implementers;
+﻿//using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 //using System;
 //using System.Collections.Generic;
 //using System.Linq;

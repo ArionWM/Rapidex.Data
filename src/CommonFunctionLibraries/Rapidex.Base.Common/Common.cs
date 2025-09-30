@@ -42,7 +42,7 @@ namespace Rapidex
         public static string DataFolder { get; set; }
 
         public static IConfiguration Configuration { get; set; }
-        public static TypeConverter Converter { get; internal set; }
+        public static RapidexTypeConverter Converter { get; internal set; }
         public static AssemblyManager Assembly { get; set; }// = new AssemblyManager();
 
         public static ITimeProvider Time { get; internal set; }
@@ -89,9 +89,11 @@ namespace Rapidex
             services.AddSingleton<AssemblyManager>(asman);
             Common.Assembly.Setup(services);
 
-            Common.Converter = new TypeConverter();
+            Common.Converter = new RapidexTypeConverter();
             Common.Converter.Setup(services);
             Rapidex.Common.Time = new DefaultTimeProvider(); //TODO: ServiceProvider?
+
+            MappingHelper.Setup();
 
             //Geçici olarak boş bir sp yerleştiriyoruz
             //Rapidex.Common.ServiceProvider = services.BuildServiceProvider();
@@ -104,7 +106,7 @@ namespace Rapidex
 
         public static void Start(IServiceProvider serviceProvider)
         {
-            MappingHelper.Setup();
+            MappingHelper.Start();
 
             ExceptionManager = serviceProvider.GetRapidexService<IExceptionManager>();
             ServiceProvider = serviceProvider;

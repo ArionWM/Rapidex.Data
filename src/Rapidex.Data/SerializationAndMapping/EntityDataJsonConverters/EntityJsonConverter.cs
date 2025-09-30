@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Rapidex.Data.Exceptions;
 using Rapidex.Data.Metadata;
-using Rapidex.Data.Metadata.Implementers;
+using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
 internal class EntityJsonConverter : JsonConverter<IEntity>
@@ -23,7 +23,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
         if (reader.TokenType != JsonTokenType.StartObject)
             throw new JsonException("Expected StartObject token");
 
-        EntityJson.DeserializationContext.NotNull("Invalid deserialization context");
+        EntityDataJsonConverter.DeserializationContext.NotNull("Invalid deserialization context");
 
         using (JsonDocument doc = JsonDocument.ParseValue(ref reader))
         {
@@ -35,10 +35,10 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
             bool idRequired = !(isNew ?? false);
             long? entityId = this.GetEntityId(root, idRequired);
 
-            var em = EntityJson.DeserializationContext.ParentDbScope.Metadata.Get(entityTypeName)
+            var em = EntityDataJsonConverter.DeserializationContext.ParentDbScope.Metadata.Get(entityTypeName)
                  .NotNull($"Entity type '{entityTypeName}' not found in metadata.");
 
-            IEntity entity = Database.EntityFactory.Create(em, EntityJson.DeserializationContext, isNew ?? false, isDeleted ?? false);
+            IEntity entity = Database.EntityFactory.Create(em, EntityDataJsonConverter.DeserializationContext, isNew ?? false, isDeleted ?? false);
 
             if (root.TryGetProperty("Values", out JsonElement valuesElement))
             {

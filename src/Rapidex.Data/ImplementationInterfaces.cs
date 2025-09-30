@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 using YamlDotNet.Serialization;
 
 namespace Rapidex.Data;
@@ -33,6 +34,11 @@ public interface IMetadataImplementHost
 //See: JsonImplementerInterfaceConverter
 //[JsonConverter(typeof(JsonImplementerInterfaceConverter))]
 //[JsonDerivedBase]
+
+//[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization, TypeDiscriminatorPropertyName = "type")]
+////[JsonDerivedType(typeof(EntityDefinitionImplementer), typeDiscriminator: "!entity")]
+////[JsonDerivedType(typeof(EntityDefinitionImplementer), typeDiscriminator: "entity")]
+//[JsonDerivedType(typeof(EntityDefinitionImplementer), typeDiscriminator: "EntityDefinition")]
 public interface IImplementer
 {
     string[] SupportedTags { get; }

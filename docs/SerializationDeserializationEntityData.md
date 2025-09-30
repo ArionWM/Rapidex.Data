@@ -1,4 +1,4 @@
-# Serialization and Deserialization of Entities
+# Serialization and Deserialization of Entity Data
 
 Rapidex Entities has custom serialization and deserialization logic to;
 
@@ -8,13 +8,32 @@ Rapidex Entities has custom serialization and deserialization logic to;
 
 ## Serialization
 
-To serialize an entity to JSON, you can use the `ToJson` method or use `System.Text.Json.JsonSerializer.Serialize` methods
+To serialize an entity to JSON, you can use the `EntityDataJsonConverter.abc` or `ToJson` method or use `System.Text.Json.JsonSerializer.Serialize` methods
+
+abc (default options usage?)
 
 > If use `JsonSerializer.Serialize` methods, prefer using `JsonHelper.JsonSerializerOptions` for consistent serialization settings.
 
 ### Sample 1
 
-Simple serialization result for `ConcreteEntity01` entity (See: Rapidex.UnitTest.Data):
+Simple serialization `ConcreteEntity01` entity (See: Rapidex.UnitTest.Data):
+
+```csharp
+
+ConcreteEntity01 ent = db.New<ConcreteEntity01>();
+ent.Name = "ent01_01";
+ent.Phone = "555-1234";
+ent.Number = 123;
+
+string json = ent.ToJson(); //See below;
+
+//or
+
+string json = EntityDataJsonConverter.Serialize(ent);
+
+
+```
+
 
 ```json
 [
@@ -67,13 +86,15 @@ Simple serialization result for `ConcreteEntity01` entity (See: Rapidex.UnitTest
 
 ## Deserialization
 
+To de-serialize an entity to JSON, you should use the `EntityDataJsonConverter.Deserialize` method.
+
 ```csharp
 
 string json = "[...]";
 
 var db = Database.Dbs.Db();
 
-var entities = EntityJson.Deserialize(json, db);
+var entities = EntityDataJsonConverter.Deserialize(json, db);
 
 ```
 
@@ -85,7 +106,7 @@ string json = "[...]";
 
 var db = Database.Dbs.Db();
 
-ConcreteEntity01[] ents = EntityJson.Deserialize<ConcreteEntity01>(json, db);
+ConcreteEntity01[] ents = EntityDataJsonConverter.Deserialize<ConcreteEntity01>(json, db);
 
 ```
 
@@ -119,4 +140,10 @@ abc
 ## Remarks
 
 - `values` node properties is case-insensitive during deserialization.
+
+
+## How To Work
+
+Rapidex using `System.Text.Json` for JSON serialization and deserialization. 
+For `System.Text.Json` simple usage, we provide `EntityDataJsonConverter` class.`
 

@@ -1,6 +1,6 @@
 ﻿using Rapidex.Base.Common.Assemblies;
 using Rapidex.Data.Metadata;
-using Rapidex.Data.Metadata.Implementers;
+using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

@@ -21,7 +21,7 @@ namespace Rapidex.UnitTest.Data.TestContent
 
         public DateTimeOffset Date { get; set; }
 
-        public Enumeration<ContactTypeTest> ContactType { get; set; }
+        public Enumeration<ContactType> ContactType { get; set; }
 
     }
 }

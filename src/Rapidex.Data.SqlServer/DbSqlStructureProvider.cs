@@ -324,6 +324,11 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
                     columnMetadataOnDb.Lenght = 0;
                     columnMetadataOnDb.Scale = 0;
                     break;
+                case "datetimeoffset":
+                    columnMetadataOnDb.DbType = DbFieldType.DateTimeOffset;
+                    columnMetadataOnDb.Lenght = 0;
+                    columnMetadataOnDb.Scale = 0;
+                    break;
                 case "bit":
                     columnMetadataOnDb.DbType = DbFieldType.Boolean;
                     columnMetadataOnDb.Lenght = 0;

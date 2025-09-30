@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Rapidex.Data.Metadata.Implementers;
+namespace Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 internal class EntityDataItemImplementer : Dictionary<string, object>, IImplementer
 {
     public string[] SupportedTags => null;

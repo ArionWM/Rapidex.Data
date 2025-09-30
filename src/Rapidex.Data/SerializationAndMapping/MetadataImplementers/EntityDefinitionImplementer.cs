@@ -8,13 +8,14 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
-namespace Rapidex.Data.Metadata.Implementers;
+namespace Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 
 internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
 {
     public virtual string[] SupportedTags => new string[] { "!entity", "entity", "entitydefinition" };
     public virtual bool Implemented { get; set; }
 
+    [JsonIgnore]
     public IDbEntityMetadata EntityMetadata { get; set; } = null!;
 
     [Required]
@@ -44,6 +45,11 @@ internal class EntityDefinitionImplementer : IImplementer<IDbEntityMetadata>
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
+
+    public EntityDefinitionImplementer()
+    {
+        
+    }
 
     public virtual IUpdateResult Implement(IMetadataImplementHost host, IImplementer parentImplementer, ref object target)
     {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Rapidex.Data
 {
-    public class Percent : BasicBaseDataType<int, Percent>
+    public class Percent : BasicBaseDataType<int>
     {
         public override string TypeName => "percent";
 

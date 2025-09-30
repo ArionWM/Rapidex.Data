@@ -22,7 +22,7 @@ namespace Rapidex.Data
                 return new DbVariableType(DbFieldType.DateTime2);
 
             if (type == TypeHelper.Type_DateTimeOffset)
-                return new DbVariableType(DbFieldType.DateTime2);
+                return new DbVariableType(DbFieldType.DateTimeOffset);
 
             //if (type == typeof(DateOnly)) //.net core
             //    return new DbVariableType(DbFieldType.DateTime2);
