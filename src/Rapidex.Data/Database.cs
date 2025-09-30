@@ -1,12 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Rapidex.Data.Configuration;
-using Rapidex.Data.Entities;
-using Rapidex.Data.Metadata;
-using Rapidex.Data.Scopes;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Rapidex.Data;
 
@@ -26,15 +18,6 @@ public static class Database
     /// Database manager, contains all db objects
     /// </summary>
     public static IDbManager Dbs { get; private set; }
-
-
-
-
-    [Obsolete("Use DbScope.Metadata instead", true)]
-    public static IDbEntityMetadataManager Metadata { get; private set; }
-
-    [Obsolete("Use DbScope.Metadata.Data instead", true)]
-    public static IPredefinedValueProcessor PredefinedValues { get; private set; }
 
     static Database()
     {

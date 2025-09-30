@@ -1,8 +1,0 @@
-﻿USE [master]
-GO
-CREATE USER [utest] FOR LOGIN [utest]
-GO
-ALTER USER [utest] WITH DEFAULT_SCHEMA=[na]
-GO
-CREATE SCHEMA [na] AUTHORIZATION [utest]
-GO

@@ -21,24 +21,6 @@ namespace Rapidex.Data;
 
 
 
-
-[Obsolete("//TODO: To Metadata.Data ...", true)]
-public interface IPredefinedValueProcessor
-{
-    void Register(IDbEntityMetadata em, bool @override, params ObjDictionary[] entityValues);
-    void Register(IDbEntityMetadata em, JsonNode jsonMetadataDef);
-    void Clear(IDbEntityMetadata em);
-    void Remove(IDbEntityMetadata em, long id);
-
-    PredefinedValueItems Get(IDbEntityMetadata em);
-
-    Task Apply(IDbSchemaScope scope);
-
-    Task Apply(IDbSchemaScope scope, IEnumerable<IEntity> unregisteredData, bool @override);
-
-    void Clear();
-}
-
 public interface IBlobRepository
 {
     IResult<BlobRecord> Set(Stream content, string name, string contentType, long id = DatabaseConstants.DEFAULT_EMPTY_ID);

@@ -1,17 +1,9 @@
-﻿using Rapidex.Data.Configuration;
+﻿using System.Runtime.CompilerServices;
 using Rapidex.Data.Entities;
-using Rapidex.Data.FieldTypes;
 using Rapidex.Data.Metadata;
-using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
-using Rapidex.Data.Parsing;
-using Rapidex.Data.Query;
 using Rapidex.Data.Scopes;
 using Rapidex.Data.SerializationAndMapping.JsonConverters;
-using Rapidex.SignalHub;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
+using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 
 
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Data")]

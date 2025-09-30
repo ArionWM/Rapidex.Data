@@ -337,55 +337,6 @@ public interface IDbEntityMetadataFactory : IManager
     IDbEntityMetadata Create(string entityName, string module = null, string prefix = null);
 }
 
-[Obsolete("Use DbScope.Metadata instead", true)]
-public interface IDbEntityMetadataManager : IManager
-{
-    IFieldMetadataFactory FieldMetadataFactory { get; }
-    IDbEntityMetadataFactory EntityMetadataFactory { get; }
-
-    void SetEntityMetadataFactory(IDbEntityMetadataFactory factory);
-
-    IDbEntityMetadata AddPremature(string entityName);
-
-
-    IDbEntityMetadata Add(Type concreteType, string module = null, string prefix = null);
-    IDbEntityMetadata Add<TDeclaration>(string module = null, string prefix = null) where TDeclaration : IDbDefinition;
-
-    ///// <summary>
-    ///// Add all concrete IEntity classes in entity
-    ///// </summary>
-    ///// <param name="assembly"></param>
-    //void Add(Assembly assembly);
-
-    void Add(IDbEntityMetadata em);
-
-    /// <summary>
-    /// Metadata'nın son kontrollerini yapar
-    /// </summary>
-    /// <param name="em"></param>
-    void Check(IDbEntityMetadata em);
-
-    //IDbEntityMetadata AddFromXml(string xmlDefinitionFileContent, string module = null);
-    IDbEntityMetadata AddFromJson(string jsonDefinitionFileContent, string module = null);
-    IDbEntityMetadata AddFromEnum<TEnum>(string module = null, string prefix = null, Action<Enum, ObjDictionary> callb = null) where TEnum : System.Enum;
-
-    IDbEntityMetadata Get(string entityName);
-
-    IDbEntityMetadata[] GetAll();
-
-    internal void Remove(IDbEntityMetadata em); //For tests
-
-    void LoadFromDb(); //Zaten Setup() ile çağırılabilir?
-
-    void Reload();
-
-    //For tests
-    internal void Clear();
-}
-
-
-
-
 public interface IDbMetadataContainer
 {
     IDbScope DbScope { get; }

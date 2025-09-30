@@ -80,8 +80,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.Base.Commo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.UnitTest.SignalHub", "src\CommonFunctionLibraries\Rapidex.UnitTest.SignalHub\Rapidex.UnitTest.SignalHub.csproj", "{C14943FA-C415-B2F7-DBD3-C8B1900B41B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rapidex.Data.Transform", "src\Rapidex.Data.Transform\Rapidex.Data.Transform.csproj", "{1252A841-65A6-0D80-46E4-7BBF7CE1EF54}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -144,10 +142,6 @@ Global
 		{C14943FA-C415-B2F7-DBD3-C8B1900B41B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C14943FA-C415-B2F7-DBD3-C8B1900B41B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C14943FA-C415-B2F7-DBD3-C8B1900B41B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1252A841-65A6-0D80-46E4-7BBF7CE1EF54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1252A841-65A6-0D80-46E4-7BBF7CE1EF54}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1252A841-65A6-0D80-46E4-7BBF7CE1EF54}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1252A841-65A6-0D80-46E4-7BBF7CE1EF54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -170,7 +164,6 @@ Global
 		{DFB13C4C-2853-DF40-A126-5BAB61878E75} = {5DF207CE-1D5A-44CA-97BD-C3712DA80806}
 		{77C437D9-D263-8549-392C-6C89116B344E} = {5DF207CE-1D5A-44CA-97BD-C3712DA80806}
 		{C14943FA-C415-B2F7-DBD3-C8B1900B41B3} = {5DF207CE-1D5A-44CA-97BD-C3712DA80806}
-		{1252A841-65A6-0D80-46E4-7BBF7CE1EF54} = {3F9BCB72-82C8-47CF-AD6F-D5A6E7978958}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7BA78EAA-AAC5-488A-9D07-61F6CB6F437A}

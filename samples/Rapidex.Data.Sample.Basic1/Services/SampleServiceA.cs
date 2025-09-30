@@ -1,10 +1,4 @@
 ﻿using Rapidex.Data.Sample.App1.ConcreteEntities;
-using Rapidex.Data.Transform;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rapidex.Data.Sample.App1.Services;
 public class SampleServiceA
@@ -41,34 +35,36 @@ public class SampleServiceA
     }
 
     [Obsolete]
-    internal Contact UpdateContact(IDbSchemaScope db, EntityDataDto entityValues)
+    internal Contact UpdateContact(IDbSchemaScope db)
     {
+        throw new NotImplementedException();
+
         using var work = db.BeginWork();
 
-        long? id = entityValues.Values.Get(nameof(Contact.Id), true).As<long?>();
+        //long? id = entityValues.Values.Get(nameof(Contact.Id), true).As<long?>();
 
-        Contact contact;
-        if (id.HasValue)
-        {
-            contact = work.Find<Contact>(id.Value);
-            contact.NotNull($"Contact not found: {id}");
-        }
-        else
-        {
-            contact = work.New<Contact>();
-        }
+        //Contact contact;
+        //if (id.HasValue)
+        //{
+        //    contact = work.Find<Contact>(id.Value);
+        //    contact.NotNull($"Contact not found: {id}");
+        //}
+        //else
+        //{
+        //    contact = work.New<Contact>();
+        //}
 
-        contact.FirstName = entityValues.Values.Get(nameof(Contact.FirstName)).As<string>();
-        contact.LastName = entityValues.Values.Get(nameof(Contact.LastName)).As<string>();
-        contact.Email = entityValues.Values.Get(nameof(Contact.Email)).As<string>();
-        contact.PhoneNumber = entityValues.Values.Get(nameof(Contact.PhoneNumber)).As<string>();
+        //contact.FirstName = entityValues.Values.Get(nameof(Contact.FirstName)).As<string>();
+        //contact.LastName = entityValues.Values.Get(nameof(Contact.LastName)).As<string>();
+        //contact.Email = entityValues.Values.Get(nameof(Contact.Email)).As<string>();
+        //contact.PhoneNumber = entityValues.Values.Get(nameof(Contact.PhoneNumber)).As<string>();
 
-        DateTimeOffset? birthDate = entityValues.Values.Get(nameof(Contact.BirthDate)).As<DateTimeOffset?>();
-        if (birthDate.HasValue)
-            contact.BirthDate = birthDate;
-        contact.Save();
-        work.CommitChanges();
-        return contact;
+        //DateTimeOffset? birthDate = entityValues.Values.Get(nameof(Contact.BirthDate)).As<DateTimeOffset?>();
+        //if (birthDate.HasValue)
+        //    contact.BirthDate = birthDate;
+        //contact.Save();
+        //work.CommitChanges();
+        //return contact;
     }
 
 

@@ -1,19 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Rapidex.Data.Query;
-using Rapidex.UnitTest.Data.TestContent;
-using SqlKata.Compilers;
-using SqlKata;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Rapidex.Data.Parsing;
+﻿using Rapidex.UnitTest.Data.TestContent;
 using Superpower;
-using Superpower.Display;
-using Superpower.Parsers;
-using Superpower.Tokenizers;
-using System.Net.Sockets;
 
 
 
@@ -27,28 +13,6 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 	{
 		this.CriteriaParser = new FilterTextParser();
 	}
-
-	//[Fact]
-	//public void XXX()
-	//{
-	//    string input = "(a > 1 | (b = 2))"; //(c | d)
-	//    var tokens = TestParser.tokenizer.Tokenize(input);
-
-	//    var result = TestParser.Expression2.TryParse(tokens);
-	//    if (result.HasValue)
-	//    {
-	//        // input is valid
-	//        var expression = (Expression)result.Value;
-	//        Console.WriteLine(expression);
-	//        // do what you need with it here, i.e. loop through the nodes, output the text, etc.
-	//    }
-	//    else
-	//    {
-	//        Console.WriteLine("NO VALUE");
-	//        // not valid
-	//    }
-	//}
-
 
 	[Fact]
 	public void FilterParser_01()
