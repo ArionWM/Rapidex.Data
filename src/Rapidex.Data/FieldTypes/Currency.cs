@@ -51,7 +51,7 @@ public class Currency : BasicBaseDataType<decimal>
 
     public class CurrencyTypeConverter : System.ComponentModel.TypeConverter
     {
-        static Type[] supportedTypes = new Type[]
+        static Type[] fromSupportedTypes = new Type[]
         {
             typeof(string),
             typeof(decimal),
@@ -61,12 +61,26 @@ public class Currency : BasicBaseDataType<decimal>
             typeof(long)
         };
 
+        static Type[] toSupportedTypes = new Type[]
+        {
+            typeof(string),
+            typeof(decimal),
+        };
+
         public override bool CanConvertFrom(ITypeDescriptorContext? context, [NotNull] Type sourceType)
         {
-            if (supportedTypes.Contains(sourceType))
+            if (fromSupportedTypes.Contains(sourceType))
                 return true;
 
             return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext? context, [NotNullWhen(true)] Type? destinationType)
+        {
+            if (fromSupportedTypes.Contains(destinationType))
+                return true;
+
+            return base.CanConvertTo(context, destinationType);
         }
 
         public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
@@ -93,6 +107,21 @@ public class Currency : BasicBaseDataType<decimal>
                 default:
                     return base.ConvertFrom(context, culture, value);
             }
+        }
+
+        public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
+        {
+            Currency from = value as Currency;
+            if (from == null)
+                return base.ConvertTo(context, culture, value, destinationType);
+
+            if (destinationType == typeof(string))
+                return from.Value.ToString();
+
+            if (destinationType == typeof(decimal))
+                return from.Value;
+
+            return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 
