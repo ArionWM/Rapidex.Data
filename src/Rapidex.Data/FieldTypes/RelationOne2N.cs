@@ -162,7 +162,7 @@ public class RelationOne2N : RelationBase, ILazy
 
         IEntity parent = this.GetParent();
         var fm = (VirtualRelationOne2NDbFieldMetadata)((IDataType)this).FieldMetadata;
-        long parentId = parent.GetValue<long>(CommonConstants.FIELD_ID);
+        long parentId = parent.GetValue<long>(DatabaseConstants.FIELD_ID);
 
         detailEntity.SetValue(fm.DetailParentFieldName, parentId);
         detailEntity.Save(); //Save if changed ...

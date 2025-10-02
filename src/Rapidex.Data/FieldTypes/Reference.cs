@@ -63,7 +63,7 @@ public class ReferenceDbFieldMetadata : DbFieldMetadata
 
 
 [TypeConverter(typeof(ReferenceBase.ReferenceTypeConverter))]
-public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
+public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference, IEmptyCheckObject
 {
     public class ReferenceTypeConverter : System.ComponentModel.TypeConverter
     {

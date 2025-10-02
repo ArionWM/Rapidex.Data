@@ -38,11 +38,9 @@ public class DataController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult ListContacts([FromQuery] string? filter)
     {
-        throw new NotImplementedException();
         var contacts = this.ServiceA.ListContacts(this.db, filter);
-
-        //var listResult = serializationCreator.ConvertToListData(contacts, this.serializationOptions, null, null);
-        //return this.Ok(listResult);
+        string json = EntityDataJsonConverter.Serialize(contacts);
+        return this.Content(json, "application/json");
     }
 
     /// <summary>
@@ -61,10 +59,9 @@ public class DataController : ControllerBase
         if (contact == null)
             return this.NotFound($"Contact with ID {id} not found");
 
-        throw new NotImplementedException();
-
-        //var entityResult = serializationCreator.ConvertToEntityData(contact, this.serializationOptions, null, null);
-        //return this.Ok(entityResult);
+        
+        string json = EntityDataJsonConverter.Serialize(contact);
+        return this.Content(json, "application/json");
     }
 
     /// <summary>

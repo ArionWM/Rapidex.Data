@@ -82,8 +82,8 @@ internal class ImageJsonConverter : JsonConverter<Image>
 
         writer.WriteString("text", caption);
 
-        writer.WriteString(CommonConstants.FIELD_ID, nav);
-        writer.WriteString(CommonConstants.DATA_FIELD_ID, nav);
+        writer.WriteString(DatabaseConstants.FIELD_ID, nav);
+        writer.WriteString(DatabaseConstants.DATA_FIELD_ID, nav);
 
         writer.WriteEndObject();
     }

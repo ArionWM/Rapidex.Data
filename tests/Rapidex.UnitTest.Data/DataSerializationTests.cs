@@ -285,9 +285,87 @@ public class DataSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Serialization_05_MultipleEntityJsonDataDeserialization()
     {
+        string json = @"
+            [
+              {
+                ""Entity"": ""ConcreteEntity01"",
+                ""Values"": {
+                  ""Id"": 123,
+                  ""Name"": ""Test Entity 1"",
+                  ""Address"": ""abc abc"",
+                  ""Phone"": ""1234567890"",
+                  ""Number"": 5,
+                  ""CreditLimit1"": 1000.50,
+                  ""CreditLimit1Currency"": ""USD"",
+                  ""Total"": 1500.75,
+                  ""TotalCurrency"": ""USD"",
+                  ""Description"": ""This is a test entity."",
+                  ""Picture"": {
+                    ""value"": ""10006"",
+                    ""text"": ""Image01.png"",
+                    ""id"": ""Base.ConcreteEntity01.10041.fields.Picture""
+                  },
+                  ""BirthDate"": ""2012-04-21T18:25:43-05:00"",
+                  ""ContactType"": {
+                    ""value"": ""16"",
+                    ""text"": ""Customer""
+                  }
+                }
+              },
+              {
+                ""Entity"": ""ConcreteEntity01"",
+                ""Values"": {
+                  ""Id"": 124,
+                  ""Name"": ""Test Entity 2"",
+                  ""Address"": ""abc abc"",
+                  ""Phone"": ""98765421"",
+                  ""Number"": 4,
+                  ""CreditLimit1"": 500.50,
+                  ""CreditLimit1Currency"": ""USD"",
+                  ""Total"": 500.75,
+                  ""TotalCurrency"": ""USD"",
+                  ""Description"": ""This is a test entity 2"",
+                  ""Picture"": null,
+                  ""BirthDate"": ""2004-03-01T18:25:43+03:00"",
+                  ""ContactType"": {
+                    ""value"": ""1""
+                  }
+                }
+              }
 
+            ]";
+
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>(); //Master
+        var entDynamics = EntityDataJsonConverter.Deserialize(json, db);
+
+        Assert.NotNull(entDynamics);
+        Assert.Equal(2, entDynamics.Count());
+
+        var entDynamic1 = entDynamics.FirstOrDefault(x => x.GetId().As<long>() == 123);
+        var entDynamic2 = entDynamics.FirstOrDefault(x => x.GetId().As<long>() == 124);
+
+        Assert.NotNull(entDynamic1);
+        Assert.IsType<ConcreteEntity01>(entDynamic1);   
+        Assert.Equal("Test Entity 1", entDynamic1["Name"].As<string>());
+        Assert.Equal(1000.50m, (entDynamic1["CreditLimit1"].As<decimal>()));
+        Assert.Equal(ContactType.Personal, (ContactType)entDynamic1["ContactType"].As<Enumeration>().Value);
+
+        Assert.NotNull(entDynamic2);
+        Assert.Equal("Test Entity 2", entDynamic2["Name"].As<string>());
+        Assert.Equal(500.50m, (entDynamic2["CreditLimit1"].As<decimal>()));
+        Assert.Equal(ContactType.Employee, (ContactType)entDynamic2["ContactType"].As<Enumeration>().Value);
 
 
 
     }
+
+    [Fact]
+    public void Serialization_06_ForceUpdateJsonToConcreteTypeRaiseError()
+    {
+        //error scenario 
+    }
+
+
+
 }

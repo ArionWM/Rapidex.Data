@@ -67,10 +67,10 @@ internal abstract class EntityMetadataBuilderBase
 
     public virtual void Check(IDbEntityMetadata em)
     {
-        em.Fields.AddIfNotExist<long>(CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
-        em.Fields.AddIfNotExist<string>(CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
-        em.Fields.AddIfNotExist<int>(CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
-        em.PrimaryKey = em.Fields.Get(CommonConstants.FIELD_ID, true);
+        em.Fields.AddIfNotExist<long>(DatabaseConstants.FIELD_ID, DatabaseConstants.FIELD_ID, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<string>(DatabaseConstants.FIELD_EXTERNAL_ID, DatabaseConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<int>(DatabaseConstants.FIELD_VERSION, DatabaseConstants.FIELD_VERSION, field => { field.IsSealed = true; });
+        em.PrimaryKey = em.Fields.Get(DatabaseConstants.FIELD_ID, true);
 
         em.TableName = em.Prefix.IsNullOrEmpty() ? em.Name : $"{em.Prefix}_{em.Name}";
 

@@ -328,8 +328,8 @@ public class EntityMapper
             fillTo.SetValue(fm.Name, value);
         }
 
-        fillTo.SetValue(CommonConstants.FIELD_ID, from[CommonConstants.FIELD_ID]);
-        fillTo.SetValue(CommonConstants.FIELD_VERSION, from[CommonConstants.FIELD_VERSION]);
+        fillTo.SetValue(DatabaseConstants.FIELD_ID, from[DatabaseConstants.FIELD_ID]);
+        fillTo.SetValue(DatabaseConstants.FIELD_VERSION, from[DatabaseConstants.FIELD_VERSION]);
 
         fillTo._Schema = this.Parent;
         fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));

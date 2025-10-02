@@ -65,25 +65,25 @@ namespace Rapidex.Data
         //    where T : IQuery<Entity> 
         //    where Entity :IConcreteEntity
         //{
-        //    return (Entity)qc.Eq(CommonConstants.FIELD_ID, id).First();
+        //    return (Entity)qc.Eq(DatabaseConstants.FIELD_ID, id).First();
         //}
 
         public static IEntity Find<T>(this T qc, long id)
                 where T : IQuery
         {
-            return qc.Eq(CommonConstants.FIELD_ID, id).First();
+            return qc.Eq(DatabaseConstants.FIELD_ID, id).First();
 
         }
 
 
         public static IQuery IdEq(this IQuery qo, long id)
         {
-            return qo.Eq(CommonConstants.FIELD_ID, id);
+            return qo.Eq(DatabaseConstants.FIELD_ID, id);
         }
 
         public static IQuery<T> IdEq<T>(this IQuery<T> qo, long id) where T : IConcreteEntity
         {
-            return qo.Eq(CommonConstants.FIELD_ID, id);
+            return qo.Eq(DatabaseConstants.FIELD_ID, id);
         }
 
 

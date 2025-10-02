@@ -34,11 +34,11 @@ namespace Rapidex.Data
         {
             get
             {
-                return this._Values[CommonConstants.FIELD_ID].As<long>();
+                return this._Values[DatabaseConstants.FIELD_ID].As<long>();
             }
             set
             {
-                this._Values[CommonConstants.FIELD_ID] = value;
+                this._Values[DatabaseConstants.FIELD_ID] = value;
             }
         }
 
@@ -46,11 +46,11 @@ namespace Rapidex.Data
         {
             get
             {
-                return this._Values[CommonConstants.FIELD_EXTERNAL_ID].As<string>();
+                return this._Values[DatabaseConstants.FIELD_EXTERNAL_ID].As<string>();
             }
             set
             {
-                this._Values[CommonConstants.FIELD_EXTERNAL_ID] = value;
+                this._Values[DatabaseConstants.FIELD_EXTERNAL_ID] = value;
             }
         }
 
@@ -58,11 +58,11 @@ namespace Rapidex.Data
         {
             get
             {
-                return this._Values[CommonConstants.FIELD_VERSION].As<int>();
+                return this._Values[DatabaseConstants.FIELD_VERSION].As<int>();
             }
             set
             {
-                this._Values[CommonConstants.FIELD_VERSION] = value;
+                this._Values[DatabaseConstants.FIELD_VERSION] = value;
             }
         }
 

@@ -12,6 +12,11 @@ using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
 internal class EntityJsonConverter : JsonConverter<IEntity>
 {
+    const int OPERATION_FLAG_NONE = 0;
+    const int OPERATION_FLAG_ISNEW = 1;
+    const int OPERATION_FLAG_ISDELETED = 2;
+    const int OPERATION_FLAG_UPDATE = 4;
+
     [ThreadStatic]
     internal static bool? useNestedEntities = null;
 
@@ -30,15 +35,38 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
             JsonElement root = doc.RootElement;
 
             string entityTypeName = this.GetRequiredEntityType(root);
-            (bool? isNew, bool? isDeleted) = this.GetFlags(root);
+            int operation = this.GetRequiredOperation(root);
 
-            bool idRequired = !(isNew ?? false);
+            bool idRequired = operation != OPERATION_FLAG_ISNEW;
             long? entityId = this.GetEntityId(root, idRequired);
 
             var em = EntityDataJsonConverter.DeserializationContext.ParentDbScope.Metadata.Get(entityTypeName)
                  .NotNull($"Entity type '{entityTypeName}' not found in metadata.");
 
-            IEntity entity = Database.EntityFactory.Create(em, EntityDataJsonConverter.DeserializationContext, isNew ?? false, isDeleted ?? false);
+            IEntity entity;
+
+            switch (operation)
+            {
+                case OPERATION_FLAG_NONE:
+                    entity = Database.EntityFactory.Create(em, EntityDataJsonConverter.DeserializationContext, false);
+                    break;
+                case OPERATION_FLAG_ISNEW:
+                    entity = Database.EntityFactory.Create(em, EntityDataJsonConverter.DeserializationContext, true);
+                    break;
+                case OPERATION_FLAG_ISDELETED:
+                    entity = Database.EntityFactory.CreatePartial(em, EntityDataJsonConverter.DeserializationContext,  false, true);
+                    if(entityId.HasValue)
+                        entity.SetId(entityId.Value);
+                    break;
+                case OPERATION_FLAG_UPDATE:
+                    entity = Database.EntityFactory.CreatePartial(em, EntityDataJsonConverter.DeserializationContext, false, false);
+                    if (entityId.HasValue)
+                        entity.SetId(entityId.Value);
+                    break;
+                default:
+                    throw new JsonException($"Unsupported operation flag '{operation}'");
+            }
+
 
             if (root.TryGetProperty("Values", out JsonElement valuesElement))
             {
@@ -57,7 +85,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
     private string GetRequiredEntityType(JsonElement root)
     {
         if (root.TryGetProperty("Entity", out JsonElement entityElement) ||
-            root.TryGetProperty(CommonConstants.DATA_FIELD_TYPENAME, out entityElement))
+            root.TryGetProperty(DatabaseConstants.DATA_FIELD_TYPENAME, out entityElement))
         {
             string entityTypeName = entityElement.GetString();
             if (!string.IsNullOrEmpty(entityTypeName))
@@ -66,36 +94,63 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
         throw new JsonException("Required field '_entity' or 'Entity' not found in JSON");
     }
 
-    private (bool? isNew, bool? isDeleted) GetFlags(JsonElement root)
+    private int GetRequiredOperation(JsonElement root)
     {
-        bool? isNew = null;
-        bool? isDeleted = null;
-        if (root.TryGetProperty("IsNew", out JsonElement isNewElement))
+        if (root.TryGetProperty("type", out JsonElement operationElement) ||
+           root.TryGetProperty(DatabaseConstants.DATA_FIELD_OPERATION, out operationElement))
         {
-            isNew = isNewElement.GetBoolean();
+            string operationTypeName = operationElement.GetString();
+            if (!string.IsNullOrEmpty(operationTypeName))
+            {
+                switch (operationTypeName.ToLowerInvariant())
+                {
+                    case "new":
+                    case "insert":
+                        return OPERATION_FLAG_ISNEW;
+                    case "delete":
+                        return OPERATION_FLAG_ISDELETED;
+                    case "update":
+                        return OPERATION_FLAG_UPDATE;
+                    case "none":
+                        return OPERATION_FLAG_NONE;
+                    default:
+                        throw new JsonException($"Unknown operation type '{operationTypeName}'");
+                }
+            }
         }
-
-        if (root.TryGetProperty("IsDeleted", out JsonElement isDeletedElement))
-        {
-            isDeleted = isDeletedElement.GetBoolean();
-        }
-
-        return (isNew, isDeleted);
+        return OPERATION_FLAG_NONE;
     }
+
+    //private (bool? isNew, bool? isDeleted) GetFlags(JsonElement root)
+    //{
+    //    bool? isNew = null;
+    //    bool? isDeleted = null;
+    //    if (root.TryGetProperty("IsNew", out JsonElement isNewElement))
+    //    {
+    //        isNew = isNewElement.GetBoolean();
+    //    }
+
+    //    if (root.TryGetProperty("IsDeleted", out JsonElement isDeletedElement))
+    //    {
+    //        isDeleted = isDeletedElement.GetBoolean();
+    //    }
+
+    //    return (isNew, isDeleted);
+    //}
 
     private long? GetEntityId(JsonElement root, bool required)
     {
         if (root.TryGetProperty("Values", out JsonElement valuesElement))
         {
             if (valuesElement.TryGetProperty("Id", out JsonElement idElement) ||
-                valuesElement.TryGetProperty(CommonConstants.FIELD_ID, out idElement))
+                valuesElement.TryGetProperty(DatabaseConstants.FIELD_ID, out idElement))
             {
                 return idElement.GetInt64();
             }
         }
 
         if (root.TryGetProperty("Id", out JsonElement directIdElement) ||
-            root.TryGetProperty(CommonConstants.FIELD_ID, out directIdElement))
+            root.TryGetProperty(DatabaseConstants.FIELD_ID, out directIdElement))
         {
             return directIdElement.GetInt64();
         }
@@ -109,9 +164,9 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
     private void SetEntityFields(IDbEntityMetadata em, IEntity entity, JsonElement sourceElement, JsonSerializerOptions options, bool skipReservedFields = false)
     {
         var reservedFields = new HashSet<string> {
-            "Entity", CommonConstants.DATA_FIELD_TYPENAME,
-            "Id", CommonConstants.FIELD_ID,
-            CommonConstants.FIELD_VERSION,
+            "Entity", DatabaseConstants.DATA_FIELD_TYPENAME,
+            "Id", DatabaseConstants.FIELD_ID,
+            DatabaseConstants.FIELD_VERSION,
             "IsNew", "IsDeleted"
         };
 
@@ -149,7 +204,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
 
     private void SetEntityVersion(IEntity entity, JsonElement sourceElement)
     {
-        if (sourceElement.TryGetProperty(CommonConstants.FIELD_VERSION, out JsonElement versionElement))
+        if (sourceElement.TryGetProperty(DatabaseConstants.FIELD_VERSION, out JsonElement versionElement))
         {
             entity.DbVersion = versionElement.GetInt32();
         }
@@ -177,12 +232,12 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
             long id = entity.GetId().As<long>();
 
             writer.WriteStartObject();
-            writer.WriteString(CommonConstants.DATA_FIELD_TYPENAME, em.Name);
-            writer.WriteString(CommonConstants.DATA_FIELD_CAPTION, entity.Caption());
-            writer.WriteNumber(CommonConstants.DATA_FIELD_ID, id);
+            writer.WriteString(DatabaseConstants.DATA_FIELD_TYPENAME, em.Name);
+            writer.WriteString(DatabaseConstants.DATA_FIELD_CAPTION, entity.Caption());
+            writer.WriteNumber(DatabaseConstants.DATA_FIELD_ID, id);
 
-            writer.WriteNumber(CommonConstants.FIELD_ID, id);
-            writer.WriteNumber(CommonConstants.FIELD_VERSION, entity.DbVersion);
+            writer.WriteNumber(DatabaseConstants.FIELD_ID, id);
+            writer.WriteNumber(DatabaseConstants.FIELD_VERSION, entity.DbVersion);
 
             writer.WritePropertyName("Values");
             writer.WriteStartObject();

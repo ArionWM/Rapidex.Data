@@ -22,6 +22,7 @@ namespace Rapidex.Data
         protected ReaderWriterLockSlim _templateLock = new ReaderWriterLockSlim();
 
 
+
         protected DbEntity Create(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
         {
             DbEntity dbEntity = new DbEntity();
@@ -48,21 +49,6 @@ namespace Rapidex.Data
             return dbEntity;
         }
 
-        protected TemplateInfo CreateTemplate(IDbEntityMetadata entityMetadata, IDbSchemaScope scope)
-        {
-            DbEntity dbEntity = this.Create(entityMetadata, scope);
-
-            TemplateInfo templateInfo = new TemplateInfo();
-            templateInfo.Entity = dbEntity;
-
-            templateInfo.PersistentSequence = "id_" + entityMetadata.Name;
-            scope.Structure.CreateSequenceIfNotExists(templateInfo.PersistentSequence, -1, 10000);
-
-            templateInfo.PrematureSequence = templateInfo.PersistentSequence + "_prm";
-            scope.Structure.CreateSequenceIfNotExists(templateInfo.PrematureSequence, -1, 10000);
-
-            return templateInfo;
-        }
 
         protected IEntity CreateConcrete(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
         {
@@ -79,6 +65,22 @@ namespace Rapidex.Data
             dbEntity.ExternalId = null;
             dbEntity.DbVersion = 0;
             return dbEntity;
+        }
+
+        protected TemplateInfo CreateTemplate(IDbEntityMetadata entityMetadata, IDbSchemaScope scope)
+        {
+            DbEntity dbEntity = this.Create(entityMetadata, scope);
+
+            TemplateInfo templateInfo = new TemplateInfo();
+            templateInfo.Entity = dbEntity;
+
+            templateInfo.PersistentSequence = "id_" + entityMetadata.Name;
+            scope.Structure.CreateSequenceIfNotExists(templateInfo.PersistentSequence, -1, 10000);
+
+            templateInfo.PrematureSequence = templateInfo.PersistentSequence + "_prm";
+            scope.Structure.CreateSequenceIfNotExists(templateInfo.PrematureSequence, -1, 10000);
+
+            return templateInfo;
         }
 
         protected TemplateInfo CreateConcreteTemplate(IDbEntityMetadata entityMetadata, IDbSchemaScope scope)
@@ -128,7 +130,7 @@ namespace Rapidex.Data
             }
         }
 
-        public IEntity Create(IDbEntityMetadata em, IDbSchemaScope dbScope, bool forNew, bool? forDeleted = null)
+        public IEntity Create(IDbEntityMetadata em, IDbSchemaScope dbScope, bool forNew)
         {
             em.NotNull();
             dbScope.NotNull();
@@ -162,12 +164,10 @@ namespace Rapidex.Data
                 newEntity._IsNew = false;
             }
 
-            if (forDeleted.HasValue && forDeleted.Value)
-            {
-                newEntity._IsDeleted = true;
-            }
-
-
+            //if (forDeleted.HasValue && forDeleted.Value)
+            //{
+            //    newEntity._IsDeleted = true;
+            //}
 
             newEntity.EnsureDataTypeInitialization();
 
@@ -204,41 +204,6 @@ namespace Rapidex.Data
             else
             {
                 newEntity._IsNew = false;
-            }
-
-            if (forDeleted)
-            {
-                newEntity._IsDeleted = true;
-            }
-
-            return newEntity;
-        }
-
-        /// <summary>
-        /// Create partial entity without dbScope (detached)
-        /// </summary>
-        /// <param name="em"></param>
-        /// <param name="forNew"></param>
-        /// <param name="forDeleted"></param>
-        /// <returns></returns>
-        public IPartialEntity CreatePartialDetached(string entityName, long? id, bool forNew, bool forDeleted)
-        {
-            entityName.NotEmpty();
-
-            PartialEntity newEntity = new PartialEntity();
-            newEntity._TypeName = entityName;
-            newEntity.Id = id ?? DatabaseConstants.DEFAULT_EMPTY_ID;
-            newEntity.ExternalId = null;
-            newEntity.DbVersion = 0;
-
-            if (forNew)
-            {
-                newEntity._IsNew = true;
-                if (id.HasValue)
-                {
-                    id = id * -1;
-                    newEntity.SetId(id);
-                }
             }
 
             if (forDeleted)

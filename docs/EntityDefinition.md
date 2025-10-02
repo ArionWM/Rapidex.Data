@@ -11,3 +11,10 @@
 ## Dynamic Entities (JSON or YAML based)
 
 
+## Partial Entities
+
+
+
+
+## Nullable Fields
+

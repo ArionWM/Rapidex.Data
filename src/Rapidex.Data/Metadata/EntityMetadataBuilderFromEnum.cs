@@ -58,9 +58,9 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         em.Parent = this.Parent;
         IDbEntityMetadata bem = em.ShouldSupportTo<IDbEntityMetadata>($"Entity metadata '{em.Name}' should be IDbEntityMetadata");
 
-        em.Fields.AddIfNotExist<long>(CommonConstants.FIELD_ID, CommonConstants.FIELD_ID, field => { field.IsSealed = true; });
-        em.Fields.AddIfNotExist<string>(CommonConstants.FIELD_EXTERNAL_ID, CommonConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
-        em.Fields.AddIfNotExist<int>(CommonConstants.FIELD_VERSION, CommonConstants.FIELD_VERSION, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<long>(DatabaseConstants.FIELD_ID, DatabaseConstants.FIELD_ID, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<string>(DatabaseConstants.FIELD_EXTERNAL_ID, DatabaseConstants.FIELD_EXTERNAL_ID, field => { field.IsSealed = true; });
+        em.Fields.AddIfNotExist<int>(DatabaseConstants.FIELD_VERSION, DatabaseConstants.FIELD_VERSION, field => { field.IsSealed = true; });
         em.Fields.AddIfNotExist<string>("Name", "Name");
         em.Fields.AddIfNotExist<string>("Description", "Description");
         em.Fields.AddIfNotExist<Color>("Color", "Color");
@@ -68,7 +68,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         em.Fields.AddIfNotExist<bool>("Sealed", "Sealed");
         em.Fields.AddIfNotExist<string>("Icon", "Icon");
 
-        em.PrimaryKey = em.Fields.Get(CommonConstants.FIELD_ID, true);
+        em.PrimaryKey = em.Fields.Get(DatabaseConstants.FIELD_ID, true);
 
         bem.AddBehavior("ArchiveEntity", true, false); //Diğer kitaplıkta kaldı?
         bem.AddBehavior("DefinitionEntity", true, false); //Diğer kitaplıkta kaldı?

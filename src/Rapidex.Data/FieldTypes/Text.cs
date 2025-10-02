@@ -1,11 +1,12 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace Rapidex.Data
 {
-    public class Text : BasicBaseDataType<string>
+    public class Text : BasicBaseDataType<string>, IEmptyCheckObject
     {
 
         public class TextDbFieldMetadata : DbFieldMetadata
@@ -62,6 +63,8 @@ namespace Rapidex.Data
                 this.SetTextType(value);
             }
         }
+
+        bool IEmptyCheckObject.IsEmpty => this.Value.IsNullOrEmpty();
 
         public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {

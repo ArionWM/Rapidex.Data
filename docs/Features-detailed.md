@@ -2,7 +2,7 @@
 
 ## Main Features
 
-**Define entities with concrete (classes), JSON or YAML files or with code in runtime**
+**Define entities with *concrete* (classes) or *soft* (JSON, YAML or with code in runtime)**
 
 ...
 
@@ -65,6 +65,14 @@ And expandable!
 **Automatic schema apply (create & update)**
 
 ...
+
+**Entity Ids always start from 10.000**
+
+To avoid conflicts with predefined data and demo data, entity Ids always start from 10.000.
+
+Developers can inject predefined data and demo data with Ids less than 10.000.
+
+
 
 
 

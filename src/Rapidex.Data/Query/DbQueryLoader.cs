@@ -23,15 +23,15 @@ namespace Rapidex.Data.Query
 
         public ILoadResult<DbEntityId> GetIds()
         {
-            //this.Query.Select(this.GetFieldName(this.EntityMetadata.PrimaryKey.Name), this.GetFieldName(CommonConstants.FIELD_VERSION));
+            //this.Query.Select(this.GetFieldName(this.EntityMetadata.PrimaryKey.Name), this.GetFieldName(DatabaseConstants.FIELD_VERSION));
             //string idFieldName = this.GetFieldName(this.EntityMetadata.PrimaryKey.Name);
-            //string versionFieldName = this.GetFieldName(CommonConstants.FIELD_VERSION);
-            var rawResult = this.LoadPartial(this.EntityMetadata.PrimaryKey.Name, CommonConstants.FIELD_VERSION);
+            //string versionFieldName = this.GetFieldName(DatabaseConstants.FIELD_VERSION);
+            var rawResult = this.LoadPartial(this.EntityMetadata.PrimaryKey.Name, DatabaseConstants.FIELD_VERSION);
 
             List<DbEntityId> result = new List<DbEntityId>();
             foreach (DataRow row in rawResult)
             {
-                result.Add(new DbEntityId(row.To<long>(this.EntityMetadata.PrimaryKey.Name), row.To<int>(CommonConstants.FIELD_VERSION)));
+                result.Add(new DbEntityId(row.To<long>(this.EntityMetadata.PrimaryKey.Name), row.To<int>(DatabaseConstants.FIELD_VERSION)));
             }
 
             return new LoadResult<DbEntityId>(result);
@@ -45,13 +45,13 @@ namespace Rapidex.Data.Query
         public ILoadResult<DataRow> LoadPartial(params string[] fields)
         {
             //Clone Query?
-            this.Query.Select(this.GetFieldName(CommonConstants.FIELD_ID));
+            this.Query.Select(this.GetFieldName(DatabaseConstants.FIELD_ID));
             foreach (string field in fields)
             {
                 this.Query.Select(this.GetFieldName(field));
             }
 
-            this.Query.Select(this.GetFieldName(CommonConstants.FIELD_VERSION));
+            this.Query.Select(this.GetFieldName(DatabaseConstants.FIELD_VERSION));
 
             return this.Schema.Data.LoadRaw(this);
         }

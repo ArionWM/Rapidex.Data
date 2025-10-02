@@ -171,7 +171,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         using var work = db.BeginWork();
 
-        var lresult = db.GetQuery("ContactType").Asc(CommonConstants.FIELD_ID).Load();
+        var lresult = db.GetQuery("ContactType").Asc(DatabaseConstants.FIELD_ID).Load();
         Assert.Equal(5, lresult.ItemCount);
 
         IEntity ct01 = lresult.First();

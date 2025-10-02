@@ -110,25 +110,111 @@ ConcreteEntity01[] ents = EntityDataJsonConverter.Deserialize<ConcreteEntity01>(
 
 ```
 
+> JSON properties are case-**insensitive** during deserialization. 
+
+> You can use either `entity` or `_entity` for entity name and `id` or `_id` for entity identifier.
 
 
 
-## Operations
+## Operations (Update, New, Delete, Add or Remove Related Entities)
 
-### New and Delete Operations
+For operational JSON; `Type` property are used to represent these operations. Type property contained json deserialization always create `PartialEntity`.
 
-JSON representation of entities can include operation information to indicate whether the entity is new or should be deleted. 
+This entities use with `UnitOfWork` pattern for batch processing of multiple operations.
 
-`IsNew` and `IsDeleted` properties are used to represent these operations.
+> Because; For concrete or full entities, partial data leads to override unspecified fields with their default values.
 
-- `IsNew`: Indicates that the entity is new and should be created in the database.
-- `IsDeleted`: Indicates that the entity should be deleted from the database.
+`type` property can have the following values; `update`, `new` and `delete`. 
+
+> You can use either `type` or `_type` for operation type.
+
+### Update Data
+
+Update data can contains partial or full data for an entity. JSON can contains only the fields that need to be updated.
 
 ```Json
+[
+  {
+    "entity": "MyConcreteEntity",
+    "type": "update",
+    "id": 10041,
+    "Values": {
+      "ConcreteField": "555-5678",
+      "AnotherConcreteField": 456
+    }
+  },
+  {
+    "_entity": "MySoftEntity",
+    "type": "update",
+    "_id": 10042,
+    "Values": {
+      "Field": "Updated Name",
+      "AnotherField": 123
+    }
+  }
+]
+```
 
-abc
+```csharp
+
+string json = "[{ "type": "update", ... } ]";
+
+var db = Database.Dbs.Db();
+
+var entities = EntityDataJsonConverter.Deserialize(json, db);
+
+using var uow = db.BeginWork();
+entities.Save(uow);
+uow.CommitChanges();
 
 ```
+
+### New Entity
+
+New entity JSON representation can include only the fields that need to be set. 
+
+```Json
+[
+  {
+    "entity": "MyConcreteEntity",
+    "type": "new",
+    "Values": {
+      "ConcreteField": "555-5678",
+      "AnotherConcreteField": 456
+    }
+  },
+  {
+    "entity": "MySoftEntity",
+    "type": "new",
+    "Values": {
+      "Field": "New Name",
+      "AnotherField": 123
+    }
+  }
+]
+```
+
+#### Specify Id for New Entity
+
+... abc
+
+### Delete Entity
+
+```Json
+[
+  {
+    "entity": "MyConcreteEntity",
+    "type": "delete",
+    "id": 10041
+  },
+  {
+    "entity": "MySoftEntity",
+    "type": "delete",
+    "id": 10042
+  }
+]
+```
+
 
 
 ### Add or Remove Related Entities
