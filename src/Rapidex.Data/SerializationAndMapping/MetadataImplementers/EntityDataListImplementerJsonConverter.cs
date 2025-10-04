@@ -46,7 +46,7 @@ internal class EntityDataListImplementerJsonConverter : JsonConverter<EntityData
                 EntityDataListImplementer imp = content;
                 return imp;
             case JsonTokenType.StartObject:
-                JsonNode node = JsonNode.Parse(ref reader);
+                JsonNode node = JsonNode.Parse(ref reader, JsonHelper.DefaultJsonNodeOptions);
                 JsonObject obj = node.As<JsonObject>();
 
                 //DataListImplementer dobj = JsonSerializer.Deserialize<DataListImplementer>(obj);

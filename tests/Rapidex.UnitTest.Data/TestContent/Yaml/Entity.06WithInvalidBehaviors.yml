@@ -1,7 +1,7 @@
 ﻿
 #!entity
 _tag: entity
-name: myComplexEntity4
+name: myInvalidEntity6
 tenant: common
 workspace: base
 module: project
@@ -27,4 +27,4 @@ fields:
 
 # other fields in concrete definition
 
-behaviors: [archiveEntity]  
+behaviors: [archiveEntity, unavailableBehavior]  

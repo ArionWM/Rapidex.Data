@@ -228,6 +228,17 @@ namespace Rapidex.Data
             return en;
         }
 
+        public static implicit operator long(Enumeration<T> reference)
+        {
+            if (reference == null)
+                return 0;
+
+            if (0L == reference.Value)
+                return 0;
+
+            return reference.TargetId;
+        }
+
         public static implicit operator T(Enumeration<T> reference)
         {
             if (reference == null)

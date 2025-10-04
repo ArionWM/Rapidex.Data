@@ -28,7 +28,7 @@ internal class ImplementerJsonDiscriminatorSelectorConverter : JsonConverter<IIm
 
     public override IImplementer? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        JsonNode node = JsonNode.Parse(ref reader);
+        JsonNode node = JsonNode.Parse(ref reader, JsonHelper.DefaultJsonNodeOptions);
         if (node is JsonObject obj)
         {
             Type impType = MetadataImplementerContainer.FindType(node);

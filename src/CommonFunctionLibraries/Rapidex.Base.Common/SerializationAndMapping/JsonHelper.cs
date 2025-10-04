@@ -18,7 +18,18 @@ public static class JsonHelper
     private static DefaultJsonTypeInfoResolver defaultJsonTypeInfoResolver;
     internal static List<JsonConverter> JsonConverters { get; private set; } = new();
     internal static Dictionary<Type, JsonConverter> TypedJsonConverters { get; private set; } = new();
-    public static JsonSerializerOptions JsonSerializerOptions { get; private set; }
+    public static JsonSerializerOptions DefaultJsonSerializerOptions { get; private set; }
+    public static JsonDocumentOptions DefaultJsonDocumentOptions { get; private set; } = new JsonDocumentOptions()
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = JsonCommentHandling.Skip,
+    };
+
+    public static JsonNodeOptions DefaultJsonNodeOptions { get; private set; } = new JsonNodeOptions()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
+
 
     static JsonHelper()
     {
@@ -27,7 +38,7 @@ public static class JsonHelper
 
     private static void CheckInitialized()
     {
-        if (JsonSerializerOptions == null)
+        if (DefaultJsonSerializerOptions == null)
             throw new InvalidOperationException("JsonHelper is not initialized. Please call JsonHelper.Start() in application startup.");
     }
 
@@ -38,8 +49,8 @@ public static class JsonHelper
 
     public static void Start()
     {
-        JsonHelper.JsonSerializerOptions = new();
-        JsonHelper.JsonSerializerOptions.SetDefaultOptions();
+        JsonHelper.DefaultJsonSerializerOptions = new();
+        JsonHelper.DefaultJsonSerializerOptions.SetDefaultOptions();
     }
 
     public static void SetDefaultOptions(this JsonSerializerOptions options, params Type[] excludedConverters)
@@ -121,7 +132,7 @@ public static class JsonHelper
             if (json == "[]")
                 return default(T);
 
-        return JsonSerializer.Deserialize<T>(json, JsonSerializerOptions);
+        return JsonSerializer.Deserialize<T>(json, DefaultJsonSerializerOptions);
     }
 
     public static object FromJson(this string json, Type targetType)
@@ -141,7 +152,7 @@ public static class JsonHelper
             if (json == "[]")
                 return null;
 
-        return JsonSerializer.Deserialize(json, targetType, JsonSerializerOptions);
+        return JsonSerializer.Deserialize(json, targetType, DefaultJsonSerializerOptions);
     }
 
     public static Dictionary<string, object> FromJsonToDictionary(this string json)
@@ -199,7 +210,7 @@ public static class JsonHelper
     {
         CheckInitialized();
 
-        return JsonSerializer.Serialize<T>(obj, JsonSerializerOptions);
+        return JsonSerializer.Serialize<T>(obj, DefaultJsonSerializerOptions);
     }
 
 

@@ -80,7 +80,7 @@ namespace Rapidex
                     }
                     else
                     {
-                        object ds = jsonElement.Deserialize<Dictionary<string, object>>(JsonHelper.JsonSerializerOptions);
+                        object ds = jsonElement.Deserialize<Dictionary<string, object>>(JsonHelper.DefaultJsonSerializerOptions);
                         return ds;
 
                     }
@@ -144,7 +144,7 @@ namespace Rapidex
                     JsonNode node = JsonObject.Parse(ref jsonReader);
                     Type type = getObjectType.NotNull().Invoke(node);
                     TypeInfo tInfo = type.GetTypeInfo();
-                    return JsonSerializer.Deserialize(node, tInfo, JsonHelper.JsonSerializerOptions); // JsonHelper.JsonSerializerOptions);
+                    return JsonSerializer.Deserialize(node, tInfo, JsonHelper.DefaultJsonSerializerOptions); // JsonHelper.JsonSerializerOptions);
 
                 default:
                     throw new NotSupportedException($"Usupported value format: {jsonReader.TokenType}");

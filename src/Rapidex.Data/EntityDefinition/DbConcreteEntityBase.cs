@@ -17,7 +17,12 @@ namespace Rapidex.Data
         IDbEntityMetadata IEntity._Metadata { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
+        object IEntity._virtualId { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
         public IDbSchemaScope _Schema { get; set; }
+
+
 
         public object this[string columnName]
         {

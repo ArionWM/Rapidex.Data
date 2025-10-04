@@ -24,7 +24,7 @@ public static class AssertionHelper
         if (obj == null)
         {
             DebugBreak();
-            throw new InvalidOperationException(message ?? "Object is null");
+            throw new ArgumentNullException(message ?? "Object is null");
         }
 
         return obj;
@@ -57,7 +57,7 @@ public static class AssertionHelper
         if (obj.IsNullOrEmpty())
         {
             DebugBreak();
-            throw new InvalidOperationException(message ?? "Object is empty");
+            throw new ArgumentNullException(message ?? "Object is empty");
         }
 
         return obj;
@@ -83,7 +83,7 @@ public static class AssertionHelper
         if (!obj.IsSupportTo(typeof(TObj)))
         {
             DebugBreak();
-            throw new InvalidOperationException(message ?? $"Object '{obj}' is not support to {typeof(TObj).Name}");
+            throw new BaseValidationException(message ?? $"Object '{obj}' is not support to {typeof(TObj).Name}");
         }
 
         return (TObj)obj;
@@ -96,7 +96,7 @@ public static class AssertionHelper
         if (!type.IsSupportTo(desiredType))
         {
             DebugBreak();
-            throw new InvalidOperationException(message ?? $"Type '{type.Name}' is not support to {desiredType.Name}");
+            throw new BaseValidationException(message ?? $"Type '{type.Name}' is not support to {desiredType.Name}");
         }
         return type;
     }
@@ -117,7 +117,7 @@ public static class AssertionHelper
         if (obj.IsSupportTo(typeof(TObj)))
         {
             DebugBreak();
-            throw new InvalidOperationException(message);
+            throw new BaseValidationException(message);
         }
 
     }
@@ -131,7 +131,7 @@ public static class AssertionHelper
         if (!result)
         {
             DebugBreak();
-            throw new InvalidOperationException(message ?? string.Format("Object is not valid"));
+            throw new BaseValidationException(message ?? string.Format("Object is not valid"));
         }
 
         return obj;

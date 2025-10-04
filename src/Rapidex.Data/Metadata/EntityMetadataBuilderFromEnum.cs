@@ -152,13 +152,7 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
 
     public IDbEntityMetadata AddFromJson(string json)
     {
-        JsonDocumentOptions opt = new JsonDocumentOptions()
-        {
-            CommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true
-        };
-
-        JsonNode jdoc = JsonNode.Parse(json, null, opt);
+        JsonNode jdoc = JsonNode.Parse(json, JsonHelper.DefaultJsonNodeOptions, JsonHelper.DefaultJsonDocumentOptions);
         string type = jdoc["type"].GetValue<string>();
 
         if (type.ToLowerInvariant() != "enumdefinition")

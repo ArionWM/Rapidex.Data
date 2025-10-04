@@ -257,7 +257,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         catch (EntityNotFoundException enf)
         {
             Exception rex = this.AnalyseException(enf);
-            throw rex;
+            throw;
         }
     }
 
@@ -291,7 +291,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
             _its?.Rollback();
 
-            throw tex;
+            throw;
         }
         finally
         {

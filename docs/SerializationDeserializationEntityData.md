@@ -196,7 +196,31 @@ New entity JSON representation can include only the fields that need to be set.
 
 #### Specify Id for New Entity
 
+For relations in same data, negative id values can use for virtual association. Real IDs will be created and assigned during commit.
+
 ... abc
+
+```Json
+[
+  {
+    "entity": "MyEntity1",
+    "id": -123 //<- Virtual Id
+    "type": "new",
+    "Values": {
+      "ConcreteField": "555-5678",
+      "AnotherConcreteField": 456
+    }
+  },
+  {
+    "entity": "MyOtherEntity",
+    "type": "new",
+    "Values": {
+      "Name": "New Name",
+      "MyReleationFieldToMyEntity1": -123 //<- Virtual Id reference to MyEntity1
+    }
+  }
+]
+```
 
 ### Delete Entity
 

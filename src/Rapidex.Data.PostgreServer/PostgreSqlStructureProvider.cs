@@ -145,7 +145,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         }
         catch (PostgresException pex) when (pex.SqlState == "42P04") // duplicate_database
         {
-            throw pex;
+            throw;
         }
         catch (PostgresException pex) when (pex.SqlState == "42501") // insufficient_privilege
         {
@@ -181,7 +181,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         }
         catch (PostgresException pex) when (pex.SqlState == "42P06") // duplicate_schema
         {
-            throw pex;
+            throw;
         }
         catch (PostgresException pex) when (pex.SqlState == "42501") // insufficient_privilege
         {
@@ -497,7 +497,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         }
         catch (PostgresException pex) when (pex.SqlState == "42P07") // duplicate_table
         {
-            throw pex;
+            throw;
         }
         catch (PostgresException pex) when (pex.SqlState == "42501") // insufficient_privilege
         {
@@ -553,7 +553,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
         }
         catch (PostgresException pex) when (pex.SqlState == "3D000") // invalid_catalog_name
         {
-            throw pex;
+            throw;
         }
         catch (PostgresException pex) when (pex.SqlState == "42501") // insufficient_privilege
         {

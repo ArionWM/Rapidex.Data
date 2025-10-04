@@ -12,10 +12,13 @@ namespace Rapidex.Data
 #pragma warning restore IDE1006 // Naming Styles
 
         [System.Text.Json.Serialization.JsonIgnore]
-        public IDbSchemaScope _Schema { get; set; }
+        IDbEntityMetadata IEntity._Metadata { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
-        IDbEntityMetadata IEntity._Metadata { get; set; }
+        object IEntity._virtualId { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public IDbSchemaScope _Schema { get; set; }
 
         public object this[string columnName]
         {

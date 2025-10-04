@@ -58,21 +58,7 @@ internal class DefaultMetadataImplementHost : IMetadataImplementHost
         if (json.IsNullOrEmpty())
             return new UpdateResult();
 
-        //TODO: Move to JsonHelper
-        //-------------------------------------
-        JsonDocumentOptions opt = new()
-        {
-            AllowTrailingCommas = true,
-            CommentHandling = JsonCommentHandling.Skip
-        };
-
-        JsonNodeOptions optNode = new()
-        {
-            PropertyNameCaseInsensitive = true,
-        };
-        //-------------------------------------
-
-        JsonNode node = JsonNode.Parse(json, optNode, opt);
+        JsonNode node = JsonNode.Parse(json, JsonHelper.DefaultJsonNodeOptions, JsonHelper.DefaultJsonDocumentOptions);
 
         if (node is JsonObject obj)
             return this.AddJsonObject(obj);

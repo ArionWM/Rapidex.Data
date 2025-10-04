@@ -790,6 +790,9 @@ public interface IEntity
 #pragma warning disable IDE1006 // Naming Styles
     internal IDbEntityMetadata _Metadata { get; set; }
 
+    [System.Text.Json.Serialization.JsonIgnore]
+    object _virtualId { get; set; }
+
     string _TypeName { get; internal set; }
     string _DbName { get; internal set; }
     string _SchemaName { get; internal set; }

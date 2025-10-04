@@ -9,8 +9,27 @@ using System.Threading.Tasks;
 namespace Rapidex.Data;
 public static class EntityDataJsonConverter
 {
+    public class EntityDeserializationContext 
+    {
+        public IDbSchemaScope Scope { get; protected set; }
+        public IDbEntityMetadata CurrentEntityMetadata { get; internal set; }
+        public IDbFieldMetadata CurrentFieldMetadata { get; internal set; }
+        //public string CurrentField { get; protected set; }
+
+        public EntityDeserializationContext()
+        {
+            
+        }
+
+        public EntityDeserializationContext(IDbSchemaScope scope)
+        {
+            this.Scope = scope.NotNull();
+        }
+
+    }
+
     [ThreadStatic]
-    static IDbSchemaScope deserializationContext = null;
+    static EntityDeserializationContext deserializationContext = null;
 
     public static void AddDefaultJsonOptions(this IServiceCollection services)
     {
@@ -20,7 +39,7 @@ public static class EntityDataJsonConverter
         });
     }
 
-    internal static IDbSchemaScope DeserializationContext
+    internal static EntityDeserializationContext DeserializationContext
     {
         get => deserializationContext;
         private set => deserializationContext = value;
@@ -50,22 +69,22 @@ public static class EntityDataJsonConverter
     {
         try
         {
-            DeserializationContext = scope;
+            DeserializationContext = new EntityDeserializationContext(scope);
 
             string pJson = json?.Trim();
             if (pJson.IsNullOrEmpty())
                 return Array.Empty<IPartialEntity>();
 
-            JsonNode node = JsonNode.Parse(json);
+            JsonNode node = JsonNode.Parse(pJson, JsonHelper.DefaultJsonNodeOptions, JsonHelper.DefaultJsonDocumentOptions);
 
             if (node.GetValueKind() == JsonValueKind.Array)
             {
-                IEntity[] ents = JsonSerializer.Deserialize<IEntity[]>(json, JsonHelper.JsonSerializerOptions);
+                IEntity[] ents = JsonSerializer.Deserialize<IEntity[]>(json, JsonHelper.DefaultJsonSerializerOptions);
                 return ents;
             }
             else
             {
-                IEntity ent = JsonSerializer.Deserialize<IEntity>(node, JsonHelper.JsonSerializerOptions);
+                IEntity ent = JsonSerializer.Deserialize<IEntity>(node, JsonHelper.DefaultJsonSerializerOptions);
                 return new IEntity[] { ent };
             }
         }

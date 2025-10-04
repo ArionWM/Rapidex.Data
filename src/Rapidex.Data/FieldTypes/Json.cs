@@ -45,7 +45,7 @@ namespace Rapidex.Data
 
         public static implicit operator JsonNode(Json value)
         {
-            JsonNode node = value.Value.IsNullOrEmpty() ? new JsonObject() : JsonNode.Parse(value.Value);
+            JsonNode node = value.Value.IsNullOrEmpty() ? new JsonObject() : JsonNode.Parse(value.Value, JsonHelper.DefaultJsonNodeOptions, JsonHelper.DefaultJsonDocumentOptions);
 
             return node;
         }

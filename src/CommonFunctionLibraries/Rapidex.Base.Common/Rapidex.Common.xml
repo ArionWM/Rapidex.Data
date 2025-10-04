@@ -186,12 +186,12 @@
             False: Sadece test sunucularında exception metninin dış dünyaya yayınlanmasına izin verilir.
             </summary>
         </member>
-        <member name="F:Rapidex.CryptoHelper.PasswordHasherV2.SaltSize">
+        <member name="F:Rapidex.CryptoHelper.PasswordHasherV2.SALTSIZE">
             <summary>
             Size of salt
             </summary>
         </member>
-        <member name="F:Rapidex.CryptoHelper.PasswordHasherV2.HashSize">
+        <member name="F:Rapidex.CryptoHelper.PasswordHasherV2.HASHSIZE">
             <summary>
             Size of hash
             </summary>

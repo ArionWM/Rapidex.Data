@@ -202,7 +202,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
         //Request ids ...
-        int requiredIdCount = entities.Count(ent => (long)ent.GetId() < 1);
+        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureId());
         long[] ids = new long[0];
         if (requiredIdCount > 0)
         {
@@ -212,7 +212,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
                 ids = this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
         }
 
-        DataTable variableTable = GetDbVariableTable(em, null);
+        DataTable variableTable = this.GetDbVariableTable(em, null);
 
         int idCount = 0;
         foreach (IEntity entity in entities)
@@ -222,14 +222,14 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
             EntityChangeResultItem ures = new EntityChangeResultItem();
             ures.Name = em.Name;
-            long oldId = (long)entity.GetId();
+            long oldId = entity.GetId() is long oldIdLong && oldIdLong < 0 ? oldIdLong : entity._virtualId.As<long>();
 
             ures.OldId = oldId;
-            ures.Id = oldId;
+            ures.Id = (long)entity.GetId();
 
             try
             {
-                if (oldId > 0)
+                if (!ures.Id.IsPrematureId())
                     continue;
 
                 long id = ids[idCount];
@@ -272,6 +272,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return result;
     }
 
+    [Obsolete("Use InsertV2", true)]
     protected IEntityUpdateResult Insert(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
@@ -281,7 +282,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
         //Request ids ...
-        int requiredIdCount = entities.Count(ent => (long)ent.GetId() < 1);
+        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureId());
         long[] ids = new long[0];
         if (requiredIdCount > 0)
         {
@@ -299,14 +300,14 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
             EntityChangeResultItem ures = new EntityChangeResultItem();
             ures.Name = em.Name;
-            long oldId = (long)entity.GetId();
+            long oldId = entity.GetId() is long oldIdLong && oldIdLong < 0 ? oldIdLong : entity._virtualId.As<long>();
 
             ures.OldId = oldId;
-            ures.Id = oldId;
+            ures.Id = (long)entity.GetId();
 
             try
             {
-                if (oldId > 0)
+                if (!ures.Id.IsPrematureId())
                     continue;
 
                 long id = ids[idCount];
@@ -424,7 +425,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         if (newEntities != null && newEntities.Any())
         {
             //BulkUpdate?
-            result.MergeWith(InsertV2(em, newEntities));
+            result.MergeWith(this.InsertV2(em, newEntities));
 
             //var parts = newEntities.Split(10);
             //foreach (var part in parts)

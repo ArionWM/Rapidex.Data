@@ -20,10 +20,9 @@ using (var uow = db.BeginWork())
 
 abc
 
-## Json Deserialization for CRUD Operations
+## JSON Deserialization for CRUD Operations
 
 
-Rapidex Json deserialization infrastructure supports `new`, `update` and `delete` operations on entities.
+Rapidex JSON deserialization infrastructure supports `new`, `update`, `delete` and add/remove relations operations on entities.
 
-
-See: [Serialization and Deserialization of Entities](/docs/SerializationDeserializationJson.md)
+See: [Serialization and Deserialization of Entities](/docs/SerializationDeserializationEntityData.md)

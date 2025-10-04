@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
 internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
@@ -24,22 +25,28 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
                 if (reader.TokenType == JsonTokenType.EndArray)
                     break;
 
+                EntityDataJsonConverter.DeserializationContext.CurrentFieldMetadata
+
+                if (reader.TokenType == JsonTokenType.Number)
+                {
+                    //Direct id value; [123, 123] etc.
+                    // Create a partial entity reference with just the ID
+
+                    long id = reader.GetInt64();
+
+                    IPartialEntity entity = new PartialEntity();
+                    //IPartialEntity entity = Database.EntityFactory.CreatePartial(em, EntityDataJsonConverter.DeserializationContext, false, true);
+                    entity.SetId(id);
+                    relation.Add(entity);
+                }
+
                 if (reader.TokenType == JsonTokenType.StartObject)
                 {
-                    // Deserialize each entity in the relation
-                    IEntity entity = JsonSerializer.Deserialize<IEntity>(ref reader, options);
+                    IEntity entity = JsonSerializer.Deserialize<IPartialEntity>(ref reader, options);
                     if (entity != null)
                     {
                         relation.Add(entity);
                     }
-                }
-                else if (reader.TokenType == JsonTokenType.Number)
-                {
-                    // Handle direct ID references
-                    long id = reader.GetInt64();
-                    // Create a partial entity reference with just the ID
-                    // This would need proper entity creation based on relation metadata
-                    throw new NotImplementedException();
                 }
             }
         }

@@ -210,7 +210,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
         string schemaName = PostgreHelper.CheckObjectName(this.ParentScope.SchemaName);
 
-        int requiredIdCount = entities.Count(ent => (long)ent.GetId() < 1);
+        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureId());
         long[] ids = new long[0];
         if (requiredIdCount > 0)
         {
@@ -230,14 +230,14 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
             EntityChangeResultItem ures = new EntityChangeResultItem();
             ures.Name = em.Name;
-            long oldId = (long)entity.GetId();
+            long oldId = entity.GetId() is long oldIdLong && oldIdLong < 0 ? oldIdLong : entity._virtualId.As<long>();
 
             ures.OldId = oldId;
-            ures.Id = oldId;
+            ures.Id = (long)entity.GetId();
 
             try
             {
-                if (oldId > 0)
+                if (!ures.Id.IsPrematureId())
                     continue;
 
                 long id = ids[idCount];
@@ -284,7 +284,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
-        int requiredIdCount = entities.Count(ent => (long)ent.GetId() < 1);
+        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureId());
         long[] ids = new long[0];
         if (requiredIdCount > 0)
         {
@@ -302,14 +302,14 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
             EntityChangeResultItem ures = new EntityChangeResultItem();
             ures.Name = em.Name;
-            long oldId = (long)entity.GetId();
+            long oldId = entity.GetId() is long oldIdLong && oldIdLong < 0 ? oldIdLong : entity._virtualId.As<long>();
 
             ures.OldId = oldId;
-            ures.Id = oldId;
+            ures.Id = (long)entity.GetId();
 
             try
             {
-                if (oldId > 0)
+                if (!ures.Id.IsPrematureId())
                     continue;
 
                 long id = ids[idCount];

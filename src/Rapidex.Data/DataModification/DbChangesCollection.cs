@@ -62,11 +62,12 @@ internal class DbChangesCollection : IDbChangesCollection
 
         public void UpdateDependedEntities(IEntity entityTo)
         {
+            object toId = entityTo.GetId();
             EntityDependency[] deps = this.FindDependedEntities(entityTo);
 
             foreach (EntityDependency dep in deps)
             {
-                dep.From.SetValue(dep.FromPropertyName, entityTo.GetId());
+                dep.From.SetValue(dep.FromPropertyName, toId);
             }
         }
 
@@ -114,7 +115,7 @@ internal class DbChangesCollection : IDbChangesCollection
     {
         entity.NotNull();
 
-        if(entity._IsNew && entity._IsDeleted)
+        if (entity._IsNew && entity._IsDeleted)
             throw new InvalidOperationException("Entity cannot be both new and deleted");
 
         if (entity._IsDeleted && changedEntities.Contains(entity))
@@ -180,7 +181,7 @@ internal class DbChangesCollection : IDbChangesCollection
 
     protected void InternalAdd(IEntity entity)
     {
-        if(entity._IsDeleted)
+        if (entity._IsDeleted)
         {
             this.InternalDelete(entity);
             return;
@@ -298,6 +299,7 @@ internal class DbChangesCollection : IDbChangesCollection
             {
                 long newId = entity._Schema.Data.Sequence(info.PersistentSequence).GetNext();
                 entity.SetId(newId);
+                entity._virtualId = oldId;
 
                 this.newEntityDependencies.UpdateDependedEntities(entity);
 
@@ -320,6 +322,7 @@ internal class DbChangesCollection : IDbChangesCollection
             {
                 if (entity.HasPrematureId() && !entity._IsNew)
                 {
+                    //WARN: Is this possible?
                     long entityId = entity.GetId().As<long>();
                     var em = entity.GetMetadata();
                     //Eğer değişiklik scope içerisinde ise, yeni Id'yi atayalım
