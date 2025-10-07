@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using static Rapidex.Data.RelationN2N;
+using static Rapidex.Data.RelationOne2N;
 
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
 internal class RelationOne2NJsonConverter : JsonConverter<RelationOne2N>
@@ -14,7 +16,13 @@ internal class RelationOne2NJsonConverter : JsonConverter<RelationOne2N>
         if (reader.TokenType == JsonTokenType.Null)
             return null;
 
-        RelationOne2N relation = new RelationOne2N();
+
+        IEntity parent = EntityDataJsonConverter.DeserializationContext.CurrentEntity;
+        VirtualRelationOne2NDbFieldMetadata fm = EntityDataJsonConverter.DeserializationContext.CurrentFieldMetadata as VirtualRelationOne2NDbFieldMetadata;
+        fm.NotNull($"Field '{fm.Name}' must be VirtualRelationOne2NDbFieldMetadata");
+
+        RelationOne2N relation = Activator.CreateInstance(fm.Type) as RelationOne2N;
+        relation.SetupInstance(parent, fm);
 
         if (reader.TokenType == JsonTokenType.StartArray)
         {
@@ -24,31 +32,36 @@ internal class RelationOne2NJsonConverter : JsonConverter<RelationOne2N>
                 if (reader.TokenType == JsonTokenType.EndArray)
                     break;
 
+
+                if (reader.TokenType == JsonTokenType.Number)
+                {
+                    //Direct id value; [123, 123] etc.
+                    // Create a partial entity reference with just the ID
+
+                    long id = reader.GetInt64();
+
+                    IPartialEntity entity = new PartialEntity();
+                    //IPartialEntity entity = Database.EntityFactory.CreatePartial(em, EntityDataJsonConverter.DeserializationContext, false, true);
+                    entity.SetId(id);
+                    relation.Add(entity);
+                }
+
                 if (reader.TokenType == JsonTokenType.StartObject)
                 {
-                    // Deserialize each entity in the relation
-                    IEntity entity = JsonSerializer.Deserialize<IEntity>(ref reader, options);
+                    IEntity entity = JsonSerializer.Deserialize<IPartialEntity>(ref reader, options);
                     if (entity != null)
                     {
                         relation.Add(entity);
                     }
                 }
-                else if (reader.TokenType == JsonTokenType.Number)
-                {
-                    // Handle direct ID references
-                    long id = reader.GetInt64();
-                    // Create a partial entity reference with just the ID
-                    // This would need proper entity creation based on relation metadata
-                    throw new NotImplementedException();
-                }
             }
-        }
-        else 
-        {
-           throw new JsonException($"Unexpected token {reader.TokenType} when parsing RelationOne2N. Array required.");
-        }
 
-        return relation;
+            return relation;
+        }
+        else
+        {
+            throw new JsonException($"Unexpected token {reader.TokenType} when parsing RelationOne2N. Array required ([ .. ]).");
+        }
     }
 
     public override void Write(Utf8JsonWriter writer, RelationOne2N value, JsonSerializerOptions options)

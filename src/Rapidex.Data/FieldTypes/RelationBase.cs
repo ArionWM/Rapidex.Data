@@ -17,7 +17,7 @@ public abstract class RelationBase : BasicBaseDataType, ILazy, IRelation
     }
 
     //public abstract bool IsEmpty { get; }
-    public abstract void Add(IEntity entity);
+    //public abstract IEntity Add(IEntity entity);
     public abstract IEntityLoadResult GetContent(Action<IQueryCriteria> additionalCriteria = null);
 
     object ILazy.GetContent()

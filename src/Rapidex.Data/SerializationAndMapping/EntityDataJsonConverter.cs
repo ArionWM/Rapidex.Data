@@ -9,23 +9,25 @@ using System.Threading.Tasks;
 namespace Rapidex.Data;
 public static class EntityDataJsonConverter
 {
-    public class EntityDeserializationContext 
+    public class EntityDeserializationContext
     {
         public IDbSchemaScope Scope { get; protected set; }
         public IDbEntityMetadata CurrentEntityMetadata { get; internal set; }
         public IDbFieldMetadata CurrentFieldMetadata { get; internal set; }
+        public IEntity CurrentEntity { get; internal set; }
         //public string CurrentField { get; protected set; }
+
+        public IList<IEntity> CreatedEntities { get; } = new List<IEntity>();
 
         public EntityDeserializationContext()
         {
-            
+
         }
 
         public EntityDeserializationContext(IDbSchemaScope scope)
         {
             this.Scope = scope.NotNull();
         }
-
     }
 
     [ThreadStatic]
@@ -76,17 +78,19 @@ public static class EntityDataJsonConverter
                 return Array.Empty<IPartialEntity>();
 
             JsonNode node = JsonNode.Parse(pJson, JsonHelper.DefaultJsonNodeOptions, JsonHelper.DefaultJsonDocumentOptions);
-
+            List<IEntity> entities;
             if (node.GetValueKind() == JsonValueKind.Array)
             {
-                IEntity[] ents = JsonSerializer.Deserialize<IEntity[]>(json, JsonHelper.DefaultJsonSerializerOptions);
-                return ents;
+                entities = JsonSerializer.Deserialize<IEntity[]>(json, JsonHelper.DefaultJsonSerializerOptions).ToList();
             }
             else
             {
                 IEntity ent = JsonSerializer.Deserialize<IEntity>(node, JsonHelper.DefaultJsonSerializerOptions);
-                return new IEntity[] { ent };
+                entities = new IEntity[] { ent }.ToList();
             }
+
+            entities.AddRange(DeserializationContext.CreatedEntities);
+            return entities;
         }
         finally
         {

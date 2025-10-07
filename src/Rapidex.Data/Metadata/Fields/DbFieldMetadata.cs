@@ -11,7 +11,7 @@ namespace Rapidex.Data;
 [DataContract]
 public class DbFieldMetadata : IDbFieldMetadata
 {
-    protected Type _type { get; set; }
+    protected Type type { get; set; }
 
     [YamlMember(Order = -9999)]
     [JsonPropertyOrder(-9999)]
@@ -51,7 +51,7 @@ public class DbFieldMetadata : IDbFieldMetadata
 
     [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
-    public virtual Type Type { get { return this._type; } set { this.SetType(value); } }
+    public virtual Type Type { get { return this.type; } set { this.SetType(value); } }
 
     [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
@@ -104,7 +104,7 @@ public class DbFieldMetadata : IDbFieldMetadata
 
     protected void SetType(Type type)
     {
-        this._type = type;
+        this.type = type;
 
         if (this.BaseType == null)
             this.BaseType = type;

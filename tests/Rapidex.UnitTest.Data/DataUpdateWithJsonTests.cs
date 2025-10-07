@@ -214,34 +214,31 @@ public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
                 ""id"": -87311,
                 ""values"": {
                   ""name"": ""new cet1 1"",
-                  ""Relation01"": [1111, 1112] //Setting relation to these entities
+                  ""Relation01"": [-1111, -1112] //Setting relation to these entities
                 }
               },
             ]
 
         ";
 
-        var entities = EntityDataJsonConverter.Deserialize(json1, db);
-
         using var work2 = db.BeginWork();
+        var entities = EntityDataJsonConverter.Deserialize(json1, db);
         entities.Save();
         var updateResult = work2.CommitChanges();
 
         Assert.NotNull(updateResult);
 
-        var resItemConcreteEntity01 = updateResult.AddedItems.FirstOrDefault(itm => itm.OldId == -84372);
-        Assert.NotNull(resItemConcreteEntity01);
+        var resConcreteEntityForN2NTest01 = updateResult.AddedItems.FirstOrDefault(itm => itm.OldId == -87311);
+        Assert.NotNull(resConcreteEntityForN2NTest01);
 
-        var resItemConcreteEntityForN2NTest02 = updateResult.AddedItems.FirstOrDefault(itm => itm.OldId == -12345);
+        var resItemConcreteEntityForN2NTest02 = updateResult.AddedItems.FirstOrDefault(itm => itm.OldId == -1111);
         Assert.NotNull(resItemConcreteEntityForN2NTest02);
 
-        var resItemConcreteEntityForN2NTest01 = updateResult.AddedItems.FirstOrDefault(itm => itm.OldId == -87311);
+        var resItemConcreteEntityForN2NTest01 = updateResult.AddedItems.FirstOrDefault(itm => itm.OldId == -1112);
         Assert.NotNull(resItemConcreteEntityForN2NTest01);
 
-        var resItemMyEntity7 = updateResult.AddedItems.FirstOrDefault(itm => itm.Name == "myEntity7");
-        Assert.NotNull(resItemMyEntity7);
-
-
+        var resItemMyEntity7 = updateResult.AddedItems.Where(itm => itm.Name == "GenericJunction");
+        Assert.Equal(2, resItemMyEntity7.Count());
     }
 
 

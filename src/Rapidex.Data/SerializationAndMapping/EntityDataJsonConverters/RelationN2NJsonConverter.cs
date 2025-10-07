@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
+using static Rapidex.Data.RelationN2N;
 
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
 internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
@@ -15,7 +16,12 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
         if (reader.TokenType == JsonTokenType.Null)
             return null;
 
-        RelationN2N relation = new RelationN2N();
+        IEntity parent = EntityDataJsonConverter.DeserializationContext.CurrentEntity;
+        VirtualRelationN2NDbFieldMetadata fm = EntityDataJsonConverter.DeserializationContext.CurrentFieldMetadata as VirtualRelationN2NDbFieldMetadata;
+        fm.NotNull($"Field '{fm.Name}' must be VirtualRelationN2NDbFieldMetadata");
+
+        RelationN2N relation = Activator.CreateInstance(fm.Type) as RelationN2N;
+        relation.SetupInstance(parent, fm);
 
         if (reader.TokenType == JsonTokenType.StartArray)
         {
@@ -25,7 +31,6 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
                 if (reader.TokenType == JsonTokenType.EndArray)
                     break;
 
-                EntityDataJsonConverter.DeserializationContext.CurrentFieldMetadata
 
                 if (reader.TokenType == JsonTokenType.Number)
                 {
@@ -37,7 +42,8 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
                     IPartialEntity entity = new PartialEntity();
                     //IPartialEntity entity = Database.EntityFactory.CreatePartial(em, EntityDataJsonConverter.DeserializationContext, false, true);
                     entity.SetId(id);
-                    relation.Add(entity);
+                    IEntity junctionEntity = relation.Add(entity, false);
+                    EntityDataJsonConverter.DeserializationContext.CreatedEntities.Add(junctionEntity);
                 }
 
                 if (reader.TokenType == JsonTokenType.StartObject)
@@ -45,14 +51,15 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
                     IEntity entity = JsonSerializer.Deserialize<IPartialEntity>(ref reader, options);
                     if (entity != null)
                     {
-                        relation.Add(entity);
+                        IEntity junctionEntity = relation.Add(entity, false);
+                        EntityDataJsonConverter.DeserializationContext.CreatedEntities.Add(junctionEntity);
                     }
                 }
             }
         }
         else
         {
-            throw new JsonException($"Unexpected token {reader.TokenType} when parsing RelationOne2N. Array required.");
+            throw new JsonException($"Unexpected token {reader.TokenType} when parsing RelationOne2N. Array required ([ .. ]).");
         }
 
         return relation;

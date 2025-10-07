@@ -156,7 +156,7 @@ public class RelationOne2N : RelationBase, ILazy
         return fm;
     }
 
-    public override void Add(IEntity detailEntity)
+    public void Add(IEntity detailEntity, bool saveDetailEntity = true)
     {
         //TODO: validate detailEntityType
 
@@ -165,7 +165,10 @@ public class RelationOne2N : RelationBase, ILazy
         long parentId = parent.GetValue<long>(DatabaseConstants.FIELD_ID);
 
         detailEntity.SetValue(fm.DetailParentFieldName, parentId);
-        detailEntity.Save(); //Save if changed ...
+        if (saveDetailEntity)
+        {
+            detailEntity.Save(); //Save if changed ...
+        }
     }
 }
 

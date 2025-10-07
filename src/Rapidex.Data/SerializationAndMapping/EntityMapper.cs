@@ -88,7 +88,7 @@ public class EntityMapper
             //EnsureValueType?
             if (available == null)
             {
-                var dt = TypeHelper.CreateInstance<IDataType>(fm.Type);
+                var dt = TypeHelper.CreateInstance<IDataType>(fm.Type); //TODO: Field factory
                 dt.SetupInstance(entity, fm);
 
                 if (value != null)

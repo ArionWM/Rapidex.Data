@@ -136,4 +136,14 @@ public static class AssertionHelper
 
         return obj;
     }
+
+    public static T ShouldEquals<T>(this T obj, T other, string? message = null)
+    {
+        if (!object.Equals(obj, other))
+        {
+            DebugBreak();
+            throw new BaseValidationException(message ?? string.Format("Object '{0}' is not equal to '{1}'", obj, other));
+        }
+        return obj;
+    }
 }

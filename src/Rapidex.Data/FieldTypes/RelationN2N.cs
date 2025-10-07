@@ -110,6 +110,18 @@ public class RelationN2N : RelationBase, ILazy
         throw new NotImplementedException();
     }
 
+    public override void SetupInstance(IEntity entity, IDbFieldMetadata fm)
+    {
+        base.SetupInstance(entity, fm);
+        VirtualRelationN2NDbFieldMetadata fmRel = fm as VirtualRelationN2NDbFieldMetadata;
+        fmRel.NotNull($"Field '{fm.Name}' must be VirtualRelationN2NDbFieldMetadata");
+
+        if (this.TargetEntityName.IsNullOrEmpty())
+            this.TargetEntityName = fmRel.TargetEntityName;
+
+        this.TargetEntityName.ShouldEquals(fmRel.TargetEntityName, $"Field '{fm.Name}' TargetEntityName mismatch ({this.TargetEntityName} != {fmRel.TargetEntityName})");
+    }
+
     public virtual void SetContentCriteria(IQueryCriteria query, Action<IQueryCriteria> additionalCriterias = null)
     {
         var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
@@ -126,8 +138,6 @@ public class RelationN2N : RelationBase, ILazy
         IEntityLoadResult res = JunctionHelper.GetEntities(parentEntity._Schema, fm, parentEntity, additionalCriteria);
         return res;
     }
-
-    
 
     public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
     {
@@ -147,7 +157,8 @@ public class RelationN2N : RelationBase, ILazy
         return fm;
     }
 
-    public override void Add(IEntity detailEntity)
+
+    public IEntity Add(IEntity detailEntity, bool saveJunctionEntities = true)
     {
         //TODO: validate detailEntityType
 
@@ -155,7 +166,8 @@ public class RelationN2N : RelationBase, ILazy
         IEntity parent = this.GetParent();
         var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
 
-        JunctionHelper.AddRelation(_this.Parent._Schema, fm, parent, detailEntity, true);
+        IEntity junctionEntity = JunctionHelper.AddRelation(_this.Parent._Schema, fm, parent, detailEntity, saveJunctionEntities);
+        return junctionEntity;
     }
 
     public void Remove(IEntity detailEntity)
@@ -197,9 +209,9 @@ public class RelationN2N<TEntity> : RelationN2N where TEntity : IConcreteEntity
         return cdetails;
     }
 
-    public void Add(TEntity detailEntity)
-    {
-        base.Add(detailEntity);
-    }
+    //public void Add(TEntity detailEntity)
+    //{
+    //    base.Add(detailEntity);
+    //}
 
 }

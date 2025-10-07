@@ -60,6 +60,8 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
                     break;
                 case OPERATION_FLAG_ISNEW:
                     entity = Database.EntityFactory.Create(em, EntityDataJsonConverter.DeserializationContext.Scope, true);
+                    if(entityId.HasValue && !entityId.Value.IsEmptyId())
+                        entity.SetId(entityId.Value);
                     break;
                 case OPERATION_FLAG_ISDELETED:
                     entity = Database.EntityFactory.CreatePartial(em, EntityDataJsonConverter.DeserializationContext.Scope, false, true);
@@ -74,6 +76,8 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
                 default:
                     throw new JsonException($"Unsupported operation flag '{operation}'");
             }
+
+            EntityDataJsonConverter.DeserializationContext.CurrentEntity = entity;
 
             if (root.TryGetPropertyValue("Values", out JsonNode? valuesElement))
             {
@@ -90,6 +94,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
         finally
         {
             EntityDataJsonConverter.DeserializationContext.CurrentEntityMetadata = null;
+            EntityDataJsonConverter.DeserializationContext.CurrentEntity = null;
         }
 
     }

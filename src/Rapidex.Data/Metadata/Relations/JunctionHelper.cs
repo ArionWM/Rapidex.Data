@@ -156,7 +156,7 @@ internal class JunctionHelper
         return null;
     }
 
-    public static IEntity AddRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, IEntity entityB, bool directSave)
+    public static IEntity AddRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, IEntity entityA, IEntity entityB, bool directSave = false)
     {
         if (entityA == null || entityB == null)
             throw new ArgumentNullException("Entity A or Entity B cannot be null");
