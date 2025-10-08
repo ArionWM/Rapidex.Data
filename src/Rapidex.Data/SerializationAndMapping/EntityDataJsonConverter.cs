@@ -31,7 +31,9 @@ public static class EntityDataJsonConverter
     }
 
     [ThreadStatic]
+#pragma warning disable IDE1006 // Naming Styles
     static EntityDeserializationContext deserializationContext = null;
+#pragma warning restore IDE1006 // Naming Styles
 
     public static void AddDefaultJsonOptions(this IServiceCollection services)
     {

@@ -365,6 +365,38 @@ public class EntityMapper
         return fillTo;
     }
 
+    public IEntity Map(IDbEntityMetadata em, IPartialEntity from, IEntity fillTo)
+    {
+        fillTo.ShouldNotSupportTo<IPartialEntity>("Partial entities can't be map");
+
+        var values = from.GetAllValues();
+
+        foreach (IDbFieldMetadata fm in em.Fields.Values)
+        {
+            if (!fm.IsPersisted)
+                continue;
+
+            if (fm.SkipDirectLoad)
+                continue;
+
+            if (!values.ContainsKey(fm.Name))
+                continue;
+
+            object value = values.Get(fm.Name);
+            if (Convert.IsDBNull(value))
+                value = null;
+
+            value = EnsureValueType(fm, fillTo, value);
+
+            fillTo.SetValue(fm.Name, value);
+        }
+
+        fillTo._Schema = this.Parent;
+        fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));
+
+        return fillTo;
+    }
+
     public IEntity MapToNew(IDbEntityMetadata em, IDictionary<string, object> from)
     {
         IEntity instance = Database.EntityFactory.Create(em, this.Parent, true);

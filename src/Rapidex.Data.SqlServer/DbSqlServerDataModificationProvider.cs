@@ -370,8 +370,8 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         //Eğer partial ise ?
         DbVariable[] variables;
 
-        if (entity is IPartialEntity)
-            variables = this.GetDbVariables(em, (IPartialEntity)entity, null);
+        if (entity is IPartialEntity pentity)
+            variables = this.GetDbVariables(em, pentity, null);
         else
             variables = this.GetDbVariables(em, entity, null);
 

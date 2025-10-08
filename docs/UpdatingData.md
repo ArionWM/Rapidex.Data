@@ -20,6 +20,10 @@ using (var uow = db.BeginWork())
 
 abc
 
+## Bulk Update
+
+abc
+
 ## JSON Deserialization for CRUD Operations
 
 

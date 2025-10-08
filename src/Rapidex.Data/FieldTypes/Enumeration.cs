@@ -136,7 +136,7 @@ namespace Rapidex.Data
 
     public class ConcreteEnumTypeConverter : System.ComponentModel.TypeConverter, ICustomTypeConverter
     {
-        static Type[] supportedTypes = new Type[]
+        static Type[] SupportedTypes = new Type[]
             {
                     typeof(int),
                     typeof(long),
@@ -155,7 +155,7 @@ namespace Rapidex.Data
 
                 if (fromGenTypeDef == supportedGenTypeDef)
                 {
-                    if (Array.IndexOf(supportedTypes, toType) >= 0)
+                    if (Array.IndexOf(SupportedTypes, toType) >= 0)
                         return true;
 
                     //Enumeration<Abc> to Abc
@@ -169,7 +169,7 @@ namespace Rapidex.Data
                 Type toGenTypeDef = toType.GetGenericTypeDefinition();
                 if (toGenTypeDef == supportedGenTypeDef)
                 {
-                    if (Array.IndexOf(supportedTypes, fromType) >= 0)
+                    if (Array.IndexOf(SupportedTypes, fromType) >= 0)
                         return true;
 
                     //Abc to Enumeration<Abc>
@@ -185,7 +185,7 @@ namespace Rapidex.Data
 
         public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
         {
-            if (Array.IndexOf(supportedTypes, sourceType) >= 0)
+            if (Array.IndexOf(SupportedTypes, sourceType) >= 0)
                 return true;
             return base.CanConvertFrom(context, sourceType);
         }
@@ -229,7 +229,7 @@ namespace Rapidex.Data
 
         public override bool CanConvertTo(ITypeDescriptorContext? context, [NotNullWhen(true)] Type? destinationType)
         {
-            if (Array.IndexOf(supportedTypes, destinationType) >= 0)
+            if (Array.IndexOf(SupportedTypes, destinationType) >= 0)
                 return true;
             return base.CanConvertTo(context, destinationType);
         }

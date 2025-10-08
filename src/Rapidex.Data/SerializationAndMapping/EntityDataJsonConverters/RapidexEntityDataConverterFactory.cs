@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
 internal class RapidexEntityDataConverterFactory : JsonConverterFactory
 {
-    readonly static Dictionary<Type, Type?> converterTypes = new();
-    readonly static Dictionary<Type, JsonConverter> converters = new();
+    readonly static Dictionary<Type, Type?> ConverterTypes = new();
+    readonly static Dictionary<Type, JsonConverter> Converters = new();
 
 
     public RapidexEntityDataConverterFactory()
@@ -20,16 +20,16 @@ internal class RapidexEntityDataConverterFactory : JsonConverterFactory
 
     public override bool CanConvert(Type typeToConvert)
     {
-        if (converterTypes.ContainsKey(typeToConvert))
+        if (ConverterTypes.ContainsKey(typeToConvert))
         {
-            bool canConvert = converterTypes[typeToConvert] != null;
+            bool canConvert = ConverterTypes[typeToConvert] != null;
             return canConvert;
         }
 
         if (JsonHelper.TypedJsonConverters.TryGetValue(typeToConvert, out JsonConverter? conv1))
         {
-            converterTypes[typeToConvert] = conv1.GetType();
-            converters[typeToConvert] = conv1;
+            ConverterTypes[typeToConvert] = conv1.GetType();
+            Converters[typeToConvert] = conv1;
             return true;
         }
 
@@ -38,19 +38,19 @@ internal class RapidexEntityDataConverterFactory : JsonConverterFactory
         {
             if (JsonHelper.TypedJsonConverters.TryGetValue(baseTypes[i], out JsonConverter? conv2))
             {
-                converterTypes[typeToConvert] = conv2.GetType();
-                converters[typeToConvert] = conv2;
+                ConverterTypes[typeToConvert] = conv2.GetType();
+                Converters[typeToConvert] = conv2;
                 return true;
             }
         }
 
-        converterTypes[typeToConvert] = null;
+        ConverterTypes[typeToConvert] = null;
         return false;
     }
 
     public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
-        if (converters.TryGetValue(typeToConvert, out JsonConverter? converter))
+        if (Converters.TryGetValue(typeToConvert, out JsonConverter? converter))
         {
             return converter;
         }

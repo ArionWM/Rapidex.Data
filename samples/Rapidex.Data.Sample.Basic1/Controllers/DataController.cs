@@ -23,10 +23,10 @@ public class DataController : ControllerBase
 
     [HttpPost("update")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult Update()
+    public async Task<IActionResult> Update()
     {
         using var reader = new StreamReader(this.Request.Body);
-        string json = reader.ReadToEnd();
+        string json = await reader.ReadToEndAsync();
 
         using var work = db.BeginWork();
         var entities = EntityDataJsonConverter.Deserialize(json, this.db);
@@ -64,8 +64,8 @@ public class DataController : ControllerBase
         entity.NotNull("No entity found in the request");
 
 
-        CheckEntityContentResultModel resultModel = new ();
-        
+        CheckEntityContentResultModel resultModel = new();
+
         if (validate.Value)
             resultModel.ValidationResult = entity.Validate().Result;
 

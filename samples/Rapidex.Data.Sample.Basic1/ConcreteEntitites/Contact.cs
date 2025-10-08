@@ -41,7 +41,7 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
 
     protected static ISignalHandlingResult Validate(IEntityReleatedMessageArguments args)
     {
-        Contact contact = args.Entity.As<Contact>();
+        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
         IValidationResult validationResult = new ValidationResult();
 
         // ....
@@ -54,14 +54,15 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
 
     protected static ISignalHandlingResult ExecLogic(IEntityReleatedMessageArguments args)
     {
-        Contact contact = args.Entity.As<Contact>();
+        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
+
         CalculateContactValues(contact);
         return args.CreateHandlingResult(contact);
     }
 
     protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
     {
-        Contact contact = args.Entity.As<Contact>();
+        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
         CalculateContactValues(contact);
         return args.CreateHandlingResult();
     }

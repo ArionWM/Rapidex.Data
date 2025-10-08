@@ -22,7 +22,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
     const int OPERATION_FLAG_REMOVE = 11;
 
     [ThreadStatic]
-    internal static bool? useNestedEntities = null;
+    internal static bool? UseNestedEntities = null;
 
     public override IEntity? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -253,9 +253,9 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
     {
         try
         {
-            if (useNestedEntities == null)
+            if (UseNestedEntities == null)
             {
-                useNestedEntities = true;
+                UseNestedEntities = true;
             }
 
             if (entity == null)
@@ -301,7 +301,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
         }
         finally
         {
-            useNestedEntities = null;
+            UseNestedEntities = null;
         }
     }
 

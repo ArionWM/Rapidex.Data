@@ -14,8 +14,8 @@ namespace Rapidex;
 
 public static class JsonHelper
 {
-    private static object optionRegisterLocker = new object();
-    private static DefaultJsonTypeInfoResolver defaultJsonTypeInfoResolver;
+    private static object OptionRegisterLocker = new object();
+    private static DefaultJsonTypeInfoResolver DefaultJsonTypeInfoResolver;
     internal static List<JsonConverter> JsonConverters { get; private set; } = new();
     internal static Dictionary<Type, JsonConverter> TypedJsonConverters { get; private set; } = new();
     public static JsonSerializerOptions DefaultJsonSerializerOptions { get; private set; }
@@ -88,7 +88,7 @@ public static class JsonHelper
 
     public static void Register(JsonConverter converter)
     {
-        lock (optionRegisterLocker)
+        lock (OptionRegisterLocker)
         {
             if (JsonConverters.Any(c => c.GetType() == converter.GetType()))
                 return;

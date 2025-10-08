@@ -10,11 +10,11 @@ internal static class JsonConvertersHelper
 {
     public static void WriteRelation(Utf8JsonWriter writer, ILazy value, JsonSerializerOptions options)
     {
-        bool? useNestedEntitiesRef = EntityJsonConverter.useNestedEntities;
+        bool? useNestedEntitiesRef = EntityJsonConverter.UseNestedEntities;
         try
         {
             bool useNestedEntities = useNestedEntitiesRef ?? true;
-            EntityJsonConverter.useNestedEntities = false;
+            EntityJsonConverter.UseNestedEntities = false;
 
             IEntityLoadResult? loadResult = (IEntityLoadResult)((ILazy)value).GetContent();
             if (loadResult.IsNullOrEmpty())
@@ -40,7 +40,7 @@ internal static class JsonConvertersHelper
         }
         finally
         {
-            EntityJsonConverter.useNestedEntities = useNestedEntitiesRef;
+            EntityJsonConverter.UseNestedEntities = useNestedEntitiesRef;
         }
 
     }
