@@ -14,7 +14,7 @@ namespace Rapidex
     public static class ConversionExtensions
     {
 
-        public static void Register<T>(this RapidexTypeConverter converter) where T : IBaseConverter
+        public static void Register<T>(this RapidexTypeConverter converter) where T : IDirectConverter
         {
             T inst = Activator.CreateInstance<T>();
             converter.Register(inst);

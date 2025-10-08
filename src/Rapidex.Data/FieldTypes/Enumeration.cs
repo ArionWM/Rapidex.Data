@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Security.AccessControl;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -127,7 +131,155 @@ namespace Rapidex.Data
 
             base.SetValue(entity, fieldName, value, applyToEntity);
         }
-       
+
+    }
+
+    public class ConcreteEnumTypeConverter : System.ComponentModel.TypeConverter, ICustomTypeConverter
+    {
+        static Type[] supportedTypes = new Type[]
+            {
+                    typeof(int),
+                    typeof(long),
+                    typeof(string),
+                    typeof(Enum),
+            };
+
+
+        public bool CanConvert(Type fromType, Type toType)
+        {
+            Type supportedGenTypeDef = typeof(Enumeration<>);
+
+            if (fromType.IsGenericType)
+            {
+                Type fromGenTypeDef = fromType.GetGenericTypeDefinition();
+
+                if (fromGenTypeDef == supportedGenTypeDef)
+                {
+                    if (Array.IndexOf(supportedTypes, toType) >= 0)
+                        return true;
+
+                    //Enumeration<Abc> to Abc
+                    var genA = fromType.GetGenericArguments().FirstOrDefault();
+
+                    if (toType.IsEnum && genA != null && genA == toType)
+                        return true;
+                }
+
+
+                Type toGenTypeDef = toType.GetGenericTypeDefinition();
+                if (toGenTypeDef == supportedGenTypeDef)
+                {
+                    if (Array.IndexOf(supportedTypes, fromType) >= 0)
+                        return true;
+
+                    //Abc to Enumeration<Abc>
+                    var genA = toType.GetGenericArguments().FirstOrDefault();
+
+                    if (toType.IsEnum && genA != null && genA == fromType)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+        {
+            if (Array.IndexOf(supportedTypes, sourceType) >= 0)
+                return true;
+            return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object? ConvertFrom(ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture, object value)
+        {
+            //Convert to switch-case if more types are supported
+            if (value == null) return null;
+
+            Type propertyType = context?.PropertyDescriptor?.PropertyType;
+            if (propertyType == null || !propertyType.IsGenericType || propertyType.GetGenericTypeDefinition() != typeof(Enumeration<>))
+                return base.ConvertFrom(context, culture, value);
+
+            Type enumType = propertyType.GetGenericArguments()[0];
+            if (enumType == null) return null;
+
+            switch (value)
+            {
+                case Enum @enum:
+                    if (@enum.GetType() == enumType)
+                        return @enum;
+                    break;
+                case int:
+                case uint:
+                case long:
+                case ulong:
+                case short:
+                case ushort:
+                case byte:
+                    return (Enumeration)Enum.ToObject(enumType, value);
+                case string strVal:
+                    if (Enum.TryParse(enumType, strVal, true, out object enumValue))
+                    {
+                        return (Enumeration)Enum.ToObject(enumType, enumValue);
+                    }
+                    break;
+            }
+
+            return base.ConvertFrom(context, culture, value);
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext? context, [NotNullWhen(true)] Type? destinationType)
+        {
+            if (Array.IndexOf(supportedTypes, destinationType) >= 0)
+                return true;
+            return base.CanConvertTo(context, destinationType);
+        }
+
+        //Create ConvertTo method using switch-case if more types are supported
+        public override object? ConvertTo(ITypeDescriptorContext? context, System.Globalization.CultureInfo? culture, object? value, Type destinationType)
+        {
+            if (value == null) return null;
+
+
+            switch (value)
+            {
+                case Enumeration enumBase:
+                    switch (destinationType)
+                    {
+                        case Type t when t.IsSupportTo<Enumeration>():
+                            return enumBase;
+                        case Type t when t.IsSupportTo<Enum>():
+                            object enumRes = Enum.ToObject(destinationType, enumBase.Value);
+                            return enumRes;
+                        case Type t when t == typeof(int):
+                            return Convert.ToInt32(enumBase.Value);
+                        case Type t when t == typeof(long):
+                            return Convert.ToInt64(enumBase.Value);
+                        case Type t when t == typeof(string):
+                            return enumBase.ToString();
+                    }
+                    break;
+                case Enum @enum:
+                    switch (destinationType)
+                    {
+                        case Type t when t.IsSupportTo<Enumeration>():
+                            Enumeration enobject = (Enumeration)Activator.CreateInstance(destinationType);
+                            enobject.SetValuePremature(value);
+                            return enobject;
+                        case Type t when t == typeof(int):
+                            return Convert.ToInt32(@enum);
+                        case Type t when t == typeof(long):
+                            return Convert.ToInt64(@enum);
+                        case Type t when t == typeof(string):
+                            return @enum.ToString();
+                    }
+                    break;
+            }
+
+
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
+
+
     }
 
     /// <summary>
@@ -136,11 +288,12 @@ namespace Rapidex.Data
     /// <typeparam name="T"></typeparam>
     public class Enumeration<T> : Enumeration where T : System.Enum
     {
+
         [System.Text.Json.Serialization.JsonIgnore]
         public override Type BaseType => typeof(Enumeration<>);
         public override string TypeName => "enumConcrete";
 
-        public T EnumValue { get { return (T)Enum.ToObject(typeof(T), Convert.ToInt32(this.Value)); } }
+        public T EnumValue { get { return (T)Enum.ToObject(typeof(T), Convert.ToInt64(this.Value)); } }
 
         public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
         {
@@ -156,7 +309,6 @@ namespace Rapidex.Data
 
         public override void SetValue(IEntity entity, string fieldName, object value, bool applyToEntity)
         {
-
             if (value is string strEnum)
             {
                 if (Enum.TryParse(typeof(T), strEnum, true, out object enumValue))
@@ -166,6 +318,31 @@ namespace Rapidex.Data
             }
 
             base.SetValue(entity, fieldName, value, applyToEntity);
+        }
+
+        public override void SetValuePremature(object value)
+        {
+            switch (value)
+            {
+                case string strEnum:
+                    if (Enum.TryParse(typeof(T), strEnum, true, out object enumValue))
+                    {
+                        this.Value = Convert.ToInt32(enumValue).As<long>();
+                        return;
+                    }
+                    break;
+                case int:
+                case uint:
+                case long:
+                case ulong:
+                case short:
+                case ushort:
+                case byte:
+                    this.Value = Convert.ToInt64(value);
+                    return;
+            }
+
+            base.SetValuePremature(value);
         }
 
         public override object Clone()

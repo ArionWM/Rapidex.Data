@@ -58,11 +58,42 @@ public static class SignalHubExtensions
         return hub.SubscribeEntityReleated(topic, handler);
     }
 
-    public static ISignalHandlingResult CreateHandlingResult(this IEntityReleatedMessageArguments args)
+    public static ISignalHandlingResult CreateHandlingResult(this IEntityReleatedMessageArguments args, object? data = null)
     {
         var res = new SignalHandlingResult(args.HandlerId);
+        res.Data = data;
         return res;
     }
 
+    public static ISignalHandlingResult CreateHandlingResult(this IEntityReleatedMessageArguments args, IEntity entity)
+    {
+        var res = new SignalHandlingResult(args.HandlerId);
+        res.Data = entity;
+        return res;
+    }
 
+    public static ISignalHandlingResult CreateHandlingValidationResult(this IEntityReleatedMessageArguments args, IEntity entity, IValidationResult validationResult)
+    {
+        entity.NotNull();
+        validationResult.NotNull();
+
+        var res = new SignalHandlingResult(args.HandlerId);
+        res.Data = entity;
+        res.Merge(validationResult);
+        return res;
+    }
+
+    public static async Task<IValidationResult> Validate(this IEntity entity)
+    {
+        entity.NotNull();
+        var result = await entity.PublishForValidate();
+        return result;
+    }
+
+    public static async Task<IEntity> ExecLogic(this IEntity entity)
+    {
+        entity.NotNull();
+        var result = await entity.PublishForExecLogic();
+        return result;
+    }
 }

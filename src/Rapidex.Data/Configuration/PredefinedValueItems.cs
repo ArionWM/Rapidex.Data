@@ -15,7 +15,7 @@ public class PredefinedValueItems
 
     public PredefinedValueItems(IDbEntityMetadata entityMetadata)
     {
-        EntityMetadata = entityMetadata;
+        this.EntityMetadata = entityMetadata;
     }
 
     public void Add(ObjDictionary item)

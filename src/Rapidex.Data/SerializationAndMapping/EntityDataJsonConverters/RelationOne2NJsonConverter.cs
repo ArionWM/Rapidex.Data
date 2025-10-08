@@ -48,10 +48,13 @@ internal class RelationOne2NJsonConverter : JsonConverter<RelationOne2N>
 
                 if (reader.TokenType == JsonTokenType.StartObject)
                 {
-                    IEntity entity = JsonSerializer.Deserialize<IPartialEntity>(ref reader, options);
-                    if (entity != null)
+                    IDictionary<string, object> values = JsonHelper.FromJsonToDictionary(ref reader);
+                    if (values != null)
                     {
-                        relation.Add(entity);
+                        long id = values.Get("id").As<long>();
+                        IPartialEntity entity = new PartialEntity();
+                        entity.SetId(id);
+                        relation.Add(entity, false);
                     }
                 }
             }

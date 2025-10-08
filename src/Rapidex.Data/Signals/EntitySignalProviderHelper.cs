@@ -14,10 +14,13 @@ internal static class EntitySignalProviderHelper
     {
         hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_NEW, "On New", "Entity", true));
         hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_BEFORESAVE, "Before Save", "Entity", true));
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERSAVE, "After Save", "Entity", false));
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERCOMMIT, "After Commit", "Entity", false));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERSAVE, "After Save", "Entity", true));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERCOMMIT, "After Commit", "Entity", true));
         hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_BEFOREDELETE, "Before Delete", "Entity", true));
-        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERDELETE, "After Delete", "Entity", false));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_AFTERDELETE, "After Delete", "Entity", true));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_VALIDATE, "Validate", "Entity", true));
+        hub.RegisterSignalDefinition(new SignalDefinition(DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC, "ExecLogic", "Entity", true));
+
 
         //hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.Signal_WorkspaceCreated, "Workspace Created", "System", false));
         //hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.Signal_WorkspaceDeleted, "Workspace Deleted", "System", false));
@@ -133,4 +136,43 @@ internal static class EntitySignalProviderHelper
         };
         Rapidex.Signal.Hub.PublishAsync(topic, new EntityReleatedMessageArguments(topic.Event, entity));
     }
+
+    public static async Task<IValidationResult> PublishForValidate(this IEntity entity)
+    {
+        var em = entity.GetMetadata();
+        SignalTopic topic = new SignalTopic()
+        {
+            DatabaseOrTenant = entity._Schema.ParentDbScope.Name,
+            Workspace = entity._Schema.SchemaName,
+            Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
+            Entity = em.NavigationName,
+            EntityId = entity.GetId().ToString(),
+            Event = DataReleatedSignalConstants.SIGNAL_VALIDATE
+        };
+        EntityReleatedMessageArguments inputArg = new EntityReleatedMessageArguments(topic.Event, entity);
+
+        ISignalProcessResult result = await Rapidex.Signal.Hub.PublishAsync(topic, inputArg);
+        return result;
+    }
+
+    public static async Task<IEntity> PublishForExecLogic(this IEntity entity)
+    {
+        var em = entity.GetMetadata();
+        SignalTopic topic = new SignalTopic()
+        {
+            DatabaseOrTenant = entity._Schema.ParentDbScope.Name,
+            Workspace = entity._Schema.SchemaName,
+            Module = em.ModuleName ?? CommonConstants.MODULE_COMMON,
+            Entity = em.NavigationName,
+            EntityId = entity.GetId().ToString(),
+            Event = DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC
+        };
+        EntityReleatedMessageArguments inputArg = new EntityReleatedMessageArguments(topic.Event, entity);
+
+        ISignalProcessResult result = await Rapidex.Signal.Hub.PublishAsync(topic, inputArg);
+        EntityReleatedMessageArguments outputArg = result.Arguments as EntityReleatedMessageArguments;
+        return outputArg?.Entity;
+    }
+
+   
 }

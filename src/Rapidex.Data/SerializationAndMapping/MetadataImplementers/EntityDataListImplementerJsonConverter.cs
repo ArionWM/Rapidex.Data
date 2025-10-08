@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Rapidex.Data.SerializationAndMapping.JsonConverters;
 
 namespace Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 
@@ -19,7 +20,7 @@ internal class EntityDataListImplementerJsonConverter : JsonConverter<EntityData
         {
             // Kendini çağırmasına engel olmak için
             InternalJsonSerializerOptions = new JsonSerializerOptions();
-            InternalJsonSerializerOptions.SetDefaultOptions(typeof(EntityDataListImplementerJsonConverter));
+            InternalJsonSerializerOptions.SetDefaultOptions(typeof(EntityDataListImplementerJsonConverter), typeof(RapidexEntityDataConverterFactory));
         }
     }
 

@@ -11,7 +11,6 @@ using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Data.PostgreServer")]
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Base.Application")]
 [assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
-[assembly: InternalsVisibleTo("Rapidex.Base.Application.Common")]
 
 namespace Rapidex.Data;
 
@@ -34,8 +33,8 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
 
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
-        
-        
+        RapidexTypeConverter.RegisterTypeConverter<ConcreteEnumTypeConverter>();
+
         //ImplementerJsonDiscriminatorSelectorConverter.Register();
         EntityDataListImplementerJsonConverter.Register();
         EntityDataNestedListImplementerJsonConverter.Register();

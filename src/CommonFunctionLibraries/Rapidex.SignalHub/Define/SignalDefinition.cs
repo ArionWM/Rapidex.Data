@@ -15,18 +15,18 @@ public class SignalDefinition : ISignalDefinition
 
     public SignalDefinition(string signalName, string category, bool isEntityReleated = false, bool isSynchronous = false)
     {
-        SignalName = signalName;
-        Category = category;
-        IsEntityReleated = isEntityReleated;
-        IsSynchronous = isSynchronous;
+        this.SignalName = signalName;
+        this.Category = category;
+        this.IsEntityReleated = isEntityReleated;
+        this.IsSynchronous = isSynchronous;
     }
 
     public SignalDefinition(string signalName, string description, string category, bool isEntityReleated = false, bool isSynchronous = false)
     {
-        SignalName = signalName;
-        Description = description;
-        Category = category;
-        IsEntityReleated = isEntityReleated;
-        IsSynchronous = isSynchronous;
+        this.SignalName = signalName;
+        this.Description = description;
+        this.Category = category;
+        this.IsEntityReleated = isEntityReleated;
+        this.IsSynchronous = isSynchronous;
     }
 }

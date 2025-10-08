@@ -1,0 +1,13 @@
+﻿_tag: data
+data:
+  - entity: ConcreteEntityForImplementationTests02
+    id: 100
+    EnumField: Value2
+    name: Predefined 1
+    DateTimeField: 2023-01-01T10:00:00Z
+  - entity: ConcreteEntityForImplementationTests02
+    id: 101
+    name: Predefined 2
+    EnumField: Value3
+    DateTimeField: 2025-03-12T11:00:00Z
+    

@@ -106,6 +106,9 @@
 	  <None Update="TestContent\Json\jsonEntity01.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="TestContent\Yaml\EntityData01.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="TestContent\Yaml\Entity.07SimpleWithMultipleReference.yml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

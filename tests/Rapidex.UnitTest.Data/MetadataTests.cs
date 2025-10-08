@@ -124,6 +124,29 @@ public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
         Assert.True(em.Has<HasTags>());
     }
 
+    [Fact]
+    public void MetadataCreation_WithConcrete_04_WithYamlPredefinedData()
+    {
+        var db = Database.Dbs.Db();
+        var em = db.ReAddReCreate<ConcreteEntityForImplementationTests02>();
+
+        string content = this.Fixture.GetFileContentAsString("TestContent\\Yaml\\EntityData01.yml");
+        db.Metadata.AddYaml(content);
+
+        PredefinedValueItems items = db.Metadata.Data.Repository.Get(em);
+        Assert.NotNull(items);
+        Assert.Equal(2, items.Entities.Count);
+
+        var itm1 = items.Entities.Get(100);
+        Assert.NotNull(itm1);
+
+        Assert.Equal("Predefined 1", itm1["Name"].As<string>());
+        Assert.Equal(DateTimeOffset.Parse("2023-01-01T10:00:00Z"), itm1["DateTimeField"].As<DateTimeOffset>());
+        Assert.Equal(MyEnum01.Value2, itm1["EnumField"].As<MyEnum01>());
+
+
+    }
+
 
     [Fact]
     public void MetadataCreation_WithJson_01()

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Rapidex.Data.Sample.App1.Models;
 using Rapidex.Data.Sample.App1.Services;
 
 namespace Rapidex.Data.Sample.App1.Controllers;
@@ -10,22 +11,70 @@ namespace Rapidex.Data.Sample.App1.Controllers;
 public class DataController : ControllerBase
 {
     private readonly IDbSchemaScope db;
-    //private readonly IEntitySerializationDataCreator serializationCreator;
-    private readonly EntitySerializationOptions serializationOptions;
+
     protected SampleServiceA ServiceA { get; }
 
     public DataController(SampleServiceA serviceA, IDbSchemaScope dbSchemaScope)
     {
         this.ServiceA = serviceA;
         this.db = dbSchemaScope;
-        //this.serializationCreator = serializationCreator;
+    }
 
-        this.serializationOptions = new EntitySerializationOptions
-        {
-            IncludeBaseFields = true,
-            IncludeNestedEntities = true,
-            IncludeTypeName = true
-        };
+
+    [HttpPost("update")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult Update()
+    {
+        using var reader = new StreamReader(this.Request.Body);
+        string json = reader.ReadToEnd();
+
+        using var work = db.BeginWork();
+        var entities = EntityDataJsonConverter.Deserialize(json, this.db);
+        entities.Save();
+        var result = work.CommitChanges();
+        return this.Ok(result);
+    }
+
+    /// <summary>
+    /// This endpoint checks the entity content;
+    /// -- Validate the content
+    /// -- Run custom logic (See: ContactImplementer.abc)
+    /// Requires the entity content without saving changes
+    /// </summary>
+    [HttpPost("check-entity-content")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult CheckEntityContent(bool? validate, bool? runCustomLogic)
+    {
+        if (validate == null)
+            validate = true;
+
+        if (runCustomLogic == null)
+            runCustomLogic = true;
+
+        if (!validate.Value && !runCustomLogic.Value)
+            return this.BadRequest("At least one of 'validate' or 'runCustomLogic' must be true.");
+
+        using var reader = new StreamReader(this.Request.Body);
+        string json = reader.ReadToEnd();
+
+
+        var entities = EntityDataJsonConverter.Deserialize(json, this.db);
+
+        var entity = entities.FirstOrDefault();
+        entity.NotNull("No entity found in the request");
+
+
+        CheckEntityContentResultModel resultModel = new ();
+        
+        if (validate.Value)
+            resultModel.ValidationResult = entity.Validate().Result;
+
+        if (runCustomLogic.Value)
+            resultModel.Entity = entity.ExecLogic().Result;
+
+        string resultJson = resultModel.ToJson();// EntityDataJsonConverter.Serialize(resultModel);
+        return this.Content(resultJson, "application/json");
+
     }
 
     /// <summary>
@@ -59,33 +108,12 @@ public class DataController : ControllerBase
         if (contact == null)
             return this.NotFound($"Contact with ID {id} not found");
 
-        
+
         string json = EntityDataJsonConverter.Serialize(contact);
         return this.Content(json, "application/json");
     }
 
-    /// <summary>
-    /// Updates an existing contact or creates a new one
-    /// </summary>
-    /// <param name="request">Contact update request data</param>
-    /// <returns>The updated or created contact</returns>
-    /// <response code="200">Returns the updated contact</response>
-    /// <response code="400">If the request data is invalid</response>
-    [Obsolete("")]
-    [HttpPost("contacts")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public IActionResult UpdateContact()
-    {
-        if (!this.ModelState.IsValid)
-            return this.BadRequest(this.ModelState);
 
-        throw new NotImplementedException();
-
-        //var contact = this.ServiceA.UpdateContact(this.db, request);
-
-        //return this.Ok(contact);
-    }
 
     /// <summary>
     /// Retrieves a list of orders with optional filtering
@@ -127,22 +155,5 @@ public class DataController : ControllerBase
         //return this.Ok(entityResult);
     }
 
-    ///// <summary>
-    ///// Creates a new order for a contact
-    ///// </summary>
-    ///// <param name="request">Order creation request data</param>
-    ///// <returns>The created order</returns>
-    ///// <response code="201">Returns the created order</response>
-    ///// <response code="400">If the request data is invalid</response>
-    //[HttpPost("orders")]
-    //[ProducesResponseType(StatusCodes.Status201Created)]
-    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-    //public IActionResult CreateOrder([FromBody] CreateOrderRequest request)
-    //{
-    //    if (!this.ModelState.IsValid)
-    //        return this.BadRequest(this.ModelState);
 
-    //    var order = this.ServiceA.CreateOrder(this.db, request.ContactId, request.ItemCodes);
-    //    return this.CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
-    //}
 }

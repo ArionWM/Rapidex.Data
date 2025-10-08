@@ -141,14 +141,18 @@ internal class JunctionHelper
 
         if (!isExist)
         {
-            IEntity jEntity = dbSchema.CurrentWork.New(fm.JunctionEntityName);
+            var junctionEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
+            IEntity jEntity = Database.EntityFactory.Create(junctionEm, dbSchema, true);
             jEntity[sourceFieldName] = entityAId;
             jEntity[targetFieldName] = entityBID;
 
             jEntity.EnsureDataTypeInitialization();
 
             if (directSave)
+            {
+                dbSchema.CurrentWork.Attach(jEntity);
                 jEntity.Save();
+            }
 
             return jEntity;
         }

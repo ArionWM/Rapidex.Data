@@ -14,3 +14,10 @@ public enum ContactType
     Corporate = 32
 }
 
+public enum MyEnum01
+{
+    Value1 = 1,
+    Value2 = 2,
+    Value3 = 3
+}
+

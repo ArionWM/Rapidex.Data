@@ -19,7 +19,7 @@ public interface IStack<T>
     T Exit();
 }
 
-public interface IBaseConverter
+public interface IDirectConverter
 {
     Type FromType { get; }
     Type ToType { get; }
@@ -30,12 +30,17 @@ public interface IBaseConverter
     bool TryConvert(object from, Type toType, out object to);
 }
 
-public interface IBaseConverter<TFrom, TTo> : IBaseConverter
+public interface IDirectConverter<TFrom, TTo> : IDirectConverter
 {
     new Type FromType => typeof(TFrom);
     new Type ToType => typeof(TTo);
 
     TTo Convert(TFrom from, TTo to);
+}
+
+public interface ICustomTypeConverter
+{
+    bool CanConvert(Type fromType, Type toType);
 }
 
 

@@ -21,7 +21,7 @@ internal class DefaultMetadataImplementHost : IMetadataImplementHost
     static DefaultMetadataImplementHost()
     {
         JsonSerializerOptionsWithExcludes = new();
-        JsonHelper.SetDefaultOptions(JsonSerializerOptionsWithExcludes, typeof(ImplementerJsonDiscriminatorSelectorConverter));
+        JsonHelper.SetDefaultOptions(JsonSerializerOptionsWithExcludes); //typeof(ImplementerJsonDiscriminatorSelectorConverter)
     }
 
     public DefaultMetadataImplementHost(IDbEntityMetadataFactory entityMetadataFactory, IFieldMetadataFactory fieldMetadataFactory)

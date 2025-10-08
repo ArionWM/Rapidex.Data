@@ -1,93 +1,107 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 
-namespace Rapidex
+namespace Rapidex;
+
+//From ProCore
+public class TwoLevelList<TKey, TValue> : Dictionary<TKey, List<TValue>>
+    where TKey : notnull
 {
-    //From ProCore
-    public class TwoLevelList<TKey, TValue> : Dictionary<TKey, List<TValue>>
+
+
+    ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
+    public List<TValue> Set([NotNull] TKey key, TValue value)
     {
-        ReaderWriterLockSlim _locker = new ReaderWriterLockSlim();
-        public List<TValue> Set(TKey key, TValue value)
+        key.NotNull();
+
+        locker.EnterUpgradeableReadLock();
+        try
         {
-            _locker.EnterUpgradeableReadLock();
+            if (!this.ContainsKey(key))
+            {
+                try
+                {
+                    locker.EnterWriteLock();
+                    this.Add(key, new List<TValue>());
+                }
+                finally
+                {
+                    locker.ExitWriteLock();
+                }
+            }
+
+            List<TValue> list = this[key];
+            list.Add(value);
+            return list;
+        }
+        finally
+        {
+            locker.ExitUpgradeableReadLock();
+        }
+    }
+
+    public void Set([NotNull] TKey key, IEnumerable<TValue> values)
+    {
+        key.NotNull();
+
+        locker.EnterUpgradeableReadLock();
+        try
+        {
+            if (!this.ContainsKey(key))
+            {
+                try
+                {
+                    locker.EnterWriteLock();
+                    this.Add(key, new List<TValue>());
+                }
+                finally
+                {
+                    locker.ExitWriteLock();
+                }
+            }
+
+            List<TValue> list = this[key];
+            list.AddRange(values);
+        }
+        finally
+        {
+            locker.ExitUpgradeableReadLock();
+        }
+    }
+
+    public List<TValue> Get([NotNull] TKey key)
+    {
+        key.NotNull();
+
+        locker.EnterUpgradeableReadLock();
+        try
+        {
+            if (this.ContainsKey(key))
+                return this[key];
+
             try
             {
-                if (!this.ContainsKey(key))
-                {
-                    try
-                    {
-                        _locker.EnterWriteLock();
-                        this.Add(key, new List<TValue>());
-                    }
-                    finally
-                    {
-                        _locker.ExitWriteLock();
-                    }
-                }
-
-                List<TValue> list = this[key];
-                list.Add(value);
+                locker.EnterWriteLock();
+                List<TValue> list = new List<TValue>();
+                this.Add(key, list);
                 return list;
             }
             finally
             {
-                _locker.ExitUpgradeableReadLock();
+                locker.ExitWriteLock();
             }
         }
-
-        public void Set(TKey key, IEnumerable<TValue> values)
+        finally
         {
-            _locker.EnterUpgradeableReadLock();
-            try
-            {
-                if (!this.ContainsKey(key))
-                {
-                    try
-                    {
-                        _locker.EnterWriteLock();
-                        this.Add(key, new List<TValue>());
-                    }
-                    finally
-                    {
-                        _locker.ExitWriteLock();
-                    }
-                }
-
-                List<TValue> list = this[key];
-                list.AddRange(values);
-            }
-            finally
-            {
-                _locker.ExitUpgradeableReadLock();
-            }
+            locker.ExitUpgradeableReadLock();
         }
+    }
 
-        public List<TValue> Get(TKey key)
-        {
-            _locker.EnterUpgradeableReadLock();
-            try
-            {
-                if (this.ContainsKey(key))
-                    return this[key];
-
-                try
-                {
-                    _locker.EnterWriteLock();
-                    List<TValue> list = new List<TValue>();
-                    this.Add(key, list);
-                    return list;
-                }
-                finally
-                {
-                    _locker.ExitWriteLock();
-                }
-            }
-            finally
-            {
-                _locker.ExitUpgradeableReadLock();
-            }
-        }
+    public void Add(TKey key, TValue value)
+    {
+        this.Set(key, value);
     }
 }

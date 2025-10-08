@@ -10,6 +10,7 @@ public class DataReleatedSignalConstants
     //Entity related
     public const string SIGNAL_NEW = "New";
     public const string SIGNAL_VALIDATE = "Validate";
+    public const string SIGNAL_EXEC_LOGIC = "ExecLogic";
     public const string SIGNAL_BEFORESAVE = "BeforeSave";
     public const string SIGNAL_AFTERSAVE = "AfterSave";
     public const string SIGNAL_AFTERCOMMIT = "AfterCommit";

@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Rapidex.Data.SerializationAndMapping;
 
 namespace Rapidex.Data.SerializationAndMapping.MetadataImplementers;
+
+[Obsolete("", true)]
 internal class ImplementerJsonDiscriminatorSelectorConverter : JsonConverter<IImplementer>
 {
     //https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/converters-how-to#use-default-system-converter

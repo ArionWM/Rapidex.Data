@@ -317,8 +317,8 @@ public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ";
 
+        
         var entities = EntityDataJsonConverter.Deserialize(json1, db);
-
         using var work2 = db.BeginWork();
         entities.Save();
         var updateResult = work2.CommitChanges();

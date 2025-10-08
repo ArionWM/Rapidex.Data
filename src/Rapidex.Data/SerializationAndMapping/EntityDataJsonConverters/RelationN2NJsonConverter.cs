@@ -40,7 +40,6 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
                     long id = reader.GetInt64();
 
                     IPartialEntity entity = new PartialEntity();
-                    //IPartialEntity entity = Database.EntityFactory.CreatePartial(em, EntityDataJsonConverter.DeserializationContext, false, true);
                     entity.SetId(id);
                     IEntity junctionEntity = relation.Add(entity, false);
                     EntityDataJsonConverter.DeserializationContext.CreatedEntities.Add(junctionEntity);
@@ -48,9 +47,12 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
 
                 if (reader.TokenType == JsonTokenType.StartObject)
                 {
-                    IEntity entity = JsonSerializer.Deserialize<IPartialEntity>(ref reader, options);
-                    if (entity != null)
+                    IDictionary<string, object> values = JsonHelper.FromJsonToDictionary(ref reader);
+                    if (values != null)
                     {
+                        long id = values.Get("id").As<long>();
+                        IPartialEntity entity = new PartialEntity();
+                        entity.SetId(id);
                         IEntity junctionEntity = relation.Add(entity, false);
                         EntityDataJsonConverter.DeserializationContext.CreatedEntities.Add(junctionEntity);
                     }

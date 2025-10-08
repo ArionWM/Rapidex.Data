@@ -205,6 +205,12 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
 
             try
             {
+                if(fieldElement == null)
+                {
+                    entity.SetValue(fieldMetadata.Name, null);
+                    continue;
+                }
+
                 object value = this.DeserializeFieldValue(fieldElement, fieldMetadata, options);
                 entity.SetValue(fieldMetadata.Name, value);
             }

@@ -39,6 +39,26 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
         }
     }
 
+    protected static ISignalHandlingResult Validate(IEntityReleatedMessageArguments args)
+    {
+        Contact contact = args.Entity.As<Contact>();
+        IValidationResult validationResult = new ValidationResult();
+
+        // ....
+
+        if (contact.FirstName.IsNullOrEmpty())
+            validationResult.Error("FirstName", "First name is required.");
+
+        return args.CreateHandlingValidationResult(contact, validationResult);
+    }
+
+    protected static ISignalHandlingResult ExecLogic(IEntityReleatedMessageArguments args)
+    {
+        Contact contact = args.Entity.As<Contact>();
+        CalculateContactValues(contact);
+        return args.CreateHandlingResult(contact);
+    }
+
     protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
     {
         Contact contact = args.Entity.As<Contact>();
@@ -61,5 +81,21 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
             SignalTopic.ANY,
             nameof(Contact),
             ContactImplementer.BeforeSave);
+
+        Signal.Hub.SubscribeEntityReleated(
+            DataReleatedSignalConstants.SIGNAL_VALIDATE,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            nameof(Contact),
+            ContactImplementer.Validate);
+
+        Signal.Hub.SubscribeEntityReleated(
+            DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            nameof(Contact),
+            ContactImplementer.ExecLogic);
     }
 }

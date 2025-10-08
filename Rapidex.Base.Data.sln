@@ -41,6 +41,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A3FE7EE0-2
 		docs\DatabaseConnectionAndRequiredRights.md = docs\DatabaseConnectionAndRequiredRights.md
 		docs\EntityDefinition.md = docs\EntityDefinition.md
 		docs\Features-detailed.md = docs\Features-detailed.md
+		docs\EntityLogic.md = docs\EntityLogic.md
 		docs\FieldTypes.md = docs\FieldTypes.md
 		docs\Filtering.md = docs\Filtering.md
 		docs\Index.md = docs\Index.md

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -7,7 +8,9 @@ namespace Rapidex;
 
 public class RapidexTypeConverter : IManager
 {
-    private static readonly TwoLevelDictionary<Type, Type, IBaseConverter> converters = new TwoLevelDictionary<Type, Type, IBaseConverter>();
+    private static readonly TwoLevelDictionary<Type, Type, IDirectConverter> directConverters = new();
+    private static readonly ConcurrentBag<ICustomTypeConverter> customTypeConverters = new();
+    private static readonly TwoLevelDictionary<Type, Type, ICustomTypeConverter> customTypeConvertersCache = new();
 
 
     static RapidexTypeConverter()
@@ -19,21 +22,60 @@ public class RapidexTypeConverter : IManager
         RapidexTypeConverter.RegisterInternal<DateTimeOffsetStrConverter>();
     }
 
-    internal static void RegisterInternal(IBaseConverter converter)
+    internal static void RegisterInternal(IDirectConverter converter)
     {
-        converters.Set(converter.FromType, converter.ToType, converter);
+        directConverters.Set(converter.FromType, converter.ToType, converter);
     }
 
-    internal static void RegisterInternal<T>() where T : IBaseConverter, new()
+    internal static void RegisterInternal<T>() where T : IDirectConverter, new()
     {
-        IBaseConverter converter = (IBaseConverter)TypeHelper.CreateInstance(typeof(T));
+        IDirectConverter converter = (IDirectConverter)TypeHelper.CreateInstance(typeof(T));
         RegisterInternal(converter);
     }
 
-    public void Register(IBaseConverter converter)
+    public void Register(IDirectConverter converter)
     {
-        converters.Set(converter.FromType, converter.ToType, converter);
+        directConverters.Set(converter.FromType, converter.ToType, converter);
     }
+
+    public static void Register<T>()
+        where T : IDirectConverter, new()
+    {
+        RegisterInternal<T>();
+    }
+
+    public static void RegisterTypeConverter<T>()
+        where T : TypeConverter, new()
+    {
+        TypeConverter converter = (TypeConverter)TypeHelper.CreateInstance(typeof(T));
+        ICustomTypeConverter ctConverter = converter.ShouldSupportTo<ICustomTypeConverter>();
+        customTypeConverters.Add(ctConverter);
+        customTypeConvertersCache.Clear();
+    }
+
+    private static TypeConverter FindCustomTypeConverter(Type fromType, Type toType)
+    {
+        ICustomTypeConverter conv = customTypeConvertersCache.Get(fromType)?.Get(toType);
+        if (conv != null)
+        {
+            TypeConverter res = conv.ShouldSupportTo<TypeConverter>();
+            return res;
+        }
+
+        foreach (var converter in customTypeConverters)
+        {
+            if (converter.CanConvert(fromType, toType) )
+            {
+                customTypeConvertersCache.Set(fromType, toType, converter);
+                TypeConverter res = converter.ShouldSupportTo<TypeConverter>();
+                return res;
+            }
+        }
+
+        //customTypeConvertersCache.Set(fromType, toType, null);
+        return null;
+    }
+
 
     [Obsolete("Use TryConvert instead. This method will be removed in future versions.")]
     public object Convert(object value, Type targetType)
@@ -67,20 +109,27 @@ public class RapidexTypeConverter : IManager
                 if (value is string strVal)
                 {
                     value = Enum.Parse(targetType, strVal);
+                    return value;
                 }
-                else
-                {
-                    value = Enum.ToObject(targetType, value);
-                }
-                return value;
+                //else
+                //{
+                //    value = Enum.ToObject(targetType, value);
+                //}
+                //return value;
             }
 
             var fromType = value.GetType();
 
-            var converter = converters.Get(fromType, targetType);
+            var converter = directConverters.Get(fromType, targetType);
             if (converter != null)
             {
                 return converter.Convert(value, targetType);
+            }
+
+            var customTC = FindCustomTypeConverter(fromType, targetType);
+            if (customTC != null)
+            {
+                return customTC.ConvertTo(value, targetType);
             }
 
             Type sourceType = value.GetType();
@@ -159,7 +208,7 @@ public class RapidexTypeConverter : IManager
 
             var fromType = value.GetType();
 
-            var converter = converters.Get(fromType, targetType);
+            var converter = directConverters.Get(fromType, targetType);
             if (converter != null)
             {
                 return converter.TryConvert(value, targetType, out convertedValue);
@@ -203,7 +252,7 @@ public class RapidexTypeConverter : IManager
 
     public void Setup(IServiceCollection services)
     {
-        Type[] types = Common.Assembly.FindDerivedClassTypes(typeof(IBaseConverter));
+        Type[] types = Common.Assembly.FindDerivedClassTypes(typeof(IDirectConverter));
         foreach (var type in types)
         {
             //IBaseConverter converter = (IBaseConverter)TypeHelper.CreateInstance(type);
@@ -218,7 +267,7 @@ public class RapidexTypeConverter : IManager
 }
 
 
-public abstract class ConverterBase : IBaseConverter
+public abstract class ConverterBase : IDirectConverter
 {
     public abstract Type FromType { get; }
     public abstract Type ToType { get; }
@@ -227,7 +276,7 @@ public abstract class ConverterBase : IBaseConverter
     public abstract bool TryConvert(object from, Type toType, out object to);
 }
 
-public abstract class ConverterBase<TFrom, TTo> : ConverterBase, IBaseConverter<TFrom, TTo>
+public abstract class ConverterBase<TFrom, TTo> : ConverterBase, IDirectConverter<TFrom, TTo>
 {
     public override Type FromType => typeof(TFrom);
     public override Type ToType => typeof(TTo);

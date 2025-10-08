@@ -155,6 +155,19 @@ public static class JsonHelper
         return JsonSerializer.Deserialize(json, targetType, DefaultJsonSerializerOptions);
     }
 
+    public static Dictionary<string, object> FromJsonToDictionary(ref Utf8JsonReader reader)
+    {
+        CheckInitialized();
+
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonToDictionaryConverter(floatFormat: FloatFormat.Double, unknownNumberFormat: UnknownNumberFormat.Error, objectFormat: ObjectFormat.Dictionary) },
+            WriteIndented = true,
+        };
+        dynamic d = JsonSerializer.Deserialize<dynamic>(ref reader, options);
+        return d;
+    }
+
     public static Dictionary<string, object> FromJsonToDictionary(this string json)
     {
         CheckInitialized();
