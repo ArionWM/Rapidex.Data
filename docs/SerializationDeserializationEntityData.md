@@ -118,7 +118,7 @@ ConcreteEntity01[] ents = EntityDataJsonConverter.Deserialize<ConcreteEntity01>(
 
 ## Operations (Update, New, Delete, Add or Remove Related Entities)
 
-For operational JSON; `Type` property are used to represent these operations. Type property contained json deserialization always create `PartialEntity`.
+For operational JSON; `Type` property are used to represent these operations. Type property contained json deserialization always create `PartialEntity` (See: [Entity Definition](EntityDefinition.md#Partial%20Entities) and [Updating Data](UpdatingData.md#Partial%20Entities)).
 
 This entities use with `UnitOfWork` pattern for batch processing of multiple operations.
 

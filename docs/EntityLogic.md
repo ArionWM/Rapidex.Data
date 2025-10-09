@@ -1,4 +1,4 @@
-# Entity Logic; Validation & Calculation & other Signals
+# Entity Logic; Validation & Calculation & Other Signals
 
 In Rapidex.Data, Entity logic (validation and calculation-like operations and other signals) is managed via signals.
 

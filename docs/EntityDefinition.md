@@ -1,4 +1,4 @@
-# Entity Definition
+# Entity Definition and Entity Types
 
 > To see entity logic (validation and calculation-like operations) See: [Entity Logic](EntityLogic.md).
 

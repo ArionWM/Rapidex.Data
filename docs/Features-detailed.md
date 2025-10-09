@@ -166,6 +166,13 @@ Much applications need predefined data for some entities (like Country, Currency
 
 See: [Predefined Data](PredefinedData.md)
 
+### PartialEntity structure supports selective data retrieval and updates
+
+*PartialEntity* structure allows to defining a subset of fields to be retrieved or updated.
+This is useful for optimizing performance and minimizing data transfer.
+
+See: [Entity Definition](EntityDefinition.md#Partial%20Entities) and [Updating Data](UpdatingData.md#Partial%20Entities)
+
 ### Multiple schema (workspaces) support
 
 Some database engines (like PostgreSQL or MS SQL) support multiple schemas in a single database. 
@@ -175,26 +182,30 @@ Rapidex.Data can use multiple schemas for workspace isolation. Each schema (work
 Some entities can be marked *only base schema* and shared between all schemas (workspaces).
 
 ```csharp
-
     var baseSchema = Database.Dbs.Db(); // default schema (name: 'base')
+    using var work = baseSchema.BeginWork();
     //....
 
     var schema1 = baseSchema.Schema("myOtherSchema"); // another schema (or workspace)
+    using var work = schema1.BeginWork();
     //....
 ```
+
+See: [Multi Schema Management](MultiSchemaManagement.md)
 
 ### Multiple database support in same application (multi tenant)
 
 An application can use multiple databases (especially can use MultiTenant applications). 
 
 ```csharp
-
     var db = Database.Dbs.Db(); // default (master) database
     //....
 
     var otherDb = Database.Dbs.Db("otherDb");
     //....
 ```
+
+See: [Multiple Database Management](MultiDatabaseManagement.md)
 
 ### Different metadata customization for each database connection (each tenant can have different configuration)
 
@@ -213,11 +224,16 @@ Each database can have its own set of entities (tables) and may have **different
     //....
 ```
 
+See: [Multiple Database Management](MultiDatabaseManagement.md)
+
 ## Other Features
 
 ### Support for complex queries, filtering and pagination
 
 ...
+
+See: [Querying Data](QueryingData.md)
+See: [Filtering](Filtering.md)
 
 ### Built-in field types
 
@@ -225,9 +241,12 @@ Color, Currency, Email, Image, Json, Password, OneWayPassword Phone, Text, Time,
 
 And expandable!
 
+See: [Field Types](FieldTypes.md)
+
 ### Easy use One-to-Many and Many-to-Many relationships
 
 ...
+
 
 ### Lazy Loading
 
@@ -246,6 +265,7 @@ Developers can inject predefined data and demo data with Ids less than 10.000.
 ### Unique and easy use *Query* object for complex queries  
 
 abc
+
 
 ### Bulk update with queries
 

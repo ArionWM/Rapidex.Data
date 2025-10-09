@@ -1,3 +1,0 @@
-﻿# Rapidex.Data Concept
-
-

@@ -13,10 +13,11 @@ Rapidex.Data supports multiple database engines (MS SQL Server, PostgreSQL and o
 - Define entities with **concrete** (classes) or **soft** (JSON, YAML or with code in runtime) 
 - Change metadata (entity definitions) and schema in runtime
 - UnitOfWork pattern
-- Unique and extensible *[behavior](Behaviors.md)* approach for reusable logic
+- Unique and extensible *[behavior](/docs/Behaviors.md)* approach for reusable logic
 - Dynamic logic injection with *signal hub (with Rapidex Common)* 
 - Web service ready for CRUD operations (with JSON)
 - Easy predefined data support for entities
+- *PartialEntity* structure supports selective data retrieval and updates
 - Multiple database support in same application (multi tenant)
 - Multiple schema (workspaces) support
 - Different metadata customization for each database connection (each tenant can have different configuration)
@@ -49,29 +50,31 @@ See: [Quick Start](/docs/QuickStart.md)
 
 You can download and run sample projects from the following links:
 
-- [Sample ASP.NET Core Application](/samples/Rapidex.Data.AspNetCoreApp)
-- [Sample Console Application](/samples/Rapidex.Data.ConsoleApp)
+- [Sample ASP.NET Core Application](/samples/Rapidex.Data.Sample.Basic1)
+- [Sample Console Application](/samples/Rapidex.Data.Sample.Basic2)
 
 ## Documentation
 
 ### Basics
 
+- [Entity Definition](/docs/EntityDefinition.md)
+
 - [Tips](/docs/UsageAndTips.md)
 
 - [Field Types](/docs/FieldTypes.md)
 
-- [Entity Definition](/docs/EntityDefinition.md)
+- [Entity Logic](/docs/EntityLogic.md)
 
 - [Behaviors](/docs/Behaviors.md)
-
-- [Predefined Data](/docs/PredefinedData.md)
 
 - [Querying Data](/docs/QueryingData.md)
   - [Filtering](/docs/Filtering.md)
 
+- [Predefined Data](/docs/PredefinedData.md)
+
 - Serialization and Deserialization
-  - [Data](/docs/SerializationDeserializationEntityData.md)
-  - [Metadata](/docs/SerializationDeserializationMetadata.md)
+  - [Data Serialization & Deserialization](/docs/SerializationDeserializationEntityData.md)
+  - [Metadata Serialization](/docs/SerializationDeserializationMetadata.md)
 
 - [Updating Data](/docs/UpdatingData.md)
 
