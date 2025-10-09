@@ -23,6 +23,9 @@
 	  <None Update="App_Content\MyAppDefinitions\PredefinedContactValues.yml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="App_Content\MyAppDefinitions\PredefinedCountryValues.yml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="App_Content\MyAppDefinitions\PredefinedItemValues.yml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

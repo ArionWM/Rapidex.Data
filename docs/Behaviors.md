@@ -157,7 +157,6 @@ public class MyStartTimeBehavior : EntityBehaviorBase<MyStartTimeBehavior> //<- 
         em.AddFieldIfNotExist<DateTimeOffset>(FIELD_START_TIME);
 
         // Subscribe to signals for calculation, validation, etc.
-
         Signal.Hub.SubscribeEntityReleated(DataReleatedSignalConstants.SIGNAL_NEW, SignalTopic.ANY, SignalTopic.ANY, SignalTopic.ANY,
             em.Name,
             MyStartTimeBehavior.OnNew);

@@ -160,9 +160,11 @@ protected static void CalculateContactValues(Contact contact)
 
 ...
 
-### Predefined data and demo data support
+### Easy predefined data support for entities
 
-...
+Much applications need predefined data for some entities (like Country, Currency, etc.). *Rapidex.Data* provides an easy way to define and apply this data with YAML format.
+
+See: [Predefined Data](PredefinedData.md)
 
 ### Multiple schema (workspaces) support
 
@@ -252,4 +254,10 @@ abc
 ### Text based filter parsing for dynamic filters
 
 abc UI usage vs.
+
+### Metadata injection from another entity definition
+
+abc
+
+
 

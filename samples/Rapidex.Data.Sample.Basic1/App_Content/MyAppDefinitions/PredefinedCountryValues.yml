@@ -1,0 +1,76 @@
+﻿_tag: data 
+forceAllValues: true
+data:
+  - entity: country
+    id: 792
+    name: Turkey
+    code: TR
+    iso2: TR
+    iso3: TUR
+    phoneCode: 90
+    currencySymbol: "TRY" # 949
+
+  - entity: country
+    id: 36
+    name: Australia
+    code: AU
+    iso2: AU
+    iso3: AUS
+    phoneCode: 61
+    currencySymbol: "AUD" # 36
+
+  - entity: country
+    id: 124
+    name: Canada
+    code: CA
+    iso2: CA
+    iso3: CAN
+    phoneCode: 1
+    currencySymbol: "CAD" # 124
+
+  - entity: country
+    id: 250
+    name: France
+    code: FR
+    iso2: FR
+    iso3: FRA
+    phoneCode: 33
+    currencySymbol: "EUR" # 978
+
+  - entity: country
+    id: 356
+    name: India
+    code: IN
+    iso2: IN
+    iso3: IND
+    phoneCode: 91
+    currencySymbol: "INR" # 356
+
+  - entity: country
+    id: 392
+    name: Japan
+    code: JP
+    iso2: JP
+    iso3: JPN
+    phoneCode: 81
+    currencySymbol: "JPY" # 392
+
+  - entity: country
+    id: 840
+    name: United States
+    code: US
+    iso2: US
+    iso3: USA
+    phoneCode: 1
+    currencySymbol: "USD" # 840
+
+  - entity: country
+    id: 826
+    name: United Kingdom
+    code: GB
+    iso2: GB
+    iso3: GBR
+    phoneCode: 44
+    currencySymbol: "GBP" # 826
+
+
