@@ -27,8 +27,8 @@ public class HasTags : EntityBehaviorBase<HasTags>
 
         public TagInfo(string name, string color)
         {
-            Name = name;
-            Color = color;
+            this.Name = name;
+            this.Color = color;
         }
 
 
@@ -75,11 +75,11 @@ public class HasTags : EntityBehaviorBase<HasTags>
     #region Base
 
     //TODO: taşınacak, common cache?
-    static TwoLevelDictionary<string, string, string> _cache = new TwoLevelDictionary<string, string, string>();
+    static TwoLevelDictionary<string, string, string> Cache = new TwoLevelDictionary<string, string, string>();
 
     protected static void CheckCache(IDbSchemaScope dbScope, string entityName)
     {
-        if (!_cache.ContainsKey(entityName))
+        if (!Cache.ContainsKey(entityName))
         {
             var availableTags = dbScope.GetQuery<TagRecord>()
                 .Eq(nameof(TagRecord.Entity), entityName)
@@ -87,7 +87,7 @@ public class HasTags : EntityBehaviorBase<HasTags>
 
             foreach (var tag in availableTags)
             {
-                _cache.Set(entityName, tag.Name, tag.Color);
+                Cache.Set(entityName, tag.Name, tag.Color);
             }
         }
     }
@@ -95,7 +95,7 @@ public class HasTags : EntityBehaviorBase<HasTags>
     protected static void Save(TagRecord rec)
     {
         rec.Save();
-        _cache.Set(rec.Entity, rec.Name, rec.Color);
+        Cache.Set(rec.Entity, rec.Name, rec.Color);
     }
 
     public static TagInfo SplitTag(string tag)
@@ -221,7 +221,7 @@ public class HasTags : EntityBehaviorBase<HasTags>
         foreach (var tag in tags)
         {
             var _tag = SplitTag(tag);
-            string color = _cache.Get(em.Name, _tag.Name);
+            string color = Cache.Get(em.Name, _tag.Name);
             result.Add(new TagInfo(_tag.Name, color ?? DEFAULT_COLOR));
         }
 

@@ -77,5 +77,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         db.Metadata.AddIfNotExist<BlobRecord>();
         db.Metadata.AddIfNotExist<GenericJunction>();
         db.Metadata.AddIfNotExist<TagRecord>();
+
+      
     }
 }

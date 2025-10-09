@@ -88,10 +88,10 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
         Assert.Single(dv);
         Assert.Equal("YES", dv[0]["IS_NULLABLE"]);
         Assert.Equal("bit", dv[0]["DATA_TYPE"]);
-
-
-
-
-
     }
+
 }
+
+
+
+

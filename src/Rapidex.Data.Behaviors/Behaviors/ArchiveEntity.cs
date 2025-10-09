@@ -11,7 +11,9 @@ public class ArchiveEntity : EntityBehaviorBase<ArchiveEntity>
     public const string FIELD_IS_ARCHIVED = "IsArchived";
 
     public override string Descripton => "Ensures that the Entity has IsArchived field. And apply archive filters and actions";
+
     //TODO: Yeni kayıtlarda IsArchived null değil 0 olmalı
+
     public ArchiveEntity()
     {
     }

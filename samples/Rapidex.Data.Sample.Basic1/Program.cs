@@ -131,8 +131,6 @@ static void StartMyConfiguration()
     //Lets scan json or yaml definitions from folder
     dbScope.Metadata.ScanDefinitions(@".\App_Content\MyAppDefinitions");
 
-    
-
     // Or you can add each metadata manually
     //--------------------------------------------
     dbScope.Metadata.AddJson(@"{ ""type"": ""EntityDefinition"", ""version"": 1, ""name"": ""mySampleJsonEntity01"", ""dbPrefix"": ""utest"", ""primaryKey"":""Id"", ""fields"": [ { ""name"": ""Id"", ""type"": ""long"" }, { ""name"": ""Subject"", ""type"": ""string"" }, { ""name"": ""ChangeField"", ""type"": ""int"" }]}");

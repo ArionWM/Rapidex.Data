@@ -18,3 +18,7 @@ abc
 ## Nullable Fields
 
 abc
+
+## Implementer Class
+
+See: [Entity Logic](EntityLogic.md)

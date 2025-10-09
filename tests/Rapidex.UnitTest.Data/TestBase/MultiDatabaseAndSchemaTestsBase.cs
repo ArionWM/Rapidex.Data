@@ -28,6 +28,8 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
         db.Structure.ApplyAllStructure();
 
+        
+
         string newSchemaName1 = "Schema" + RandomHelper.RandomText(5);
 
         var schema1 = db.AddSchemaIfNotExists(newSchemaName1);

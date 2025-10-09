@@ -10,16 +10,17 @@ Rapidex.Data supports multiple database engines (MS SQL Server, PostgreSQL and o
 
 ## Main Features
 
+- Simple and flexible 
 - Define entities with **concrete** (classes) or **soft** (JSON, YAML or with code in runtime) 
 - Change metadata (entity definitions) and schema in runtime
-- Multiple database support in same application (multi tenant)
-- Multiple schema (workspaces) support
-- Different metadata customization for each database connection (each tenant can have different configuration)
 - UnitOfWork pattern
 - Unique and extensible *behavior* approach for reusable logic
 - Dynamic logic injection with *signal hub (with Rapidex Common)* 
-- Direct JSON support for CRUD operations
+- Web service ready for CRUD operations (with JSON)
 - Predefined data and demo data support
+- Multiple database support in same application (multi tenant)
+- Multiple schema (workspaces) support
+- Different metadata customization for each database connection (each tenant can have different configuration)
 
 See: [Features](/docs/Features-detailed.md) for more details.
 
