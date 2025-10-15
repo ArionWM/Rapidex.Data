@@ -13,6 +13,9 @@ internal enum FilterTokens
     String,
     //Number,
 
+    [Token(Example = "'text'")]
+    QuotedString,
+
     [Token(Example = "()")]
     OpenCloseParen,
 

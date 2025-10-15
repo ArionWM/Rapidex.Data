@@ -78,19 +78,23 @@ Same filter & filter propositions have templates. See: Layouts / RelationX2N's; 
 | -------- | ----------- | ------- | ------- |
 | `@parentId` | Releated parent id (Master / details) | Not available| `ParentQuote = @parentId` |
 
+## Using Strings and DateTimes
+
+Strings with spaces can be use with quotes (`'`) or without quotes (should use with url encoding).
+
+DateTimes should be in `yyyy-MM-dd` or `yyyy-MM-ddTHH:mm:ss` format.
 
 ## Planned Features
 
 | Feature | Description | Status |
 | ------- | ----------- | ------- |
-| Operator:  `between` | | Not available |
 | Operator: `!:` | Not in a list | Not available |
 | Operator: `!~` | Not like | Not available |
 | Operator: `is null` | Is null | Not available |
 | Operator: `is not null` | Is not null | Not available |
 | Nested filters (MyEntity.ReferencedField.Field = ABC) | Is empty | Not available |
 | Relation supported filters (MyEntity.RelationField.any() eg) ||
-| string quotes; '', "" ||
+| string quotes; `'` ||
 
 
 
@@ -102,8 +106,14 @@ Same filter & filter propositions have templates. See: Layouts / RelationX2N's; 
 Name = John%20Doe
 ```
 
+or 
+
 ```plaintext
-Date between 2025-01-01 and 2025-12-31
+Name = 'John Doe'
+```
+
+```plaintext
+Date between '2025-01-01' and '2025-12-31'
 ```
 
 ### Filter with Parentheses

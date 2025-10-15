@@ -33,8 +33,8 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
         switch (fce.Operator)
         {
             case FilterTokens.Equal:
-                string rVal = fce.Right.Trim().ToLower();
-                if (rVal == "null")
+                string rVal = fce.Right.Trim();
+                if (rVal.ToLower() == "null")
                     rVal = null;
                 query.Eq(fieldName, this.CheckValue(rVal, fm));
                 break;
@@ -57,8 +57,8 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
                 query.LtEq(fieldName, this.CheckValue(fce.Right, fm));
                 break;
             case FilterTokens.NotEqual:
-                string rVal2 = fce.Right.Trim().ToLower();
-                if (rVal2 == "null")
+                string rVal2 = fce.Right.Trim();
+                if (rVal2.ToLower() == "null")
                     rVal2 = null;
                 query.Not(q=> q.Eq(fieldName, this.CheckValue(rVal2, fm)));
                 break;

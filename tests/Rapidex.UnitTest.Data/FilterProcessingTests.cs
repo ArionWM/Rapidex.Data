@@ -204,9 +204,82 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         criteria = CriteriaParser.Parse(query, filter);
 
 
-    }
+        nestedCondition = criteria.Query.Clauses.Where(cl => cl is SqlKata.NestedCondition<SqlKata.Query>).Cast<SqlKata.NestedCondition<SqlKata.Query>>();
+        Assert.NotEmpty(nestedCondition);
+        Assert.Single(nestedCondition);
 
-    [Fact]
+        conditions = nestedCondition.FirstOrDefault().Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
+        Assert.NotEmpty(conditions);
+        Assert.Equal(2, conditions.Count());
+
+        SqlKata.BasicCondition cond08_1 = conditions.ElementAt(0);
+        SqlKata.BasicCondition cond08_2 = conditions.ElementAt(1);
+
+        Assert.Contains(".Date", cond08_1.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Equal(">=", cond08_1.Operator);
+        Assert.Equal("2025-01-01", cond08_1.Value);
+
+        Assert.Contains(".Date", cond08_2.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Equal("<=", cond08_2.Operator);
+        Assert.Equal("2025-12-31", cond08_2.Value);
+
+        //------------------------------------------------------------------------------
+        //Quoted string with spaces
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Name='Alice Smith'";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        conditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
+        Assert.NotEmpty(conditions);
+        Assert.Single(conditions);
+
+        SqlKata.BasicCondition cond09 = conditions.First();
+        Assert.Contains(".Name", cond09.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Equal("=", cond09.Operator);
+        Assert.Equal("Alice Smith", cond09.Value);
+
+        //------------------------------------------------------------------------------
+        //Mixed quoted and unquoted
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Name='Alice' and Age>18";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        nestedCondition = criteria.Query.Clauses.Where(cl => cl is SqlKata.NestedCondition<SqlKata.Query>).Cast<SqlKata.NestedCondition<SqlKata.Query>>();
+        Assert.NotEmpty(nestedCondition);
+        Assert.Single(nestedCondition);
+
+        conditions = nestedCondition.FirstOrDefault().Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
+        Assert.NotEmpty(conditions);
+        Assert.Equal(2, conditions.Count());
+
+        SqlKata.BasicCondition cond10_1 = conditions.ElementAt(0);
+        SqlKata.BasicCondition cond10_2 = conditions.ElementAt(1);
+
+        Assert.Contains(".Name", cond10_1.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Equal("=", cond10_1.Operator);
+        Assert.Equal("Alice", cond10_1.Value);
+
+        Assert.Contains(".Age", cond10_2.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Equal(">", cond10_2.Operator);
+        Assert.Equal("18", cond10_2.Value);
+
+        //------------------------------------------------------------------------------
+        //Quoted string with Url encoded spaces
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Name=Alice%20Smith";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        conditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
+        Assert.NotEmpty(conditions);
+        Assert.Single(conditions);
+
+        SqlKata.BasicCondition cond10 = conditions.First();
+        Assert.Contains(".Name", cond10.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Equal("=", cond10.Operator);
+        Assert.Equal("Alice Smith", cond10.Value);
+
+
+    }
 	public void FilterParser_02()
 	{
 		//this.Fixture.ClearCaches();

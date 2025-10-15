@@ -70,10 +70,20 @@ internal class FilterParserBase
 
     .Match(Character.EqualTo(' '), FilterTokens.Whitespace)
 
+    // Match single-quoted strings first (before unquoted strings)
+    // The content between quotes is captured, excluding the quotes themselves
+    .Match(
+        from open in Character.EqualTo('\'')
+        from content in Character.Except('\'').Many()
+        from close in Character.EqualTo('\'')
+        select content,
+        FilterTokens.QuotedString)
+
     .Match(Character.LetterOrDigit
         //.Or(Character.Digit)
         .Or(Character.EqualTo('*'))
         .Or(Character.EqualTo('/'))
+        .Or(Character.EqualTo('-'))
         .AtLeastOnce(), FilterTokens.String)
     //.Match(Span.MatchedBy(Character.AnyChar), MyTokens.String)
     //.Match(Numerics.Natural,MyTokens.Number)
@@ -81,7 +91,17 @@ internal class FilterParserBase
 
     private static readonly TokenListParser<FilterTokens, string> IdentifierParser =
            Token.EqualTo(FilterTokens.String)
-               .Select(t => t.ToStringValue());
+               .Select(t => t.ToStringValue())
+           .Or(Token.EqualTo(FilterTokens.QuotedString)
+               .Select(t => {
+                   var value = t.ToStringValue();
+                   // Remove surrounding quotes if present
+                   if (value.Length >= 2 && value.StartsWith("'") && value.EndsWith("'"))
+                   {
+                       return value.Substring(1, value.Length - 2);
+                   }
+                   return value;
+               }));
 
     private static readonly TokenListParser<FilterTokens, string[]> IdentifierListParser =
       IdentifierParser.ManyDelimitedBy(Token.EqualTo(FilterTokens.Comma))
@@ -169,7 +189,7 @@ internal class FilterParserBase
 
 
 
-        switch (value)
+        switch (value?.ToLower())
         {
             case "true":
                 _value = true;
