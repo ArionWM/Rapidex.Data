@@ -24,7 +24,7 @@ Parentheses are used to group conditions and can be nested, and the `and` and `o
 | `<`        | Less than   | `lt` |  |
 | `>=`       | Greater than or equal to | `ge`, `gte` |  |
 | `<=`       | Less than or equal to | `le`, `lte` |  |
-| `between`  | between in and equal to two values  | ? |  Not available|
+| `between`  | between in and equal to two values  |  |  |
 | `:=`      | In a list (seperated by comma)  | `in`, `contains`, `anyof` |  |
 | `!:`      | Not in a list | `notin`, `notcontains`, `noneof` | Not available |
 | `!`        | Not    | `not` |  |
@@ -103,7 +103,7 @@ Name = John%20Doe
 ```
 
 ```plaintext
-Date between 2025-01-01, 2025-12-31
+Date between 2025-01-01 and 2025-12-31
 ```
 
 ### Filter with Parentheses

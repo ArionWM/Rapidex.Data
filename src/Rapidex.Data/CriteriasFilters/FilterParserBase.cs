@@ -112,15 +112,26 @@ internal class FilterParserBase
         .Or(Token.EqualTo(FilterTokens.LessThan).Select(t => t.Kind)
         );
 
+    private static readonly TokenListParser<FilterTokens, FilterExpression> BetweenParser =
+           (from left in IdentifierParser
+            from betweenToken in Token.EqualTo(FilterTokens.Between)
+            from start in IdentifierParser
+            from andToken in Token.EqualTo(FilterTokens.And)
+            from end in IdentifierParser
+            select (FilterExpression)new FilterBetweenExpression(left, start, end));
+
     private static readonly TokenListParser<FilterTokens, FilterExpression> ComparisonParser =
            (from left in IdentifierParser
             from op in ComparisonOperatorParser
             from right in IdentifierListParser
             select (FilterExpression)new FilterComparisonExpression(left, op, right));
 
+    // Use Try extension method to make BetweenParser non-consuming on failure
+    private static readonly TokenListParser<FilterTokens, FilterExpression> FieldExpressionParser =
+        BetweenParser.Try().Or(ComparisonParser);
 
     private static readonly TokenListParser<FilterTokens, FilterExpression> Factor =
-         ComparisonParser
+         FieldExpressionParser
             .Or(NotExpressionParser)
             .Or(Superpower.Parse.Ref(() => ParenExpressionParser!))
             .Named("factor");
@@ -248,6 +259,32 @@ internal class FilterParserBase
             //TODO: Check nested or ?
 
             throw new InvalidOperationException($"Field not found with '{leftValue}' on filter part: '{fce}'");
+        }
+        return fm;
+    }
+
+    protected IDbFieldMetadata CheckLeft(IDbEntityMetadata em, FilterBetweenExpression fbe)
+    {
+        string leftValue = fbe.Field;
+
+        IDbFieldMetadata fm = null;
+        switch (leftValue.ToLowerInvariant())
+        {
+            case "caption":
+                fm = em.Caption;
+                if (fm == null)
+                {
+                    throw new InvalidOperationException($"{em.Name} has no caption field");
+                }
+                return fm;
+        }
+
+        fm = em.Fields.Get(leftValue, false);
+        if (fm == null)
+        {
+            //TODO: Check nested or ?
+
+            throw new InvalidOperationException($"Field not found with '{leftValue}' on filter part: '{fbe}'");
         }
         return fm;
     }

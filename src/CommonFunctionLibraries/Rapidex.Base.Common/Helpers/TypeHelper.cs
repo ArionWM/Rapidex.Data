@@ -69,7 +69,7 @@ public static class TypeHelper
             return Activator.CreateInstance(type);
         }
 
-        if (Rapidex.Common.serviceProvider == null)
+        if (Rapidex.Common.InternalServiceProvider == null)
         {
             //Henüz sistem ayağa kalkmamış
             return Activator.CreateInstance(type, parameters);

@@ -65,16 +65,23 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
             case FilterTokens.NotIn:
                 query.Not(q => q.In(fieldName, fce.RightArray));
                 break;
-            case FilterTokens.Between:
-                query.And(
-                    q => q.GtEq(fieldName, this.CheckValue(fce.Right, fm)),
-                    q => q.Lt(fieldName, this.CheckValue(fce.Right, fm)));
-                break;
             default:
                 throw new NotSupportedException($"Operator {fce.Operator} is not supported.");
         }
     }
 
+    protected void ParseBetweenExpression(IQueryCriteria query, FilterBetweenExpression fbe)
+    {
+        IDbFieldMetadata fm = this.CheckLeft(query.EntityMetadata, fbe);
+        string fieldName = fm.Name;
+
+        object startValue = this.CheckValue(fbe.StartValue, fm);
+        object endValue = this.CheckValue(fbe.EndValue, fm);
+
+        query.And(
+            q => q.GtEq(fieldName, startValue),
+            q => q.LtEq(fieldName, endValue));
+    }
 
     protected void ParseRelationExpression(IQueryCriteria query, FilterComparisonExpression fce)
     {
@@ -126,6 +133,11 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
 
     }
 
+    protected void Parse(IQueryCriteria query, FilterBetweenExpression fbe)
+    {
+        this.ParseBetweenExpression(query, fbe);
+    }
+
     protected void Parse(IQueryCriteria query, FilterBinaryExpression fce)
     {
         switch (fce.Operator)
@@ -162,6 +174,9 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
         {
             case FilterComparisonExpression comparison:
                 this.Parse(query, comparison);
+                break;
+            case FilterBetweenExpression between:
+                this.Parse(query, between);
                 break;
             case FilterBinaryExpression binary:
                 this.Parse(query, binary);

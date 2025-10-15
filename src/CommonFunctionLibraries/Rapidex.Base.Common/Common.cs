@@ -22,7 +22,7 @@ namespace Rapidex
         public const string ENV = CommonConstants.ENV_UNITTEST;
 #endif
 
-        internal static IServiceProvider serviceProvider;
+        internal static IServiceProvider InternalServiceProvider;
 
         /// <summary>
         /// Alabileceği değerler; 
@@ -52,12 +52,12 @@ namespace Rapidex
         {
             get
             {
-                return serviceProvider
+                return InternalServiceProvider
                     .NotNull("Common service provider not set");
             }
             set
             {
-                serviceProvider = value;
+                InternalServiceProvider = value;
             }
         }
         public static void LoadConfiguration()

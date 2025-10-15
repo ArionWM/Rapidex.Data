@@ -37,6 +37,25 @@ internal class FilterComparisonExpression : FilterExpression
     }
 }
 
+internal class FilterBetweenExpression : FilterExpression
+{
+    public string Field { get; }
+    public string StartValue { get; }
+    public string EndValue { get; }
+
+    public FilterBetweenExpression(string field, string startValue, string endValue)
+    {
+        Field = field;
+        StartValue = startValue;
+        EndValue = endValue;
+    }
+
+    public override string ToString()
+    {
+        return $"{Field} between {StartValue} and {EndValue}";
+    }
+}
+
 internal class FilterBinaryExpression : FilterExpression
 {
     public FilterExpression Left { get; }
@@ -80,6 +99,7 @@ internal static class FilterExpressionExtensions
             FilterComparisonExpression comp => comp.Operator == FilterTokens.In
                 ? $"{comp.Left} {comp.Operator} {string.Join(", ", comp.RightArray)}"
                 : $"{comp.Left} {comp.Operator} {comp.Right}",
+            FilterBetweenExpression between => $"{between.Field} between {between.StartValue} and {between.EndValue}",
             FilterUnaryExpression unary => $"{unary.Operator}{ExpressionToString(unary.Operand)}",
             FilterBinaryExpression bin => $"({ExpressionToString(bin.Left)} {bin.Operator} {ExpressionToString(bin.Right)})",
             _ => throw new NotSupportedException("Unknown expression type")
