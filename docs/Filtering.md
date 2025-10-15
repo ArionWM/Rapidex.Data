@@ -29,9 +29,9 @@ Parentheses are used to group conditions and can be nested, and the `and` and `o
 | `!:`      | Not in a list | `notin`, `notcontains`, `noneof` | |
 | `!`        | Not    | `not` |  |
 | `~`        | Like (wildcard: `*`)      | `like` |  |
-| `!~`       | Not like (wildcard: `*`)  | `notlike` | Not available |
-| `is null`  | Is null     | `isnull`, `= null` | Not available |
-| `is not null` | Is not null | `isnotnull`, `!= null` | Not available |
+| `!~`       | Not like (wildcard: `*`)  | `notlike` | |
+| `is null`  | Is null     | `isnull`, `= null` |  |
+| `is not null` | Is not null | `isnotnull`, `!= null` |  |
 
 
 ## Simple / Direct Operators
@@ -45,7 +45,7 @@ Parentheses are used to group conditions and can be nested, and the `and` and `o
 | Field Name | Description | Status |
 | ---------- | ----------- | ------- |
 | `Caption` | For entity caption field (Name, Title eg) |  
-| `All` | Entity wide search | Not available |
+| `All` | Entity wide search | Not available yet|
 
 ## Predefined Values
 
@@ -85,12 +85,8 @@ DateTimes should be in `yyyy-MM-dd` or `yyyy-MM-ddTHH:mm:ss` format.
 
 | Feature | Description | Status |
 | ------- | ----------- | ------- |
-| Operator: `is null` | Is null | Not available |
-| Operator: `is not null` | Is not null | Not available |
-| Nested filters (MyEntity.ReferencedField.Field = ABC) | Is empty | Not available |
-| Relation supported filters (MyEntity.RelationField.any() eg) ||
-| string quotes; `'` ||
-
+| Nested filters (MyEntity.ReferencedField.Field = ABC) | Is empty | Not available yet |
+| Relation supported filters (MyEntity.RelationField.any() eg) | Not available yet |
 
 
 ## Samples
@@ -141,6 +137,19 @@ or
 
 ```plaintext
 age in 10,11,12
+```
+
+### Using `isnull` operator
+
+`is null`, `isnull`, `= null` are same operators
+```plaintext
+MyField isnull
+```
+
+### Using `lastyear` keyword
+
+```plaintext
+Date >= lastyear
 ```
 
 

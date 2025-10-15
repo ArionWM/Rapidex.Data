@@ -137,5 +137,39 @@ public class DataController : ControllerBase
         return this.Content(json, "application/json");
     }
 
+    /// <summary>
+    /// Retrieves a list of items with optional filtering
+    /// </summary>
+    /// <param name="filter">Optional filter string to search items</param>
+    /// <returns>List of items matching the filter criteria</returns>
+    /// <response code="200">Returns the list of items</response>
+    [HttpGet("items")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult ListItems([FromQuery] string? filter)
+    {
+        var items = this.SampleService.ListItems(this.db, filter);
+        string json = EntityDataJsonConverter.Serialize(items);
+        return this.Content(json, "application/json");
+    }
+
+    /// <summary>
+    /// Retrieves a specific item by ID
+    /// </summary>
+    /// <param name="id">The unique identifier of the item</param>
+    /// <returns>The item details</returns>
+    /// <response code="200">Returns the item</response>
+    /// <response code="404">If the item is not found</response>
+    [HttpGet("items/{id:long}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult GetItem([FromRoute] long id)
+    {
+        var item = this.SampleService.GetItem(this.db, id);
+        if (item == null)
+            return this.NotFound($"Item with ID {id} not found");
+
+        string json = EntityDataJsonConverter.Serialize(item);
+        return this.Content(json, "application/json");
+    }
 
 }

@@ -144,9 +144,13 @@ public static class TypeHelper
     {
         var propDict = properties.Get(type);
         var propInfo = propDict?.Get(propertyName);
+
         if (propInfo == null)
         {
-            propInfo = type.GetProperty(propertyName);
+
+            //var props = type.GetProperties();
+
+            propInfo = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
             if (propInfo != null)
                 properties.Set(type, propertyName, propInfo);
 

@@ -82,4 +82,25 @@ public class SampleServiceA
         return order;
 
     }
+
+    internal IEntityLoadResult<Item> ListItems(IDbSchemaScope db, string? filter)
+    {
+        var query = db.GetQuery<Item>()
+            .OrderBy(OrderDirection.Asc, nameof(Item.Name));
+
+        if (filter.IsNOTNullOrEmpty())
+        {
+            this.parsers.FindParser(filter)
+                .NotNull($"No parser found for filter: {filter}")
+                .Parse(query, filter);
+        }
+
+        return query.Load();
+    }
+
+    internal Item GetItem(IDbSchemaScope db, long id)
+    {
+        var item = db.Find<Item>(id);
+        return item;
+    }
 }

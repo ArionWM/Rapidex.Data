@@ -1,0 +1,506 @@
+{
+	"info": {
+		"_postman_id": "65094ec5-3f4b-48ef-a916-92b1fac4d77e",
+		"name": "Rapidex Data Sample Application",
+		"description": "A sample API demonstrating Rapidex.Data framework capabilities\n\nContact Support:\n Name: Rapidex.Data",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10163472",
+		"_collection_link": "https://blue-moon-230195.postman.co/workspace/Pro-X~a2ad05b8-a41c-49e5-a7ff-09e0a9e44b73/collection/10163472-65094ec5-3f4b-48ef-a916-92b1fac4d77e?action=share&source=collection_link&creator=10163472"
+	},
+	"item": [
+		{
+			"name": "api",
+			"item": [
+				{
+					"name": "Data",
+					"item": [
+						{
+							"name": "update",
+							"item": [
+								{
+									"name": "Update a contact",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "[\r\n  {\r\n    \"type\": \"update\",\r\n    \"entity\": \"Contact\",\r\n\r\n    \"values\": {\r\n      \"id\": 100,\r\n      \"firstName\": \"Billie\",\r\n    }\r\n  }\r\n]",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/Data/update",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"Data",
+												"update"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/Data/update",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"Data",
+														"update"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": null
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "check-entity-content-with-update-data",
+							"item": [
+								{
+									"name": "Contact values check",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"_entity\": \"Contact\",\r\n    \"id\": 100,\r\n\r\n    \"Values\": {\r\n        \"Type\": {\r\n            \"value\": 1,\r\n            \"text\": \"Personal\"\r\n        },\r\n        //\"FullName\": \"John Doe\",\r\n        \"FirstName\": \"Billie\",\r\n        \"LastName\": \"Doe\",\r\n        \"Email\": \"john.doe@example.com\",\r\n        \"PhoneNumber\": null,\r\n        \"BirthDate\": \"2000-01-05\" //Age calculated automaticaly with \"ExecLogic\" signal subscription\r\n        //\"Age\": 0,\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/Data/check-entity-content-with-update-data?validate=true&runCustomLogic=true",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"Data",
+												"check-entity-content-with-update-data"
+											],
+											"query": [
+												{
+													"key": "validate",
+													"value": "true"
+												},
+												{
+													"key": "runCustomLogic",
+													"value": "true"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/Data/check-entity-content?validate=false&runCustomLogic=false",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"Data",
+														"check-entity-content"
+													],
+													"query": [
+														{
+															"key": "validate",
+															"value": "false"
+														},
+														{
+															"key": "runCustomLogic",
+															"value": "false"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": null
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "orders",
+							"item": [
+								{
+									"name": "{id}",
+									"item": [
+										{
+											"name": "Get order with id",
+											"request": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/Data/orders/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"Data",
+														"orders",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id",
+															"value": "10006",
+															"description": "The unique identifier of the order"
+														}
+													]
+												}
+											},
+											"response": [
+												{
+													"name": "Returns the order",
+													"originalRequest": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/api/Data/orders/:id",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"Data",
+																"orders",
+																":id"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "OK",
+													"code": 200,
+													"_postman_previewlanguage": "text",
+													"header": [],
+													"cookie": [],
+													"body": null
+												},
+												{
+													"name": "If the order is not found",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "{{baseUrl}}/api/Data/orders/:id",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"Data",
+																"orders",
+																":id"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Not Found",
+													"code": 404,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"type\": \"string\",\n  \"title\": \"string\",\n  \"status\": 3172,\n  \"detail\": \"string\",\n  \"instance\": \"string\",\n  \"key_0\": {}\n}"
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "Get order list",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/Data/orders?filter=",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"Data",
+												"orders"
+											],
+											"query": [
+												{
+													"key": "filter",
+													"value": "",
+													"description": "Optional filter string to search orders"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Returns the list of orders",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/Data/orders?filter=string",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"Data",
+														"orders"
+													],
+													"query": [
+														{
+															"key": "filter",
+															"value": "string",
+															"description": "Optional filter string to search orders"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": null
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "contacts",
+							"item": [
+								{
+									"name": "{id}",
+									"item": [
+										{
+											"name": "Get contact with id",
+											"request": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/Data/contacts/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"Data",
+														"contacts",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id",
+															"value": "100",
+															"description": "The unique identifier of the contact"
+														}
+													]
+												}
+											},
+											"response": [
+												{
+													"name": "Returns the contact",
+													"originalRequest": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/api/Data/contacts/:id",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"Data",
+																"contacts",
+																":id"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "OK",
+													"code": 200,
+													"_postman_previewlanguage": "text",
+													"header": [],
+													"cookie": [],
+													"body": null
+												},
+												{
+													"name": "If the contact is not found",
+													"originalRequest": {
+														"method": "GET",
+														"header": [
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"url": {
+															"raw": "{{baseUrl}}/api/Data/contacts/:id",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"Data",
+																"contacts",
+																":id"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Not Found",
+													"code": 404,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"type\": \"string\",\n  \"title\": \"string\",\n  \"status\": 3172,\n  \"detail\": \"string\",\n  \"instance\": \"string\",\n  \"key_0\": {}\n}"
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "Get contact list",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/Data/contacts?filter=",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"Data",
+												"contacts"
+											],
+											"query": [
+												{
+													"key": "filter",
+													"value": "",
+													"description": "Optional filter string to search contacts"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Returns the list of contacts",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/Data/contacts?filter=string",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"Data",
+														"contacts"
+													],
+													"query": [
+														{
+															"key": "filter",
+															"value": "string",
+															"description": "Optional filter string to search contacts"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": null
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "/"
+		}
+	]
+}
