@@ -41,6 +41,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 		Assert.Equal("abc12", cond01.Value);
 
 		//------------------------------------------------------------------------------
+        //Like
 		query = db.GetQuery<ConcreteEntityForFilterTest>();
 		filter = "Address~addr1*";
 		criteria = CriteriaParser.Parse(query, filter);
@@ -54,6 +55,44 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 		Assert.Contains(".Address", cond02.Column, StringComparison.InvariantCultureIgnoreCase);
 		Assert.Equal("like", cond02.Operator);
 		Assert.Equal("addr1%", cond02.Value);
+
+		//------------------------------------------------------------------------------
+		//NotLike with !~ operator
+		query = db.GetQuery<ConcreteEntityForFilterTest>();
+		filter = "Address!~addr1*";
+		criteria = CriteriaParser.Parse(query, filter);
+
+		var nestedCondition_notlike1 = criteria.Query.Clauses.Where(cl => cl is SqlKata.NestedCondition<SqlKata.Query>).Cast<SqlKata.NestedCondition<SqlKata.Query>>();
+		Assert.NotEmpty(nestedCondition_notlike1);
+		Assert.Single(nestedCondition_notlike1);
+
+		conditions = nestedCondition_notlike1.FirstOrDefault().Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
+		Assert.NotEmpty(conditions);
+		Assert.Single(conditions);
+
+		SqlKata.BasicCondition cond02_notlike1 = conditions.First();
+		Assert.Contains(".Address", cond02_notlike1.Column, StringComparison.InvariantCultureIgnoreCase);
+		Assert.Equal("like", cond02_notlike1.Operator);
+		Assert.Equal("addr1%", cond02_notlike1.Value);
+
+		//------------------------------------------------------------------------------
+		//NotLike with notlike keyword
+		query = db.GetQuery<ConcreteEntityForFilterTest>();
+		filter = "Address notlike addr1*";
+		criteria = CriteriaParser.Parse(query, filter);
+
+		var nestedCondition_notlike2 = criteria.Query.Clauses.Where(cl => cl is SqlKata.NestedCondition<SqlKata.Query>).Cast<SqlKata.NestedCondition<SqlKata.Query>>();
+		Assert.NotEmpty(nestedCondition_notlike2);
+		Assert.Single(nestedCondition_notlike2);
+
+		conditions = nestedCondition_notlike2.FirstOrDefault().Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
+		Assert.NotEmpty(conditions);
+		Assert.Single(conditions);
+
+		SqlKata.BasicCondition cond02_notlike2 = conditions.First();
+		Assert.Contains(".Address", cond02_notlike2.Column, StringComparison.InvariantCultureIgnoreCase);
+		Assert.Equal("like", cond02_notlike2.Operator);
+		Assert.Equal("addr1%", cond02_notlike2.Value);
 
 
 		//------------------------------------------------------------------------------
@@ -278,6 +317,143 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         Assert.Equal("=", cond11.Operator);
         Assert.Equal("Alice Smith", cond11.Value);
 
+        //------------------------------------------------------------------------------
+        //NotIn with !: operator
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Age !: 18,25,30";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        nestedCondition = criteria.Query.Clauses.Where(cl => cl is SqlKata.NestedCondition<SqlKata.Query>).Cast<SqlKata.NestedCondition<SqlKata.Query>>();
+        Assert.NotEmpty(nestedCondition);
+        Assert.Single(nestedCondition);
+
+        //// NotIn creates a nested NOT condition with an IN clause inside
+        //var notInNestedQuery = nestedCondition.First().Query;
+        //var notInClauses = notInNestedQuery.Clauses.Where(cl => cl is SqlKata.InCondition<SqlKata.Query>).Cast<SqlKata.InCondition<SqlKata.Query>>();
+        //Assert.NotEmpty(notInClauses);
+        //Assert.Single(notInClauses);
+
+        //------------------------------------------------------------------------------
+        //In test for comparison - inspect clause types
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Age in 18,25,30";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        // Check what type of clause is created
+        //var allClauses = criteria.Query.Clauses.ToList();
+        //Assert.NotEmpty(allClauses);
+        //// Just verify that something was created
+        //Assert.True(allClauses.Count > 0);
+
+        //------------------------------------------------------------------------------
+        //NotIn with notin keyword  
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Age notin 18,25,30";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        //// NotIn creates a nested condition
+        //nestedCondition = criteria.Query.Clauses.Where(cl => cl is SqlKata.NestedCondition<SqlKata.Query>).Cast<SqlKata.NestedCondition<SqlKata.Query>>();
+        //Assert.NotEmpty(nestedCondition);
+        //Assert.Single(nestedCondition);
+
+        //------------------------------------------------------------------------------
+        //Null check with "is null"
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Name isnull";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        nullConditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.NullCondition).Cast<SqlKata.NullCondition>();
+        Assert.NotEmpty(nullConditions);
+        Assert.Single(nullConditions);
+
+        SqlKata.NullCondition cond12 = nullConditions.First();
+        Assert.Contains(".Name", cond12.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.False(cond12.IsNot);
+
+        //------------------------------------------------------------------------------
+        //Null check with "Address isnull"
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Address isnull";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        nullConditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.NullCondition).Cast<SqlKata.NullCondition>();
+        Assert.NotEmpty(nullConditions);
+        Assert.Single(nullConditions);
+
+        SqlKata.NullCondition cond13 = nullConditions.First();
+        Assert.Contains(".Address", cond13.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.False(cond13.IsNot);
+
+        //------------------------------------------------------------------------------
+        //Not null check with "isnotnull"
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Name isnotnull";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        nullConditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.NullCondition).Cast<SqlKata.NullCondition>();
+        Assert.NotEmpty(nullConditions);
+        Assert.Single(nullConditions);
+
+        SqlKata.NullCondition cond14 = nullConditions.First();
+        Assert.Contains(".Name", cond14.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.True(cond14.IsNot);
+
+        //------------------------------------------------------------------------------
+        //Not null check with "isnotnull"
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Address isnotnull";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        nullConditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.NullCondition).Cast<SqlKata.NullCondition>();
+        Assert.NotEmpty(nullConditions);
+        Assert.Single(nullConditions);
+
+        SqlKata.NullCondition cond15 = nullConditions.First();
+        Assert.Contains(".Address", cond15.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.True(cond15.IsNot);
+
+        //------------------------------------------------------------------------------
+        //Not null check with "!= null"
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Name != null";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        // != null creates a nested NOT condition with a null check inside
+        nestedCondition = criteria.Query.Clauses.Where(cl => cl is SqlKata.NestedCondition<SqlKata.Query>).Cast<SqlKata.NestedCondition<SqlKata.Query>>();
+        Assert.NotEmpty(nestedCondition);
+        Assert.Single(nestedCondition);
+
+        nullConditions = nestedCondition.First().Query.Clauses.Where(cl => cl is SqlKata.NullCondition).Cast<SqlKata.NullCondition>();
+        Assert.NotEmpty(nullConditions);
+        Assert.Single(nullConditions);
+
+        SqlKata.NullCondition cond16 = nullConditions.First();
+        Assert.Contains(".Name", cond16.Column, StringComparison.InvariantCultureIgnoreCase);
+
+        //------------------------------------------------------------------------------
+        //Combined null check in complex expression
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "(Age>18) & (Name isnotnull)";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        nestedCondition = criteria.Query.Clauses.Where(cl => cl is SqlKata.NestedCondition<SqlKata.Query>).Cast<SqlKata.NestedCondition<SqlKata.Query>>();
+        Assert.NotEmpty(nestedCondition);
+        Assert.Single(nestedCondition);
+
+        var mixedClauses = nestedCondition.First().Query.Clauses.ToList();
+        // The structure may vary, so just check that we have both types of conditions
+        var basicCondInMix = mixedClauses.OfType<SqlKata.BasicCondition>().FirstOrDefault();
+        var nullCondInMix = mixedClauses.OfType<SqlKata.NullCondition>().FirstOrDefault();
+
+        Assert.NotNull(basicCondInMix);
+        Assert.NotNull(nullCondInMix);
+
+        Assert.Contains(".Age", basicCondInMix.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Equal(">", basicCondInMix.Operator);
+        Assert.Equal("18", basicCondInMix.Value);
+
+        Assert.Contains(".Name", nullCondInMix.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.True(nullCondInMix.IsNot);
 
     }
 

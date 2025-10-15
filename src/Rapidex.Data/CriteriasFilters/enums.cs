@@ -37,6 +37,9 @@ internal enum FilterTokens
     [Token(Category = "operator", Example = "~")]
     Like,
 
+    [Token(Category = "operator", Example = "!~")]
+    NotLike,
+
     [Token(Category = "operator", Example = "=")]
     Equal,
 
@@ -67,6 +70,12 @@ internal enum FilterTokens
 
     [Token(Category = "operator", Example = "between")]
     Between,
+
+    [Token(Category = "operator", Example = "isnull")]
+    IsNull,
+
+    [Token(Category = "operator", Example = "isnotnull")]
+    IsNotNull,
 
     //[Token(Example = ".")]
     //Dot,

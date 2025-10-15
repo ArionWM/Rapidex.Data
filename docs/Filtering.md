@@ -26,14 +26,12 @@ Parentheses are used to group conditions and can be nested, and the `and` and `o
 | `<=`       | Less than or equal to | `le`, `lte` |  |
 | `between`  | between in and equal to two values  |  |  |
 | `:=`      | In a list (seperated by comma)  | `in`, `contains`, `anyof` |  |
-| `!:`      | Not in a list | `notin`, `notcontains`, `noneof` | Not available |
+| `!:`      | Not in a list | `notin`, `notcontains`, `noneof` | |
 | `!`        | Not    | `not` |  |
 | `~`        | Like (wildcard: `*`)      | `like` |  |
 | `!~`       | Not like (wildcard: `*`)  | `notlike` | Not available |
 | `is null`  | Is null     | `isnull`, `= null` | Not available |
 | `is not null` | Is not null | `isnotnull`, `!= null` | Not available |
-| `is empty` | Is empty   | `isempty`, `[]` | Not available |
-| `is not empty` | Is not empty | `isnotempty`, `![]` | Not available |
 
 
 ## Simple / Direct Operators
@@ -87,8 +85,6 @@ DateTimes should be in `yyyy-MM-dd` or `yyyy-MM-ddTHH:mm:ss` format.
 
 | Feature | Description | Status |
 | ------- | ----------- | ------- |
-| Operator: `!:` | Not in a list | Not available |
-| Operator: `!~` | Not like | Not available |
 | Operator: `is null` | Is null | Not available |
 | Operator: `is not null` | Is not null | Not available |
 | Nested filters (MyEntity.ReferencedField.Field = ABC) | Is empty | Not available |
@@ -133,6 +129,20 @@ Date between '2025-01-01' and '2025-12-31'
 ```plaintext
 ((Name = John%20Doe) & (Age > 30)) | ((Name = Jane%20Doe) & (Age < 25))
 ```
+
+### Using `in` Operator
+
+`:=`, `in`, `contains`, `anyof` are same operators
+
+```plaintext
+age := 10,11,12	
+```
+or 
+
+```plaintext
+age in 10,11,12
+```
+
 
 
 ### Filter with search any caption field

@@ -41,6 +41,9 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
             case FilterTokens.Like:
                 query.Like(fieldName, this.CheckValue(fce.Right, fm));
                 break;
+            case FilterTokens.NotLike:
+                query.Not(q => q.Like(fieldName, this.CheckValue(fce.Right, fm)));
+                break;
             case FilterTokens.In:
                 query.In(fieldName, fce.RightArray);
                 break;
@@ -60,10 +63,10 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
                 string rVal2 = fce.Right.Trim();
                 if (rVal2.ToLower() == "null")
                     rVal2 = null;
-                query.Not(q=> q.Eq(fieldName, this.CheckValue(rVal2, fm)));
+                query.Not(q=> q.Eq(fieldName, this.CheckValue(rVal2, fm))); //TODO: q.Eq with `not`  flag
                 break;
             case FilterTokens.NotIn:
-                query.Not(q => q.In(fieldName, fce.RightArray));
+                query.Not(q => q.In(fieldName, fce.RightArray)); //TODO: q.In with `not`  flag
                 break;
             default:
                 throw new NotSupportedException($"Operator {fce.Operator} is not supported.");
@@ -81,6 +84,45 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
         query.And(
             q => q.GtEq(fieldName, startValue),
             q => q.LtEq(fieldName, endValue));
+    }
+
+    protected void ParseNullCheckExpression(IQueryCriteria query, FilterNullCheckExpression fne)
+    {
+        string fieldName = fne.Field;
+        IDbFieldMetadata fm = query.EntityMetadata.Fields.Get(fieldName, false);
+        if (fm == null)
+        {
+            // Check for special cases like 'caption'
+            switch (fieldName.ToLowerInvariant())
+            {
+                case "caption":
+                    fm = query.EntityMetadata.Caption;
+                    if (fm == null)
+                    {
+                        throw new InvalidOperationException($"{query.EntityMetadata.Name} has no caption field");
+                    }
+                    fieldName = fm.Name;
+                    break;
+                default:
+                    throw new InvalidOperationException($"Field not found with '{fieldName}' on null check");
+            }
+        }
+        else
+        {
+            fieldName = fm.Name;
+        }
+
+        // Build the column name with table alias
+        string columnName = $"{query.Alias}.{fieldName}";
+
+        if (fne.IsNotNull)
+        {
+            query.Query.WhereNotNull(columnName);
+        }
+        else
+        {
+            query.Query.WhereNull(columnName);
+        }
     }
 
     protected void ParseRelationExpression(IQueryCriteria query, FilterComparisonExpression fce)
@@ -178,6 +220,9 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
             case FilterBetweenExpression between:
                 this.Parse(query, between);
                 break;
+            case FilterNullCheckExpression nullCheck:
+                this.ParseNullCheckExpression(query, nullCheck);
+                break;
             case FilterBinaryExpression binary:
                 this.Parse(query, binary);
                 break;
@@ -198,5 +243,8 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
     }
 
 }
+
+
+
 
 

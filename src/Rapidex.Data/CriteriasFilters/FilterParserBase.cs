@@ -30,8 +30,13 @@ internal class FilterParserBase
     .Match(Span.EqualTo("and"), FilterTokens.And)
     .Match(Character.EqualTo('&'), FilterTokens.And)
 
+    .Match(Span.EqualTo("!~"), FilterTokens.NotLike)
+    .Match(Span.EqualTo("notlike"), FilterTokens.NotLike)
     .Match(Character.EqualTo('~'), FilterTokens.Like)
     .Match(Span.EqualTo("like"), FilterTokens.Like)
+
+    .Match(Span.EqualTo("isnotnull"), FilterTokens.IsNotNull)
+    .Match(Span.EqualTo("isnull"), FilterTokens.IsNull)
 
     .Match(Character.EqualTo('='), FilterTokens.Equal)
     .Match(Span.EqualTo("eq"), FilterTokens.Equal)
@@ -60,8 +65,10 @@ internal class FilterParserBase
     .Match(Span.EqualTo("contains"), FilterTokens.In)
     .Match(Span.EqualTo("anyof"), FilterTokens.In)
 
+    .Match(Span.EqualTo("!:"), FilterTokens.NotIn)
     .Match(Span.EqualTo("notin"), FilterTokens.NotIn)
-    .Match(Span.EqualTo("!="), FilterTokens.NotIn)
+    .Match(Span.EqualTo("notcontains"), FilterTokens.NotIn)
+    .Match(Span.EqualTo("noneof"), FilterTokens.NotIn)
 
     .Match(Span.EqualTo("not"), FilterTokens.Not)
     .Match(Character.EqualTo('!'), FilterTokens.Not)
@@ -133,8 +140,11 @@ internal class FilterParserBase
     private static readonly TokenListParser<FilterTokens, FilterTokens> ComparisonOperatorParser =
     Token
         .EqualTo(FilterTokens.Equal).Select(t => FilterTokens.Equal)
+        .Or(Token.EqualTo(FilterTokens.NotEqual).Select(t => t.Kind))
         .Or(Token.EqualTo(FilterTokens.Like).Select(t => t.Kind))
+        .Or(Token.EqualTo(FilterTokens.NotLike).Select(t => t.Kind))
         .Or(Token.EqualTo(FilterTokens.In).Select(t => t.Kind))
+        .Or(Token.EqualTo(FilterTokens.NotIn).Select(t => t.Kind))
         .Or(Token.EqualTo(FilterTokens.GreaterThanOrEqual).Select(t => t.Kind))
         .Or(Token.EqualTo(FilterTokens.LessThanOrEqual).Select(t => t.Kind))
         .Or(Token.EqualTo(FilterTokens.GreaterThan).Select(t => t.Kind))
@@ -149,15 +159,47 @@ internal class FilterParserBase
             from end in IdentifierParser
             select (FilterExpression)new FilterBetweenExpression(left, start, end));
 
+    // Parse "Field is null" - handle both "isnull" and "is null" patterns
+    private static readonly TokenListParser<FilterTokens, FilterExpression> IsNullParser =
+           // Pattern 1: "Field isnull"
+           (from field in IdentifierParser
+            from isNullToken in Token.EqualTo(FilterTokens.IsNull)
+            select (FilterExpression)new FilterNullCheckExpression(field, false))
+           // Pattern 2: "Field is null" - read three tokens and validate
+           .Or(from field in Token.EqualTo(FilterTokens.String).Select(t => t.ToStringValue())
+               from isStr in Token.EqualTo(FilterTokens.String).Where(t => t.ToStringValue().ToLower() == "is")
+               from nullStr in Token.EqualTo(FilterTokens.String).Where(t => t.ToStringValue().ToLower() == "null")
+               select (FilterExpression)new FilterNullCheckExpression(field, false));
+
+    // Parse "Field is not null" - handle both "isnotnull" and "is not null" patterns
+    private static readonly TokenListParser<FilterTokens, FilterExpression> IsNotNullParser =
+           // Pattern 1: "Field isnotnull"
+           (from field in IdentifierParser
+            from isNotNullToken in Token.EqualTo(FilterTokens.IsNotNull)
+            select (FilterExpression)new FilterNullCheckExpression(field, true))
+           // Pattern 2: "Field is not null" - read four tokens and validate
+           .Or(from field in Token.EqualTo(FilterTokens.String).Select(t => t.ToStringValue())
+               from isStr in Token.EqualTo(FilterTokens.String).Where(t => t.ToStringValue().ToLower() == "is")
+               from notToken in Token.EqualTo(FilterTokens.Not)
+               from nullStr in Token.EqualTo(FilterTokens.String).Where(t => t.ToStringValue().ToLower() == "null")
+               select (FilterExpression)new FilterNullCheckExpression(field, true));
+
     private static readonly TokenListParser<FilterTokens, FilterExpression> ComparisonParser =
            (from left in IdentifierParser
             from op in ComparisonOperatorParser
             from right in IdentifierListParser
             select (FilterExpression)new FilterComparisonExpression(left, op, right));
 
-    // Use Try extension method to make BetweenParser non-consuming on failure
+    // Field expressions excluding null checks
+    private static readonly TokenListParser<FilterTokens, FilterExpression> BasicFieldExpressionParser =
+        BetweenParser.Try()
+            .Or(ComparisonParser);
+
+    // All field expressions including null checks
     private static readonly TokenListParser<FilterTokens, FilterExpression> FieldExpressionParser =
-        BetweenParser.Try().Or(ComparisonParser);
+        IsNotNullParser.Try()
+            .Or(IsNullParser.Try())
+            .Or(BasicFieldExpressionParser);
 
     private static readonly TokenListParser<FilterTokens, FilterExpression> Factor =
          FieldExpressionParser

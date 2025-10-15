@@ -6,9 +6,17 @@ data:
     firstName: John
     lastName: Doe
     email: john.doe@example.com
+    birthDate: 1985-05-15
   - entity: Contact
     id: 101
     fullName: Rapidex Inc.
     type: Business
     email: contact@example.com
+  - entity: Contact
+    id: 102
+    type: Personal
+    firstName: Alicia
+    lastName: Example
+    email: alicia.doe@example.com
+    birthDate: 2000-01-04
     

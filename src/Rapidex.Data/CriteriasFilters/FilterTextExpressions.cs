@@ -37,6 +37,23 @@ internal class FilterComparisonExpression : FilterExpression
     }
 }
 
+internal class FilterNullCheckExpression : FilterExpression
+{
+    public string Field { get; }
+    public bool IsNotNull { get; }
+
+    public FilterNullCheckExpression(string field, bool isNotNull)
+    {
+        Field = field;
+        IsNotNull = isNotNull;
+    }
+
+    public override string ToString()
+    {
+        return IsNotNull ? $"{Field} is not null" : $"{Field} is null";
+    }
+}
+
 internal class FilterBetweenExpression : FilterExpression
 {
     public string Field { get; }
@@ -99,6 +116,9 @@ internal static class FilterExpressionExtensions
             FilterComparisonExpression comp => comp.Operator == FilterTokens.In
                 ? $"{comp.Left} {comp.Operator} {string.Join(", ", comp.RightArray)}"
                 : $"{comp.Left} {comp.Operator} {comp.Right}",
+            FilterNullCheckExpression nullCheck => nullCheck.IsNotNull
+                ? $"{nullCheck.Field} is not null"
+                : $"{nullCheck.Field} is null",
             FilterBetweenExpression between => $"{between.Field} between {between.StartValue} and {between.EndValue}",
             FilterUnaryExpression unary => $"{unary.Operator}{ExpressionToString(unary.Operand)}",
             FilterBinaryExpression bin => $"({ExpressionToString(bin.Left)} {bin.Operator} {ExpressionToString(bin.Right)})",
