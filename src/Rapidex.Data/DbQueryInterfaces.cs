@@ -149,7 +149,8 @@ public interface IQueryAggregate : IQueryLoader
 public interface IQueryUpdater : IQueryCriteria
 {
     ObjDictionary UpdateData { get; }
-    void Update(IDbDataModificationScope workScope, ObjDictionary data); //TODO: IDbDataModificationScope üzerinden çağırıldığında IDbDataModificationScope workScope parametresine gerek yok. 
+    void Update(IDbDataModificationScope workScope, IDictionary<string, object> data);
+    //TODO: IDbDataModificationScope üzerinden çağırıldığında IDbDataModificationScope workScope parametresine gerek yok. 
     void Delete();
 }
 

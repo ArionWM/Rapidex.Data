@@ -164,3 +164,7 @@ See: *DbEntityMetadata.Caption* property
 ```plaintext
 Caption~*Mytext*
 ```
+
+## Using Filters in Code
+
+abc

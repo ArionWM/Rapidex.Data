@@ -94,108 +94,24 @@ This ensures data integrity and consistency, especially in multithread applicati
 Rapidex.Data uses the [behavior](Behaviors.md) infrastructure to customize the definition and behavior of entities.
 
 You can create reusable behaviors and attach them to multiple entities.
-```csharp
 
-```
-
-...
-
-### Dynamic logic injection with *signal hub (Rapidex Common)
+### Dynamic logic injection with *signal hub*
 
 Validate, calculate, before save, after save and other logic can be injected with *signal hub*.
 
 Much more possibilities with *SignalHub* structure.
 
-```csharp
+See: [Entity Logic](EntityLogic.md)
 
-internal class ContactImplementer : IConcreteEntityImplementer<Contact>
-{
-    protected static void CalculateContactValues(Contact contact)
-    {
-        if (contact.BirthDate.IsNOTNullOrEmpty())
-        {
-            DateTimeOffset now = DateTimeOffset.Now;
-            int age = now.Year - contact.BirthDate.Value.Year;
-            if (now.DayOfYear < contact.BirthDate.Value.DayOfYear)
-                age--;
-            contact.Age = age;
-        }
-
-        if (contact.FullName.IsNullOrEmpty())
-        {
-            contact.FullName = (contact.FirstName + " " + contact.LastName).Trim();
-        }
-    }
-
-    protected static ISignalHandlingResult Validate(IEntityReleatedMessageArguments args)
-    {
-        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
-        IValidationResult validationResult = new ValidationResult();
-
-        // ....
-
-        if (contact.FirstName.IsNullOrEmpty())
-            validationResult.Error("FirstName", "First name is required.");
-
-        return args.CreateHandlingValidationResult(contact, validationResult);
-    }
-
-    protected static ISignalHandlingResult ExecLogic(IEntityReleatedMessageArguments args)
-    {
-        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
-
-        CalculateContactValues(contact);
-        return args.CreateHandlingResult(contact);
-    }
-
-    protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
-    {
-        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
-        CalculateContactValues(contact);
-        return args.CreateHandlingResult();
-    }
-
-    public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
-    {
-        metadata
-            .AddBehavior<ArchiveEntity>(true, false)
-            .AddBehavior<HasTags>(true, false)
-            .MarkOnlyBaseSchema();
-
-        //See: SignalHub.md
-        //Register to signals
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_BEFORESAVE,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.BeforeSave);
-
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_VALIDATE,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.Validate);
-
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.ExecLogic);
-    }
-}
-```
-
-...
+See: [Signal Hub](SignalHub.md)
 
 ### Web service ready for CRUD operations (with JSON)
 
-...
+Rapidex.Data ready for CRUD operations + web services implementation and provides built-in JSON deserialization support. 
+
+See: [Serialization & Deserialization](SerializationDeserializationEntityData.md)
+
+See: [Sample ASP.NET Core Application](/samples/Rapidex.Data.Sample.Basic1)
 
 ### Easy predefined data support for entities
 
@@ -208,7 +124,9 @@ See: [Predefined Data](PredefinedData.md)
 *PartialEntity* structure allows to defining a subset of fields to be retrieved or updated.
 This is useful for optimizing performance and minimizing data transfer.
 
-See: [Entity Definition](EntityDefinition.md#Partial%20Entities) and [Updating Data](UpdatingData.md#Partial%20Entities)
+See: [Entity Definition](EntityDefinition.md#Partial-Entities) 
+
+See: [Updating Data](UpdatingData.md#Partial-Entities)
 
 ### Multiple schema (workspaces) support
 
@@ -267,9 +185,12 @@ See: [Multiple Database Management](MultiDatabaseManagement.md)
 
 ### Support for complex queries, filtering and pagination
 
-...
+Rapidex.Data has built-in support for complex queries and pagination.
 
 See: [Querying Data](QueryingData.md)
+
+Also supports filtering (from string expressions) with various operators.
+
 See: [Filtering](Filtering.md)
 
 ### Built-in field types
@@ -282,16 +203,38 @@ See: [Field Types](FieldTypes.md)
 
 ### Easy use One-to-Many and Many-to-Many relationships
 
-...
+Relationship support is designed with "field" infrastructure for easy development and end user experience.
 
+`RelationN2N` and `RelationOne2N` field types are provide easy use of Many-to-Many and One-to-Many relationship support.
+
+And this relationships is `lazy` and can be used in queries, filters, json serialization / deserialization etc.
+
+See: [Field Types](FieldTypes.md)
 
 ### Lazy Loading
 
-...
+Reference, Relation, Enumeration and other complex field types are lazy loaded.
 
 ### Automatic schema apply (create & update)
 
-...
+Rapidex.Data can automatically create and update database schema based on entity definitions with single command.
+
+```csharp
+    var db = Database.Dbs.Db(); 
+    //... scan definitions or add definitions with code
+    db.Structure.ApplyAllStructure(); //<-- Apply structure changes
+```
+
+or 
+
+```csharp
+    var db = Database.Dbs.Db(); 
+    
+    var em = dbScope.Metadata.Get<Contact>();
+    em.AddFieldIfNotExist<string>("DynamicAddedField");
+    dbScope.Structure.ApplyEntityStructure<Contact>(); //<-- Apply structure changes for entity only
+```
+
 
 ### Entity Ids always start from 10.000
 
@@ -301,20 +244,62 @@ Developers can inject predefined data and demo data with Ids less than 10.000.
 
 ### Unique and easy use *Query* object for complex queries  
 
-abc
+`Query` object provides a unique and easy way to create complex queries with filtering, sorting, pagination and includes.
 
+```csharp
+    var db = Database.Dbs.Db(); 
+    var query = db.GetQuery<Contact>()
+            .Like(nameof(Contact.FullName), "%a%")
+            .OrderBy(OrderDirection.Asc, nameof(Contact.FullName))
+            .IsNotArchived();
+
+    var result = query.Load();
+```
 
 ### Bulk update with queries
 
-abc
+`Query` object also supports bulk update operations, allowing you to update multiple records in a single command.
+
+```csharp
+    var work = db.BeginWork();
+    var query = db.GetQuery<Contact>();
+    
+    query
+        .EnterUpdateMode()
+        .Eq(nameof(Contact.Type), ContactTypeSample.Personal)
+        .Update(work, new Dictionary<string, object>() { { nameof(Contact.FullName), "Updated Name" } });
+
+    work.CommitChanges();
+```
 
 ### Text based filter parsing for dynamic filters
 
-abc UI usage vs.
+For web services and dynamic queries, Rapidex.Data supports text-based filter parsing.
+
+See: [Filtering](Filtering.md)
 
 ### Metadata injection from another entity definition
 
-abc
+Rapidex.Data supports metadata injection from another entity definition, allowing you to easily reuse and extend existing entity definitions.
 
+```YAML
+_tag: entity
+name: myEntity5
+tenant: common
 
+fields:
+- name: Type
+  type: enum
+  caption: 
+  isSealed: false
+  reference: ContactType
+
+injection: # <- Inject to another entity definition 
+- entityName: myOtherEntity
+  fields:
+  - name: InjectedField
+    type: string
+    caption: InjectedField
+
+```
 

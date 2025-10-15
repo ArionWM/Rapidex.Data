@@ -46,7 +46,6 @@ public class SampleServiceA
         }
 
         return query.Load();
-
     }
 
     internal Contact GetContact(IDbSchemaScope db, long id)

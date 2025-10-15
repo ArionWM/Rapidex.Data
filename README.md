@@ -13,7 +13,7 @@ Rapidex.Data supports multiple database engines (MS SQL Server, PostgreSQL and o
 - Define entities with **concrete** (classes) or **soft** (JSON, YAML or with code in runtime) 
 - Change metadata (entity definitions) and schema in runtime
 - UnitOfWork pattern
-- Unique and extensible *[behavior](/docs/Behaviors.md)* approach for reusable logic
+- Unique and extensible *behavior* approach for reusable logic
 - Dynamic logic injection with *signal hub (with Rapidex Common)* 
 - Web service ready for CRUD operations (with JSON)
 - Easy predefined data support for entities
