@@ -8,8 +8,8 @@ using Rapidex.Data.Sample.App1;
 using Rapidex.Data.Sample.App1.ConcreteEntities;
 
 
-//Classic ASP.NET Core setup
 
+#region Classic ASP.NET Core setup
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -44,15 +44,15 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.UseSerilog(Path.Combine(AppContext.BaseDirectory, "Logs"));
+#endregion
 
-//...
 
 builder.Services.AddApplicationServices(); //<- Add own services
 
 
-
-
 //Rapidex ==============================
+//See: https://github.com/ArionWM/Rapidex.Data/blob/main/docs/QuickStart.md
+
 builder.Services.AddRapidexDataLevel(); //<- Add Rapidex services
 
 //For single database and schema application, this useful ...
@@ -63,30 +63,29 @@ builder.Services.AddTransient<IDbSchemaScope>(sp =>
 });
 
 //If we not use IRapidexAssemblyDefinition supported class (library declaration), we can add manually own assemblies
-//See: LibraryDeclaration.md
 Common.Assembly.Add(typeof(Program).Assembly);
+
+//See: https://github.com/ArionWM/Rapidex.Data/blob/main/docs/LibraryDeclaration.md
 //======================================
 
 
 
 //...
-
-
 
 var app = builder.Build();
 
 
 //...
 
-
-
 //Rapidex ==============================
 app.Services.StartRapidexDataLevel(); //<- Start Rapidex infrastructure
 
-StartMyConfiguration(); //<- Add dynamic metadata eg.
+StartMyConfiguration(); //<- Add dynamic metadata etc.
 //======================================
 
 //...
+
+#region Classic ASP.NET Core setup
 
 if (app.Environment.IsDevelopment())
 {
@@ -114,8 +113,9 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+#endregion
 
+app.Run();
 
 
 
@@ -127,7 +127,7 @@ static void StartMyConfiguration()
     //Scan and add metadata from definitions
     //--------------------------------------------
     //Concrete definitions already scanned from assembly
-    
+
     //Lets scan json or yaml definitions from folder
     dbScope.Metadata.ScanDefinitions(@".\App_Content\MyAppDefinitions");
 

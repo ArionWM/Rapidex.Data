@@ -169,47 +169,54 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 
 		SqlKata.BasicCondition cond06 = conditions.First();
 		Assert.Contains(".Name", cond06.Column, StringComparison.InvariantCultureIgnoreCase);
-		//Assert.Equal("=", cond06.Operator);
-		//Assert.Equal(2L, cond06.Value);
+        //Assert.Equal("=", cond06.Operator);
+        //Assert.Equal(2L, cond06.Value);
+
+        //------------------------------------------------------------------------------
+        //between
+        query = db.GetQuery<ConcreteEntityForFilterTest>();
+        filter = "Age between 18 and 20";
+        criteria = CriteriaParser.Parse(query, filter);
+
+        //------------------------------------------------------------------------------
+
+
+        ////------------------------------------------------------------------------------
+        //query = database.GetQuery<ConcreteEntityForFilterTest>();
+        //filter = "(Name=1) and (Address~addr1* or Address~addr2*)";
+        //criteria = CriteriaParser.Parse(query, filter);
+
+        //conditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
+        //Assert.NotEmpty(conditions);
+        //Assert.Single(conditions);
+
+
+        ////------------------------------------------------------------------------------
+        //query = database.GetQuery<ConcreteEntityForFilterTest>();
+        //filter = "Name=null";
+        //criteria = CriteriaParser.Parse(query, filter);
+
+        //conditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
+        //Assert.NotEmpty(conditions);
+        //Assert.Single(conditions);
 
 
 
-		////------------------------------------------------------------------------------
-		//query = database.GetQuery<ConcreteEntityForFilterTest>();
-		//filter = "(Name=1) and (Address~addr1* or Address~addr2*)";
-		//criteria = CriteriaParser.Parse(query, filter);
-
-		//conditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
-		//Assert.NotEmpty(conditions);
-		//Assert.Single(conditions);
 
 
-		////------------------------------------------------------------------------------
-		//query = database.GetQuery<ConcreteEntityForFilterTest>();
-		//filter = "Name=null";
-		//criteria = CriteriaParser.Parse(query, filter);
+        //SqlServerCompiler mySqlCompiler = new SqlServerCompiler();
+        //SqlResult result = mySqlCompiler.Compile(criteria.Query);
+        //string sql = result.ToString();
 
-		//conditions = criteria.Query.Clauses.Where(cl => cl is SqlKata.BasicCondition).Cast<SqlKata.BasicCondition>();
-		//Assert.NotEmpty(conditions);
-		//Assert.Single(conditions);
+        //Assert.NotNull(sql);
+        ////SELECT * FROM [Base].[ConcreteEntityForFilterTest] AS [C36516] WHERE [C36516].[Name] = 'abc12' AND LOWER([C36516].[Address]) like 'addr1%'
 
+        //Assert.Contains("[Name] = abc12", sql);
+        //Assert.Contains("[Address]) like addr1*", sql);
 
+    }
 
-
-
-		//SqlServerCompiler mySqlCompiler = new SqlServerCompiler();
-		//SqlResult result = mySqlCompiler.Compile(criteria.Query);
-		//string sql = result.ToString();
-
-		//Assert.NotNull(sql);
-		////SELECT * FROM [Base].[ConcreteEntityForFilterTest] AS [C36516] WHERE [C36516].[Name] = 'abc12' AND LOWER([C36516].[Address]) like 'addr1%'
-
-		//Assert.Contains("[Name] = abc12", sql);
-		//Assert.Contains("[Address]) like addr1*", sql);
-
-	}
-
-	[Fact]
+    [Fact]
 	public void FilterParser_02()
 	{
 		//this.Fixture.ClearCaches();

@@ -60,11 +60,8 @@ public class ThreadingUtilities
 
     protected async Task T03AsyncDelayMethod(AsyncLocalStack<string> stack, int delayMs)
     {
-        //Interlocked.Increment(ref t03ExecutingCount);
-        //stack.Push($"B {t03ExecutingCount:00}");
         stack.Push($"B");
         await Task.Delay(delayMs);
-        //Interlocked.Increment(ref t03ExecutedCount);
     }
 
     protected async Task AsyncLocalStackScope()
@@ -83,10 +80,7 @@ public class ThreadingUtilities
 
         Action act = () =>
         {
-            //localStack.Push($"C {t03ExecutingCount:00}");
             localStack.Push($"C");
-            //Assert.False(localStack.IsEmpty);
-            //Assert.Equal(1, localStack.Count);
             Thread.Sleep(100);
         };
 

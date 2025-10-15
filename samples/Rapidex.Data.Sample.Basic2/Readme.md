@@ -1,5 +1,0 @@
-﻿# Prerequisites
-
-## Database and user
-
-.....

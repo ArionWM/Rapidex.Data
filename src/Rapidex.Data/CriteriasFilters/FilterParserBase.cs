@@ -15,7 +15,7 @@ namespace Rapidex.Data;
 
 internal class FilterParserBase
 {
-    internal static Tokenizer<FilterTokens> tokenizer = new TokenizerBuilder<FilterTokens>()
+    internal static Tokenizer<FilterTokens> Tokenizer = new TokenizerBuilder<FilterTokens>()
         .Ignore(Span.WhiteSpace)
     .Match(Span.EqualTo("()"), FilterTokens.OpenCloseParen)
     .Match(Span.EqualTo("[]"), FilterTokens.OpenCloseParen)
@@ -138,7 +138,7 @@ internal class FilterParserBase
 
     public FilterExpression ParseToExpression(string input)
     {
-        var tokens = FilterParserBase.tokenizer.Tokenize(input);
+        var tokens = FilterParserBase.Tokenizer.Tokenize(input);
         var result = FilterParserBase.ExpressionParser.Parse(tokens);
         return result;
     }

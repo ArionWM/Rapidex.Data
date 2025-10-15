@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Rapidex.Data.Sample.App1.Models;
 using Rapidex.Data.Sample.App1.Services;
 
@@ -12,11 +13,11 @@ public class DataController : ControllerBase
 {
     private readonly IDbSchemaScope db;
 
-    protected SampleServiceA ServiceA { get; }
+    protected SampleServiceA SampleService { get; }
 
     public DataController(SampleServiceA serviceA, IDbSchemaScope dbSchemaScope)
     {
-        this.ServiceA = serviceA;
+        this.SampleService = serviceA;
         this.db = dbSchemaScope;
     }
 
@@ -36,14 +37,14 @@ public class DataController : ControllerBase
     }
 
     /// <summary>
-    /// This endpoint checks the entity content;
+    /// This endpoint receive updated (planned etc) single entity content and checks the entity content;
     /// -- Validate the content
     /// -- Run custom logic (See: ContactImplementer.abc)
     /// Requires the entity content without saving changes
     /// </summary>
-    [HttpPost("check-entity-content")]
+    [HttpPost("check-entity-content-with-update-data")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult CheckEntityContent(bool? validate, bool? runCustomLogic)
+    public async Task<IActionResult> CheckEntityContentWithUpdateData(bool? validate, bool? runCustomLogic)
     {
         if (validate == null)
             validate = true;
@@ -55,24 +56,11 @@ public class DataController : ControllerBase
             return this.BadRequest("At least one of 'validate' or 'runCustomLogic' must be true.");
 
         using var reader = new StreamReader(this.Request.Body);
-        string json = reader.ReadToEnd();
+        string json = await reader.ReadToEndAsync();
 
+        var resultModel = this.SampleService.CheckEntityContent(this.db, json, validate.Value, runCustomLogic.Value);
 
-        var entities = EntityDataJsonConverter.Deserialize(json, this.db);
-
-        var entity = entities.FirstOrDefault();
-        entity.NotNull("No entity found in the request");
-
-
-        CheckEntityContentResultModel resultModel = new();
-
-        if (validate.Value)
-            resultModel.ValidationResult = entity.Validate().Result;
-
-        if (runCustomLogic.Value)
-            resultModel.Entity = entity.ExecLogic().Result;
-
-        string resultJson = resultModel.ToJson();// EntityDataJsonConverter.Serialize(resultModel);
+        string resultJson = resultModel.ToJson();
         return this.Content(resultJson, "application/json");
 
     }
@@ -87,7 +75,7 @@ public class DataController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult ListContacts([FromQuery] string? filter)
     {
-        var contacts = this.ServiceA.ListContacts(this.db, filter);
+        var contacts = this.SampleService.ListContacts(this.db, filter);
         string json = EntityDataJsonConverter.Serialize(contacts);
         return this.Content(json, "application/json");
     }
@@ -104,7 +92,7 @@ public class DataController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetContact([FromRoute] long id)
     {
-        var contact = this.ServiceA.GetContact(this.db, id);
+        var contact = this.SampleService.GetContact(this.db, id);
         if (contact == null)
             return this.NotFound($"Contact with ID {id} not found");
 
@@ -114,22 +102,19 @@ public class DataController : ControllerBase
     }
 
 
-
     /// <summary>
     /// Retrieves a list of orders with optional filtering
     /// </summary>
     /// <param name="filter">Optional filter string to search orders</param>
     /// <returns>List of orders matching the filter criteria</returns>
     /// <response code="200">Returns the list of orders</response>
-    [Obsolete("")]
     [HttpGet("orders")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult ListOrders([FromQuery] string? filter)
     {
-        throw new NotImplementedException();
-        //var orders = this.ServiceA.ListOrders(this.db, filter);
-        //var listResult = serializationCreator.ConvertToListData(orders, this.serializationOptions, null, null);
-        //return this.Ok(listResult);
+        var orders = this.SampleService.ListOrders(this.db, filter);
+        string json = EntityDataJsonConverter.Serialize(orders);
+        return this.Content(json, "application/json");
     }
 
     /// <summary>
@@ -139,20 +124,17 @@ public class DataController : ControllerBase
     /// <returns>The order details</returns>
     /// <response code="200">Returns the order</response>
     /// <response code="404">If the order is not found</response>
-
-    [Obsolete("")]
     [HttpGet("orders/{id:long}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetOrder([FromRoute] long id)
     {
-        var order = this.ServiceA.GetOrder(this.db, id);
+        var order = this.SampleService.GetOrder(this.db, id);
         if (order == null)
             return this.NotFound($"Order with ID {id} not found");
 
-        throw new NotImplementedException();
-        //var entityResult = serializationCreator.ConvertToEntityData(order, this.serializationOptions, null, null);
-        //return this.Ok(entityResult);
+        string json = EntityDataJsonConverter.Serialize(order);
+        return this.Content(json, "application/json");
     }
 
 

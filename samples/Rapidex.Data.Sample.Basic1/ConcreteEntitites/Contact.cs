@@ -75,6 +75,7 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
             .MarkOnlyBaseSchema();
 
         //See: SignalHub.md
+        //Register to signals
         Signal.Hub.SubscribeEntityReleated(
             DataReleatedSignalConstants.SIGNAL_BEFORESAVE,
             SignalTopic.ANY,

@@ -217,6 +217,17 @@ namespace Rapidex
             return str;
         }
 
+        public static string AlignRight(this string str, int totalWidth, char paddingChar = ' ')
+        {
+            if (str.IsNullOrEmpty())
+                return str;
+
+            if (str.Length >= totalWidth)
+                return str;
+
+            return str.PadLeft(totalWidth, paddingChar);
+        }
+
         public static string AppendIsNotExists(this string str, string endfix)
         {
             if (!str.EndsWith(endfix))

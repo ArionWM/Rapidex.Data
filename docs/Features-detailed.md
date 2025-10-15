@@ -8,7 +8,7 @@ For easy use and fast development. But also flexible for complex scenarios.
 
 ### Define entities with *concrete* (classes) or *soft* (JSON, YAML or with code in runtime)
 
-ORM frameworks usually require entity definitions with concrete classes. But this approach has flexibility limitations.
+For ORMs, only concrete classes or static mapping (XML etc.) definitions has flexibility limitations.
 
 Rapidex.Data allows to define entities with concrete classes or with JSON, YAML files. 
 
@@ -108,50 +108,87 @@ Much more possibilities with *SignalHub* structure.
 
 ```csharp
 
-// ...
+internal class ContactImplementer : IConcreteEntityImplementer<Contact>
+{
+    protected static void CalculateContactValues(Contact contact)
+    {
+        if (contact.BirthDate.IsNOTNullOrEmpty())
+        {
+            DateTimeOffset now = DateTimeOffset.Now;
+            int age = now.Year - contact.BirthDate.Value.Year;
+            if (now.DayOfYear < contact.BirthDate.Value.DayOfYear)
+                age--;
+            contact.Age = age;
+        }
 
-/// Register signal handler for Contact entity
-Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC, //<-- calculate 
+        if (contact.FullName.IsNullOrEmpty())
+        {
+            contact.FullName = (contact.FirstName + " " + contact.LastName).Trim();
+        }
+    }
+
+    protected static ISignalHandlingResult Validate(IEntityReleatedMessageArguments args)
+    {
+        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
+        IValidationResult validationResult = new ValidationResult();
+
+        // ....
+
+        if (contact.FirstName.IsNullOrEmpty())
+            validationResult.Error("FirstName", "First name is required.");
+
+        return args.CreateHandlingValidationResult(contact, validationResult);
+    }
+
+    protected static ISignalHandlingResult ExecLogic(IEntityReleatedMessageArguments args)
+    {
+        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
+
+        CalculateContactValues(contact);
+        return args.CreateHandlingResult(contact);
+    }
+
+    protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
+    {
+        Contact contact = (Contact)args.Entity.EnsureForActualEntity();
+        CalculateContactValues(contact);
+        return args.CreateHandlingResult();
+    }
+
+    public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
+    {
+        metadata
+            .AddBehavior<ArchiveEntity>(true, false)
+            .AddBehavior<HasTags>(true, false)
+            .MarkOnlyBaseSchema();
+
+        //See: SignalHub.md
+        //Register to signals
+        Signal.Hub.SubscribeEntityReleated(
+            DataReleatedSignalConstants.SIGNAL_BEFORESAVE,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            nameof(Contact),
+            ContactImplementer.BeforeSave);
+
+        Signal.Hub.SubscribeEntityReleated(
+            DataReleatedSignalConstants.SIGNAL_VALIDATE,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            SignalTopic.ANY,
+            nameof(Contact),
+            ContactImplementer.Validate);
+
+        Signal.Hub.SubscribeEntityReleated(
+            DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC,
             SignalTopic.ANY,
             SignalTopic.ANY,
             SignalTopic.ANY,
             nameof(Contact),
             ContactImplementer.ExecLogic);
-
-// ...
-
-
-/// Signal handler implementation
-
-protected static ISignalHandlingResult ExecLogic(IEntityReleatedMessageArguments args)
-{
-    Contact contact = (Contact)args.Entity.EnsureForActualEntity();
-
-    CalculateContactValues(contact); //<-- 
-
-    return args.CreateHandlingResult(contact);
-}
-
-protected static void CalculateContactValues(Contact contact)
-{
-    if (contact.BirthDate.IsNOTNullOrEmpty())
-    {
-        DateTimeOffset now = DateTimeOffset.Now;
-        int age = now.Year - contact.BirthDate.Value.Year;
-        if (now.DayOfYear < contact.BirthDate.Value.DayOfYear)
-            age--;
-        contact.Age = age;
-    }
-
-    if (contact.FullName.IsNullOrEmpty())
-    {
-        contact.FullName = (contact.FirstName + " " + contact.LastName).Trim();
     }
 }
-
-
-
 ```
 
 ...

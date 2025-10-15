@@ -89,6 +89,16 @@ public static class AssertionHelper
         return (TObj)obj;
     }
 
+    public static TObj NotZero<TObj>(this TObj obj, string? message = null) where TObj : struct, IComparable
+    {
+        if (obj.CompareTo(default(TObj)) == 0)
+        {
+            DebugBreak();
+            throw new BaseValidationException(message ?? "Object is zero");
+        }
+        return obj;
+    }   
+
     public static Type ShouldSupportTo(this Type type, Type desiredType, string? message = null)
     {
         message = message ?? $"Type does not support to {desiredType.Name}, type is '{type.Name}'";

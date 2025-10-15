@@ -44,8 +44,14 @@ public interface IValidationResult : IResult
 
 public interface IUpdateResult<T> : IResult
 {
-    IReadOnlyList<T> ModifiedItems { get; }
+    
+    [JsonPropertyOrder(9990)]
     IReadOnlyList<T> AddedItems { get; }
+
+    [JsonPropertyOrder(9991)]
+    IReadOnlyList<T> ModifiedItems { get; }
+
+    [JsonPropertyOrder(9992)]
     IReadOnlyList<T> DeletedItems { get; }
 
     void MergeWith(IUpdateResult<T> with);
@@ -62,39 +68,51 @@ public interface IUpdateResult : IUpdateResult<object>
 
 public class UpdateResult<T> : IUpdateResult<T>
 {
-    List<T> _modifiedItems { get; } = new List<T>();
-    List<T> _addedItems { get; } = new List<T>();
-    List<T> _deletedItems { get; } = new List<T>();
+#pragma warning disable IDE1006 // Naming Styles
+    protected List<T> modifiedItems { get; } = new List<T>();
+    protected List<T> addedItems { get; } = new List<T>();
+    protected List<T> deletedItems { get; } = new List<T>();
+#pragma warning restore IDE1006 // Naming Styles
 
-
-
+    [JsonPropertyOrder(-9999)]
     public bool Success { get; set; }
+
+    [JsonPropertyOrder(-9990)]
     public string Description { get; set; }
-    public IReadOnlyList<T> ModifiedItems => this._modifiedItems.AsReadOnly();
-    public IReadOnlyList<T> AddedItems => this._addedItems.AsReadOnly();
-    public IReadOnlyList<T> DeletedItems => this._deletedItems.AsReadOnly();
+
+
+    [JsonPropertyOrder(9990)]
+    public IReadOnlyList<T> AddedItems => this.addedItems.AsReadOnly();
+
+
+    [JsonPropertyOrder(9991)]
+    public IReadOnlyList<T> ModifiedItems => this.modifiedItems.AsReadOnly();
+
+
+    [JsonPropertyOrder(9992)]
+    public IReadOnlyList<T> DeletedItems => this.deletedItems.AsReadOnly();
 
 
     public void Added(T item)
     {
-        this._addedItems.Add(item);
+        this.addedItems.Add(item);
     }
 
     public void Deleted(T item)
     {
-        this._deletedItems.Add(item);
+        this.deletedItems.Add(item);
     }
 
     public void Modified(T item)
     {
-        this._modifiedItems.Add(item);
+        this.modifiedItems.Add(item);
     }
 
     public void MergeWith(IUpdateResult<T> with)
     {
-        this._modifiedItems.AddRange(with.ModifiedItems);
-        this._addedItems.AddRange(with.AddedItems);
-        this._deletedItems.AddRange(with.DeletedItems);
+        this.modifiedItems.AddRange(with.ModifiedItems);
+        this.addedItems.AddRange(with.AddedItems);
+        this.deletedItems.AddRange(with.DeletedItems);
     }
 }
 

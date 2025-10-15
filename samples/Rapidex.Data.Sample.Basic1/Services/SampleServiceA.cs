@@ -1,4 +1,5 @@
 ﻿using Rapidex.Data.Sample.App1.ConcreteEntities;
+using Rapidex.Data.Sample.App1.Models;
 
 namespace Rapidex.Data.Sample.App1.Services;
 public class SampleServiceA
@@ -8,6 +9,26 @@ public class SampleServiceA
     public SampleServiceA(IEnumerable<IDbCriteriaParser> parsers)
     {
         this.parsers = parsers;
+    }
+
+
+    internal CheckEntityContentResultModel CheckEntityContent(IDbSchemaScope db, string json, bool validate, bool runCustomLogic)
+    {
+        var entities = EntityDataJsonConverter.Deserialize(json, db);
+
+        var entity = entities.FirstOrDefault();
+        entity.NotNull("No entity found in the request");
+
+
+        CheckEntityContentResultModel resultModel = new();
+
+        if (validate)
+            resultModel.ValidationResult = entity.Validate().Result;
+
+        if (runCustomLogic)
+            resultModel.Entity = entity.ExecLogic().Result;
+
+        return resultModel;
     }
 
 
@@ -34,42 +55,7 @@ public class SampleServiceA
         return contact;
     }
 
-    [Obsolete]
-    internal Contact UpdateContact(IDbSchemaScope db)
-    {
-        throw new NotImplementedException();
-
-        using var work = db.BeginWork();
-
-        //long? id = entityValues.Values.Get(nameof(Contact.Id), true).As<long?>();
-
-        //Contact contact;
-        //if (id.HasValue)
-        //{
-        //    contact = work.Find<Contact>(id.Value);
-        //    contact.NotNull($"Contact not found: {id}");
-        //}
-        //else
-        //{
-        //    contact = work.New<Contact>();
-        //}
-
-        //contact.FirstName = entityValues.Values.Get(nameof(Contact.FirstName)).As<string>();
-        //contact.LastName = entityValues.Values.Get(nameof(Contact.LastName)).As<string>();
-        //contact.Email = entityValues.Values.Get(nameof(Contact.Email)).As<string>();
-        //contact.PhoneNumber = entityValues.Values.Get(nameof(Contact.PhoneNumber)).As<string>();
-
-        //DateTimeOffset? birthDate = entityValues.Values.Get(nameof(Contact.BirthDate)).As<DateTimeOffset?>();
-        //if (birthDate.HasValue)
-        //    contact.BirthDate = birthDate;
-        //contact.Save();
-        //work.CommitChanges();
-        //return contact;
-    }
-
-
-
-
+   
 
     public IEntityLoadResult<Order> ListOrders(IDbSchemaScope schema, string? filter)
     {
@@ -88,49 +74,7 @@ public class SampleServiceA
     }
 
 
-    public Order CreateOrder(IDbSchemaScope schema, Contact contact, params Item[] items)
-    {
-        using var work = schema.BeginWork();
-
-        Order order = work.New<Order>();
-        order.Customer = contact;
-        order.Save();
-
-        foreach (var item in items)
-        {
-            OrderLine line = work.New<OrderLine>();
-            line.Item = item;
-            line.Quantity = 1;
-            line.UnitPrice = item.Price;
-
-            order.Lines.Add(line);
-        }
-
-        work.CommitChanges();
-
-        return order;
-    }
-
-    public Order CreateOrder(IDbSchemaScope schema, long contactId, params string[] itemCodes)
-    {
-        Contact contact = schema.Find<Contact>(contactId);
-        List<Item> items = new List<Item>();
-
-        contact.NotNull($"Contact not found: {contactId}");
-
-        foreach (var itemCode in itemCodes)
-        {
-            Item item = schema.GetQuery<Item>()
-                .Eq(nameof(Item.Code), itemCode)
-                .First();
-
-            item.NotNull($"Item not found with: {itemCode}");
-            items.Add(item);
-        }
-
-        return CreateOrder(schema, contact, items.ToArray());
-
-    }
+    
 
     internal Order GetOrder(IDbSchemaScope db, long id)
     {

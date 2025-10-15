@@ -21,10 +21,7 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
     }
 
 
-
-
     // Nested vs. desteklemez, daha sonra değişecek
-
 
     protected void ParseFieldExpression(IQueryCriteria query, FilterComparisonExpression fce)
     {
@@ -60,11 +57,19 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
                 query.LtEq(fieldName, this.CheckValue(fce.Right, fm));
                 break;
             case FilterTokens.NotEqual:
-                throw new NotImplementedException();
+                string rVal2 = fce.Right.Trim().ToLower();
+                if (rVal2 == "null")
+                    rVal2 = null;
+                query.Not(q=> q.Eq(fieldName, this.CheckValue(rVal2, fm)));
+                break;
             case FilterTokens.NotIn:
-                throw new NotImplementedException();
+                query.Not(q => q.In(fieldName, fce.RightArray));
+                break;
             case FilterTokens.Between:
-                throw new NotImplementedException();
+                query.And(
+                    q => q.GtEq(fieldName, this.CheckValue(fce.Right, fm)),
+                    q => q.Lt(fieldName, this.CheckValue(fce.Right, fm)));
+                break;
             default:
                 throw new NotSupportedException($"Operator {fce.Operator} is not supported.");
         }
