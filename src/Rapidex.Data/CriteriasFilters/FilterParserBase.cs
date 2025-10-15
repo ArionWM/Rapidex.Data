@@ -84,6 +84,7 @@ internal class FilterParserBase
         .Or(Character.EqualTo('*'))
         .Or(Character.EqualTo('/'))
         .Or(Character.EqualTo('-'))
+        .Or(Character.EqualTo('%'))
         .AtLeastOnce(), FilterTokens.String)
     //.Match(Span.MatchedBy(Character.AnyChar), MyTokens.String)
     //.Match(Numerics.Natural,MyTokens.Number)
@@ -91,7 +92,15 @@ internal class FilterParserBase
 
     private static readonly TokenListParser<FilterTokens, string> IdentifierParser =
            Token.EqualTo(FilterTokens.String)
-               .Select(t => t.ToStringValue())
+               .Select(t => {
+                   var value = t.ToStringValue();
+                   // URL decode if contains % character
+                   if (value.Contains('%'))
+                   {
+                       value = System.Web.HttpUtility.UrlDecode(value);
+                   }
+                   return value;
+               })
            .Or(Token.EqualTo(FilterTokens.QuotedString)
                .Select(t => {
                    var value = t.ToStringValue();

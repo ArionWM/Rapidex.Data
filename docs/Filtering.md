@@ -68,7 +68,6 @@ Parentheses are used to group conditions and can be nested, and the `and` and `o
 | `nextmonth` | Next month's date ||
 | `lastyear` | Last year's start date ||
 | `nextyear` | Next year's start date ||
-| `user` | Active user |Not available |
 
 ## Templates
 

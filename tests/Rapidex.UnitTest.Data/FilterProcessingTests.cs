@@ -273,14 +273,16 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
         Assert.NotEmpty(conditions);
         Assert.Single(conditions);
 
-        SqlKata.BasicCondition cond10 = conditions.First();
-        Assert.Contains(".Name", cond10.Column, StringComparison.InvariantCultureIgnoreCase);
-        Assert.Equal("=", cond10.Operator);
-        Assert.Equal("Alice Smith", cond10.Value);
+        SqlKata.BasicCondition cond11 = conditions.First();
+        Assert.Contains(".Name", cond11.Column, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Equal("=", cond11.Operator);
+        Assert.Equal("Alice Smith", cond11.Value);
 
 
     }
-	public void FilterParser_02()
+
+    [Fact]
+    public void FilterParser_02()
 	{
 		//this.Fixture.ClearCaches();
 
