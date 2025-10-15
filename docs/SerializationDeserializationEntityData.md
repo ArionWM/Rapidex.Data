@@ -198,8 +198,6 @@ New entity JSON representation can include only the fields that need to be set.
 
 For relations in same data, negative id values can use for virtual association. Real IDs will be created and assigned during commit.
 
-... abc
-
 ```Json
 [
   {
@@ -241,16 +239,13 @@ For relations in same data, negative id values can use for virtual association. 
 
 
 
-### Add or Remove Related Entities
+### Add or Remove Related (RelationN2N, RelationOneToN) Entities
 
-...
-
-
+... (preparing)
 
 ## Remarks
 
 - `values` node properties is case-insensitive during deserialization.
-
 
 ## How To Work
 

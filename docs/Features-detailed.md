@@ -65,12 +65,16 @@ fields:
     #...
 ```
 
+---
+
 ### Change metadata (entity definitions) and schema in runtime
 
 Rapidex.Data allows to change entity definitions (metadata) and apply schema changes in runtime. 
 
 - You can add a new field to an entity and apply the schema change in runtime without stopping the application.
 - You can add *behavior* to an entity in runtime.
+
+---
 
 ### UnitOfWork pattern
 
@@ -88,12 +92,15 @@ This ensures data integrity and consistency, especially in multithread applicati
     work1.CommitChanges();
 ```
 
+---
 
 ### Unique and extensible *behavior* approach for reusable logic
 
 Rapidex.Data uses the [behavior](Behaviors.md) infrastructure to customize the definition and behavior of entities.
 
 You can create reusable behaviors and attach them to multiple entities.
+
+---
 
 ### Dynamic logic injection with *signal hub*
 
@@ -105,6 +112,8 @@ See: [Entity Logic](EntityLogic.md)
 
 See: [Signal Hub](SignalHub.md)
 
+---
+
 ### Web service ready for CRUD operations (with JSON)
 
 Rapidex.Data ready for CRUD operations + web services implementation and provides built-in JSON deserialization support. 
@@ -113,11 +122,15 @@ See: [Serialization & Deserialization](SerializationDeserializationEntityData.md
 
 See: [Sample ASP.NET Core Application](/samples/Rapidex.Data.Sample.Basic1)
 
+---
+
 ### Easy predefined data support for entities
 
 Much applications need predefined data for some entities (like Country, Currency, etc.). *Rapidex.Data* provides an easy way to define and apply this data with YAML format.
 
 See: [Predefined Data](PredefinedData.md)
+
+---
 
 ### PartialEntity structure supports selective data retrieval and updates
 
@@ -127,6 +140,8 @@ This is useful for optimizing performance and minimizing data transfer.
 See: [Entity Definition](EntityDefinition.md#Partial-Entities) 
 
 See: [Updating Data](UpdatingData.md#Partial-Entities)
+
+---
 
 ### Multiple schema (workspaces) support
 
@@ -148,6 +163,8 @@ Some entities can be marked *only base schema* and shared between all schemas (w
 
 See: [Multi Schema Management](MultiSchemaManagement.md)
 
+---
+
 ### Multiple database support in same application (multi tenant)
 
 An application can use multiple databases (especially can use MultiTenant applications). 
@@ -161,6 +178,8 @@ An application can use multiple databases (especially can use MultiTenant applic
 ```
 
 See: [Multiple Database Management](MultiDatabaseManagement.md)
+
+---
 
 ### Different metadata customization for each database connection (each tenant can have different configuration)
 
@@ -181,6 +200,8 @@ Each database can have its own set of entities (tables) and may have **different
 
 See: [Multiple Database Management](MultiDatabaseManagement.md)
 
+---
+
 ## Other Features
 
 ### Support for complex queries, filtering and pagination
@@ -193,6 +214,8 @@ Also supports filtering (from string expressions) with various operators.
 
 See: [Filtering](Filtering.md)
 
+---
+
 ### Built-in field types
 
 Color, Currency, Email, Image, Json, Password, OneWayPassword Phone, Text, Time, and others.
@@ -200,6 +223,8 @@ Color, Currency, Email, Image, Json, Password, OneWayPassword Phone, Text, Time,
 And expandable!
 
 See: [Field Types](FieldTypes.md)
+
+---
 
 ### Easy use One-to-Many and Many-to-Many relationships
 
@@ -211,9 +236,13 @@ And this relationships is `lazy` and can be used in queries, filters, json seria
 
 See: [Field Types](FieldTypes.md)
 
+---
+
 ### Lazy Loading
 
 Reference, Relation, Enumeration and other complex field types are lazy loaded.
+
+---
 
 ### Automatic schema apply (create & update)
 
@@ -235,12 +264,15 @@ or
     dbScope.Structure.ApplyEntityStructure<Contact>(); //<-- Apply structure changes for entity only
 ```
 
+---
 
 ### Entity Ids always start from 10.000
 
 To avoid conflicts with predefined data and demo data, entity Ids always start from 10.000.
 
 Developers can inject predefined data and demo data with Ids less than 10.000.
+
+---
 
 ### Unique and easy use *Query* object for complex queries  
 
@@ -255,6 +287,8 @@ Developers can inject predefined data and demo data with Ids less than 10.000.
 
     var result = query.Load();
 ```
+
+---
 
 ### Bulk update with queries
 
@@ -272,11 +306,15 @@ Developers can inject predefined data and demo data with Ids less than 10.000.
     work.CommitChanges();
 ```
 
+---
+
 ### Text based filter parsing for dynamic filters
 
 For web services and dynamic queries, Rapidex.Data supports text-based filter parsing.
 
 See: [Filtering](Filtering.md)
+
+---
 
 ### Metadata injection from another entity definition
 

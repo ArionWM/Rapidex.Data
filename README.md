@@ -38,20 +38,15 @@ Ongoing work focuses on completing feature sets, improving performance, and enha
 
 > **In short:** The architecture is stable — development continues with focus on refinement rather than redesign.
 
-## Getting Started
-
-...
-
 ## Quick Start
 
 See: [Quick Start](/docs/QuickStart.md) 
 
 ## Samples
 
-You can download and run sample projects from the following links:
+You can download and run sample project from the following links:
 
 - [Sample ASP.NET Core Application](/samples/Rapidex.Data.Sample.Basic1)
-- [Sample Console Application](/samples/Rapidex.Data.Sample.Basic2)
 
 ## Documentation
 
@@ -72,6 +67,8 @@ You can download and run sample projects from the following links:
 
 - [Predefined Data](/docs/PredefinedData.md)
 
+- [Database Connection and Required Rights](/docs/DatabaseConnectionAndRequiredRights.md)
+
 - Serialization and Deserialization
   - [Data Serialization & Deserialization](/docs/SerializationDeserializationEntityData.md)
   - [Metadata Serialization](/docs/SerializationDeserializationMetadata.md)
@@ -79,6 +76,7 @@ You can download and run sample projects from the following links:
 - [Updating Data](/docs/UpdatingData.md)
 
 - [Library Declaration](/docs/LibraryDeclaration.md)
+
 
 ### Advanced Topics
 
