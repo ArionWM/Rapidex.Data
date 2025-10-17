@@ -52,3 +52,6 @@ db.Metadata.ScanDefinitions(@".\App_Content\MyAppDefinitions"); //<-- Load defin
 //...
 db.Structure.ApplyAllStructure(); //<-- Apply structure changes and predefined data
 ```
+
+## Autoloading Predefined Data
+

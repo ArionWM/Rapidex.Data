@@ -18,11 +18,13 @@ For default, `appsettings.json` file is used to get connection string.
 
 ```Json
 {
-"Databases": {
-    "Master": {
-      "Provider": "Rapidex.Data.SqlServer.DbSqlServerProvider",
-      "ConnectionString": "<connection string>"
-    }
+"Rapidex": {
+    "Databases": {
+        "Master": {
+          "Provider": "Rapidex.Data.SqlServer.DbSqlServerProvider",
+          "ConnectionString": "<connection string>"
+        }
+      }
   }
 }
 ```

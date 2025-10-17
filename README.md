@@ -30,13 +30,23 @@ See: [Features](/docs/Features-detailed.md) for more details.
 
 ![Status](https://img.shields.io/badge/status-early--development-%23f39c12)
 ![Stability](https://img.shields.io/badge/stability-mostly--stable-%234CAF50)
-![Usability](https://img.shields.io/badge/usability-Inhouse-blue)
+![Usability](https://img.shields.io/badge/usability-inhouse-blue)
 
 Rapidex.Data is under active development, but its **core architecture and interfaces are now stable**.  
 No major changes are expected in the framework’s structure or public API surface.  
 Ongoing work focuses on completing feature sets, improving performance, and enhancing documentation.
 
 > **In short:** The architecture is stable — development continues with focus on refinement rather than redesign.
+
+## Packages (nuget)
+
+| Package | Version |
+|---|---|
+|[Rapidex.Data](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
+|[Rapidex.Data.SqlServer](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
+|[Rapidex.Data.PostgreServer](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
+
+---
 
 ## Quick Start
 
@@ -46,15 +56,13 @@ See: [Quick Start](/docs/QuickStart.md)
 
 You can download and run sample project from the following links:
 
-- [Sample ASP.NET Core Application](/samples/Rapidex.Data.Sample.Basic1)
+- [Sample Application](/samples/)
 
 ## Documentation
 
 ### Basics
 
 - [Entity Definition](/docs/EntityDefinition.md)
-
-- [Tips](/docs/UsageAndTips.md)
 
 - [Field Types](/docs/FieldTypes.md)
 
@@ -77,6 +85,7 @@ You can download and run sample project from the following links:
 
 - [Library Declaration](/docs/LibraryDeclaration.md)
 
+- [Tips](/docs/UsageAndTips.md)
 
 ### Advanced Topics
 
@@ -89,17 +98,14 @@ You can download and run sample project from the following links:
 - [Change Metadata (and schema) on Runtime](/docs/RuntimeChanges.md)
 
 
+---
+
 ## Roadmap
 
 See [Roadmap](/docs/Roadmap.md) for planned features and improvements.
 
-## Packages (nuget)
 
-| Package | Version |
-|---|---|
-|[Rapidex.Data](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
-|[Rapidex.Data.SqlServer](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
-|[Rapidex.Data.PostgreServer](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
+---
 
 ## Licensing and Contribution
 

@@ -54,7 +54,7 @@ public class SampleServiceA
         return contact;
     }
 
-   
+
 
     public IEntityLoadResult<Order> ListOrders(IDbSchemaScope schema, string? filter)
     {
@@ -73,13 +73,12 @@ public class SampleServiceA
     }
 
 
-    
+
 
     internal Order GetOrder(IDbSchemaScope db, long id)
     {
         var order = db.Find<Order>(id);
         return order;
-
     }
 
     internal IEntityLoadResult<Item> ListItems(IDbSchemaScope db, string? filter)

@@ -5,7 +5,7 @@ In Rapidex.Data, Entity logic (validation and calculation-like operations and ot
 ## Concrete Entities - Entity Implementer Classes
 
 
-## Dynamic Entities - Definitions
+## Soft Entities - Definitions
 
 
 ## Validation

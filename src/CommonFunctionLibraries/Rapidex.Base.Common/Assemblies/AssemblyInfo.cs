@@ -8,9 +8,21 @@ namespace Rapidex.Base.Common.Assemblies
 {
     public class AssemblyInfo : IComparable<AssemblyInfo>, IEquatable<AssemblyInfo>
     {
+        protected string navigationName;
+
         public string Code { get; internal set; }
         public string Name { get; internal set; }
-        public string NavigationName { get; internal set; }
+        public string NavigationName
+        {
+            get
+            {
+                return this.navigationName.IsNullOrEmpty() ? this.Name.ToNavigationName() : this.navigationName;
+            }
+            internal set
+            {
+                this.navigationName = value;
+            }
+        }
         public string DatabaseEntityPrefix { get; internal set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
@@ -27,7 +39,7 @@ namespace Rapidex.Base.Common.Assemblies
 
         public AssemblyInfo()
         {
-            
+
         }
 
         public AssemblyInfo(string code, string name, string navigationName, string entityPrefix, Assembly assembly, Type initializatorType)
@@ -47,7 +59,7 @@ namespace Rapidex.Base.Common.Assemblies
 
         public override int GetHashCode()
         {
-            if(this.InitializatorType == null)
+            if (this.InitializatorType == null)
             {
                 return base.GetHashCode();
 

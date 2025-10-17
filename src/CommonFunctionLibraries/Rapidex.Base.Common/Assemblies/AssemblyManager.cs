@@ -13,7 +13,7 @@ namespace Rapidex.Base.Common.Assemblies
         //Bkz: ProCore / AssemblyManagerV2
         //Bu basitleştirilmişi...
 
-        static ConcurrentDictionary<string, Type> types = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
+        protected static ConcurrentDictionary<string, Type> Types = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
         protected HashSet<AssemblyInfo> assemblyDefinitions = new HashSet<AssemblyInfo>();
 
         public IReadOnlyCollection<AssemblyInfo> AssemblyDefinitions { get { return assemblyDefinitions.ToArray().AsReadOnly(); } } //Performance?
@@ -127,8 +127,8 @@ namespace Rapidex.Base.Common.Assemblies
             if (typeName.IsNullOrEmpty())
                 throw new BaseArgumentNullException("typeName");
 
-            if (types.ContainsKey(typeName))
-                return types[typeName];
+            if (Types.ContainsKey(typeName))
+                return Types[typeName];
 
             var assemblies = this.AssemblyDefinitions;
 
@@ -138,7 +138,7 @@ namespace Rapidex.Base.Common.Assemblies
 
                 if (type != null)
                 {
-                    types.Set(typeName, type);
+                    Types.Set(typeName, type);
                     return type;
                 }
             }
@@ -152,7 +152,7 @@ namespace Rapidex.Base.Common.Assemblies
                     {
                         if (string.Compare(type.Name, typeName, true) == 0)
                         {
-                            types.Set(typeName, type);
+                            Types.Set(typeName, type);
                             return type;
                         }
                     }

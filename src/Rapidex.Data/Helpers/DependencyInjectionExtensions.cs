@@ -30,6 +30,7 @@ public static class DependencyInjectionExtensions
 
         var dbScope = Database.Dbs.AddMainDbIfNotExists();
         dbScope.Metadata.ScanConcreteDefinitions();
+        dbScope.Metadata.ScanSoftDefinitions();
         dbScope.Structure.ApplyAllStructure();
     }
 }

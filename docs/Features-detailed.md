@@ -120,7 +120,7 @@ Rapidex.Data ready for CRUD operations + web services implementation and provide
 
 See: [Serialization & Deserialization](SerializationDeserializationEntityData.md)
 
-See: [Sample ASP.NET Core Application](/samples/Rapidex.Data.Sample.Basic1)
+See: [Sample Application](/samples/)
 
 ---
 

@@ -17,13 +17,11 @@
 		<ProjectReference Include="..\..\src\Rapidex.Data.PostgreServer\Rapidex.Data.PostgreServer.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Data.SqlServer\Rapidex.Data.SqlServer.csproj" />
 		<ProjectReference Include="..\..\src\Rapidex.Data\Rapidex.Data.csproj" />
+		<ProjectReference Include="..\Rapidex.Data.Sample.Library\Rapidex.Data.Sample.Library.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <None Update="App_Content\MyAppDefinitions\PredefinedContactValues.yml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="App_Content\MyAppDefinitions\PredefinedCountryValues.yml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="App_Content\MyAppDefinitions\PredefinedItemValues.yml">

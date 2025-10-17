@@ -93,6 +93,33 @@ public static class ImplementerExtender
         return ems.ToArray();
     }
 
+    public static void ScanSoftDefinitions(this IDbMetadataContainer mContainer)
+    {
+        mContainer.NotNull();
+
+        IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();
+        IFieldMetadataFactory ff = Rapidex.Common.ServiceProvider.GetRapidexService<IFieldMetadataFactory>();
+
+        string baseFolder = Path.Combine(Rapidex.Common.RootFolder, Database.Configuration.SoftDefinitionsBaseFolder);
+
+        var aInfos = Common.Assembly.AssemblyDefinitions;
+        foreach (AssemblyInfo ainfo in aInfos)
+        {
+            string[] alternativePaths = new string[]
+            {
+                Path.Combine(baseFolder, ainfo.Name),
+                Path.Combine(baseFolder, ainfo.NavigationName)
+            };
+
+            string foundPath = alternativePaths.FirstOrDefault(p => Directory.Exists(p));
+
+            if (foundPath.IsNOTNullOrEmpty())
+            {
+                mContainer.ScanDefinitions(foundPath);
+            }
+        }
+    }
+
     public static IDbEntityMetadata[] AddJson(this IDbMetadataContainer mContainer, string json)
     {
         IDbEntityMetadataFactory mf = Rapidex.Common.ServiceProvider.GetRapidexService<IDbEntityMetadataFactory>();

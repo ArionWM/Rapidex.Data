@@ -15,27 +15,30 @@ namespace Rapidex.Data
         /// For test purposes, different master database configuration for different provider
         /// </summary>
         internal string DatabaseSectionParentName { get; set; } = null;
+        public string RapidexSectionName { get; set; } = "Rapidex";
         public string DatabaseSectionName { get; set; } = "Databases";
+        public string SoftDefinitionsBaseFolder { get; set; } = "App_Content";
         public IConfiguration Configuration { get; set; }
+        public IConfigurationSection? Root { get;protected set; }
         public IDictionary<string, DbConnectionInfo> ConnectionInfo { get; set; } = new Dictionary<string, DbConnectionInfo>();
 
 
         public IDictionary<string, DbConnectionInfo> ReadConnectionInfo()
         {
-            var dbConfigRoot = Database.Configuration.Configuration;
+            var dbConfigRoot = this.Root;
             if (this.DatabaseSectionParentName.IsNOTNullOrEmpty())
             {
                 dbConfigRoot = dbConfigRoot.GetSection(this.DatabaseSectionParentName);
             }
 
-            IConfigurationSection connectionDatabaseSection = dbConfigRoot.GetSection("Databases");
-            if (connectionDatabaseSection == null)
+            IConfigurationSection databaseSection = dbConfigRoot.GetSection(this.DatabaseSectionName);
+            if (databaseSection == null)
             {
                 return null;
                 //throw new InvalidOperationException("'Databases' section not found in configuration file. See: abcd");
             }
 
-            IDictionary<string, DbConnectionInfo> connections = connectionDatabaseSection.Get<Dictionary<string, DbConnectionInfo>>();
+            IDictionary<string, DbConnectionInfo> connections = databaseSection.Get<Dictionary<string, DbConnectionInfo>>();
 
             connections.NotNull("Connection definitions not found");
 
@@ -56,6 +59,10 @@ namespace Rapidex.Data
 
         public void Setup()
         {
+            this.Root = Database.Configuration.Configuration.GetSection(this.RapidexSectionName);
+            this.Root.NotNull($"'{this.RapidexSectionName}' section not found in configuration file. See: appsettings.json");
+
+            this.SoftDefinitionsBaseFolder = this.Root.GetValue<string>("SoftDefinitionsBaseFolder", this.SoftDefinitionsBaseFolder);
             this.ReadConnectionInfo();
         }
 
