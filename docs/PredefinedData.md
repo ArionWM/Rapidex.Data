@@ -45,13 +45,19 @@ data:
     currencySymbol: "USD" # 840
 ```
 
+
+## Autoloading 
+
+abc
+
+See: [Library Declaration](LibraryDeclaration.md)
+
+## Manual Loading 
+
+abc
+
 ```csharp
 var db = Database.Dbs.AddMainDbIfNotExists();
-//...
 db.Metadata.ScanDefinitions(@".\App_Content\MyAppDefinitions"); //<-- Load definitions include predefined data
-//...
 db.Structure.ApplyAllStructure(); //<-- Apply structure changes and predefined data
 ```
-
-## Autoloading Predefined Data
-
