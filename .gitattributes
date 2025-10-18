@@ -7,8 +7,6 @@
 *.slnx     text eol=crlf
 *.csproj   text eol=crlf
 
-*.json linguist-language=JavaScript
-
 # Serialisation
 *.json     text
 *.toml     text

@@ -24,12 +24,21 @@ First, you need to configure the database connection (`appsettings.json`)
         "Master": {
           "Provider": "Rapidex.Data.SqlServer.DbSqlServerProvider",
           "ConnectionString": "Data Source=databaseServer;Initial Catalog=databaseName;User Id=username;Password=userPassword;MultipleActiveResultSets=true;Pooling=true;Min Pool Size=10; Max Pool Size=500;TrustServerCertificate=True"
-        },
-        //"Master": {
-        //  "Provider": "Rapidex.Data.PostgreServer.PostgreSqlServerProvider",
-        //  "ConnectionString": "User ID=username;Password=userPassword;Host=databaseServer;Port=5432;Database=databaseName;"
-        //}
         }
+     }
+  }
+```
+
+or
+
+```json
+"Rapidex": {
+    "Databases": {
+        "Master": {
+          "Provider": "Rapidex.Data.PostgreServer.PostgreSqlServerProvider",
+          "ConnectionString": "User ID=username;Password=userPassword;Host=databaseServer;Port=5432;Database=databaseName;"
+        }
+     }
   }
 ```
 

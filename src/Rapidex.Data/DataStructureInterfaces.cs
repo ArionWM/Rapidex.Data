@@ -791,7 +791,7 @@ public interface IEntity
     internal IDbEntityMetadata _Metadata { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore]
-    object _virtualId { get; set; }
+    object _VirtualId { get; set; }
 
     string _TypeName { get; internal set; }
     string _DbName { get; internal set; }

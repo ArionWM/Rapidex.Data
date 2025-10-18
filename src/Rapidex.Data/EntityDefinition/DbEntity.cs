@@ -15,7 +15,7 @@ namespace Rapidex.Data
         IDbEntityMetadata IEntity._Metadata { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
-        object IEntity._virtualId { get; set; }
+        object IEntity._VirtualId { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
         public IDbSchemaScope _Schema { get; set; }

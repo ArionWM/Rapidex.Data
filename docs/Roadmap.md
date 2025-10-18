@@ -10,9 +10,13 @@
 
 [ ] Oracle database support
 
+[ ] Nullable fields support improvements
+
 [ ] Vector types support	
 
 [ ] date, time (datetime already available), url field types support
+
+[ ] Implementer infrastructure for soft entities (JSON, YAML)
 
 ## Future Considerations
 

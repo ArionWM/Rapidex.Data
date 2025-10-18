@@ -230,7 +230,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
             EntityChangeResultItem ures = new EntityChangeResultItem();
             ures.Name = em.Name;
-            long oldId = entity.GetId() is long oldIdLong && oldIdLong < 0 ? oldIdLong : entity._virtualId.As<long>();
+            long oldId = entity.GetId() is long oldIdLong && oldIdLong < 0 ? oldIdLong : entity._VirtualId.As<long>();
 
             ures.OldId = oldId;
             ures.Id = (long)entity.GetId();
@@ -302,7 +302,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
             EntityChangeResultItem ures = new EntityChangeResultItem();
             ures.Name = em.Name;
-            long oldId = entity.GetId() is long oldIdLong && oldIdLong < 0 ? oldIdLong : entity._virtualId.As<long>();
+            long oldId = entity.GetId() is long oldIdLong && oldIdLong < 0 ? oldIdLong : entity._VirtualId.As<long>();
 
             ures.OldId = oldId;
             ures.Id = (long)entity.GetId();

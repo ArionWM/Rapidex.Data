@@ -299,7 +299,7 @@ internal class DbChangesCollection : IDbChangesCollection
             {
                 long newId = entity._Schema.Data.Sequence(info.PersistentSequence).GetNext();
                 entity.SetId(newId);
-                entity._virtualId = oldId;
+                entity._VirtualId = oldId;
 
                 this.newEntityDependencies.UpdateDependedEntities(entity);
 
