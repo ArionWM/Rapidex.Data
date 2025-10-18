@@ -1,6 +1,6 @@
 # Entity Definition and Entity Types
 
-Entities in the framework are defined through concrete classes or entity definition files (JSON or YAML). These definitions specify the structure, fields, relationships, and behaviors of the entities used within the application.
+Entities in the Rapidex.Data are defined through concrete classes or entity definition files (JSON or YAML). These definitions specify the structure, fields, relationships, and behaviors of the entities used within the application.
 
 Each entity corresponds to one database table and includes fields that map directly to the columns of those tables. Fields can represent not only simple columns but also relationships to other entities — such as one-to-many, many-to-many, or other complex associations.
 
@@ -18,24 +18,71 @@ Concrete entities implement the IConcreteEntity interface. For basic usage, we p
 Properties starting with an underscore `_`` are not recognized as fields.
 
 ```csharp
-public class Customer : DbConcreteEntityBase
+public class MyEntity : DbConcreteEntityBase
 {
-	public int Id { get; set; }
-	public string Name { get; set; }
-	public string Email { get; set; }
+    public string Subject { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeStartEnd PlannedTimes { get; set; }
+    public Tags Tags { get; set; }
+    public Reference<Customer> Customer { get; set; }
+    public Enumeration<MyEntityTypeEnum> Type { get; set; }
+}
+
+public enum MyEntityTypeEnum
+{
+    Type1 = 1,
+    Type2 = 2,
+    Type3 = 3
+}
+
+public class MyEntityImplementer : IConcreteEntityImplementer<MyEntity>
+{
+    public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
+    {
+        metadata
+            .AddBehavior<HasTags>(true, false);
+    }
 }
 ```
 
 ## Soft Entities (JSON or YAML based)
 
-Soft entities are defined using JSON or YAML files and can represent more flexible or dynamic data structures. They may not have a direct mapping to database tables but can be used to define entities that are more fluid in nature, such as user-generated content or external API responses.
+Soft entities are defined using JSON or YAML files and can represent more end-user friendly environments.
 
 ### JSON
 
-abc
-
 ```json
-abc
+{
+  "type": "EntityDefinition",
+  "name": "MyEntity",
+  "fields": [
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "PlannedTimes",
+      "type": "dateTimeStartEnd"
+    },
+    {
+      "name": "Customer",
+      "type": "reference",
+      "reference": "Customer"
+    },
+    {
+      "name": "Type",
+      "type": "enumeration",
+      "reference": "MyEntityTypeEnum"
+    }
+  ],
+  "behaviors": [
+    "HasTags"
+  ]
+}
 
 ```
 
@@ -43,13 +90,24 @@ abc: virtualize json?
 
 ### YAML
 
-abc
-
 ```yaml
-abc
+_tag: entity
+name: MyEntity
+fields:
+  - name: Subject
+    type: string
+  - name: StartTime
+    type: datetime
+  - name: PlannedTimes
+    type: dateTimeStartEnd
+  - name: Customer
+    type: reference
+    reference: Customer
+  - name: Type
+    type: enumeration
+    reference: MyEntityTypeEnum
+behaviors: [hasTags]  
 ```
-
-
 
 ## Metadata
 
@@ -90,6 +148,11 @@ See: [Library Declaration](LibraryDeclaration.md)
 
 See: [Sample Application](/samples/)
 
+#### Field Definitions In Soft Entities
+
+Fields contains name and type information and field specific properties.
+
+See: [Field Types](FieldTypes.md)
 
 ### Applying Entity Definitions
 
@@ -101,18 +164,23 @@ db.Structure.ApplyAllStructure();
 
 In runtime, you can change definitions and reapply them as needed.
 
-
 ## Partial Entities
 
 Partial entities allow you to define a subset of an entity's fields and behaviors. This can be useful for scenarios where you want to work with a simplified version of an entity without loading the entire entity definition.
 
-## Field Definitions
+```csharp
 
-Fields contains name and type information and field specific properties.
+var db = Database.Dbs.Db(); //<- Master db
 
-```yaml
-abc
+ILoadResult<DataRow> partialData = db.GetQuery<Contact>()
+    .Like(nameof(Contact.FullName), "John")
+    .LoadPartial(nameof(Contact.FirstName), nameof(Contact.LastName));
+
+//...
+
 ```
+
+Also partial entities used in [JSON deserialization](SerializationDeserializationEntityData.md).
 
 ## Predefined Fields
 
@@ -132,12 +200,12 @@ Each entity object has following predefined properties that are not considered f
 
 ## Nullable Fields
 
-Nullable fields can be specified in entity definitions, allowing for fields that may not always have a value.
+Nullable fields can be specified in entity definitions, but they convert to non-nullable types in concrete entities. 
 
-See: [Roadmap](Roadmap.md) 
+*Future improvements are planned to better support nullable fields in concrete entities. See: [Roadmap](Roadmap.md)*
 
 ## Implementer Infrastructure for Entity Logic
 
-Classes
+Entity logic, including validation and custom calculations, is managed through the Implementer infrastructure. Each entity can have an associated implementer class that encapsulates the logic specific to that entity.
 
 See: [Entity Logic](EntityLogic.md)

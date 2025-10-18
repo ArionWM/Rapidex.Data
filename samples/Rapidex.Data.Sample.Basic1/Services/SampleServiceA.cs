@@ -1,4 +1,5 @@
-﻿using Rapidex.Data.Sample.App1.ConcreteEntities;
+﻿using System.Data;
+using Rapidex.Data.Sample.App1.ConcreteEntities;
 using Rapidex.Data.Sample.App1.Models;
 
 namespace Rapidex.Data.Sample.App1.Services;
@@ -100,5 +101,17 @@ public class SampleServiceA
     {
         var item = db.Find<Item>(id);
         return item;
+    }
+
+    internal void XXX()
+    {
+        //var db = Database.Dbs.Db();
+        //using var work = db.BeginWork();
+        
+        //var myQuery = db.GetQuery<Contact>()
+        //    .EnterUpdateMode()
+        //    .Like(nameof(Contact.FullName), "John")
+        //    .Update(work2, new ObjDictionary() { { "Address", "Updated Address" } });
+
     }
 }

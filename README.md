@@ -4,8 +4,7 @@
 
 **Rapidex.Data** is an **Object-Relational Mapping (ORM)** framework focused on *flexibility*, *ease of use*, and *runtime customization* for modern applications.
 
-It allows entities to be defined using concrete classes, **JSON**, or **YAML** definition files — or even programmatically at runtime.  
-Entity definitions (metadata) can also be modified and applied dynamically while the application is running.
+It allows entities to be defined using concrete classes, **JSON**, or **YAML** definition files — or even programmatically at runtime. Entity definitions (metadata) can also be modified and applied dynamically while the application is running.
 
 It supports multiple database engines, including **Microsoft SQL Server**, **PostgreSQL**, and others (planned).  
 Multiple database connections can be used within a single application instance.

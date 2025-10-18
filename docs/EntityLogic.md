@@ -1,5 +1,11 @@
 # Entity Logic; Validation & Calculation & Other Signals
 
+The **Implementer** architecture is designed for extensibility.  
+It allows integration with different message hubs and signal (topic) systems.  
+
+The **Topic** structure enables separation between **multi-workspace** and **multi-tenant** environments,  
+providing advanced customization capabilities.
+
 In Rapidex.Data, Entity logic (validation and calculation-like operations and other signals) is managed via signals.
 
 ## Concrete Entities - Entity Implementer Classes
