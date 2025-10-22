@@ -19,4 +19,10 @@ data:
     lastName: Example
     email: alicia.doe@example.com
     birthDate: 2000-01-04
-    
+  - entity: Address
+    id: 500
+    parentContact: 100
+    addressName: Home
+    street: 123 Main St
+    country: 826
+  

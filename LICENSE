@@ -1,4 +1,39 @@
+# Rapidex.Data License
 
-*Rapidex.Data* is licensed under the GNU Lesser General Public License v3.0 only (LGPLv3).
+Rapidex.Data is licensed under the **GNU Lesser General Public License v3.0 (LGPLv3)**.
 
-[GNU Lesser General Public License v3.0](https://www.gnu.org/licenses/lgpl-3.0.html)
+You are free to use, modify, and redistribute this software under the terms of the LGPLv3 license.  
+See the full text at: https://www.gnu.org/licenses/lgpl-3.0.html
+
+---
+
+## Attribution Notice
+
+This project is part of the Rapidex ecosystem.
+
+This software includes components from **Rapidex.Data**,  
+licensed under the **GNU Lesser General Public License v3 (LGPLv3)**.
+
+Users are encouraged (but not required) to include the following notice  
+in documentation or about sections of their applications:
+
+> "This application uses Rapidex.Data, licensed under the LGPLv3."
+
+You must retain all original copyright notices and include a copy of  
+this license file in any redistributions of this software or its modified versions.
+
+---
+
+## Trademark Notice
+
+“Rapidex” is a trademark of ArionWm.  
+The use of the Rapidex name, logo, or brand for marketing or commercial purposes  
+is **not covered by this license** and requires prior written permission.
+
+The LGPLv3 license applies **only** to the code in the **Rapidex.Data** repository.
+
+---
+## Copyright
+
+© 2025, ArionWm.  
+All rights reserved.

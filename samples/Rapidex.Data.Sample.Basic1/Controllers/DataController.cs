@@ -22,19 +22,7 @@ public class DataController : ControllerBase
     }
 
 
-    [HttpPost("update")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Update()
-    {
-        using var reader = new StreamReader(this.Request.Body);
-        string json = await reader.ReadToEndAsync();
 
-        using var work = db.BeginWork();
-        var entities = EntityDataJsonConverter.Deserialize(json, this.db);
-        entities.Save();
-        var result = work.CommitChanges();
-        return this.Ok(result);
-    }
 
     /// <summary>
     /// This endpoint receive updated (planned etc) single entity content and checks the entity content;
@@ -172,4 +160,32 @@ public class DataController : ControllerBase
         return this.Content(json, "application/json");
     }
 
+    [HttpPost("updateany")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateAny()
+    {
+        using var reader = new StreamReader(this.Request.Body);
+        string json = await reader.ReadToEndAsync();
+
+        using var work = db.BeginWork();
+        var entities = EntityDataJsonConverter.Deserialize(json, this.db);
+        entities.Save();
+        var result = work.CommitChanges();
+        return this.Ok(result);
+    }
+
+    /// <summary>
+    /// This endpoint retrieves any entity type entity data filtering
+    /// with 
+    /// </summary>
+    /// <param name="entityName"></param>
+    /// <param name="filter"></param>
+    /// <returns></returns>
+    [HttpGet("{entityName}")]
+    public IActionResult GetAny([FromRoute] string entityName, [FromQuery] string? filter)
+    {
+        var result = this.SampleService.GetAny(this.db, entityName, filter);
+        string json = EntityDataJsonConverter.Serialize(result);
+        return this.Content(json, "application/json");
+    }
 }

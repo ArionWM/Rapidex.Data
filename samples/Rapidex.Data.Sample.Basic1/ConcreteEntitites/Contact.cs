@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rapidex.Data.Sample.Library.ConcreteEntities;
 
 namespace Rapidex.Data.Sample.App1.ConcreteEntities;
 
@@ -18,6 +19,7 @@ public class Contact : DbConcreteEntityBase
     public string PhoneNumber { get; set; }
     public DateTimeOffset? BirthDate { get; set; }
     public int Age { get; set; }
+    public RelationOne2N<Address> Addresses { get; set; }
 }
 
 internal class ContactImplementer : IConcreteEntityImplementer<Contact>

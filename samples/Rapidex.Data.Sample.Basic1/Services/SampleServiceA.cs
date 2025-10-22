@@ -103,11 +103,28 @@ public class SampleServiceA
         return item;
     }
 
+    internal IEntityLoadResult<IEntity> GetAny(IDbSchemaScope db, string entityName, string? filter)
+    {
+        var em = db.ParentDbScope.Metadata.Get(entityName);
+        em.NotNull($"Entity not found: {entityName}");
+
+        var query = db.GetQuery(em);
+
+        if (filter.IsNOTNullOrEmpty())
+        {
+            this.parsers.FindParser(filter)
+                .NotNull($"No parser found for filter: {filter}")
+                .Parse(query, filter);
+        }
+
+        return query.Load();
+    }
+
     internal void XXX()
     {
         //var db = Database.Dbs.Db();
         //using var work = db.BeginWork();
-        
+
         //var myQuery = db.GetQuery<Contact>()
         //    .EnterUpdateMode()
         //    .Like(nameof(Contact.FullName), "John")

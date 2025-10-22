@@ -78,7 +78,7 @@ internal class OrderLineImplementer : IConcreteEntityImplementer<OrderLine>
             SignalTopic.ANY,
             SignalTopic.ANY,
             SignalTopic.ANY,
-            nameof(Contact),
+            nameof(OrderLine),
             OrderLineImplementer.BeforeSave);
 
         Signal.Hub.SubscribeEntityReleated(
@@ -86,7 +86,7 @@ internal class OrderLineImplementer : IConcreteEntityImplementer<OrderLine>
             SignalTopic.ANY,
             SignalTopic.ANY,
             SignalTopic.ANY,
-            nameof(Contact),
+            nameof(OrderLine),
             OrderLineImplementer.Validate);
 
         Signal.Hub.SubscribeEntityReleated(
@@ -94,7 +94,7 @@ internal class OrderLineImplementer : IConcreteEntityImplementer<OrderLine>
             SignalTopic.ANY,
             SignalTopic.ANY,
             SignalTopic.ANY,
-            nameof(Contact),
+            nameof(OrderLine),
             OrderLineImplementer.ExecLogic);
     }
 }

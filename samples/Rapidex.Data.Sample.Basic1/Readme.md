@@ -16,5 +16,5 @@ This sample demontrates the basic (single database and schema) usage of Rapidex.
 - Run the application. It will create required tables and predefined data automatically.
 - For ready to use web API
 	- Install [Postman](https://www.postman.com/downloads/)
-	- Import [SampleRequestsPostmanCollection.json](SampleRequestsPostmanCollection.json) file.
+	- Import [SampleRequestsPostmanCollection.json](SampleRequestsPostmanCollection.json) and [SampleRequestsPostmanCollectionEnviromentValues.json](SampleRequestsPostmanCollectionEnviromentValues.json) files.
 

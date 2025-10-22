@@ -1,0 +1,21 @@
+{
+	"id": "34024c7c-55e4-4abc-b6aa-fe12817a836e",
+	"name": "Local",
+	"values": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5099",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "defaultWorkSpace",
+			"value": "base",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-10-22T13:50:58.053Z",
+	"_postman_exported_using": "Postman/11.68.1"
+}
