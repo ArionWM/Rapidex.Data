@@ -67,11 +67,29 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         return new IDbEntityUpdater[] { this.DmProvider };
     }
 
-    //protected bool IsBulkOperationRequired(IDbChangesScope scope)
-    //{
-    //    return scope.ChangedEntities.Count() > this.BulkOperationThreshold;
-    //}
+    protected void PublishAfterSave(IDbChangesCollection scope)
+    {
+        foreach (var entity in scope.ChangedEntities)
+        {
+            entity.PublishOnAfterSave();
+        }
+    }
 
+    protected void PublishAfterDelete(IDbChangesCollection scope)
+    {
+        foreach (var entity in scope.DeletedEntities)
+        {
+            entity.PublishOnAfterDelete();
+        }
+    }
+
+    protected void PublishAfterCommit(IDbChangesCollection scope)
+    {
+        foreach (var entity in scope.ChangedEntities)
+        {
+            entity.PublishOnAfterCommit();
+        }
+    }
     protected IEntityUpdateResult InsertOrUpdate(IDbChangesCollection scope)
     {
         EntityUpdateResult result = new EntityUpdateResult();
@@ -90,6 +108,8 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             {
                 result.MergeWith(saver.InsertOrUpdate(em, scope.ChangedEntities));
             }
+
+            this.PublishAfterSave(scope);
         }
 
         if (scope.DeletedEntities.Any())
@@ -100,6 +120,8 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             {
                 result.MergeWith(saver.Delete(em, scope.DeletedEntities.Select(ent => (long)ent.GetId())));
             }
+
+            this.PublishAfterDelete(scope);
         }
 
         if (scope.BulkUpdates.Any())
@@ -140,6 +162,10 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
     public void Delete(IEntity entity)
     {
+        IEntity resEntity = entity.PublishOnBeforeDelete().Result;
+        if (resEntity != null)
+            entity = resEntity;
+
         this.ChangesCollection.Delete(entity);
     }
 
@@ -217,8 +243,11 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             IEntity retEntity = entity.PublishOnBeforeSave()
                 .Result;
 
-            if (retEntity != null)
-                entity = retEntity;
+            if (retEntity != null) entity = retEntity;
+
+            IValidationResult entityValidationResult = entity.PublishForValidate().Result;
+            if (!entityValidationResult.Success)
+                throw new DataValidationException(entityValidationResult);
 
             this.ChangesCollection.Add(entity);
         }
@@ -249,6 +278,10 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
                 if (retEntity != null)
                     _entity = retEntity;
+
+                IValidationResult entityValidationResult = _entity.PublishForValidate().Result;
+                if (!entityValidationResult.Success)
+                    throw new DataValidationException(entityValidationResult);
 
                 this.ChangesCollection.Add(_entity);
             }
@@ -282,6 +315,9 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         {
             var result = this.CommitOrApplyChangesInternal();
             _its?.Commit();
+
+            this.PublishAfterCommit(this.ChangesCollection);
+
             return result;
         }
         catch (Exception ex)

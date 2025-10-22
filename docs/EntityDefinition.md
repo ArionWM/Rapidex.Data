@@ -7,8 +7,6 @@ Each entity corresponds to one database table and includes fields that map direc
 For better serialization performance and ease of use, entities themselves do not contain business logic. Each entity is DTO-like (Data Transfer Object) and is primarily focused on data representation.
 Instead, they are associated with *implementer*s that encapsulate the corresponding logic.
 
-## General Structure of an Entity Object
-
 Each entity object typically includes the self metadata, scope (db or schema), fields dictionary. Even concrete entities behave like a dictionary.
 
 ## Concrete Entities
@@ -86,8 +84,6 @@ Soft entities are defined using JSON or YAML files and can represent more end-us
 
 ```
 
-abc: virtualize json?
-
 ### YAML
 
 ```yaml
@@ -144,15 +140,11 @@ var db = Database.Dbs.AddMainDbIfNotExists();
 db.Metadata.ScanDefinitions(@".\MyDefinitionRoot\MyAppDefinitions");
 ```
 
-See: [Library Declaration](LibraryDeclaration.md)
-
-See: [Sample Application](/samples/)
 
 #### Field Definitions In Soft Entities
 
 Fields contains name and type information and field specific properties.
 
-See: [Field Types](FieldTypes.md)
 
 ### Applying Entity Definitions
 
@@ -169,7 +161,6 @@ In runtime, you can change definitions and reapply them as needed.
 Partial entities allow you to define a subset of an entity's fields and behaviors. This can be useful for scenarios where you want to work with a simplified version of an entity without loading the entire entity definition.
 
 ```csharp
-
 var db = Database.Dbs.Db(); //<- Master db
 
 ILoadResult<DataRow> partialData = db.GetQuery<Contact>()
@@ -177,7 +168,6 @@ ILoadResult<DataRow> partialData = db.GetQuery<Contact>()
     .LoadPartial(nameof(Contact.FirstName), nameof(Contact.LastName));
 
 //...
-
 ```
 
 Also partial entities used in [JSON deserialization](SerializationDeserializationEntityData.md).
@@ -194,9 +184,9 @@ Each entity has several predefined fields that are commonly used across differen
 
 Each entity object has following predefined properties that are not considered fields:
 
-`_Metadata`: Metadata reference about the entity.
-`_virtualId`: Store premature id and planned future use.
-`_Schema`: Db or schema scope reference.
+- `_Metadata`: Metadata reference about the entity.
+- `_virtualId`: Store premature id and planned future use.
+- `_Schema`: Db or schema scope reference.
 
 ## Nullable Fields
 
@@ -208,4 +198,12 @@ Nullable fields can be specified in entity definitions, but they convert to non-
 
 Entity logic, including validation and custom calculations, is managed through the Implementer infrastructure. Each entity can have an associated implementer class that encapsulates the logic specific to that entity.
 
-See: [Entity Logic](EntityLogic.md)
+## See Also
+
+- See: [Quick Start](QuickStart.md)
+- See: [Library Declaration](LibraryDeclaration.md)
+- See: [Sample Application](/samples/)
+- See: [Field Types](FieldTypes.md)
+- See: [Entity Logic](EntityLogic.md)
+- See: [Serialization and Deserialization of Entities](SerializationDeserializationEntityData.md)
+- See: [Usage and Tips](UsageAndTips.md)

@@ -302,13 +302,13 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="F:Rapidex.TypeInheritenceHelper._inheritanceCache">
+        <member name="F:Rapidex.TypeInheritenceHelper.InheritanceTypesCache">
             <summary>
             Static cache for type inheritance relationships to improve performance
             Key: Type, Value: HashSet of base types within the current type array
             </summary>
         </member>
-        <member name="F:Rapidex.TypeInheritenceHelper._inheritanceDepthCache">
+        <member name="F:Rapidex.TypeInheritenceHelper.InheritanceDepthCache">
             <summary>
             Static cache for inheritance depth calculations
             Key: Type full name, Value: inheritance depth

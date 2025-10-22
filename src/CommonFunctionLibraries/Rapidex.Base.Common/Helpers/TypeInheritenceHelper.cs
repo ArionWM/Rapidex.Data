@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,13 +15,15 @@ public static class TypeInheritenceHelper
     /// Static cache for type inheritance relationships to improve performance
     /// Key: Type, Value: HashSet of base types within the current type array
     /// </summary>
-    private static readonly ConcurrentDictionary<string, HashSet<Type>> _inheritanceCache = new();
+    private static readonly ConcurrentDictionary<string, HashSet<Type>> InheritanceTypesCache = new();
 
     /// <summary>
     /// Static cache for inheritance depth calculations
     /// Key: Type full name, Value: inheritance depth
     /// </summary>
-    private static readonly ConcurrentDictionary<string, int> _inheritanceDepthCache = new();
+    private static readonly ConcurrentDictionary<string, int> InheritanceDepthCache = new();
+
+    private static readonly TwoLevelList<Type, Type> BaseTypeCache = new();
 
     /// <summary>
     /// Sorts an array of types based on inheritance hierarchy, placing derived types before their base types.
@@ -98,6 +101,44 @@ public static class TypeInheritenceHelper
         return result.ToArray();
     }
 
+    private static IEnumerable<Type> CreateBaseTypeCache(Type type)
+    {
+        var baseTypes = new List<Type>();
+        var currentType = type.BaseType;
+        while (currentType != null && currentType != typeof(object))
+        {
+            baseTypes.Add(currentType);
+            currentType = currentType.BaseType;
+        }
+        BaseTypeCache.Add(type, baseTypes);
+
+        return baseTypes;
+    }
+
+    public static Type[] RemoveBaseTypes(this Type[] types)
+    {
+        var typeSet = new HashSet<Type>(types);
+
+        foreach (var type in types)
+        {
+            IEnumerable<Type> baseTypesList = BaseTypeCache.Get(type);
+            if (baseTypesList == null)
+            {
+                baseTypesList = CreateBaseTypeCache(type);
+            }
+
+            foreach (var baseType in baseTypesList)
+            {
+                if (typeSet.Contains(baseType))
+                {
+                    typeSet.Remove(baseType);
+                }
+            }
+        }
+
+        return typeSet.ToArray();
+    }
+
     /// <summary>
     /// Builds inheritance relationships map with caching support
     /// </summary>
@@ -113,7 +154,7 @@ public static class TypeInheritenceHelper
         {
             var baseTypesKey = $"{cacheKey}_{type.FullName}";
 
-            if (!_inheritanceCache.TryGetValue(baseTypesKey, out var baseTypes))
+            if (!InheritanceTypesCache.TryGetValue(baseTypesKey, out var baseTypes))
             {
                 baseTypes = new HashSet<Type>();
 
@@ -129,7 +170,7 @@ public static class TypeInheritenceHelper
                 }
 
                 // Cache the result
-                _inheritanceCache.TryAdd(baseTypesKey, baseTypes);
+                InheritanceTypesCache.TryAdd(baseTypesKey, baseTypes);
             }
 
             inheritanceMap[type] = baseTypes;
@@ -149,7 +190,7 @@ public static class TypeInheritenceHelper
     {
         var cacheKey = $"{CreateCacheKey(typeArray)}_{type.FullName}_depth";
 
-        if (!_inheritanceDepthCache.TryGetValue(cacheKey, out var depth))
+        if (!InheritanceDepthCache.TryGetValue(cacheKey, out var depth))
         {
             depth = 0;
             var typeSet = new HashSet<Type>(typeArray);
@@ -165,7 +206,7 @@ public static class TypeInheritenceHelper
             }
 
             // Cache the result
-            _inheritanceDepthCache.TryAdd(cacheKey, depth);
+            InheritanceDepthCache.TryAdd(cacheKey, depth);
         }
 
         return depth;
@@ -191,7 +232,7 @@ public static class TypeInheritenceHelper
     /// </summary>
     public static void ClearInheritanceCache()
     {
-        _inheritanceCache.Clear();
-        _inheritanceDepthCache.Clear();
+        InheritanceTypesCache.Clear();
+        InheritanceDepthCache.Clear();
     }
 }

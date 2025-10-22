@@ -7,7 +7,7 @@
 		<LangVersion>latest</LangVersion>
 		<RootNamespace>Rapidex.Data.Sample.App1</RootNamespace>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<NoWarn>$(NoWarn);1591</NoWarn>
+		<NoWarn>$(NoWarn);1591;CS8618</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -76,28 +76,8 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
 
         //See: SignalHub.md
         //Register to signals
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_BEFORESAVE,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.BeforeSave);
-
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_VALIDATE,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.Validate);
-
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.ExecLogic);
+        this.SubscribeBeforeSave(ContactImplementer.BeforeSave);
+        this.SubscribeValidate(ContactImplementer.Validate);
+        this.SubscribeExecLogic(ContactImplementer.ExecLogic);
     }
 }

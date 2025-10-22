@@ -3,27 +3,26 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace Rapidex.Data.DataModification.Loaders
+namespace Rapidex.Data.DataModification.Loaders;
+
+
+internal class DbEntityInMemoryCacheLoader : DbEntityLoaderBase, IDbEntityLoader
 {
-
-    internal class DbEntityInMemoryCacheLoader : DbEntityLoaderBase, IDbEntityLoader
+    public override IEntityLoadResult GetInternal(IQueryLoader loader)
     {
-        public override IEntityLoadResult GetInternal(IQueryLoader loader)
-        {
-            EntityLoadResult lres = new EntityLoadResult();
-            return lres;
-        }
+        EntityLoadResult lres = new EntityLoadResult();
+        return lres;
+    }
 
-        public override ILoadResult<DataRow> GetInternalRaw(IQueryLoader loader)
-        {
-            LoadResult<DataRow> lres = new LoadResult<DataRow>();
-            return lres;
-        }
+    public override ILoadResult<DataRow> GetInternalRaw(IQueryLoader loader)
+    {
+        LoadResult<DataRow> lres = new LoadResult<DataRow>();
+        return lres;
+    }
 
-        protected override IEntity GetInternal(DbEntityId id)
-        {
-            return null;
-            //throw new NotImplementedException();
-        }
+    protected override IEntity GetInternal(DbEntityId id)
+    {
+        return null;
+        //throw new NotImplementedException();
     }
 }

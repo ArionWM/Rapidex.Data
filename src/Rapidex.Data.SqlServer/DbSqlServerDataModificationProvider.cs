@@ -445,7 +445,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return new DbSqlSequence(this, name);
     }
 
-    protected IEntityUpdateResult _Delete(IDbEntityMetadata em, IEnumerable<long> ids)
+    protected IEntityUpdateResult InternalDelete(IDbEntityMetadata em, IEnumerable<long> ids)
     {
         this.CheckConnection();
         EntityUpdateResult result = new EntityUpdateResult();
@@ -466,7 +466,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         var parts = ids.Split(10);
         foreach (var part in parts)
             result.MergeWith(
-                this._Delete(em, part));
+                this.InternalDelete(em, part));
 
         return result;
     }

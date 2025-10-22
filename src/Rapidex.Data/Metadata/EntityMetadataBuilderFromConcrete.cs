@@ -100,13 +100,16 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
         Type[] types = Common.Assembly.FindDerivedClassTypes(intGenericType);
 
         types = TypeInheritenceHelper.SortTypesByInheritanceHierarchy(types);
-        Type implementerType = types.FirstOrDefault();
 
-        if(implementerType == null)
+        IEnumerable<Type> endTypes = types.RemoveBaseTypes();
+        if(endTypes.IsNullOrEmpty())
             return;
 
-        IConcreteEntityImplementer implementer = TypeHelper.CreateInstance<IConcreteEntityImplementer>(implementerType);
-        implementer.SetupMetadata(this.Parent.DbScope, em);
+        foreach(Type implementerType in endTypes)
+        {
+            IConcreteEntityImplementer implementer = TypeHelper.CreateInstance<IConcreteEntityImplementer>(implementerType);
+            implementer.SetupMetadata(this.Parent.DbScope, em);
+        }
     }
 
     protected virtual IDbEntityMetadata AddConcreteDefinition(Type type, string module = null, string prefix = null)

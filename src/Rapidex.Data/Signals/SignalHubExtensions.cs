@@ -58,6 +58,15 @@ public static class SignalHubExtensions
         return hub.SubscribeEntityReleated(topic, handler);
     }
 
+    public static IResult<int> SubscribeEntityReleatedForAllLevels(this ISignalHub hub, string @event, string entity, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler)
+    {
+        SignalTopic topic = SignalTopic.Create(SignalTopic.ANY, SignalTopic.ANY, SignalTopic.ANY, @event, entity, SignalTopic.ANY_ALL_SECTIONS);
+        return hub.SubscribeEntityReleated(topic, handler);
+    }
+
+
+
+
     public static ISignalHandlingResult CreateHandlingResult(this IEntityReleatedMessageArguments args, object? data = null)
     {
         var res = new SignalHandlingResult(args.HandlerId);

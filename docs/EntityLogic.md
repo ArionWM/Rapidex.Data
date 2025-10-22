@@ -10,15 +10,49 @@ In Rapidex.Data, Entity logic (validation and calculation-like operations and ot
 
 ## Concrete Entities - Entity Implementer Classes
 
+Run time metadata manuplation and entity logic is implemented via **Implementer** classes.
+
+Entities can have multiple Implementer classes, each implementing the `IConcreteEntityImplementer<T>` interface, where `T` is the concrete entity type.
+
+Rapidex.Data scans assemblies (with [Library Declaration](/docs/LibraryDeclaration.md) or manually registered) for Implementer classes during database mettadata loading.
+
+Implementer classes have `SetupMetadata` method for related modifications or registrations.
+
+```csharp
+internal class MyEntityImplementer : IConcreteEntityImplementer<MyEntity>
+{
+    public void SetupMetadata(IDbScope owner, IDbEntityMetadata metadata)
+    {
+        //Manipulate metadata or register to signals here
+
+    }
+}
+```
+
 
 ## Soft Entities - Definitions
 
+*Preparing*
+
+
+
+## Exec Logic (Calculation, etc.)
+
+Custom logic is implemented via `ExecLogic` signal. In this signal handler, you can implement calculation-like logic and return entity with updated values.
+
+## Before Save
+
+`BeforeSave` signal is called before entity is saved to database. You can implement any logic that needs to be executed before saving the entity.
+
+In this signal handler, you can implement any logic and return entity with updated values.
+
+Note: `BeforeSave` signal is not call `ExecLogic` signal. If required, you need to call it manually inside `BeforeSave` handler.
 
 ## Validation
 
+Validation logic is implemented via `Validate` signal. This signal is called after 'BeforeSave' signal.
 
-## Custom Logic
-
+If *validate* handler result contains errors, the operation is aborted with `DataValidationException`.
 
 ## Call Logic With Manual
 
@@ -86,31 +120,9 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
             .AddBehavior<HasTags>(true, false)
             .MarkOnlyBaseSchema();
 
-        //See: SignalHub.md
-        //Register to signals
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_BEFORESAVE,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.BeforeSave);
-
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_VALIDATE,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.Validate);
-
-        Signal.Hub.SubscribeEntityReleated(
-            DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            SignalTopic.ANY,
-            nameof(Contact),
-            ContactImplementer.ExecLogic);
+        this.SubscribeBeforeSave(ContactImplementer.BeforeSave);
+        this.SubscribeValidate(ContactImplementer.Validate);
+        this.SubscribeExecLogic(ContactImplementer.ExecLogic);        
     }
 }
 ```

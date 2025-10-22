@@ -118,4 +118,53 @@ public static class OtherExtensions
             throw new DbInsufficientPermissionsException($"CreateTable in {schemaName}", ac.GetCurrentUserId());
         }
     }
+
+#pragma warning disable IDE0060 // Remove unused parameter
+    public static IResult<int> Subscribe<T>(this IConcreteEntityImplementer<T> implementer, string @event, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+#pragma warning restore IDE0060 // Remove unused parameter
+    {
+        return Signal.Hub.SubscribeEntityReleatedForAllLevels(@event, nameof(T), handler);
+    }
+
+    public static IResult<int> SubscribeBeforeSave<T>(this IConcreteEntityImplementer<T> implementer, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+    {
+        return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_BEFORESAVE, handler);
+    }
+
+    public static IResult<int> SubscribeAfterSave<T>(this IConcreteEntityImplementer<T> implementer, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+    {
+        return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_AFTERSAVE, handler);
+    }
+
+    public static IResult<int> SubscribeAfterCommit<T>(this IConcreteEntityImplementer<T> implementer, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+    {
+        return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_AFTERCOMMIT, handler);
+    }
+
+    public static IResult<int> SubscribeBeforeDelete<T>(this IConcreteEntityImplementer<T> implementer, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+    {
+        return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_BEFOREDELETE, handler);
+    }
+
+    public static IResult<int> SubscribeAfterDelete<T>(this IConcreteEntityImplementer<T> implementer, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+    {
+        return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_AFTERDELETE, handler);
+    }
+
+    public static IResult<int> SubscribeValidate<T>(this IConcreteEntityImplementer<T> implementer, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+    {
+        return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_VALIDATE, handler);
+    }
+
+    public static IResult<int> SubscribeExecLogic<T>(this IConcreteEntityImplementer<T> implementer, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+    {
+        return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_EXEC_LOGIC, handler);
+    }
+
+    public static IResult<int> SubscribeOnNew<T>(this IConcreteEntityImplementer<T> implementer, Func<IEntityReleatedMessageArguments, ISignalHandlingResult> handler) where T : IConcreteEntity
+    {
+        return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_NEW, handler);
+    }
+
+
 }

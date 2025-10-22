@@ -2,6 +2,8 @@
 
 ## Planned Features
 
+[ ] Soft Entities Logics: Implement support for soft entities defined via JSON or YAML configurations.
+
 [ ] Cache Management: Implement caching strategies to improve data retrieval performance and reduce database load.
 
 [ ] New loaders for fast loading
