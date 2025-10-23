@@ -1,0 +1,144 @@
+name: Publish NuGet Packages
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v0.2.0.2
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      use_assembly_version:
+        description: 'Use version from RapidexAssemblyInfo.cs'
+        required: false
+        type: boolean
+        default: true
+      version:
+        description: 'Version number (e.g., 0.2.0.2) - Only used if use_assembly_version is false'
+        required: false
+        type: string
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  CONFIGURATION: 'Release'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for proper versioning
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Extract version from RapidexAssemblyInfo.cs
+      id: extract_assembly_version
+      run: |
+        VERSION=$(grep -oP 'VERSION = "\K[^"]+' RapidexAssemblyInfo.cs)
+        echo "ASSEMBLY_VERSION=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Extracted version from RapidexAssemblyInfo.cs: ${VERSION}"
+    
+    - name: Determine version to use
+      id: get_version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          if [ "${{ inputs.use_assembly_version }}" == "true" ]; then
+            VERSION="${{ steps.extract_assembly_version.outputs.ASSEMBLY_VERSION }}"
+            echo "Using version from RapidexAssemblyInfo.cs: ${VERSION}"
+          else
+            VERSION="${{ inputs.version }}"
+            echo "Using manual version: ${VERSION}"
+          fi
+        else
+          # For tag-based triggers, use assembly version
+          VERSION="${{ steps.extract_assembly_version.outputs.ASSEMBLY_VERSION }}"
+          echo "Using version from RapidexAssemblyInfo.cs: ${VERSION}"
+        fi
+        echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Final version: ${VERSION}"
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+    
+    - name: Run tests
+      run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
+    
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v2
+      with:
+        nuget-version: 'latest'
+    
+    - name: Update nuspec versions
+      run: |
+        VERSION=${{ steps.get_version.outputs.VERSION }}
+        echo "Updating nuspec files to version: ${VERSION}"
+        sed -i "s/<version>.*<\/version>/<version>${VERSION}<\/version>/" package/Rapidex.Data.nuspec
+        sed -i "s/<version>.*<\/version>/<version>${VERSION}<\/version>/" package/Rapidex.Data.SqlServer.nuspec
+        sed -i "s/<version>.*<\/version>/<version>${VERSION}<\/version>/" package/Rapidex.Data.PostgreServer.nuspec
+        # Update dependency versions in provider packages
+        sed -i "s/<dependency id=\"Rapidex.Data\" version=\"[^\"]*\" \/>/<dependency id=\"Rapidex.Data\" version=\"${VERSION}\" \/>/" package/Rapidex.Data.SqlServer.nuspec
+        sed -i "s/<dependency id=\"Rapidex.Data\" version=\"[^\"]*\" \/>/<dependency id=\"Rapidex.Data\" version=\"${VERSION}\" \/>/" package/Rapidex.Data.PostgreServer.nuspec
+    
+    - name: Pack Rapidex.Data
+      run: nuget pack package/Rapidex.Data.nuspec -OutputDirectory ./artifacts
+    
+    - name: Pack Rapidex.Data.SqlServer
+      run: nuget pack package/Rapidex.Data.SqlServer.nuspec -OutputDirectory ./artifacts
+    
+    - name: Pack Rapidex.Data.PostgreServer
+      run: nuget pack package/Rapidex.Data.PostgreServer.nuspec -OutputDirectory ./artifacts
+    
+    - name: List packages
+      run: ls -la ./artifacts
+    
+    - name: Push packages to NuGet.org
+      run: |
+        dotnet nuget push ./artifacts/Rapidex.Data.${{ steps.get_version.outputs.VERSION }}.nupkg \
+          --api-key ${{ secrets.NUGETORGRAPIDEXDATAAPIKEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+        
+        dotnet nuget push ./artifacts/Rapidex.Data.SqlServer.${{ steps.get_version.outputs.VERSION }}.nupkg \
+          --api-key ${{ secrets.NUGETORGRAPIDEXDATAAPIKEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+        
+        dotnet nuget push ./artifacts/Rapidex.Data.PostgreServer.${{ steps.get_version.outputs.VERSION }}.nupkg \
+          --api-key ${{ secrets.NUGETORGRAPIDEXDATAAPIKEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          ./artifacts/*.nupkg
+        body: |
+          ## Rapidex.Data v${{ steps.get_version.outputs.VERSION }}
+          
+          ### NuGet Packages
+          - [Rapidex.Data](https://www.nuget.org/packages/Rapidex.Data/${{ steps.get_version.outputs.VERSION }})
+          - [Rapidex.Data.SqlServer](https://www.nuget.org/packages/Rapidex.Data.SqlServer/${{ steps.get_version.outputs.VERSION }})
+          - [Rapidex.Data.PostgreServer](https://www.nuget.org/packages/Rapidex.Data.PostgreServer/${{ steps.get_version.outputs.VERSION }})
+          
+          ### Changes
+          See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./artifacts/*.nupkg
+        retention-days: 30

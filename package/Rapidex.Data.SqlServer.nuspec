@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Rapidex.Data.SqlServer</id>
+    <version>0.2.0.2</version>
+    <title>Rapidex.Data.SqlServer - SQL Server Provider</title>
+    <authors>ArionWM</authors>
+    <owners>ArionWM</owners>
+    <license type="expression">LGPL-3.0-or-later</license>
+    <projectUrl>https://github.com/ArionWM/Rapidex.Data</projectUrl>
+    <repository type="git" url="https://github.com/ArionWM/Rapidex.Data.git" branch="main" />
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+Microsoft SQL Server database provider for Rapidex.Data ORM framework.
+
+This package provides SQL Server specific implementation for the Rapidex.Data framework, enabling full support for Microsoft SQL Server databases.
+
+Features:
+• Full SQL Server support for Rapidex.Data
+• Optimized SQL generation for SQL Server
+• Support for SQL Server specific data types
+• Transaction support with SQL Server
+• Multi-schema support
+• Automatic schema creation and updates
+• Connection pooling support
+
+Requires Rapidex.Data package (which includes all necessary dependencies).
+    </description>
+    <summary>Microsoft SQL Server database provider for Rapidex.Data ORM framework</summary>
+    <releaseNotes>
+    </releaseNotes>
+    <copyright>Copyright © ArionWM 2025</copyright>
+    <tags>orm data database sqlserver mssql rapidex provider</tags>
+    <readme>README.md</readme>
+    <!--<icon>images\icon.png</icon>-->
+    
+    <dependencies>
+      <group targetFramework="net8.0">
+        <dependency id="Microsoft.Data.SqlClient" version="6.0.2" />
+        <dependency id="Rapidex.Data" version="0.2.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  
+  <files>
+    <!-- Library files -->
+    <file src="..\src\Rapidex.Data.SqlServer\bin\Release\net8.0\Rapidex.Data.SqlServer.dll" target="lib\net8.0" />
+    <file src="..\src\Rapidex.Data.SqlServer\bin\Release\net8.0\Rapidex.Data.SqlServer.xml" target="lib\net8.0" />
+    <file src="..\src\Rapidex.Data.SqlServer\bin\Release\net8.0\Rapidex.Data.SqlServer.pdb" target="lib\net8.0" />
+    
+    <!-- README -->
+    <file src="..\README.md" target="README.md" />
+    
+    <!-- License -->
+    <file src="..\LICENSE" target="LICENSE" />
+  </files>
+</package>

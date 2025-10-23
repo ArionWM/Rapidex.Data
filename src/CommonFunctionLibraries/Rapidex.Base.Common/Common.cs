@@ -12,11 +12,10 @@ namespace Rapidex
     {
 #if DEBUG
         public const string ENV = CommonConstants.ENV_DEVELOPMENT;
-#endif
-
-#if PRODUCTION
+#else
         public const string ENV = CommonConstants.ENV_PRODUCTION;
 #endif
+
 
 #if UNITTEST
         public const string ENV = CommonConstants.ENV_UNITTEST;

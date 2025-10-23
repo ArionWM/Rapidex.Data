@@ -11,16 +11,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\Rapidex.Base.Common.Logging.SerilogImp.Core8.csproj" />
-		<ProjectReference Include="..\..\src\CommonFunctionLibraries\Rapidex.Base.Common\Rapidex.Base.Common.csproj" />
-		<ProjectReference Include="..\..\src\Rapidex.Data.Behaviors\Rapidex.Data.Behaviors.csproj" />
-		<ProjectReference Include="..\..\src\Rapidex.Data.PostgreServer\Rapidex.Data.PostgreServer.csproj" />
-		<ProjectReference Include="..\..\src\Rapidex.Data.SqlServer\Rapidex.Data.SqlServer.csproj" />
-		<ProjectReference Include="..\..\src\Rapidex.Data\Rapidex.Data.csproj" />
-		<ProjectReference Include="..\Rapidex.Data.Sample.Library\Rapidex.Data.Sample.Library.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <None Update="App_Content\MyAppDefinitions\PredefinedContactValues.yml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
@@ -37,6 +27,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Rapidex.Data.Sample.Library\Rapidex.Data.Sample.Library.csproj" />
 	</ItemGroup>
 
 </Project>
