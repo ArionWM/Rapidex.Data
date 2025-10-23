@@ -35,5 +35,5 @@ using System.Runtime.InteropServices;
 #pragma warning disable CS8600
 public static class RapidexAssembly
 {
-    public const string VERSION = "0.2.1.0002";
+    public const string VERSION = "0.2.1.0003";
 }
