@@ -1,107 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-  <metadata>
-    <id>Rapidex.Data</id>
-    <version>0.2.1</version>
-    <title>Rapidex.Data - Flexible ORM Framework</title>
-    <authors>ArionWM</authors>
-    <owners>ArionWM</owners>
-    <license type="expression">LGPL-3.0-or-later</license>
-    <projectUrl>https://github.com/ArionWM/Rapidex.Data</projectUrl>
-    <repository type="git" url="https://github.com/ArionWM/Rapidex.Data.git" branch="main" />
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>
-Rapidex.Data is a flexible Object-Relational Mapping (ORM) framework designed for modern .NET applications. 
+	<metadata>
+		<id>Rapidex.Data</id>
+		<version>0.2.1</version>
+		<title>Rapidex.Data - Flexible ORM Framework</title>
+		<authors>ArionWM (Türkay Kaynak)</authors>
+		<owners>ArionWM</owners>
+		<license type="expression">LGPL-3.0-or-later</license>
+		<projectUrl>https://github.com/ArionWM/Rapidex.Data</projectUrl>
+		<repository type="git" url="https://github.com/ArionWM/Rapidex.Data.git" branch="main" />
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>
+			Rapidex.Data is a flexible Object-Relational Mapping (ORM) framework designed for modern .NET applications.
 
-Define entities using concrete classes, JSON, YAML, or dynamically at runtime. Modify entity definitions and schema on-the-fly without restarting your application.
+			Define entities using concrete classes, JSON, YAML, or dynamically at runtime. Modify entity definitions and schema on-the-fly without restarting your application.
 
-Key Features:
-• Define entities with concrete classes, JSON, YAML, or programmatically at runtime
-• Change metadata (entity definitions) and schema at runtime
-• UnitOfWork pattern for data integrity
-• Unique behavior-based approach for reusable logic
-• Dynamic logic injection with Signal Hub
-• Web service ready for CRUD operations (JSON support)
-• Easy predefined data support
-• PartialEntity for selective data retrieval and updates
-• Multiple database and schema support (multi-tenant ready)
-• Different metadata customization per database connection
-• Complex queries, filtering, and pagination
-• Built-in field types (Color, Currency, Email, Image, JSON, Password, Phone, Text, Time, etc.)
-• Easy One-to-Many and Many-to-Many relationships
-• Lazy loading for complex field types
-• Automatic schema creation and updates
-• Bulk update operations
+			Key Features:
+			• Define entities with concrete classes, JSON, YAML, or programmatically at runtime
+			• Change metadata (entity definitions) and schema at runtime
+			• UnitOfWork pattern for data integrity
+			• Unique behavior-based approach for reusable logic
+			• Dynamic logic injection with Signal Hub
+			• Web service ready for CRUD operations (JSON support)
+			• Easy predefined data support
+			• PartialEntity for selective data retrieval and updates
+			• Multiple database and schema support (multi-tenant ready)
+			• Different metadata customization per database connection
+			• Complex queries, filtering, and pagination
+			• Built-in field types (Color, Currency, Email, Image, JSON, Password, Phone, Text, Time, etc.)
+			• Easy One-to-Many and Many-to-Many relationships
+			• Lazy loading for complex field types
+			• Automatic schema creation and updates
+			• Bulk update operations
 
-Supports Microsoft SQL Server, PostgreSQL, and more (planned).
+			Supports Microsoft SQL Server, PostgreSQL, and more (planned).
 
-    </description>
-    <summary>Flexible ORM framework with runtime entity definition, multi-tenant support, and dynamic schema management for .NET 8</summary>
-    <releaseNotes>
-    </releaseNotes>
-    <copyright>Copyright © ArionWM 2025</copyright>
-    <tags>orm data database entity framework sql sqlserver postgresql multi-tenant runtime metadata flexible yaml json unitofwork behaviors signals serilog logging</tags>
-    <readme>README.md</readme>
-    <!--<icon>images\icon.png</icon>-->
-    
-    <dependencies>
-      <group targetFramework="net8.0">
-        <dependency id="SqlKata" version="4.0.1" />
-        <dependency id="Superpower" version="3.1.0" />
-        <dependency id="System.Text.Json" version="9.0.3" />
-        <dependency id="Mapster" version="7.4.0" />
-        <dependency id="Mapster.DependencyInjection" version="1.0.1" />
-        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="9.0.0" />
-        <dependency id="Microsoft.Extensions.Configuration.Binder" version="9.0.0" />
-        <dependency id="Microsoft.Extensions.Configuration.FileExtensions" version="9.0.0" />
-        <dependency id="Microsoft.Extensions.Configuration.Json" version="9.0.0" />
-        <dependency id="Microsoft.Extensions.Hosting.Abstractions" version="9.0.0" />
-        <dependency id="Microsoft.Extensions.Logging" version="9.0.0" />
-        <dependency id="YamlDotNet" version="16.3.0" />
-        <dependency id="MimeTypeMapOfficial" version="1.0.17" />
-        <dependency id="Serilog" version="4.3.0" />
-        <dependency id="Serilog.Extensions.Hosting" version="9.0.0" />
-        <dependency id="Serilog.Extensions.Logging" version="9.0.2" />
-        <dependency id="Serilog.Sinks.Async" version="2.1.0" />
-        <dependency id="Serilog.Sinks.File" version="7.0.0" />
-        <dependency id="Serilog.Sinks.Map" version="2.0.0" />
-      </group>
-    </dependencies>
-  </metadata>
-  
-  <files>
-    <!-- Rapidex.Data library files -->
-    <file src="..\src\Rapidex.Data\bin\Release\net8.0\Rapidex.Data.dll" target="lib\net8.0" />
-    <file src="..\src\Rapidex.Data\bin\Release\net8.0\Rapidex.Data.xml" target="lib\net8.0" />
-    <file src="..\src\Rapidex.Data\bin\Release\net8.0\Rapidex.Data.pdb" target="lib\net8.0" />
-    
-    <!-- Rapidex.Base.Common library files -->
-    <file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common\bin\Release\net8.0\Rapidex.Common.dll" target="lib\net8.0" />
-    <file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common\bin\Release\net8.0\Rapidex.Common.xml" target="lib\net8.0" />
-    <file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common\bin\Release\net8.0\Rapidex.Common.pdb" target="lib\net8.0" />
-    
-    <!-- Rapidex.SignalHub library files -->
-    <file src="..\src\CommonFunctionLibraries\Rapidex.SignalHub\bin\Release\net8.0\Rapidex.Signal.Hub.dll" target="lib\net8.0" />
-    <file src="..\src\CommonFunctionLibraries\Rapidex.SignalHub\bin\Release\net8.0\Rapidex.Signal.Hub.xml" target="lib\net8.0" />
-    <file src="..\src\CommonFunctionLibraries\Rapidex.SignalHub\bin\Release\net8.0\Rapidex.Signal.Hub.pdb" target="lib\net8.0" />
-    
-    <!-- Rapidex.Data.Behaviors library files -->
-    <file src="..\src\Rapidex.Data.Behaviors\bin\Release\net8.0\Rapidex.Data.Behaviors.dll" target="lib\net8.0" />
-    <file src="..\src\Rapidex.Data.Behaviors\bin\Release\net8.0\Rapidex.Data.Behaviors.xml" target="lib\net8.0" />
-    <file src="..\src\Rapidex.Data.Behaviors\bin\Release\net8.0\Rapidex.Data.Behaviors.pdb" target="lib\net8.0" />
-    
-    <!-- Rapidex.Base.Common.Logging.Serilog library files -->
-    <file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\bin\Release\net8.0\Rapidex.Base.Common.Logging.Serilog.Core8.dll" target="lib\net8.0" />
-    <file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\bin\Release\net8.0\Rapidex.Base.Common.Logging.Serilog.Core8.xml" target="lib\net8.0" />
-    <file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\bin\Release\net8.0\Rapidex.Base.Common.Logging.Serilog.Core8.pdb" target="lib\net8.0" />
-    
-    <!-- README -->
-    <file src="..\README.md" target="README.md" />
-    
-    <!-- License -->
-    <file src="..\LICENSE" target="LICENSE" />
-    
-    <!-- Icon (if exists) -->
-    <!-- <file src="..\icon.png" target="images\icon.png" /> -->
-  </files>
+		</description>
+		<summary>Flexible ORM framework with runtime entity definition, multi-tenant support, and dynamic schema management for .NET 8</summary>
+		<releaseNotes>
+		</releaseNotes>
+		<copyright>Copyright © ArionWM 2025</copyright>
+		<tags>orm data database entity framework sql sqlserver postgresql multi-tenant runtime metadata flexible yaml json unitofwork behaviors signals serilog logging</tags>
+		<readme>README.md</readme>
+		<!--<icon>images\icon.png</icon>-->
+
+		<dependencies>
+			<group targetFramework="net8.0">
+				<dependency id="SqlKata" version="4.0.1" />
+				<dependency id="Superpower" version="3.1.0" />
+				<dependency id="System.Text.Json" version="9.0.3" />
+				<dependency id="Mapster" version="7.4.0" />
+				<dependency id="Mapster.DependencyInjection" version="1.0.1" />
+				<dependency id="Microsoft.Extensions.Configuration.Abstractions" version="9.0.0" />
+				<dependency id="Microsoft.Extensions.Configuration.Binder" version="9.0.0" />
+				<dependency id="Microsoft.Extensions.Configuration.FileExtensions" version="9.0.0" />
+				<dependency id="Microsoft.Extensions.Configuration.Json" version="9.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.Abstractions" version="9.0.0" />
+				<dependency id="Microsoft.Extensions.Logging" version="9.0.0" />
+				<dependency id="YamlDotNet" version="16.3.0" />
+				<dependency id="MimeTypeMapOfficial" version="1.0.17" />
+				<dependency id="Serilog" version="4.3.0" />
+				<dependency id="Serilog.Extensions.Hosting" version="9.0.0" />
+				<dependency id="Serilog.Extensions.Logging" version="9.0.2" />
+				<dependency id="Serilog.Sinks.Async" version="2.1.0" />
+				<dependency id="Serilog.Sinks.File" version="7.0.0" />
+				<dependency id="Serilog.Sinks.Map" version="2.0.0" />
+			</group>
+		</dependencies>
+	</metadata>
+
+	<files>
+		<!-- Rapidex.Data library files -->
+		<file src="..\src\Rapidex.Data\bin\Release\net8.0\Rapidex.Data.dll" target="lib\net8.0" />
+		<file src="..\src\Rapidex.Data\bin\Release\net8.0\Rapidex.Data.xml" target="lib\net8.0" />
+		<file src="..\src\Rapidex.Data\bin\Release\net8.0\Rapidex.Data.pdb" target="lib\net8.0" />
+
+		<!-- Rapidex.Base.Common library files -->
+		<file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common\bin\Release\net8.0\Rapidex.Common.dll" target="lib\net8.0" />
+		<file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common\bin\Release\net8.0\Rapidex.Common.xml" target="lib\net8.0" />
+		<file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common\bin\Release\net8.0\Rapidex.Common.pdb" target="lib\net8.0" />
+
+		<!-- Rapidex.SignalHub library files -->
+		<file src="..\src\CommonFunctionLibraries\Rapidex.SignalHub\bin\Release\net8.0\Rapidex.Signal.Hub.dll" target="lib\net8.0" />
+		<file src="..\src\CommonFunctionLibraries\Rapidex.SignalHub\bin\Release\net8.0\Rapidex.Signal.Hub.xml" target="lib\net8.0" />
+		<file src="..\src\CommonFunctionLibraries\Rapidex.SignalHub\bin\Release\net8.0\Rapidex.Signal.Hub.pdb" target="lib\net8.0" />
+
+		<!-- Rapidex.Data.Behaviors library files -->
+		<file src="..\src\Rapidex.Data.Behaviors\bin\Release\net8.0\Rapidex.Data.Behaviors.dll" target="lib\net8.0" />
+		<file src="..\src\Rapidex.Data.Behaviors\bin\Release\net8.0\Rapidex.Data.Behaviors.xml" target="lib\net8.0" />
+		<file src="..\src\Rapidex.Data.Behaviors\bin\Release\net8.0\Rapidex.Data.Behaviors.pdb" target="lib\net8.0" />
+
+		<!-- Rapidex.Base.Common.Logging.Serilog library files -->
+		<file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\bin\Release\net8.0\Rapidex.Base.Common.Logging.Serilog.Core8.dll" target="lib\net8.0" />
+		<file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\bin\Release\net8.0\Rapidex.Base.Common.Logging.Serilog.Core8.xml" target="lib\net8.0" />
+		<file src="..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\bin\Release\net8.0\Rapidex.Base.Common.Logging.Serilog.Core8.pdb" target="lib\net8.0" />
+
+		<!-- README -->
+		<file src="..\README.md" target="README.md" />
+
+		<!-- License -->
+		<file src="..\LICENSE" target="LICENSE" />
+
+		<!-- Icon (if exists) -->
+		<!-- <file src="..\icon.png" target="images\icon.png" /> -->
+	</files>
 </package>

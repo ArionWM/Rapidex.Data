@@ -221,7 +221,6 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
                 {
                     return enfx;
                 }
-                break;
         }
 
         return ex;

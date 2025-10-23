@@ -13,7 +13,7 @@ Each entity object typically includes the self metadata, scope (db or schema), f
 
 Concrete entities implement the IConcreteEntity interface. For basic usage, we provide the `DbConcreteEntityBase` class that can be extended to create concrete entities.
 
-Properties starting with an underscore `_`` are not recognized as fields.
+Properties starting with an underscore `_` are not recognized as fields.
 
 ```csharp
 public class MyEntity : DbConcreteEntityBase

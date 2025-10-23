@@ -116,6 +116,8 @@ Rapidex.Data is licensed under **LGPL v3**. See [License](LICENSE) for details.
 
 See: [Contributing](/docs/Contributing.md) for contribution guidelines.
 
+© 2025, Türkay Kaynak (ArionWm).  
+
 ## Thanks 
 
 Thanks to all supporters!
