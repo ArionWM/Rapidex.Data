@@ -45,9 +45,9 @@ Ongoing work focuses on completing feature sets, improving performance, and enha
 
 | Package | Version |
 |---|---|
-|[Rapidex.Data](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
-|[Rapidex.Data.SqlServer](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
-|[Rapidex.Data.PostgreServer](https://www.nuget.org/packages/abc/)|![JobMan](https://img.shields.io/nuget/v/abc)|
+|[Rapidex.Data](https://www.nuget.org/packages/Rapidex.Data)|![JobMan](https://img.shields.io/nuget/v/Rapidex.Data)|
+|[Rapidex.Data.SqlServer](https://www.nuget.org/packages/Rapidex.Data.SqlServer)|![JobMan](https://img.shields.io/nuget/v/Rapidex.Data.SqlServer)|
+|[Rapidex.Data.PostgreServer](https://www.nuget.org/packages/Rapidex.Data.PostgreServer)|![JobMan](https://img.shields.io/nuget/v/Rapidex.Data.PostgreServer)|
 
 ---
 
