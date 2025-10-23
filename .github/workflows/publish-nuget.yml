@@ -47,19 +47,37 @@ jobs:
       run: |
         if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
           if [ "${{ inputs.use_assembly_version }}" == "true" ]; then
-            VERSION="${{ steps.extract_assembly_version.outputs.ASSEMBLY_VERSION }}"
-            echo "Using version from RapidexAssemblyInfo.cs: ${VERSION}"
+            FULL_VERSION="${{ steps.extract_assembly_version.outputs.ASSEMBLY_VERSION }}"
+            echo "Using version from RapidexAssemblyInfo.cs: ${FULL_VERSION}"
           else
-            VERSION="${{ inputs.version }}"
-            echo "Using manual version: ${VERSION}"
+            FULL_VERSION="${{ inputs.version }}"
+            echo "Using manual version: ${FULL_VERSION}"
           fi
         else
           # For tag-based triggers, use assembly version
-          VERSION="${{ steps.extract_assembly_version.outputs.ASSEMBLY_VERSION }}"
-          echo "Using version from RapidexAssemblyInfo.cs: ${VERSION}"
+          FULL_VERSION="${{ steps.extract_assembly_version.outputs.ASSEMBLY_VERSION }}"
+          echo "Using version from RapidexAssemblyInfo.cs: ${FULL_VERSION}"
         fi
-        echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-        echo "Final version: ${VERSION}"
+        
+        # Convert 4-part version to 3-part NuGet version
+        # Examples:
+        # 0.2.0.0003 -> 0.2.0
+        # 0.2.1.0005 -> 0.2.1
+        # Extract major.minor.patch (first 3 parts)
+        NUGET_VERSION=$(echo "${FULL_VERSION}" | cut -d. -f1-3)
+        
+        # Optional: If 4th part is not zero, add it as prerelease suffix
+        BUILD_NUMBER=$(echo "${FULL_VERSION}" | cut -d. -f4)
+        if [ ! -z "$BUILD_NUMBER" ] && [ "$BUILD_NUMBER" != "0" ]; then
+          # Remove leading zeros from build number
+          BUILD_NUMBER=$(echo $BUILD_NUMBER | sed 's/^0*//')
+          if [ ! -z "$BUILD_NUMBER" ] && [ "$BUILD_NUMBER" != "0" ]; then
+            NUGET_VERSION="${NUGET_VERSION}-beta.${BUILD_NUMBER}"
+          fi
+        fi
+        
+        echo "VERSION=${NUGET_VERSION}" >> $GITHUB_OUTPUT
+        echo "Final NuGet version: ${NUGET_VERSION} (from ${FULL_VERSION})"
     
     - name: Restore dependencies
       run: dotnet restore

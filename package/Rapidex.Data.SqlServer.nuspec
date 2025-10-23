@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Rapidex.Data.SqlServer</id>
-    <version>0.2.0.2</version>
+    <version>0.2.1</version>
     <title>Rapidex.Data.SqlServer - SQL Server Provider</title>
     <authors>ArionWM</authors>
     <owners>ArionWM</owners>
