@@ -70,8 +70,15 @@ jobs:
     # - name: Run tests
     #   run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
     
-    - name: Install NuGet as dotnet tool
-      run: dotnet tool install --global NuGet.CommandLine --version 6.8.0
+    - name: Install Mono (for nuget.exe)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mono-complete
+    
+    - name: Download nuget.exe
+      run: |
+        curl -o nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+        chmod +x nuget.exe
     
     - name: Update nuspec versions
       run: |
@@ -88,13 +95,13 @@ jobs:
       run: mkdir -p ./artifacts
     
     - name: Pack Rapidex.Data
-      run: dotnet nuget pack package/Rapidex.Data.nuspec -o ./artifacts
+      run: mono nuget.exe pack package/Rapidex.Data.nuspec -OutputDirectory ./artifacts
     
     - name: Pack Rapidex.Data.SqlServer
-      run: dotnet nuget pack package/Rapidex.Data.SqlServer.nuspec -o ./artifacts
+      run: mono nuget.exe pack package/Rapidex.Data.SqlServer.nuspec -OutputDirectory ./artifacts
     
     - name: Pack Rapidex.Data.PostgreServer
-      run: dotnet nuget pack package/Rapidex.Data.PostgreServer.nuspec -o ./artifacts
+      run: mono nuget.exe pack package/Rapidex.Data.PostgreServer.nuspec -OutputDirectory ./artifacts
     
     - name: List packages
       run: ls -la ./artifacts
