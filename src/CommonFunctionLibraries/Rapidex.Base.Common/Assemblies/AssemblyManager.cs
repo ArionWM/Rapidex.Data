@@ -27,7 +27,7 @@ namespace Rapidex.Base.Common.Assemblies
         protected string[] FindAssemblyPathsForCheck()
         {
             HashSet<string> paths = new HashSet<string>();
-            paths.Add(Directory.GetFiles(Rapidex.Common.BinaryFolder, "Rapidex*.dll"));
+            paths.Add(Directory.GetFiles(Rapidex.Common.BinaryFolder, "*.dll"));
 
             return paths.ToArray();
         }
@@ -73,10 +73,18 @@ namespace Rapidex.Base.Common.Assemblies
 
             Assembly assembly = null;
 
-            if (File.Exists(nameOrPath))
-                assembly = Assembly.LoadFrom(nameOrPath);
-            else
-                assembly = Assembly.Load(nameOrPath);
+            try
+            {
+                if (File.Exists(nameOrPath))
+                    assembly = Assembly.LoadFrom(nameOrPath);
+                else
+                    assembly = Assembly.Load(nameOrPath);
+            }
+            catch (Exception ex)
+            {
+                ex.Log(); //do nothing
+                return new AssemblyInfo[0];
+            }
 
             if (assembly.IsDynamic)
                 return new AssemblyInfo[0];
@@ -90,7 +98,7 @@ namespace Rapidex.Base.Common.Assemblies
         {
             List<AssemblyInfo> proCoreAssemblies = new List<AssemblyInfo>();
 
-            string[] namesAndPaths = FindAssemblyPathsForCheck();
+            string[] namesAndPaths = this.FindAssemblyPathsForCheck();
 
             foreach (string nameOrPath in namesAndPaths)
             {
@@ -110,7 +118,7 @@ namespace Rapidex.Base.Common.Assemblies
 
             foreach (var assemblyInfo in this.AssemblyDefinitions)
             {
-                if(assemblyInfo.InitializatorType == null)
+                if (assemblyInfo.InitializatorType == null)
                     continue; //Assembly don't have a IRapidexAssemblyDefinition derived definition class
 
                 IRapidexAssemblyDefinition proxAssembly = TypeHelper.CreateInstance<IRapidexAssemblyDefinition>(assemblyInfo.InitializatorType);

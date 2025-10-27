@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 namespace Rapidex;
 public enum Period
 {
-    Shift = 15,
-
     Daily = 10,
 
     Weekly = 20,

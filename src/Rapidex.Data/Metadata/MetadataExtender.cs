@@ -43,7 +43,7 @@ public static class MetadataExtender
     {
         ent.NotNull();
 
-        IDbEntityMetadata em = ent._Metadata ?? ent._Schema?.ParentDbScope.Metadata.Get(ent._TypeName);
+        IDbEntityMetadata em = ent._Metadata ?? (ent._Metadata = ent._Schema?.ParentDbScope.Metadata.Get(ent._TypeName));
         //Database.Metadata.Get(ent._TypeName);
         return em;
     }

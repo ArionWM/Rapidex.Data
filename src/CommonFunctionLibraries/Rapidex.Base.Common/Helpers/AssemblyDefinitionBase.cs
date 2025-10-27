@@ -8,7 +8,7 @@ namespace Rapidex;
 
 public abstract class AssemblyDefinitionBase : IRapidexAssemblyDefinition
 {
-    private string _navigationName;
+    private string navigationName;
 
     public abstract string Name { get; }
     public abstract string TablePrefix { get; }
@@ -18,11 +18,12 @@ public abstract class AssemblyDefinitionBase : IRapidexAssemblyDefinition
     {
         get
         {
-            return _navigationName ?? (_navigationName = this.Name.ToNavigationName());
+            return navigationName ?? (navigationName = this.Name.ToNavigationName());
         }
+
         protected set
         {
-            _navigationName = value;
+            navigationName = value;
         }
     }
 

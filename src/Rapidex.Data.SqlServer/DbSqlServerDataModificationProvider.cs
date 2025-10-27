@@ -433,7 +433,9 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         }
 
         if (updatedEntities != null && updatedEntities.Any())
+        {
             result.MergeWith(this.Update(em, updatedEntities)); //TODO: Diffset?
+        }
 
         return result;
     }

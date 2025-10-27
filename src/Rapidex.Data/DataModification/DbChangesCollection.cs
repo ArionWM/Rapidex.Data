@@ -286,7 +286,6 @@ internal class DbChangesCollection : IDbChangesCollection
         }
     }
 
-
     protected void CheckNewEntity(IEntity entity)
     {
         if (entity._IsNew)
@@ -297,7 +296,18 @@ internal class DbChangesCollection : IDbChangesCollection
             long oldId = (long)entity.GetId();
             if (entity.HasPrematureId())
             {
-                long newId = entity._Schema.Data.Sequence(info.PersistentSequence).GetNext();
+                List<long> ids = this.newEntityIds.Get(em);
+                long newId = 0;
+                if (ids.Any())
+                {
+                    newId = ids.First();
+                    ids.RemoveAt(0);
+                }
+                else
+                {
+                    newId = entity._Schema.Data.Sequence(info.PersistentSequence).GetNext();
+                }
+
                 entity.SetId(newId);
                 entity._VirtualId = oldId;
 
@@ -308,11 +318,30 @@ internal class DbChangesCollection : IDbChangesCollection
         }
     }
 
+    TwoLevelList<IDbEntityMetadata, long> newEntityIds = new TwoLevelList<IDbEntityMetadata, long>();
+
+    protected void ReserveIds()
+    {
+        this.newEntityIds.Clear();
+        var groupForTypeName = this.newEntities.Where(e => e.HasPrematureId()).GroupBy(e => e._TypeName);
+        foreach (var group in groupForTypeName)
+        {
+            var dbScope = group.First()._Schema;
+            var em = group.First().GetMetadata();
+            TemplateInfo info = Database.EntityFactory.GetTemplate(em, group.First()._Schema);
+            int requiredIdCount = group.Count();
+            var reqIds = dbScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
+            this.newEntityIds.Set(em, reqIds);
+        }
+    }
+
     public void CheckNewEntities()
     {
         locker.EnterWriteLock();
         try
         {
+            this.ReserveIds();
+
             foreach (var entity in newEntities)
             {
                 this.CheckNewEntity(entity);

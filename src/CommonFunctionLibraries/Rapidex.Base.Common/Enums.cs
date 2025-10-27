@@ -28,11 +28,11 @@ namespace Rapidex
 
     public enum RunnableComponentStatus
     {
-        Idle = 0 ,
+        Idle = 10 ,
         Running = 20, 
         WaitingStop = 40,
-        Stopped = 50,
-        Error = 99
+        Completed = 50,
+        Failure = 99
              
     }
 }

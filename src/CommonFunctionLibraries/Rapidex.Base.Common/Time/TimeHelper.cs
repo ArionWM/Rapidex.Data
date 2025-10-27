@@ -165,7 +165,6 @@ public static class TimeHelper
         DateTimeOffset date = time.GetStart(period);
         switch (period)
         {
-            case Period.Shift: //!!!
             case Period.Daily:
                 return new DateTimeOffset(date.Year, date.Month, date.Day, 23, 59, 59, TimeSpan.Zero);
             case Period.Weekly:
@@ -190,7 +189,6 @@ public static class TimeHelper
         DateTimeOffset date = new DateTimeOffset(time.Year, time.Month, time.Day, 0, 0, 0, TimeSpan.Zero);
         switch (period)
         {
-            case Period.Shift: //!!!
             case Period.Daily:
                 return date;
             case Period.Weekly:
@@ -213,7 +211,6 @@ public static class TimeHelper
         DateTimeOffset date = time.GetStart(period);
         switch (period)
         {
-            case Period.Shift: //!!!
             case Period.Daily:
                 return date.AddDays(1);
             case Period.Weekly:
@@ -333,6 +330,28 @@ public static class TimeHelper
     public static bool IsSameDay(this DateTimeOffset? time1, DateTimeOffset? time2)
     {
         return time1.HasValue && time2.HasValue && time1.Value.Day() == time2.Value.Day();
+    }
+
+    public static bool IsSameMonth(this DateTimeOffset time1, DateTimeOffset time2)
+    {
+        return time1.Year == time2.Year && time1.Month == time2.Month;
+    }
+
+    public static (DateTimeOffset start, DateTimeOffset end)[] SplitToDays(DateTimeOffset? startDate, DateTimeOffset? endDate)
+    {
+        List<(DateTimeOffset start, DateTimeOffset end)> result = new List<(DateTimeOffset start, DateTimeOffset end)>();
+        if (!startDate.HasValue || !endDate.HasValue)
+            return result.ToArray();
+        DateTimeOffset currentStart = startDate.Value;
+        DateTimeOffset finalEnd = endDate.Value;
+        while (currentStart.Day() < finalEnd.Day())
+        {
+            DateTimeOffset currentEnd = new DateTimeOffset(currentStart.Year, currentStart.Month, currentStart.Day, 23, 59, 59, TimeSpan.Zero);
+            result.Add((currentStart, currentEnd));
+            currentStart = currentEnd.AddSeconds(1);
+        }
+        result.Add((currentStart, finalEnd));
+        return result.ToArray();
     }
 
 }

@@ -52,7 +52,7 @@ public class DbEntityFactory
 
     protected IEntity CreateConcrete(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
     {
-        Type concreteType = Common.Assembly.FindType(entityMetadata.ConcreteTypeName);
+        Type concreteType = Common.Assembly.FindType(entityMetadata.ConcreteTypeName); //TODO: Cache / Dictionary<string,type> for performance 
         concreteType.ShouldSupportTo<IEntity>($"Concrete type '{entityMetadata.ConcreteTypeName}' must implement IEntity interface.");
 
         IEntity dbEntity = TypeHelper.CreateInstance<IEntity>(concreteType);
@@ -155,7 +155,7 @@ public class DbEntityFactory
             TemplateInfo templateInfo = this.GetTemplate(em, dbScope);
 
             newEntity._IsNew = true;
-            long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext();
+            long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext(); //TODO: Slow, much faster tech needed (with GetNextN)
             id = id * -1;
             newEntity.SetId(id);
         }

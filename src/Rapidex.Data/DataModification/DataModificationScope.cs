@@ -270,7 +270,15 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             foreach (var entity in _entities)
             {
                 IEntity _entity = entity;
-                _entity.EnsureDataTypeInitialization();
+
+                if (!entity.IsAttached() || entity._Schema != this.ParentSchema)
+                {
+                    this.Attach(entity);
+                }
+                else
+                {
+                    _entity.EnsureDataTypeInitialization();
+                }
 
                 IEntity retEntity = _entity.PublishOnBeforeSave()
                     .Result;

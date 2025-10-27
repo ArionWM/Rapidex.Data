@@ -170,6 +170,8 @@ public class DbSqlDdlGenerator
 
     public string GetNextNSequenceValues(string schemaName, string sequenceName, int numberCount)
     {
+        //TODO: Use sys.sp_sequence_get_range
+
         string sql = $@"
 DECLARE @requestedCount INT = {numberCount}; 
 DECLARE @currentValue BIGINT;
