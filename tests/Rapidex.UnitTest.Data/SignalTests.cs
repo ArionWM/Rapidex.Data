@@ -94,6 +94,8 @@ public class SignalTests : DbDependedTestsBase<DbSqlServerProvider>
 
         Assert.NotEmpty(beforeSaveInvokes);
         Assert.NotEmpty(afterSaveInvokes);
+
+        Thread.Sleep(100); //wait for async signal processing (after commit is async)
         Assert.NotEmpty(afterCommitInvokes);
 
     }

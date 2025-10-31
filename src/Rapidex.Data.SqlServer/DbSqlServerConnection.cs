@@ -87,10 +87,6 @@ internal class DbSqlServerConnection : IDisposable
         using (SqlCommand command = this.CreateCommand(parameters))
             try
             {
-
-                //if (Log.IsDebugEnabled)
-                //    Log.Verbose("Database", this.SqlCommandToRunnableString(context.SQL, context.Parameters));
-
                 command.CommandText = sql;
                 using (SqlDataReader reader = command.ExecuteReader(CommandBehavior.Default)) //Ne zaman CommandBehavior.SequentialAccess kullanalım?
                 {
@@ -105,8 +101,6 @@ internal class DbSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
-                //string sqlLog = this.SqlCommandToRunnableString(context.SQL, context.Parameters);
-                //Log.Error("Database", ex, sqlLog);
                 Log.Warn("Database", Environment.StackTrace);
                 Log.Error("Database", $"{ex.Message}\r\n{sql}");
 
@@ -123,14 +117,9 @@ internal class DbSqlServerConnection : IDisposable
         using (SqlCommand command = this.CreateCommand())
             try
             {
-
-                //var param = command.Parameters.AddWithValue("@table", variableTable);
                 var param = command.Parameters.Add("@table", SqlDbType.Structured);
                 param.Value = variableTable;
                 param.TypeName = variableTable.TableName;
-
-                //if (Log.IsDebugEnabled)
-                //    Log.Verbose("Database", this.SqlCommandToRunnableString(context.SQL, context.Parameters));
 
                 command.CommandType = CommandType.Text;
                 command.CommandText = sql;
@@ -139,8 +128,6 @@ internal class DbSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
-                //string sqlLog = this.SqlCommandToRunnableString(context.SQL, context.Parameters);
-                //Log.Error("Database", ex, sqlLog);
                 Log.Warn("Database", Environment.StackTrace);
                 Log.Error("Database", $"{ex.Message}\r\n{sql}");
 

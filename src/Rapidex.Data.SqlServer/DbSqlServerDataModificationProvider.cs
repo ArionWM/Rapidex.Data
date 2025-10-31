@@ -83,9 +83,14 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
         SqlServerCompiler mySqlCompiler = new SqlServerCompiler();
         SqlResult result = mySqlCompiler.Compile(loader.Query);
-        string sql = result.ToString();
+        string sql = result.Sql;
+        DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
-        DataTable table = this.Connection.Execute(sql);
+#if DEBUG
+        Log.Debug("Database", $"{sql} \r\n {variables.Select(v=>$"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+#endif
+
+        DataTable table = this.Connection.Execute(sql, variables);
 
         IEntity[] entities = this.ParentScope.Mapper.MapToNew(loader.EntityMetadata, table);
         return new EntityLoadResult(entities);
@@ -424,12 +429,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
         if (newEntities != null && newEntities.Any())
         {
-            //BulkUpdate?
             result.MergeWith(this.InsertV2(em, newEntities));
-
-            //var parts = newEntities.Split(10);
-            //foreach (var part in parts)
-            //    result.MergeWith(this.Insert(em, part, forceBulk));
         }
 
         if (updatedEntities != null && updatedEntities.Any())

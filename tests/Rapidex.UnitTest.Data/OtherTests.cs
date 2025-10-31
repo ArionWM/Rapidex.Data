@@ -97,7 +97,7 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void T03_AlreadyFinalizedScope1()
+    public void T03_ExpectedException_AlreadyFinalizedScope1()
     {
         var db = Database.Dbs.Db();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -120,7 +120,7 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void T03_AlreadyFinalizedScope2()
+    public void T03_ExpectedException_AlreadyFinalizedScope2()
     {
         Assert.Throws<WorkScopeNotAvailableException>(() =>
         {

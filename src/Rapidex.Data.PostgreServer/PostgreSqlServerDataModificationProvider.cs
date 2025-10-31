@@ -90,9 +90,15 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         var compiler = new PostgresCompiler();
         SqlResult result = compiler.Compile(loader.Query);
-        string sql = result.ToString();
+        string sql = result.Sql;
+        DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
-        DataTable table = this.Connection.Execute(sql);
+#if DEBUG
+        Log.Debug("Database", $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+#endif
+
+        DataTable table = this.Connection.Execute(sql, variables);
+
 
         IEntity[] entities = this.ParentScope.Mapper.MapToNew(loader.EntityMetadata, table);
         return new EntityLoadResult(entities);

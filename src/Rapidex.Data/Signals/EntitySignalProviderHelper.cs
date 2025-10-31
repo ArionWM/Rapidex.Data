@@ -25,8 +25,8 @@ internal static class EntitySignalProviderHelper
         //hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.Signal_WorkspaceCreated, "Workspace Created", "System", false));
         //hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.Signal_WorkspaceDeleted, "Workspace Deleted", "System", false));
 
-        hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.Signal_SchemaOrWorkspaceCreated, "Schema / Workspace Created", "System", false));
-        hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.Signal_SchemaOrWorkspaceDeleted, "Schema / Workspace Deleted", "System", false));
+        hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.SIGNAL_SCHEMAORWORKSPACECREATED, "Schema / Workspace Created", "System", false));
+        hub.RegisterSignalDefinition(new SignalDefinition(SignalConstants.SIGNAL_SCHEMAORWORKSPACEDELETED, "Schema / Workspace Deleted", "System", false));
 
 
     }

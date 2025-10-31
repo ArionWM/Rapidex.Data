@@ -87,7 +87,7 @@ public class RegistrationTests : IClassFixture<SingletonFixtureFactory<DefaultEm
             DatabaseOrTenant = SignalTopic.ANY,
             Workspace = SignalTopic.ANY,
             Module = SignalTopic.ANY,
-            Event = SignalConstants.Signal_Editing,
+            Event = SignalConstants.SIGNAL_EDITING,
             Entity = SignalTopic.ANY,
             EntityId = SignalTopic.ANY,
         };
@@ -97,7 +97,7 @@ public class RegistrationTests : IClassFixture<SingletonFixtureFactory<DefaultEm
             DatabaseOrTenant = SignalTopic.ANY,
             Workspace = SignalTopic.ANY,
             Module = SignalTopic.ANY,
-            Event = SignalConstants.Signal_Importing,
+            Event = SignalConstants.SIGNAL_IMPORTING,
             Entity = SignalTopic.ANY,
             EntityId = SignalTopic.ANY,
         };

@@ -20,10 +20,10 @@ public static class TimeHelper
         return _time;
     }
 
-    public static DateTimeOffset WeekStart(this DateTimeOffset time)
+    public static DateTimeOffset WeekStart(this DateTimeOffset time, DayOfWeek startOfWeek = DayOfWeek.Monday)
     {
-        DateTimeOffset _time = new DateTimeOffset(time.Year, time.Month, time.Day - (int)time.DayOfWeek, 0, 0, 0, TimeSpan.Zero); //time.Offset?
-        return _time;
+        int diff = (7 + (time.DayOfWeek - startOfWeek)) % 7;
+        return time.AddDays(-1 * diff).Date;
     }
 
     public static DateTimeOffset MonthStart(this DateTimeOffset time)
@@ -150,7 +150,19 @@ public static class TimeHelper
     /// <returns></returns>
     public static DateTimeOffset WithoutMs(this DateTimeOffset time)
     {
+        if (time.Millisecond == 0)
+            return time;
+
         DateTimeOffset date = new DateTimeOffset(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second, TimeSpan.Zero);
+        return date;
+    }
+
+    public static DateTimeOffset WithoutZone(this DateTimeOffset time)
+    {
+        if (time.Offset == TimeSpan.Zero)
+            return time;
+
+        DateTimeOffset date = new DateTimeOffset(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second, time.Millisecond, TimeSpan.Zero);
         return date;
     }
 
@@ -337,13 +349,12 @@ public static class TimeHelper
         return time1.Year == time2.Year && time1.Month == time2.Month;
     }
 
-    public static (DateTimeOffset start, DateTimeOffset end)[] SplitToDays(DateTimeOffset? startDate, DateTimeOffset? endDate)
+    public static (DateTimeOffset start, DateTimeOffset end)[] SplitToDays(DateTimeOffset startDate, DateTimeOffset endDate)
     {
         List<(DateTimeOffset start, DateTimeOffset end)> result = new List<(DateTimeOffset start, DateTimeOffset end)>();
-        if (!startDate.HasValue || !endDate.HasValue)
-            return result.ToArray();
-        DateTimeOffset currentStart = startDate.Value;
-        DateTimeOffset finalEnd = endDate.Value;
+
+        DateTimeOffset currentStart = startDate;
+        DateTimeOffset finalEnd = endDate;
         while (currentStart.Day() < finalEnd.Day())
         {
             DateTimeOffset currentEnd = new DateTimeOffset(currentStart.Year, currentStart.Month, currentStart.Day, 23, 59, 59, TimeSpan.Zero);
@@ -354,4 +365,38 @@ public static class TimeHelper
         return result.ToArray();
     }
 
+    public static (DateTimeOffset start, DateTimeOffset end)[] SplitToWeeks(DateTimeOffset startDate, DateTimeOffset endDate)
+    {
+        endDate = TimeHelper.GetEndTime(endDate, Period.Weekly);
+
+
+        List<(DateTimeOffset start, DateTimeOffset end)> result = new List<(DateTimeOffset start, DateTimeOffset end)>();
+        DateTimeOffset currentStart = startDate;
+        DateTimeOffset finalEnd = endDate;
+        while (currentStart.WeekStart() < finalEnd.WeekStart())
+        {
+            DateTimeOffset currentEnd = currentStart.WeekStart().AddDays(6).GetEndTime(Period.Daily);
+            result.Add((currentStart, currentEnd));
+            currentStart = currentEnd.AddSeconds(1);
+        }
+
+        return result.ToArray();
+    }
+
+    public static (DateTimeOffset start, DateTimeOffset end)[] SplitToMonths(DateTimeOffset startDate, DateTimeOffset endDate)
+    {
+        endDate = TimeHelper.GetEndTime(endDate, Period.Monthly);
+        List<(DateTimeOffset start, DateTimeOffset end)> result = new List<(DateTimeOffset start, DateTimeOffset end)>();
+        DateTimeOffset currentStart = startDate;
+        DateTimeOffset finalEnd = endDate;
+        while (currentStart.MonthStart() < finalEnd.MonthStart())
+        {
+            DateTimeOffset currentEnd = currentStart.MonthStart().AddMonths(1).AddDays(-1).GetEndTime(Period.Daily);
+            result.Add((currentStart, currentEnd));
+            currentStart = currentEnd.AddSeconds(1);
+        }
+
+        return result.ToArray();
+    }
+    
 }
