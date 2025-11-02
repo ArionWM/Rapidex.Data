@@ -224,6 +224,8 @@ public interface IQuery<T> : IQuery, IQueryLoader<T> where T : IConcreteEntity
 
     new IQuery<T> OrderBy(OrderDirection direction, params string[] fields);
     new IQuery<T> Page(long pageSize, long skip, bool includeTotalCount = true);
+
+    //TODO: Limit / Top
     new IQuery<T> ClearPaging();
     new IQuery<T> EnterUpdateMode();
 

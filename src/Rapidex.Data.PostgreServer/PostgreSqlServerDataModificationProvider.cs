@@ -94,7 +94,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
 #if DEBUG
-        Log.Debug("Database", $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        Log.Verbose("Database", $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
         DataTable table = this.Connection.Execute(sql, variables);

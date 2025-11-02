@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using Rapidex.Data.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -101,10 +102,10 @@ internal class DbSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
+                string logLine = LogHelper.CreateSqlLog(sql, parameters);
+                Log.Error("Database", $"{ex.Message}\r\n{logLine}");
                 Log.Warn("Database", Environment.StackTrace);
-                Log.Error("Database", $"{ex.Message}\r\n{sql}");
-
-                var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, sql) ?? ex;
+                var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
                 tex.Log();
                 throw tex;
             }

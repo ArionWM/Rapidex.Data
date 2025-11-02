@@ -245,7 +245,7 @@ public class Currency : BasicBaseDataType<decimal>
 
     public override string ToString()
     {
-        return this.Value.ToString();
+        return this.Value.ToString(CultureInfo.InvariantCulture);
     }
 
     //define implicit conversion from decimal to Currency

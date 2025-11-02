@@ -1,10 +1,11 @@
-﻿using Npgsql;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Logging;
+using Npgsql;
+using Rapidex.Data.Helpers;
 
 namespace Rapidex.Data.PostgreServer;
 
@@ -107,10 +108,10 @@ internal class PostgreSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
+                string logLine = LogHelper.CreateSqlLog(sql, parameters);
+                Log.Error("Database", $"{ex.Message}\r\n{logLine}");
                 Log.Warn("Database", Environment.StackTrace);
-                Log.Error("Database", $"{ex.Message}\r\n{sql}");
-
-                var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, sql) ?? ex;
+                var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
                 tex.Log();
                 throw tex;
             }

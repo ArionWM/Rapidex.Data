@@ -7,15 +7,14 @@ using System.Threading.Tasks;
 
 namespace Rapidex;
 
-internal class DefaultTimeProvider : ITimeProvider
+public class DefaultTimeProvider : ITimeProvider
 {
-    public DateTimeOffset Now => DateTimeOffset.Now;
-
     protected ConcurrentDictionary<string, System.Threading.Timer> timers = new ConcurrentDictionary<string, Timer>(StringComparer.InvariantCultureIgnoreCase);
 
-    public event TimerEventDelegate OnEvent;
+    public virtual DateTimeOffset Now => DateTimeOffset.Now;
+    public virtual DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
-    public void CallAfter(int msLater, Action<DateTimeOffset> callback)
+    public virtual void CallAfter(int msLater, Action<DateTimeOffset> callback)
     {
         callback.NotNull();
 

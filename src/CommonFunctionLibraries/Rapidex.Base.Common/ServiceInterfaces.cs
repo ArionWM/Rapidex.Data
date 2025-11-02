@@ -27,8 +27,7 @@ public delegate void TimerEventDelegate(string name, DateTimeOffset time, object
 public interface ITimeProvider
 {
     DateTimeOffset Now { get; }
-
-    event TimerEventDelegate OnEvent;
+    DateTimeOffset UtcNow { get; }
 
     void Setup();
     void CallAfter(int msLater, Action<DateTimeOffset> callback);
