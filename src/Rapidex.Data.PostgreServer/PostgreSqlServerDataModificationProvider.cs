@@ -94,7 +94,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
 #if DEBUG
-        Log.Verbose("Database", $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        Log.Debug("Database", $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
         DataTable table = this.Connection.Execute(sql, variables);
@@ -141,7 +141,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         }
 
 #if DEBUG
-        Log.Verbose(dbVariables.ToLogStr());
+        Log.Debug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();
@@ -200,7 +200,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         }
 
 #if DEBUG
-        Log.Verbose(dbVariables.ToLogStr());
+        Log.Debug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();
@@ -226,7 +226,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
                 ids = this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
         }
 
-        DataTable variableTable = GetDbVariableTable(schemaName, em, null);
+        DataTable variableTable = this.GetDbVariableTable(schemaName, em, null);
 
         int idCount = 0;
         foreach (IEntity entity in entities)
@@ -282,7 +282,27 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return result;
     }
 
-    protected IEntityUpdateResult Insert(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    protected void SimpleInsertBatch(IDbEntityMetadata em, DbVariable[] majorVariables, IEnumerable<IEntity> entities)
+    {
+        List<DbVariable[]> fields = new List<DbVariable[]>();
+        List<DbVariable> flatFields = new List<DbVariable>();
+
+        for (int i = 0; i < entities.Count(); i++)
+        {
+            IEntity entity = entities.ElementAt(i);
+            DbVariable[] variables = this.GetDbVariables(em, entity, i.ToString("0000"));
+            fields.Add(variables);
+            flatFields.AddRange(variables);
+        }
+
+        //max parameter count: 65535, split 
+
+        string sql = this.DdlGenerator.Insert(this.ParentScope.SchemaName, em.TableName, majorVariables, fields);
+
+        this.Connection.Execute(sql, flatFields.ToArray());
+    }
+
+    protected IEntityUpdateResult SimpleInsert(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -335,22 +355,14 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         {
             DbVariable[] majorVariables = this.GetDbVariables(em, entities.First(), null);
 
-            List<DbVariable[]> fields = new List<DbVariable[]>();
-            List<DbVariable> flatFields = new List<DbVariable>();
+            //Max parameter count: 10922 (~ 65535 / 6 )
+            int rowsPerBatch = 10922 / majorVariables.Length;
+            var batchs = entities.Split(rowsPerBatch);
 
-            for (int i = 0; i < count; i++)
+            foreach (var batch in batchs)
             {
-                IEntity entity = entities.ElementAt(i);
-                DbVariable[] variables = this.GetDbVariables(em, entity, i.ToString("0000"));
-                fields.Add(variables);
-                flatFields.AddRange(variables);
+                this.SimpleInsertBatch(em, majorVariables, batch);
             }
-
-
-
-            string sql = this.DdlGenerator.Insert(this.ParentScope.SchemaName, em.TableName, majorVariables, fields);
-
-            this.Connection.Execute(sql, flatFields.ToArray());
         }
         else
         {
@@ -375,8 +387,8 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         DbVariable[] variables;
 
-        if (entity is IPartialEntity)
-            variables = this.GetDbVariables(em, (IPartialEntity)entity, null);
+        if (entity is IPartialEntity pent)
+            variables = this.GetDbVariables(em, pent, null);
         else
             variables = this.GetDbVariables(em, entity, null);
 
@@ -419,11 +431,13 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         if (newEntities != null && newEntities.Any())
         {
-            result.MergeWith(this.Insert(em, newEntities));
+            result.MergeWith(this.SimpleInsert(em, newEntities));
         }
 
         if (updatedEntities != null && updatedEntities.Any())
+        {
             result.MergeWith(this.Update(em, updatedEntities));
+        }
 
         return result;
     }

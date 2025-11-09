@@ -427,5 +427,9 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         work.CommitChanges();
     }
 
-
+    public void LowerValues_Check()
+    {
+        //Eg: Enum lower value is long (with dynamic enums)
+        throw new NotImplementedException();
+    }
 }

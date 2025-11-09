@@ -38,10 +38,7 @@ public static class AssertionHelper
             if (!string.IsNullOrEmpty(message))
             {
                 var messageField = typeof(E).GetField("_message", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                if (messageField != null)
-                {
-                    messageField.SetValue(exception, message);
-                }
+                messageField?.SetValue(exception, message);
             }
             DebugBreak();
             throw exception;

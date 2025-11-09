@@ -63,15 +63,15 @@ internal class LoggingHelper : ILoggingHelper
 
     public void Debug(string category, string format, params object[] args)
     {
-        Log.Debug(category, string.Format(format, args));
+        Log.Debug(category, string.Format(format, args));//todo: direct pass format, args for performance
     }
 
     public void Debug(string format, params object[] args)
     {
         if (CurrentCategory.IsNullOrEmpty())
-            Log.Debug(string.Format(format, args));
+            Log.Debug(string.Format(format, args));//todo: direct pass format, args for performance
         else
-            this.Debug(CurrentCategory, string.Format(format, args));
+            this.Debug(CurrentCategory, string.Format(format, args));//todo: direct pass format, args for performance
     }
 
     public void Debug(string message)
@@ -92,15 +92,15 @@ internal class LoggingHelper : ILoggingHelper
 
     public void Verbose(string category, string format, params object[] args)
     {
-        Log.Verbose(category, string.Format(format, args));
+        Log.Debug(category, string.Format(format, args)); //todo: direct pass format, args for performance
     }
 
     public void Verbose(string format, params object[] args)
     {
         if (CurrentCategory.IsNullOrEmpty())
-            Log.Verbose(string.Format(format, args));
+            Log.Debug(string.Format(format, args));
         else
-            this.Verbose(CurrentCategory, string.Format(format, args));
+            this.Verbose(CurrentCategory, string.Format(format, args)); //todo: direct pass format, args for performance
     }
 
     public void Verbose(string message)

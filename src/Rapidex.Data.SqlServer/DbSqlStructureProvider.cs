@@ -234,42 +234,51 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public void ApplyAllStructure()
     {
-        IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
-        HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
-        List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
-
-        this.ParentDbProvider.CanCreateTable(this.ParentDbProvider.ParentScope.SchemaName);
-
-        var allEms = scope.ParentDbScope.Metadata.GetAll();
-        foreach (var em in allEms)
+        try
         {
-            if (!this.CanApplyToSchema(em))
-                continue;
+            IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
+            HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
+            List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
 
-            em.ApplyBehaviors();
+            this.ParentDbProvider.CanCreateTable(this.ParentDbProvider.ParentScope.SchemaName);
+
+            var allEms = scope.ParentDbScope.Metadata.GetAll();
+            foreach (var em in allEms)
+            {
+                if (!this.CanApplyToSchema(em))
+                    continue;
+
+                em.ApplyBehaviors();
+            }
+
+            allEms = scope.ParentDbScope.Metadata.GetAll();
+            foreach (var em in allEms)
+            {
+                if (!this.CanApplyToSchema(em))
+                    continue; //Sadece base schema'da olanları dışarıda tutuyoruz.
+
+                this.ApplyEntityStructureInternal(em, ref applyRequiredMetadatas, false);
+                appliedMetadatas.Add(em);
+            }
+
+
+            this.ApplyStructureInternal(applyRequiredMetadatas, true);
+
+            //Apply predefined data ...
+            scope.ParentDbScope.Metadata.Data.Apply(scope);
+
+            foreach (var em in allEms)
+            {
+                em.ApplyToScope(this.ParentScope);
+            }
+
         }
-
-        allEms = scope.ParentDbScope.Metadata.GetAll();
-        foreach (var em in allEms)
+        catch (Exception ex)
         {
-            if (!this.CanApplyToSchema(em))
-                continue; //Sadece base schema'da olanları dışarıda tutuyoruz.
-
-            this.ApplyEntityStructureInternal(em, ref applyRequiredMetadatas, false);
-            appliedMetadatas.Add(em);
+            ex.Log();
+            var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex) ?? ex;
+            throw tex;
         }
-
-
-        this.ApplyStructureInternal(applyRequiredMetadatas, true);
-
-        //Apply predefined data ...
-        scope.ParentDbScope.Metadata.Data.Apply(scope);
-
-        foreach (var em in allEms)
-        {
-            em.ApplyToScope(this.ParentScope);
-        }
-
     }
 
 

@@ -9,36 +9,67 @@ namespace Rapidex;
 
 public class DefaultTimeProvider : ITimeProvider
 {
-    protected ConcurrentDictionary<string, System.Threading.Timer> timers = new ConcurrentDictionary<string, Timer>(StringComparer.InvariantCultureIgnoreCase);
+    protected ConcurrentDictionary<int, System.Threading.Timer> timers = new();
 
     public virtual DateTimeOffset Now => DateTimeOffset.Now;
     public virtual DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
-    public virtual void CallAfter(int msLater, Action<DateTimeOffset> callback)
+    protected int CreateHandle()
+    {
+        int handle = Guid.NewGuid().GetHashCode();
+        return handle;
+    }
+
+    protected int CallAfterInternal(int msLater, Func<DateTimeOffset, Task> callback)
     {
         callback.NotNull();
 
-        string uniqueKey = Guid.NewGuid().ToString();
+        int handle = this.CreateHandle();
 
         var stateTimer = new System.Threading.Timer(
             (state) =>
             {
-                callback.Invoke(this.Now);
+                callback.Invoke(DateTimeOffset.Now).Wait();
             },
             null,
             msLater,
             msLater
-            );
+        );
 
-        timers.TryAdd(uniqueKey, stateTimer);
+        timers.TryAdd(handle, stateTimer);
+        return handle;
+    }
+
+    public int CallAfter(int msLater, Func<DateTimeOffset, Task> callback)
+    {
+        return this.CallAfterInternal(msLater, callback);
+    }
+
+    public virtual int CallAfter(int msLater, Action<DateTimeOffset> callback)
+    {
+        callback.NotNull();
+
+        return this.CallAfterInternal(msLater, (time) =>
+        {
+            callback.Invoke(time);
+            return Task.CompletedTask;
+        });
     }
 
     public void Setup()
     {
-        
+
     }
 
-    public virtual void StopCall()
+    public virtual void CancelCall(int handle)
+    {
+        if (timers.TryRemove(handle, out Timer timer))
+        {
+            timer.Dispose();
+        }
+    }
+
+    public virtual void CancelAllCalls()
     {
         var _timers = timers.ToArray();
         foreach (var timerKv in _timers)
@@ -47,4 +78,6 @@ public class DefaultTimeProvider : ITimeProvider
             timerKv.Value.Dispose();
         }
     }
+
+
 }

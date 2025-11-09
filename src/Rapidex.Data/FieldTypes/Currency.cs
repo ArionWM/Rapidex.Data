@@ -51,7 +51,7 @@ public class Currency : BasicBaseDataType<decimal>
 
     public class CurrencyTypeConverter : System.ComponentModel.TypeConverter
     {
-        static Type[] fromSupportedTypes = new Type[]
+        static Type[] FROMSUPPORTEDTYPES = new Type[]
         {
             typeof(string),
             typeof(decimal),
@@ -61,7 +61,7 @@ public class Currency : BasicBaseDataType<decimal>
             typeof(long)
         };
 
-        static Type[] toSupportedTypes = new Type[]
+        static Type[] TOSUPPORTEDTYPES = new Type[]
         {
             typeof(string),
             typeof(decimal),
@@ -69,7 +69,7 @@ public class Currency : BasicBaseDataType<decimal>
 
         public override bool CanConvertFrom(ITypeDescriptorContext? context, [NotNull] Type sourceType)
         {
-            if (fromSupportedTypes.Contains(sourceType))
+            if (FROMSUPPORTEDTYPES.Contains(sourceType))
                 return true;
 
             return base.CanConvertFrom(context, sourceType);
@@ -77,7 +77,7 @@ public class Currency : BasicBaseDataType<decimal>
 
         public override bool CanConvertTo(ITypeDescriptorContext? context, [NotNullWhen(true)] Type? destinationType)
         {
-            if (toSupportedTypes.Contains(destinationType))
+            if (TOSUPPORTEDTYPES.Contains(destinationType))
                 return true;
 
             return base.CanConvertTo(context, destinationType);

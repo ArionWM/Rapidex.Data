@@ -30,6 +30,9 @@ public interface ITimeProvider
     DateTimeOffset UtcNow { get; }
 
     void Setup();
-    void CallAfter(int msLater, Action<DateTimeOffset> callback);
-    void StopCall();
+    int CallAfter(int msLater, Action<DateTimeOffset> callback);
+    int CallAfter(int msLater, Func<DateTimeOffset, Task> callback);
+    void CancelCall(int handle);
+
+    void CancelAllCalls();
 }

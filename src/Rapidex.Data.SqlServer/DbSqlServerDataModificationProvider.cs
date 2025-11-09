@@ -87,7 +87,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
 #if DEBUG
-        Log.Verbose("Database", $"{sql} \r\n {variables.Select(v=>$"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        Log.Debug("Database", $"{sql} \r\n {variables.Select(v=>$"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
         DataTable table = this.Connection.Execute(sql, variables);
@@ -134,7 +134,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         }
 
 #if DEBUG
-        Log.Verbose(dbVariables.ToLogStr());
+        Log.Debug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();
@@ -188,7 +188,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         }
 
 #if DEBUG
-        Log.Verbose(dbVariables.ToLogStr());
+        Log.Debug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();
@@ -405,6 +405,8 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         EntityUpdateResult result = new EntityUpdateResult();
 
         //Eğer IPartial ise???
+
+        //Todo: Bulk update?
 
         foreach (IEntity entity in entities)
         {

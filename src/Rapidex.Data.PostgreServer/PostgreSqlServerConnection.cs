@@ -11,6 +11,9 @@ namespace Rapidex.Data.PostgreServer;
 
 internal class PostgreSqlServerConnection : IDisposable
 {
+    protected object lockObject = new object();
+
+    protected int DebugId { get; }
     protected string ConnectionString { get; }
     internal NpgsqlConnection Connection { get; private set; }
     internal NpgsqlTransaction Transaction { get; private set; }
@@ -19,6 +22,8 @@ internal class PostgreSqlServerConnection : IDisposable
 
     public PostgreSqlServerConnection(string connectionString)
     {
+        this.DebugId = RandomHelper.Random(99999999);
+
         NpgsqlConnectionStringBuilder npgsqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
         if (npgsqlConnectionStringBuilder.Timeout < 30)
             npgsqlConnectionStringBuilder.Timeout = 30;
@@ -32,6 +37,8 @@ internal class PostgreSqlServerConnection : IDisposable
         this.ConnectionString = npgsqlConnectionStringBuilder.ConnectionString;
         this.Connection = new NpgsqlConnection(this.ConnectionString);
         this.Connection.Open();
+
+        Log.Debug("Database", "Connection [{0}, {1}, {2}]: opened.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
     }
 
     protected void CheckConnectionState()
@@ -45,7 +52,7 @@ internal class PostgreSqlServerConnection : IDisposable
             retryCount++;
             if (retryCount > 200)
             {
-                Log.Error("Database", "Connection is not established after 10 seconds. ConnectionString: " + this.ConnectionString);
+                Log.Error("Database", $"Connection is not established after 10 seconds. {this.DebugId}; ConnectionString: {this.ConnectionString}");
                 throw new InvalidOperationException("Connection is not established after 10 seconds.");
             }
         }
@@ -89,60 +96,74 @@ internal class PostgreSqlServerConnection : IDisposable
 
     public DataTable Execute(string sql, params DbVariable[] parameters)
     {
-        this.CheckConnectionState();
-        using (var command = this.CreateCommand(parameters))
+        lock (this.lockObject) //PostgreSQL NpgsqlConnection is not support MARS
         {
-            try
+            this.CheckConnectionState();
+            using (var command = this.CreateCommand(parameters))
             {
-                command.CommandText = sql;
-                using (var reader = command.ExecuteReader(CommandBehavior.Default))
+                try
                 {
-                    DataTable table = new DataTable();
-                    table.Load(reader);
-
                     if (Log.IsDebugEnabled)
-                        Log.Verbose("Database", $"{table.Rows.Count} row(s) returned");
+                    {
+                        string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                        Log.Debug("Database", logLine);
+                    }
 
-                    return table;
+                    command.CommandText = sql;
+                    using (var reader = command.ExecuteReader(CommandBehavior.Default))
+                    {
+                        DataTable table = new DataTable();
+                        table.Load(reader);
+
+                        if (Log.IsDebugEnabled)
+                            Log.Debug("Database", $"{table.Rows.Count} row(s) returned");
+
+                        table.CaseSensitive = false;
+                        return table;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                string logLine = LogHelper.CreateSqlLog(sql, parameters);
-                Log.Error("Database", $"{ex.Message}\r\n{logLine}");
-                Log.Warn("Database", Environment.StackTrace);
-                var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
-                tex.Log();
-                throw tex;
+                catch (Exception ex)
+                {
+                    string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                    Log.Error("Database", $"{this.DebugId}; {ex.Message}\r\n{logLine}");
+                    Log.Warn("Database", Environment.StackTrace);
+                    var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
+                    tex.Log();
+                    throw tex;
+                }
             }
         }
     }
 
     public void BulkUpdate(string schemaName, DataTable variableTable)
     {
-        this.CheckConnectionState();
-
-        try
+        lock (this.lockObject) //PostgreSQL NpgsqlConnection is not support MARS
         {
-            //See: https://gist.github.com/samlii/a646660ced448fa1d8dd6642da358f3e
-            //See: https://www.bytefish.de/blog/postgresql_bulk_insert.html
-            this.Connection.BulkUpdate(schemaName, variableTable);
-        }
-        catch (Exception ex)
-        {
-            Log.Warn("Database", Environment.StackTrace);
-            Log.Error("Database", $"{ex.Message}\r\n{variableTable.TableName}");
+            this.CheckConnectionState();
 
-            var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, schemaName + ", " + variableTable.TableName) ?? ex;
-            tex.Log();
-            throw tex;
-        }
+            try
+            {
+                //See: https://gist.github.com/samlii/a646660ced448fa1d8dd6642da358f3e
+                //See: https://www.bytefish.de/blog/postgresql_bulk_insert.html
+                this.Connection.BulkUpdate(schemaName, variableTable);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Database", Environment.StackTrace);
+                Log.Error("Database", $"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
 
+                var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, schemaName + ", " + variableTable.TableName) ?? ex;
+                tex.Log();
+                throw tex;
+            }
+        }
     }
 
     public void Dispose()
     {
-        Log.Debug("Database", $"Connection [{Thread.CurrentThread.ManagedThreadId} / {this.Connection.ProcessID}]: closed.");
+        //TODO: Check https://github.com/npgsql/npgsql/issues/1201 NpgsqlConnection.ClearPool(NpgsqlConnection) ?
+
+        Log.Debug("Database", "Connection [{0}, {1}, {2}]: closed.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
         if (this.Connection != null)
         {
             this.Connection.Close();

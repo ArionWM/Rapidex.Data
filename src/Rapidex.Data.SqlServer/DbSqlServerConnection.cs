@@ -11,6 +11,7 @@ namespace Rapidex.Data.SqlServer;
 
 internal class DbSqlServerConnection : IDisposable
 {
+    protected int DebugId { get; }
     protected string ConnectionString { get; }
     internal SqlConnection Connection { get; private set; }
     internal SqlTransaction Transaction { get; private set; }
@@ -19,6 +20,7 @@ internal class DbSqlServerConnection : IDisposable
 
     public DbSqlServerConnection(string connectionString)
     {
+        this.DebugId = RandomHelper.Random(99999999);
         this.ConnectionString = connectionString;
         this.Connection = new SqlConnection(connectionString);
         this.Connection.OpenAsync();
@@ -88,6 +90,12 @@ internal class DbSqlServerConnection : IDisposable
         using (SqlCommand command = this.CreateCommand(parameters))
             try
             {
+                if (Log.IsDebugEnabled)
+                {
+                    string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                    Log.Debug("Database", logLine);
+                }
+
                 command.CommandText = sql;
                 using (SqlDataReader reader = command.ExecuteReader(CommandBehavior.Default)) //Ne zaman CommandBehavior.SequentialAccess kullanalım?
                 {
@@ -95,14 +103,14 @@ internal class DbSqlServerConnection : IDisposable
                     table.Load(reader);
 
                     if (Log.IsDebugEnabled)
-                        Log.Verbose("Database", $"{table.Rows.Count} row(s) returned");
+                        Log.Debug("Database", $"{table.Rows.Count} row(s) returned");
 
                     return table;
                 }
             }
             catch (Exception ex)
             {
-                string logLine = LogHelper.CreateSqlLog(sql, parameters);
+                string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
                 Log.Error("Database", $"{ex.Message}\r\n{logLine}");
                 Log.Warn("Database", Environment.StackTrace);
                 var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;

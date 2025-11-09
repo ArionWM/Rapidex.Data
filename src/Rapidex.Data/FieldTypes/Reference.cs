@@ -67,7 +67,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
 {
     public class ReferenceTypeConverter : System.ComponentModel.TypeConverter
     {
-        static Type[] supportedTypes = new Type[]
+        static Type[] SUPPORTED_TYPES = new Type[]
         {
             typeof(int),
             typeof(long)
@@ -76,7 +76,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
         public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
         {
 
-            if (supportedTypes.Contains(sourceType))
+            if (SUPPORTED_TYPES.Contains(sourceType))
                 return true;
 
             return base.CanConvertFrom(context, sourceType);

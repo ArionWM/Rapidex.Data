@@ -74,13 +74,13 @@ namespace Rapidex
         public static void Setup(string rootFolder, string binaryFolder, IServiceCollection services, IConfiguration configuration = null)
         {
             if (configuration != null)
-                Configuration = configuration;
+                Common.Configuration = configuration;
 
             RootFolder = rootFolder;
             BinaryFolder = binaryFolder;
             DataFolder = Path.Combine(rootFolder, "App_Data");
 
-            if (configuration == null)
+            if (configuration == null && Common.Configuration == null)
                 LoadConfiguration();
 
             AssemblyManager asman = new AssemblyManager();

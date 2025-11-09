@@ -16,17 +16,38 @@ public class EntityMapper
     public class EntityTypeMap
     {
         public IDbEntityMetadata EntityMetadata { get; set; }
-        public List<IDbFieldMetadata> AdvancedFields { get; } = new List<IDbFieldMetadata>();
+        public List<IDbFieldMetadata> AdvancedFields { get; } = new();
+        public DictionaryA<string> TableFieldMappings { get; } = new();
 
         public void CreateMap()
         {
-
             foreach (IDbFieldMetadata fm in this.EntityMetadata.Fields.Values)
             {
                 if (fm.Type.IsSupportTo<IDataType>())
                 {
                     this.AdvancedFields.Add(fm);
                 }
+            }
+        }
+
+        public void UpdateMap(DataTable table)
+        {
+            this.TableFieldMappings.Clear();
+            foreach (DataColumn col in table.Columns)
+            {
+                var fm = this.EntityMetadata.Fields.Get(col.ColumnName);
+                if (fm != null)
+                {
+                    this.TableFieldMappings.Add(fm.Name, col.ColumnName);
+                }
+            }
+        }
+
+        public void CheckUpdateMap(DataTable table)
+        {
+            if (this.TableFieldMappings.Count != table.Columns.Count)
+            {
+                this.UpdateMap(table);
             }
         }
     }
@@ -55,6 +76,7 @@ public class EntityMapper
                 this.Lock.EnterWriteLock();
                 try
                 {
+                    //Error: Should update after entity metadata change
                     EntityTypeMap tpl = new EntityTypeMap();
                     tpl.EntityMetadata = em;
                     tpl.CreateMap();
@@ -257,7 +279,7 @@ public class EntityMapper
         return to;
     }
 
-    public IEntity Map(IDbEntityMetadata em, DataRow from, IEntity fillTo)
+    public IEntity Map(IDbEntityMetadata em, EntityTypeMap map, DataRow from, IEntity fillTo)
     {
         foreach (IDbFieldMetadata fm in em.Fields.Values)
         {
@@ -268,8 +290,9 @@ public class EntityMapper
                 continue;
 
             object value = null;
+            string columnName = map.TableFieldMappings.Get(fm.Name) ?? fm.Name;
 
-            value = from[fm.Name];
+            value = from[columnName];
             if (Convert.IsDBNull(value))
                 value = null;
 
@@ -284,24 +307,28 @@ public class EntityMapper
         return fillTo;
     }
 
-    public IEntity MapToNew(IDbEntityMetadata em, DataRow from)
+    public IEntity MapToNew(IDbEntityMetadata em, EntityTypeMap map, DataRow from)
     {
         IEntity instance = Database.EntityFactory.Create(em, this.Parent, false);
-        return this.Map(em, from, instance);
+        return this.Map(em, map, from, instance);
     }
 
 
     public IEntity[] MapToNew(IDbEntityMetadata em, DataTable table)
     {
+        var mapping = this.GetMapping(em);
+        mapping.CheckUpdateMap(table);
+
+        table.CaseSensitive = false;
         List<IEntity> entities = new List<IEntity>();
         foreach (DataRow row in table.Rows)
         {
-            entities.Add(this.MapToNew(em, row));
+            entities.Add(this.MapToNew(em, mapping, row));
         }
 
         return entities.ToArray();
     }
-    public IPartialEntity Map(IDbEntityMetadata em, DataRow from, IPartialEntity fillTo, string[] fields)
+    public IPartialEntity Map(IDbEntityMetadata em, EntityTypeMap map, DataRow from, IPartialEntity fillTo, string[] fields)
     {
         foreach (string fieldName in fields)
         {
@@ -319,7 +346,9 @@ public class EntityMapper
 
             object value = null;
 
-            value = from[fm.Name];
+            string columnName = map.TableFieldMappings.Get(fm.Name) ?? fm.Name;
+
+            value = from[columnName];
             if (Convert.IsDBNull(value))
                 value = null;
 

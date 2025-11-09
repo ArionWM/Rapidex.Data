@@ -97,13 +97,13 @@ namespace Rapidex
         public static void Verbose(string category, string format, params object[] args)
         {
             if (CheckLogger())
-                Log.Verbose(category, string.Format(format, args));
+                Log.Debug(category, string.Format(format, args));
         }
 
         public static void Verbose(string format, params object[] args)
         {
             if (CheckLogger())
-                Log.Verbose(string.Format(format, args));
+                Log.Debug(string.Format(format, args));
         }
 
         public static void Verbose(string message)

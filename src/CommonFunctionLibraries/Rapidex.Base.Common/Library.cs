@@ -32,6 +32,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
         services.Configure<JsonSerializerOptions>(opt => opt.SetDefaultOptions());
 
         services.AddSingletonForProd<ITimeProvider, DefaultTimeProvider>();
+        services.AddKeyedSingleton<ITimeProvider, DefaultTimeProvider>("real");
 
         services.AddSingletonForProd<RapidexTypeConverter>(Common.Converter);
         services.AddSingletonForProd<ExceptionManager, ExceptionManager>();

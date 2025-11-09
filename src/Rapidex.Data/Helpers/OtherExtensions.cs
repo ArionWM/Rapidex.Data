@@ -81,6 +81,12 @@ public static class OtherExtensions
         {
             value = entity.GetId();
         }
+
+        if(value is Enum enumVal)
+        {
+            value = Convert.ToInt64(enumVal);
+        }
+
         return value;
     }
 
