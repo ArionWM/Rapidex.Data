@@ -38,12 +38,14 @@ public static class DependencyInjectionExtensions
         {
             Rapidex.Common.Start(sp);
             Rapidex.Data.Database.Start(sp);
-            Rapidex.Common.Assembly.StartAssemblies(sp);
+            Rapidex.Common.Assembly.InitializeAssemblies(sp);
 
             var dbScope = Database.Dbs.AddMainDbIfNotExists();
             dbScope.Metadata.ScanConcreteDefinitions();
             dbScope.Metadata.ScanSoftDefinitions();
             dbScope.Structure.ApplyAllStructure();
+
+            Rapidex.Common.Assembly.StartAssemblies(sp);
         }
         catch (Exception ex)
         {

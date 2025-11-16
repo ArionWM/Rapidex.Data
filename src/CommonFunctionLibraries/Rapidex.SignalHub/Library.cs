@@ -23,8 +23,13 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
         services.AddRapidexSignalHub();
     }
 
-    public override void Start(IServiceProvider serviceProvider)
+    public override void Initialize(IServiceProvider serviceProvider)
     {
         serviceProvider.StartRapidexSignalHub();
+    }
+
+    public override void Start(IServiceProvider serviceProvider)
+    {
+
     }
 }

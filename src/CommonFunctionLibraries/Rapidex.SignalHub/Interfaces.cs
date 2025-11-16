@@ -88,6 +88,7 @@ public interface ISignalHub
     /// <param name="handler">The handler to remove.</param>
     IResult Unsubscribe(int handlerId);
 
+
     /// <summary>
     ///     Raise a signal.
     /// </summary>

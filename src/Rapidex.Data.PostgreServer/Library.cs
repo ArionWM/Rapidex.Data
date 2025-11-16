@@ -21,6 +21,10 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
         services.AddSingletonForProd<IExceptionTranslator, PostgreSqlServerExceptionTranslator>();
     }
 
+    public override void Initialize(IServiceProvider serviceProvider)
+    {
+    }
+
     public override void Start(IServiceProvider serviceProvider)
     {
 

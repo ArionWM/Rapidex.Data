@@ -205,9 +205,36 @@ public interface IQuery<T> : IQuery, IQueryLoader<T> where T : IConcreteEntity
 
 
 
+    /// <summary>
+    /// field > value
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
     new IQuery<T> Gt(string field, object value);
+
+    /// <summary>
+    /// field >= value
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
     new IQuery<T> GtEq(string field, object value);
+
+    /// <summary>
+    /// field < value
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
     new IQuery<T> Lt(string field, object value);
+
+    /// <summary>
+    /// field <= value
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
     new IQuery<T> LtEq(string field, object value);
 
 

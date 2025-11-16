@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rapidex;
 
-//Copilot Generated :)
+//Copilot Generated 
 public static class TypeInheritenceHelper
 {
     /// <summary>

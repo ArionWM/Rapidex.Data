@@ -107,6 +107,11 @@ internal class SignalHub : ISignalHub
         });
     }
 
+    //public ISignalProcessResult PublishSync(SignalTopic topic, ISignalArguments args)
+    //{
+    //    return this.PublishInternal(topic, args);
+    //}
+
     public IResult<int> Subscribe(SignalTopic topic, Func<ISignalArguments, ISignalHandlingResult> handler)
     {
         topic.Check()

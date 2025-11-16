@@ -184,5 +184,29 @@ namespace Rapidex
             return (T)provider.GetRapidexService(typeof(T), serviceKey);
         }
 
+        public static void FindAndAddTransient<T>(this IServiceCollection services)
+        {
+            var classes = Common.Assembly.FindDerivedClassTypes<T>();
+            foreach (var clazz in classes)
+            {
+                if (clazz.IsAbstract)
+                    continue;
+
+                services.AddTransient(clazz);
+                services.AddTransient(typeof(T), clazz);
+            }
+        }
+
+        public static void FindAndAddSingleton<T>(this IServiceCollection services)
+        {
+            var classes = Common.Assembly.FindDerivedClassTypes<T>();
+            foreach (var clazz in classes)
+            {
+                if (clazz.IsAbstract)
+                    continue;
+
+                services.AddSingleton(clazz);
+            }
+        }
     }
 }

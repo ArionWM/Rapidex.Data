@@ -340,6 +340,15 @@ namespace Rapidex.Base.Common.Assemblies
         //    });
         //}
 
+        public void InitializeAssemblies(IServiceProvider serviceProvider)
+        {
+            this.IterateAsemblies(assembly =>
+            {
+                assembly.Initialize(serviceProvider);
+            });
+        }
+
+
         public void StartAssemblies(IServiceProvider serviceProvider)
         {
             this.IterateAsemblies(assembly =>

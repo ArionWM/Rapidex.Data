@@ -62,11 +62,18 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         fmc.Setup(services);
     }
 
-    public override void Start(IServiceProvider serviceProvider)
+
+
+    public override void Initialize(IServiceProvider serviceProvider)
     {
         MetadataImplementerContainer.Setup();
 
         EntitySignalProviderHelper.CreatePredefinedContent(Rapidex.Signal.Hub);
+    }
+
+    public override void Start(IServiceProvider serviceProvider)
+    {
+
     }
 
     public void SetupMetadata(IDbScope db)

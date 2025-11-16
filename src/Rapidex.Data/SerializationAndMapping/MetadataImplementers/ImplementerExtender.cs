@@ -86,8 +86,13 @@ public static class ImplementerExtender
                 if (type.IsAbstract || type.IsInterface)
                     continue; //Skip abstract and interface types
 
-                ems.Add(
-                    cmi.Add(type, ainfo.NavigationName, ainfo.DatabaseEntityPrefix));
+               var em = mContainer.Entities.Values.FirstOrDefault(em => em.ConcreteTypeName == type.FullName);
+                if(em == null)
+                {
+                   em = cmi.Add(type, ainfo.NavigationName, ainfo.DatabaseEntityPrefix);
+                }
+
+                ems.Add(em);
             }
         }
         return ems.ToArray();

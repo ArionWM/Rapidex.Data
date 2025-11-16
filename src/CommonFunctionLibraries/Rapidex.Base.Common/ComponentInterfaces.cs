@@ -57,8 +57,8 @@ public interface IRapidexAssemblyDefinition : IOrderedComponent
     string TablePrefix { get; }
     void SetupServices(IServiceCollection services);
 
-    
-    void Start(IServiceProvider serviceProvider);
+    void Initialize(IServiceProvider serviceProvider); 
+    void Start(IServiceProvider serviceProvider); 
 }
 
 

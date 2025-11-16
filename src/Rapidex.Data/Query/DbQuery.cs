@@ -194,11 +194,23 @@ namespace Rapidex.Data.Query
             return (T)base.First();
         }
 
+        /// <summary>
+        /// field > value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         IQuery<T> IQuery<T>.Gt(string field, object value)
         {
             return (IQuery<T>)base.Gt(field, value);
         }
 
+        /// <summary>
+        /// field >= value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         IQuery<T> IQuery<T>.GtEq(string field, object value)
         {
             return (IQuery<T>)base.GtEq(field, value);
@@ -221,11 +233,23 @@ namespace Rapidex.Data.Query
             return lres;
         }
 
+        /// <summary>
+        /// field < value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         IQuery<T> IQuery<T>.Lt(string field, object value)
         {
             return (IQuery<T>)base.Lt(field, value);
         }
 
+        /// <summary>
+        /// field <= value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         IQuery<T> IQuery<T>.LtEq(string field, object value)
         {
             return (IQuery<T>)base.LtEq(field, value);

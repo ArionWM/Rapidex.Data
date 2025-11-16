@@ -61,10 +61,12 @@ namespace Rapidex
         }
         public static void LoadConfiguration()
         {
-            Common.Configuration = new ConfigurationBuilder()
-                            .SetBasePath(AppContext.BaseDirectory)
-                            .AddJsonFile("appsettings.json", false, true)
-                            .Build();
+            var cBuilder = new ConfigurationBuilder()
+                             .SetBasePath(AppContext.BaseDirectory)
+                             .AddJsonFile("appsettings.json", true, true)
+                             .AddJsonFile($"appsettings.{Common.EnviromentCode}.json", true, true);
+
+            Common.Configuration = cBuilder.Build();
         }
 
         /// <summary>

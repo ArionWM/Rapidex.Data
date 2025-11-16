@@ -35,6 +35,12 @@ namespace Rapidex.Data.Query
 
         }
 
+        /// <summary>
+        /// field > value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public IQueryCriteria Gt(string field, object value)
         {
             field.NotEmpty();
@@ -44,6 +50,12 @@ namespace Rapidex.Data.Query
             return this;
         }
 
+        /// <summary>
+        /// field >= value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public IQueryCriteria GtEq(string field, object value)
         {
             field.NotEmpty();
@@ -76,6 +88,12 @@ namespace Rapidex.Data.Query
             return this;
         }
 
+        /// <summary>
+        /// field < value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public IQueryCriteria Lt(string field, object value)
         {
             field.NotEmpty();
@@ -86,6 +104,12 @@ namespace Rapidex.Data.Query
 
         }
 
+        /// <summary>
+        /// field <= value
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public IQueryCriteria LtEq(string field, object value)
         {
             field.NotEmpty();

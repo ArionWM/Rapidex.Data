@@ -28,6 +28,8 @@ public abstract class AssemblyDefinitionBase : IRapidexAssemblyDefinition
     }
 
     public abstract void SetupServices(IServiceCollection services);
-    
+
+    public abstract void Initialize(IServiceProvider serviceProvider);
+
     public abstract void Start(IServiceProvider serviceProvider);
 }

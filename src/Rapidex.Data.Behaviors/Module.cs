@@ -22,7 +22,10 @@ internal class Module:AssemblyDefinitionBase, IRapidexAssemblyDefinition
         services.AddTransient<IEntityBehaviorDefinition, ArchiveEntity>();
         services.AddTransient<IEntityBehaviorDefinition, HasTags>();
         services.AddTransient<IEntityBehaviorDefinition, DefinitionEntity>();
+    }
 
+    public override void Initialize(IServiceProvider serviceProvider)
+    {
 
     }
 

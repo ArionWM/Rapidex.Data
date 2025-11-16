@@ -38,7 +38,7 @@ public class EntityMapper
                 var fm = this.EntityMetadata.Fields.Get(col.ColumnName);
                 if (fm != null)
                 {
-                    this.TableFieldMappings.Add(fm.Name, col.ColumnName);
+                    this.TableFieldMappings.Set(fm.Name, col.ColumnName);
                 }
             }
         }
