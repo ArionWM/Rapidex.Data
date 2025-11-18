@@ -15,22 +15,32 @@ public class EntityMapper
     protected IDbSchemaScope Parent { get; }
     public class EntityTypeMap
     {
+        protected ReaderWriterLockSlim SyncLock { get; } = new ReaderWriterLockSlim();
+
         public IDbEntityMetadata EntityMetadata { get; set; }
         public List<IDbFieldMetadata> AdvancedFields { get; } = new();
         public DictionaryA<string> TableFieldMappings { get; } = new();
 
         public void CreateMap()
         {
-            foreach (IDbFieldMetadata fm in this.EntityMetadata.Fields.Values)
+            this.SyncLock.EnterWriteLock();
+            try
             {
-                if (fm.Type.IsSupportTo<IDataType>())
+                foreach (IDbFieldMetadata fm in this.EntityMetadata.Fields.Values)
                 {
-                    this.AdvancedFields.Add(fm);
+                    if (fm.Type.IsSupportTo<IDataType>())
+                    {
+                        this.AdvancedFields.Add(fm);
+                    }
                 }
+            }
+            finally
+            {
+                this.SyncLock.ExitWriteLock();
             }
         }
 
-        public void UpdateMap(DataTable table)
+        protected void UpdateMapInternal(DataTable table)
         {
             this.TableFieldMappings.Clear();
             foreach (DataColumn col in table.Columns)
@@ -43,11 +53,40 @@ public class EntityMapper
             }
         }
 
+        public void UpdateMap(DataTable table)
+        {
+            this.SyncLock.EnterWriteLock();
+            try
+            {
+                this.UpdateMapInternal(table);
+            }
+            finally
+            {
+                this.SyncLock.ExitWriteLock();
+            }
+        }
+
         public void CheckUpdateMap(DataTable table)
         {
-            if (this.TableFieldMappings.Count != table.Columns.Count)
+            this.SyncLock.EnterUpgradeableReadLock();
+            try
             {
-                this.UpdateMap(table);
+                if (this.TableFieldMappings.Count != table.Columns.Count)
+                {
+                    this.SyncLock.EnterWriteLock();
+                    try
+                    {
+                        this.UpdateMapInternal(table);
+                    }
+                    finally
+                    {
+                        this.SyncLock.ExitWriteLock();
+                    }
+                }
+            }
+            finally
+            {
+                this.SyncLock.ExitUpgradeableReadLock();
             }
         }
     }

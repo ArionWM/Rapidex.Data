@@ -10,8 +10,8 @@ namespace Rapidex;
 public static class TypeHelper
 {
 
-    readonly static TwoLevelDictionary<Type, string, PropertyInfo> properties = new TwoLevelDictionary<Type, string, PropertyInfo>();
-    readonly static TwoLevelList<Type, Type> baseTypes = new TwoLevelList<Type, Type>();
+    readonly static TwoLevelDictionary<Type, string, PropertyInfo> Properties = new TwoLevelDictionary<Type, string, PropertyInfo>();
+    readonly static TwoLevelList<Type, Type> BaseTypes = new TwoLevelList<Type, Type>();
 
     public readonly static Type Type_Int = typeof(int);
     public readonly static Type Type_String = typeof(string);
@@ -142,7 +142,7 @@ public static class TypeHelper
 
     public static PropertyInfo GetPropertyCached(this Type type, string propertyName)
     {
-        var propDict = properties.Get(type);
+        var propDict = Properties.Get(type);
         var propInfo = propDict?.Get(propertyName);
 
         if (propInfo == null)
@@ -152,7 +152,7 @@ public static class TypeHelper
 
             propInfo = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
             if (propInfo != null)
-                properties.Set(type, propertyName, propInfo);
+                Properties.Set(type, propertyName, propInfo);
 
         }
 
@@ -161,9 +161,9 @@ public static class TypeHelper
 
     public static IList<Type> GetBaseTypesChainCached(this Type type, bool includeInterfaces)
     {
-        if (baseTypes.ContainsKey(type) && baseTypes[type] != null)
+        if (BaseTypes.ContainsKey(type) && BaseTypes[type] != null)
         {
-            return baseTypes[type];
+            return BaseTypes[type];
         }
 
         List<Type> list = new List<Type>();
@@ -173,7 +173,7 @@ public static class TypeHelper
             list.Add(bType);
             bType = bType.BaseType;
         }
-        baseTypes.Set(type, list);
+        BaseTypes.Set(type, list);
 
         if (includeInterfaces)
         {

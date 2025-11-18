@@ -20,7 +20,7 @@ public class DefaultTimeProvider : ITimeProvider
         return handle;
     }
 
-    protected int CallAfterInternal(int msLater, Func<DateTimeOffset, Task> callback)
+    protected int CallAfterInternal(int msLater, Func<DateTimeOffset, DateTimeOffset, Task> callback)
     {
         callback.NotNull();
 
@@ -29,7 +29,7 @@ public class DefaultTimeProvider : ITimeProvider
         var stateTimer = new System.Threading.Timer(
             (state) =>
             {
-                callback.Invoke(DateTimeOffset.Now).Wait();
+                callback.Invoke(DateTimeOffset.UtcNow, DateTimeOffset.Now).Wait();
             },
             null,
             msLater,
@@ -40,18 +40,18 @@ public class DefaultTimeProvider : ITimeProvider
         return handle;
     }
 
-    public int CallAfter(int msLater, Func<DateTimeOffset, Task> callback)
+    public int CallAfter(int msLater, Func<DateTimeOffset, DateTimeOffset, Task> callback)
     {
         return this.CallAfterInternal(msLater, callback);
     }
 
-    public virtual int CallAfter(int msLater, Action<DateTimeOffset> callback)
+    public virtual int CallAfter(int msLater, Action<DateTimeOffset, DateTimeOffset> callback)
     {
         callback.NotNull();
 
-        return this.CallAfterInternal(msLater, (time) =>
+        return this.CallAfterInternal(msLater, (timeUtc, timeLocal) =>
         {
-            callback.Invoke(time);
+            callback.Invoke(timeUtc, timeLocal);
             return Task.CompletedTask;
         });
     }
