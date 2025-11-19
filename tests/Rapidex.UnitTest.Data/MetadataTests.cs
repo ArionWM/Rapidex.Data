@@ -15,7 +15,7 @@ namespace Rapidex.UnitTest.Data;
 
 public class MetadataTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public MetadataTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public MetadataTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

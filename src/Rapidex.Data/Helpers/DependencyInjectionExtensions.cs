@@ -21,7 +21,7 @@ public static class DependencyInjectionExtensions
             if (binaryFolder.IsNullOrEmpty())
                 binaryFolder = AppContext.BaseDirectory;
 
-            Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration);
+            Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration, defaultLogger);
             Rapidex.Common.Assembly.SetupAssemblyServices(services);
             Rapidex.Data.Database.Setup();
         }

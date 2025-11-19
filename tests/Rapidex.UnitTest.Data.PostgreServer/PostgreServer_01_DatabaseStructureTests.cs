@@ -4,7 +4,7 @@ namespace Rapidex.UnitTest.Data.PostgreServer;
 
 public class PostgreServer_01_DatabaseStructureTests : DatabaseStructureTestsBase<PostgreSqlServerProvider>
 {
-    public PostgreServer_01_DatabaseStructureTests(SingletonFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
+    public PostgreServer_01_DatabaseStructureTests( SingletonFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
     {
     }
 

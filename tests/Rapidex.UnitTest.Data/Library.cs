@@ -16,8 +16,11 @@ global using Rapidex.Data.SqlServer;
 
 global using Rapidex.UnitTest.Data.Fixtures;
 global using Rapidex.UnitTest.Data.TestBase;
-using Microsoft.Extensions.DependencyInjection;
-using System.Runtime.CompilerServices;
+
+global using Microsoft.Extensions.Logging;
+
+global using Microsoft.Extensions.DependencyInjection;
+global using System.Runtime.CompilerServices;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 

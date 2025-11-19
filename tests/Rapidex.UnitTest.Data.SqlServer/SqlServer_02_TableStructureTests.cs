@@ -2,7 +2,7 @@
 
 public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlServerProvider>
 {
-    public SqlServer_02_TableStructureTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SqlServer_02_TableStructureTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

@@ -15,9 +15,10 @@ global using Rapidex;
 global using Rapidex.UnitTests;
 global using Rapidex.UnitTest.Data.Fixtures;
 global using Rapidex.UnitTest.Data.TestBase;
+global using Microsoft.Extensions.Logging;
 
-using Microsoft.Extensions.DependencyInjection;
-using System.Runtime.CompilerServices;
+global using Microsoft.Extensions.DependencyInjection;
+global using System.Runtime.CompilerServices;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 

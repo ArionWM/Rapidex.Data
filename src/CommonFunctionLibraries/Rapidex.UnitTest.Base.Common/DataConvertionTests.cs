@@ -1,4 +1,5 @@
-﻿using Rapidex.UnitTest.Base.Common.Fixtures;
+﻿using Microsoft.Extensions.Logging;
+using Rapidex.UnitTest.Base.Common.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,13 @@ namespace Rapidex.UnitTest.Base.Common;
 
 public class DataConvertionTests : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
 {
-    DefaultEmptyFixture fixture;
+    DefaultEmptyFixture Fixture { get; }
+    public ILogger Logger => this.Fixture.Logger;
 
     public DataConvertionTests(SingletonFixtureFactory<DefaultEmptyFixture> factory)
     {
-        fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture();
+        this.Logger?.LogInformation("DataConvertionTests initialized.");
     }
 
     [Fact]

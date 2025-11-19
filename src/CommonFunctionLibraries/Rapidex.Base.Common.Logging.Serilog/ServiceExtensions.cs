@@ -19,7 +19,16 @@ public static class ServiceExtensions
     private static LoggingLevelSwitch? GlobalLevelSwitch;
     private static ConcurrentDictionary<string, LoggingLevelSwitch>? CategoryLevelSwitches;
 
-    public static IServiceCollection UseRapidexSerilog(this IServiceCollection services, ILoggingBuilder loggingBuilder, IConfiguration configuration = null, IHostEnvironment environment = null, Action<RapidexLoggingConfiguration>? configureOptions = null)
+    /// <summary>
+    /// Rapidex Serilog implementasyonunu kullanýr.
+    /// Hem standart Serilog konfigürasyonunu (appsettings.json) hem de Rapidex özelliklerini destekler.
+    /// </summary>
+    public static IServiceCollection UseRapidexSerilog(
+        this IServiceCollection services, 
+        ILoggingBuilder loggingBuilder, 
+        IConfiguration configuration = null, 
+        IHostEnvironment environment = null, 
+        Action<RapidexLoggingConfiguration>? configureOptions = null)
     {
         services.NotNull();
 
@@ -41,10 +50,24 @@ public static class ServiceExtensions
             CategoryLevelSwitches.TryAdd(kvp.Key, levelSwitch);
         }
 
-        // Serilog konfigürasyonunu oluþtur
-        var loggerConfig = new LoggerConfiguration()
-            .MinimumLevel.ControlledBy(GlobalLevelSwitch)
-            .Enrich.FromLogContext();
+        LoggerConfiguration loggerConfig;
+
+        if (config.UseStandardSerilogConfiguration)
+        {
+            // Standart Serilog konfigürasyonunu kullan (appsettings.json'dan)
+            loggerConfig = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
+                .MinimumLevel.ControlledBy(GlobalLevelSwitch);
+        }
+        else
+        {
+            // Rapidex özel konfigürasyonunu kullan
+            loggerConfig = new LoggerConfiguration()
+                .MinimumLevel.ControlledBy(GlobalLevelSwitch);
+        }
+
+        // Enricher'larý ekle
+        loggerConfig.Enrich.FromLogContext();
 
         if (environment != null)
         { 
@@ -59,32 +82,31 @@ public static class ServiceExtensions
             loggerConfig.MinimumLevel.Override(kvp.Key, kvp.Value);
         }
 
-        ConfigureFileSinks(loggerConfig, config);
+        // Rapidex özel file sink'lerini ekle (standart konfigürasyon kullanýlsa bile)
+        if (!config.UseStandardSerilogConfiguration || config.UseSeperateErrorLogFile || config.UseSeperateWarningLogFile)
+        {
+            ConfigureFileSinks(loggerConfig, config);
+        }
 
+        // Console sink
+        if (config.WriteToConsole)
+        {
+            loggerConfig.WriteTo.Console(outputTemplate: config.OutputTemplate);
+        }
 
         // Serilog'u ayarla
         var serilogLogger = loggerConfig.CreateLogger();
-
-        //Log.Logger = serilogLogger;
 
         // ASP.NET Core logging'i Serilog'a yönlendir
         loggingBuilder.ClearProviders();
         loggingBuilder.AddSerilog(serilogLogger, dispose: true);
 
-        //// Service'leri kaydet
-        //builder.Services.AddSingleton<ILoggingHelper>(sp => 
-        //    new SerilogLoggingHelper(sp.GetRequiredService<ILoggerFactory>()));
-
+        // ILogLevelController service'ini kaydet (runtime'da seviye deðiþimi için)
         services.AddSingleton<ILogLevelController>(sp =>
             new SerilogLevelController(GlobalLevelSwitch, CategoryLevelSwitches));
 
-        // Log static class'ýný ayarla
-        //var serviceProvider = builder.Services.BuildServiceProvider();
-        //Rapidex.Log.Logger = serviceProvider.GetRequiredService<ILoggingHelper>();
-
         return services;
     }
-
 
     /// <summary>
     /// Rapidex Serilog implementasyonunu kullanýr
@@ -115,7 +137,7 @@ public static class ServiceExtensions
                 fileSizeLimitBytes: config.MaxLogFileSize,
                 retainedFileCountLimit: config.RetainedFileCountLimit,
                 buffered: true,
-                flushToDiskInterval: TimeSpan.FromSeconds(5)
+                flushToDiskInterval: TimeSpan.FromSeconds(config.BufferFlushIntervalSeconds)
             ));
         }
         else
@@ -140,7 +162,7 @@ public static class ServiceExtensions
                 outputTemplate: config.OutputTemplate,
                 fileSizeLimitBytes: config.MaxLogFileSize,
                 retainedFileCountLimit: config.RetainedFileCountLimit,
-                buffered: false // Error'lar için buffer yok
+                buffered: false // Error'lar için buffer yok - immediate write
             );
         }
 
@@ -197,16 +219,17 @@ public static class ServiceExtensions
         return string.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries));
     }
 
-    private static LogEventLevel ConvertToSerilogLevel(int level)
+    private static LogEventLevel ConvertToSerilogLevel(LogLevel level)
     {
         return level switch
         {
-            0 => LogEventLevel.Verbose,
-            1 => LogEventLevel.Debug,
-            2 => LogEventLevel.Information,
-            3 => LogEventLevel.Warning,
-            4 => LogEventLevel.Error,
-            5 => LogEventLevel.Fatal,
+            LogLevel.Trace => LogEventLevel.Verbose,
+            LogLevel.Debug => LogEventLevel.Debug,
+            LogLevel.Information => LogEventLevel.Information,
+            LogLevel.Warning => LogEventLevel.Warning,
+            LogLevel.Error => LogEventLevel.Error,
+            LogLevel.Critical => LogEventLevel.Fatal,
+            LogLevel.None => LogEventLevel.Fatal,
             _ => LogEventLevel.Information
         };
     }

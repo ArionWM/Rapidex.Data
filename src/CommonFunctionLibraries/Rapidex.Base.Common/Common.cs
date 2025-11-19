@@ -115,6 +115,11 @@ namespace Rapidex
 
             ExceptionManager = serviceProvider.GetRapidexService<IExceptionManager>();
             ServiceProvider = serviceProvider;
+
+            if (Common.DefaultLogger == null)
+            {
+                Common.DefaultLogger = serviceProvider.GetService<ILogger<Common>>();
+            }
         }
 
     }

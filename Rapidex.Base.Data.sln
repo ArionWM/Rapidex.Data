@@ -53,6 +53,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A3FE7EE0-2
 		docs\PredefinedData.md = docs\PredefinedData.md
 		docs\QueryingData.md = docs\QueryingData.md
 		docs\QuickStart.md = docs\QuickStart.md
+		docs\Rapidex-Logging-Configuration.md = docs\Rapidex-Logging-Configuration.md
 		docs\Roadmap.md = docs\Roadmap.md
 		docs\RuntimeChanges.md = docs\RuntimeChanges.md
 		docs\SerializationDeserializationEntityData.md = docs\SerializationDeserializationEntityData.md

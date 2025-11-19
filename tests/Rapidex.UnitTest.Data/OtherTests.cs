@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.Data;
 public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public OtherTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public OtherTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

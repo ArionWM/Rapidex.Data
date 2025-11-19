@@ -10,17 +10,19 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.Base.Common;
 public class Logging : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
 {
-    DefaultEmptyFixture fixture;
+    DefaultEmptyFixture Fixture { get; }
+    public ILogger Logger => this.Fixture.Logger;
 
     public Logging(SingletonFixtureFactory<DefaultEmptyFixture> factory)
     {
-        fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture();
+        this.Logger?.LogInformation("Logging initialized.");
     }
 
     [Fact]
     public void Log_01_Info()
     {
-        ILoggerFactory factory = this.fixture.ServiceProvider.GetService<ILoggerFactory>();
+        ILoggerFactory factory = this.Fixture.ServiceProvider.GetService<ILoggerFactory>();
         Assert.NotNull(factory);
         //Rapidex.Log.Info("Test message");
         //Rapidex.Log.Info("Test category", "Test message");

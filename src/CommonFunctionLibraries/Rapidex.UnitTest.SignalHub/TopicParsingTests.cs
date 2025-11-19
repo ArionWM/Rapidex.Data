@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Rapidex.SignalHub;
 using Rapidex.UnitTest.Base.Common.Fixtures;
 
@@ -5,11 +6,13 @@ namespace Rapidex.UnitTest.SignalHub;
 
 public class TopicParsing : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
 {
-    DefaultEmptyFixture fixture;
+    DefaultEmptyFixture Fixture { get; }
+    public ILogger Logger => this.Fixture.Logger;
 
     public TopicParsing(SingletonFixtureFactory<DefaultEmptyFixture> factory)
     {
-        fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture();
+        this.Logger?.LogInformation("TopicParsingTests initialized.");
     }
 
     [Fact]

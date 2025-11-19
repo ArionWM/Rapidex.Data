@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Rapidex.UnitTest.Base.Common.Fixtures;
 
 
@@ -11,11 +12,13 @@ namespace Rapidex.UnitTest.Base.Common;
 public class JsonSerialization : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
 {
 
-    DefaultEmptyFixture fixture;
+    DefaultEmptyFixture Fixture { get; }
+    public ILogger Logger => this.Fixture.Logger;
 
     public JsonSerialization(SingletonFixtureFactory<DefaultEmptyFixture> factory)
     {
-        fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture();
+        this.Logger?.LogInformation("JsonSerialization initialized.");
     }
 
     //[Fact]

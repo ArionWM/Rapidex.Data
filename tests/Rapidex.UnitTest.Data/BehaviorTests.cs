@@ -17,7 +17,7 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
         }
     }
 
-    public BehaviorTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public BehaviorTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

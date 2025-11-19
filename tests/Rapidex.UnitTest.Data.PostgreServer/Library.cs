@@ -12,10 +12,12 @@ global using System.Data;
 global using System.Linq;
 global using System.Text;
 global using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
-using Rapidex.Data.PostgreServer;
-using System.Runtime.CompilerServices;
+global using Microsoft.Extensions.Logging;
+
+global using Microsoft.Extensions.DependencyInjection;
+global using Npgsql;
+global using Rapidex.Data.PostgreServer;
+global using System.Runtime.CompilerServices;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 

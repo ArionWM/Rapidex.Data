@@ -45,10 +45,9 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.UseRapidexSerilog(conf =>
 {
+    // Override or extend appsettings.json configuration if needed
     conf.LogDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "Logs");
-    conf.UseBufferForNonErrors = true;
-    conf.UseSeperateErrorLogFile = true;
-    conf.UseSeperateWarningLogFile = true;
+    conf.SetMinimumLogLevelAndOthers(new[] { "Rapidex" }, LogLevel.Debug, LogLevel.Warning);
 });
 #endregion
 
@@ -59,7 +58,7 @@ builder.Services.AddApplicationServices(); //<- Add own services
 //Rapidex ==============================
 //See: https://github.com/ArionWM/Rapidex.Data/blob/main/docs/QuickStart.md
 
-builder.Services.AddRapidexDataLevel(); //<- Add Rapidex services
+builder.Services.AddRapidexDataLevel(null, null, builder.Configuration); //<- Add Rapidex services
 
 //For single database and schema application, this useful ...
 builder.Services.AddTransient<IDbSchemaScope>(sp =>

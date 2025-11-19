@@ -1,5 +1,7 @@
 namespace Rapidex;
 
+using Microsoft.Extensions.Logging;
+
 /// <summary>
 /// Loglama konfigürasyonu için temel sýnýf
 /// </summary>
@@ -16,9 +18,9 @@ public class RapidexLoggingConfiguration
     public string LogFilePrefix { get; set; } = "app";
 
     /// <summary>
-    /// Varsayýlan minimum loglama seviyesi (0=Trace, 1=Debug, 2=Information, 3=Warning, 4=Error, 5=Critical, 6=None)
+    /// Varsayýlan minimum loglama seviyesi
     /// </summary>
-    public int DefaultMinimumLevel { get; set; } = 1; // Debug
+    public LogLevel DefaultMinimumLevel { get; set; } = LogLevel.Debug;
 
     /// <summary>
     /// Error loglarý için ayrý dosya kullanýlsýn mý?
@@ -41,6 +43,11 @@ public class RapidexLoggingConfiguration
     public int BufferSize { get; set; } = 32768; // 32KB
 
     /// <summary>
+    /// Buffer flush süresi (saniye cinsinden)
+    /// </summary>
+    public int BufferFlushIntervalSeconds { get; set; } = 5;
+
+    /// <summary>
     /// Log dosyasý maksimum boyutu (byte cinsinden). Aþýldýðýnda yeni dosya oluþturulur.
     /// </summary>
     public long MaxLogFileSize { get; set; } = 100 * 1024 * 1024; // 100MB
@@ -52,9 +59,9 @@ public class RapidexLoggingConfiguration
 
     /// <summary>
     /// Belirli kategoriler için özel loglama seviyeleri
-    /// Örn: { "Microsoft.AspNetCore", 3 } -> Microsoft.AspNetCore için Warning seviyesi
+    /// Örn: { "Microsoft.AspNetCore", LogLevel.Warning } -> Microsoft.AspNetCore için Warning seviyesi
     /// </summary>
-    public Dictionary<string, int> CategoryMinimumLevels { get; set; } = new();
+    public Dictionary<string, LogLevel> CategoryMinimumLevels { get; set; } = new();
 
     /// <summary>
     /// Belirli kategoriler için ayrý dosya kullanýlsýn mý?
@@ -66,4 +73,15 @@ public class RapidexLoggingConfiguration
     /// Log satýrý formatý
     /// </summary>
     public string OutputTemplate { get; set; } = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
+
+    /// <summary>
+    /// Standart Serilog konfigürasyonu kullanýlsýn mý? (appsettings.json'daki Serilog bölümü)
+    /// True ise, yukarýdaki ayarlar Serilog yapýlandýrmasý üzerine eklenir.
+    /// </summary>
+    public bool UseStandardSerilogConfiguration { get; set; } = false;
+
+    /// <summary>
+    /// Console'a da log yazýlsýn mý?
+    /// </summary>
+    public bool WriteToConsole { get; set; } = false;
 }

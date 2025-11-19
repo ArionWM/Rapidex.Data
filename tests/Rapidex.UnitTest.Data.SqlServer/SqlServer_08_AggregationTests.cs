@@ -8,7 +8,7 @@ namespace Rapidex.UnitTest.Data.SqlServer;
 
 public class SqlServer_08_AggregationTests : AggregationTestsBase<DbSqlServerProvider>
 {
-    public SqlServer_08_AggregationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SqlServer_08_AggregationTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 }

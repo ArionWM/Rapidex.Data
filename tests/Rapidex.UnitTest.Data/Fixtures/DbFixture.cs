@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rapidex.Data;
 using Rapidex.Data.Entities;
@@ -12,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rapidex.Base.Common.Logging.Serilog.Core8;
+using Microsoft.Extensions.Logging;
 
 namespace Rapidex.UnitTest.Data.Fixtures;
 
@@ -63,6 +63,19 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
+        string logDir = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "Logs");
+
+        builder.UseRapidexSerilog(conf =>
+        {
+            conf.DefaultMinimumLevel = Microsoft.Extensions.Logging.LogLevel.Debug;
+            conf.LogDirectory = logDir;
+            conf.UseBufferForNonErrors = true;
+            conf.UseSeperateErrorLogFile = true;
+            conf.UseSeperateWarningLogFile = true;
+            conf.SetMinimumLogLevelAndOthers(new[] { "Rapidex" }, LogLevel.Debug, LogLevel.Warning);
+        });
+
+
         this.Setup(builder.Services);
 
         //??
@@ -73,6 +86,9 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
         IHost host = builder.Build();
         this.ServiceProvider = host.Services;
+
+        var loggerFactory = this.ServiceProvider.GetRequiredService<ILoggerFactory>();
+        this.Logger = loggerFactory.CreateLogger(this.GetType());
 
         this.ServiceProvider.StartRapidexDataLevel();
 
@@ -111,5 +127,5 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
     }
 
-    
+
 }

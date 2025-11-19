@@ -9,7 +9,7 @@ using Rapidex.UnitTest.Data.TestContent;
 namespace Rapidex.UnitTest.Data;
 public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public DataUpdateWithJsonTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public DataUpdateWithJsonTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

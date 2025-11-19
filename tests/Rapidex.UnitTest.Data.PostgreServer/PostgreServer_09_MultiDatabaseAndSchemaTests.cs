@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.Data.PostgreServer;
 public class PostgreServer_09_MultiDatabaseAndSchemaTests : MultiDatabaseAndSchemaTestsBase<PostgreSqlServerProvider>
 {
-    public PostgreServer_09_MultiDatabaseAndSchemaTests(SingletonFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
+    public PostgreServer_09_MultiDatabaseAndSchemaTests( SingletonFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
     {
     }
 

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTests;
 public interface ICoreTestFixture //From ProCore
 {
+    ILogger Logger { get; }
+
     void Init();
 
     /// <summary>

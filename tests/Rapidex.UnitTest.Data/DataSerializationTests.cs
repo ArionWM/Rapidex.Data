@@ -12,7 +12,7 @@ namespace Rapidex.UnitTest.Data;
 
 public class DataSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public DataSerializationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public DataSerializationTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

@@ -136,8 +136,6 @@ namespace Rapidex.Base.Common.Assemblies
                 assemblyInfo.DatabaseEntityPrefix = proxAssembly.TablePrefix;
                 assemblyInfo.Name = proxAssembly.Name;
             }
-
-            //this.Assemblies = proCoreAssemblies.ToList();
         }
 
         public Type FindType(string typeName, bool deepSearch = false)

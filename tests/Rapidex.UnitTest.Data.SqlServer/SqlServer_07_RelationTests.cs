@@ -9,7 +9,7 @@ namespace Rapidex.UnitTest.Data.SqlServer;
 
 public class SqlServer_07_RelationTests : RelationsTestBase<DbSqlServerProvider>
 {
-    public SqlServer_07_RelationTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SqlServer_07_RelationTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

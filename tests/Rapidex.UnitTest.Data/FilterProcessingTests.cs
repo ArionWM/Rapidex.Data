@@ -9,7 +9,7 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 {
 	internal FilterTextParser CriteriaParser { get; }
 
-	public FilterProcessingTests(SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+	public FilterProcessingTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
 	{
 		this.CriteriaParser = new FilterTextParser();
 	}

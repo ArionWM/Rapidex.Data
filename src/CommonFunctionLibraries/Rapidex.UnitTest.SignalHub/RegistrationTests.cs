@@ -1,4 +1,5 @@
-﻿using Rapidex.SignalHub;
+﻿using Microsoft.Extensions.Logging;
+using Rapidex.SignalHub;
 using Rapidex.UnitTest.Base.Common.Fixtures;
 using Rapidex.UnitTests;
 using System;
@@ -11,11 +12,13 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.SignalHub;
 public class RegistrationTests : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
 {
-    DefaultEmptyFixture fixture;
+    DefaultEmptyFixture Fixture { get; }
+    public ILogger Logger => this.Fixture.Logger;
 
     public RegistrationTests(SingletonFixtureFactory<DefaultEmptyFixture> factory)
     {
-        fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture();
+        this.Logger?.LogInformation("RegistrationTests initialized.");
     }
 
     //See: SignalHub.md
