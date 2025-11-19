@@ -32,6 +32,9 @@ public class RapidexLoggingConfiguration
     /// </summary>
     public bool UseSeperateWarningLogFile { get; set; } = true;
 
+
+    public bool UseSeperateDebugLogFile { get; set; } = true;
+
     /// <summary>
     /// Error dýþýndaki loglar için buffer kullanýlsýn mý? (Disk IO'su azaltýr)
     /// </summary>

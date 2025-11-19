@@ -9,14 +9,14 @@ namespace Rapidex;
 public static class LoggingExtensions
 {
 
-    public static void SetMinimumLogLevelAndOthers(this RapidexLoggingConfiguration conf, string[] assemblyNamesOrNameStarts, LogLevel targetAssembliesLevel, LogLevel othersLevel)
-    {
-        conf.DefaultMinimumLevel = othersLevel;
-        foreach (var asm in assemblyNamesOrNameStarts)
-        {
-            conf.CategoryMinimumLevels[asm] = targetAssembliesLevel;
-        }
-    }
+    //public static void SetMinimumLogLevelAndOthers(this RapidexLoggingConfiguration conf, string[] assemblyNamesOrNameStarts, LogLevel targetAssembliesLevel, LogLevel othersLevel)
+    //{
+    //    conf.DefaultMinimumLevel = targetAssembliesLevel;
+    //    foreach (var asm in assemblyNamesOrNameStarts)
+    //    {
+    //        conf.CategoryMinimumLevels[asm] = targetAssembliesLevel;
+    //    }
+    //}
 
     public static void LogError(this ILogger logger, Exception? exception)
     {

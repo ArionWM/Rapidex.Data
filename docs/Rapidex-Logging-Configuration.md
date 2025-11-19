@@ -147,7 +147,7 @@ app.Run();
 
 ### Log Levels
 
-Available log levels (from `Microsoft.Extensions.Logging.LogLevel`):
+Available log levels (from `LogLevel`):
 
 - `Trace` (0): Most detailed logging
 - `Debug` (1): Debug information

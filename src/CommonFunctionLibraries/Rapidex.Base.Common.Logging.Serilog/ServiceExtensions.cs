@@ -9,6 +9,7 @@ using Serilog.Events;
 using Serilog.Extensions.Logging;
 using Serilog.Sinks.File;
 using System.Collections.Concurrent;
+using System.IO;
 
 namespace Rapidex.Base.Common.Logging.Serilog.Core8;
 
@@ -38,8 +39,9 @@ public static class ServiceExtensions
         }
 
         // Basit bir bootstrap logger configuration
+        var defaultMinLevel = ConvertToSerilogLevel(config.DefaultMinimumLevel);
         var bootstrapLoggerConfig = new LoggerConfiguration()
-            .MinimumLevel.Is(ConvertToSerilogLevel(config.DefaultMinimumLevel))
+            .MinimumLevel.Is(defaultMinLevel)
             .Enrich.FromLogContext()
             .Enrich.WithProperty("Stage", "Bootstrap");
 
@@ -48,14 +50,15 @@ public static class ServiceExtensions
             outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [Bootstrap] {Message:lj}{NewLine}{Exception}");
 
         // Basit bir dosyaya yaz (bootstrap loglarý için)
-        var logDir = System.IO.Path.Combine(AppContext.BaseDirectory, config.LogDirectory);
+        var logDir = Path.Combine(AppContext.BaseDirectory, config.LogDirectory);
         System.IO.Directory.CreateDirectory(logDir);
-        var bootstrapLogPath = System.IO.Path.Combine(logDir, $"{config.LogFilePrefix}-bootstrap-.log");
+        var bootstrapLogPath = Path.Combine(logDir, $"{config.LogFilePrefix}-bootstrap-.log");
 
         bootstrapLoggerConfig.WriteTo.File(
             bootstrapLogPath,
             rollingInterval: RollingInterval.Day,
             outputTemplate: config.OutputTemplate,
+            buffered: false,
             retainedFileCountLimit: 7); // Bootstrap loglarý için 7 gün yeterli
 
         var serilogLogger = bootstrapLoggerConfig.CreateLogger();
@@ -112,7 +115,8 @@ public static class ServiceExtensions
         configureOptions?.Invoke(config);
 
         // Level switch'leri oluþtur
-        GlobalLevelSwitch = new LoggingLevelSwitch(ConvertToSerilogLevel(config.DefaultMinimumLevel));
+        var defaultMinLevel = ConvertToSerilogLevel(config.DefaultMinimumLevel);
+        GlobalLevelSwitch = new LoggingLevelSwitch(defaultMinLevel);
         CategoryLevelSwitches = new ConcurrentDictionary<string, LoggingLevelSwitch>();
 
         // Kategori bazlý level switch'leri oluþtur
@@ -198,16 +202,30 @@ public static class ServiceExtensions
 
     private static void ConfigureFileSinks(LoggerConfiguration loggerConfig, RapidexLoggingConfiguration config)
     {
-        var logDir = System.IO.Path.Combine(AppContext.BaseDirectory, config.LogDirectory);
+        var logDir = Path.Combine(AppContext.BaseDirectory, config.LogDirectory);
         System.IO.Directory.CreateDirectory(logDir);
 
         // Ana log dosyasý (tüm loglar - buffered)
-        var mainLogPath = System.IO.Path.Combine(logDir, $"{config.LogFilePrefix}-.log");
+        var mainLogPath = Path.Combine(logDir, $"{config.LogFilePrefix}-.log");
+
+        LogEventLevel defaultMinLevel = ConvertToSerilogLevel(config.DefaultMinimumLevel);
+        var defaultFileLevelSwitch = new LoggingLevelSwitch(defaultMinLevel);
+
+        if (config.UseSeperateDebugLogFile && config.DefaultMinimumLevel <= LogLevel.Debug)
+        {
+            defaultFileLevelSwitch.MinimumLevel = LogEventLevel.Information;
+        }
+
+        if (config.BufferFlushIntervalSeconds < 5)
+        {
+            config.BufferFlushIntervalSeconds = 5;
+        }
 
         if (config.UseBufferForNonErrors)
         {
             loggerConfig.WriteTo.Async(a => a.File(
                 mainLogPath,
+                levelSwitch: defaultFileLevelSwitch,
                 rollingInterval: RollingInterval.Day,
                 outputTemplate: config.OutputTemplate,
                 fileSizeLimitBytes: config.MaxLogFileSize,
@@ -220,6 +238,7 @@ public static class ServiceExtensions
         {
             loggerConfig.WriteTo.File(
                 mainLogPath,
+                levelSwitch: defaultFileLevelSwitch,
                 rollingInterval: RollingInterval.Day,
                 outputTemplate: config.OutputTemplate,
                 fileSizeLimitBytes: config.MaxLogFileSize,
@@ -230,7 +249,7 @@ public static class ServiceExtensions
         // Error loglarý için ayrý dosya (unbuffered - immediate write)
         if (config.UseSeperateErrorLogFile)
         {
-            var errorLogPath = System.IO.Path.Combine(logDir, $"{config.LogFilePrefix}-error-.log");
+            var errorLogPath = Path.Combine(logDir, $"{config.LogFilePrefix}-error-.log");
             loggerConfig.WriteTo.File(
                 errorLogPath,
                 restrictedToMinimumLevel: LogEventLevel.Error,
@@ -245,7 +264,7 @@ public static class ServiceExtensions
         // Warning loglarý için ayrý dosya (unbuffered)
         if (config.UseSeperateWarningLogFile)
         {
-            var warningLogPath = System.IO.Path.Combine(logDir, $"{config.LogFilePrefix}-warning-.log");
+            var warningLogPath = Path.Combine(logDir, $"{config.LogFilePrefix}-warning-.log");
             loggerConfig.WriteTo.File(
                 warningLogPath,
                 restrictedToMinimumLevel: LogEventLevel.Warning,
@@ -261,11 +280,33 @@ public static class ServiceExtensions
             );
         }
 
+        if (config.UseSeperateDebugLogFile && config.DefaultMinimumLevel <= LogLevel.Debug)
+        {
+            var debugLogPath = Path.Combine(logDir, $"{config.LogFilePrefix}-debug-.log");
+            loggerConfig.WriteTo.File(
+                debugLogPath,
+                restrictedToMinimumLevel: LogEventLevel.Debug,
+                levelSwitch: new LoggingLevelSwitch(LogEventLevel.Debug)
+                {
+                    MinimumLevel = LogEventLevel.Debug
+                },
+                rollingInterval: RollingInterval.Day,
+                outputTemplate: config.OutputTemplate,
+                fileSizeLimitBytes: config.MaxLogFileSize,
+                retainedFileCountLimit: config.RetainedFileCountLimit,
+                buffered: true,
+                flushToDiskInterval: TimeSpan.FromSeconds(config.BufferFlushIntervalSeconds)
+            );
+
+        }
+
+
+
         // Kategori bazlý ayrý dosyalar
         foreach (var kvp in config.CategorySeparateFiles.Where(x => x.Value))
         {
             var category = kvp.Key;
-            var categoryLogPath = System.IO.Path.Combine(logDir, $"{SanitizeFileName(category)}-.log");
+            var categoryLogPath = Path.Combine(logDir, $"{SanitizeFileName(category)}-.log");
 
             loggerConfig.WriteTo.Map(
                 le => le.Properties.TryGetValue("SourceContext", out var sourceContext)
@@ -278,6 +319,7 @@ public static class ServiceExtensions
                     {
                         wt.File(
                             categoryLogPath,
+                            levelSwitch: new LoggingLevelSwitch(defaultMinLevel),
                             rollingInterval: RollingInterval.Day,
                             outputTemplate: config.OutputTemplate,
                             fileSizeLimitBytes: config.MaxLogFileSize,
@@ -291,7 +333,7 @@ public static class ServiceExtensions
 
     private static string SanitizeFileName(string fileName)
     {
-        var invalids = System.IO.Path.GetInvalidFileNameChars();
+        var invalids = Path.GetInvalidFileNameChars();
         return string.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries));
     }
 

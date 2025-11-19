@@ -113,15 +113,15 @@ namespace Rapidex
 
         public static void Start(IServiceProvider serviceProvider)
         {
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            var logger = loggerFactory?.CreateLogger("Rapidex");
+            if (logger != null)
+                Common.DefaultLogger = logger;
+
             MappingHelper.Start();
 
-            ExceptionManager = serviceProvider.GetRapidexService<IExceptionManager>();
-            ServiceProvider = serviceProvider;
-
-            if (Common.DefaultLogger == null)
-            {
-                Common.DefaultLogger = serviceProvider.GetService<ILogger<Common>>();
-            }
+            Common.ExceptionManager = serviceProvider.GetRapidexService<IExceptionManager>();
+            Common.ServiceProvider = serviceProvider;
         }
 
         public static void UseLogger(ILogger logger)

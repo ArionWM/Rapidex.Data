@@ -37,6 +37,8 @@ public static class DependencyInjectionExtensions
     {
         try
         {
+            Rapidex.Common.DefaultLogger?.LogInformation("Starting Rapidex.Data level...");
+
             Rapidex.Common.Start(sp);
             Rapidex.Data.Database.Start(sp);
             Rapidex.Common.Assembly.InitializeAssemblies(sp);

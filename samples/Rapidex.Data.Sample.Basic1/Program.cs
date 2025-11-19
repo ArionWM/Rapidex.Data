@@ -47,7 +47,7 @@ builder.UseRapidexSerilog(conf =>
 {
     // Override or extend appsettings.json configuration if needed
     conf.LogDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "Logs");
-    conf.SetMinimumLogLevelAndOthers(new[] { "Rapidex" }, LogLevel.Debug, LogLevel.Warning);
+    //conf.SetMinimumLogLevelAndOthers(new[] { "Rapidex" }, LogLevel.Debug, LogLevel.Warning);
 });
 #endregion
 

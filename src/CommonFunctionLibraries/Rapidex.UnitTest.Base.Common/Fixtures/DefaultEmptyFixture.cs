@@ -41,10 +41,11 @@ public class DefaultEmptyFixture : ICoreTestFixture
         string logDir = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "Logs");
         builder.UseRapidexSerilog(conf =>{
             conf.LogDirectory = logDir;
+            conf.DefaultMinimumLevel = LogLevel.Debug;
             conf.UseBufferForNonErrors = true;
             conf.UseSeperateErrorLogFile = true;
             conf.UseSeperateWarningLogFile = true;
-            conf.SetMinimumLogLevelAndOthers(new[] { "Rapidex" }, LogLevel.Debug, LogLevel.Warning);
+            //conf.SetMinimumLogLevelAndOthers(new[] { "Rapidex" }, LogLevel.Debug, LogLevel.Warning);
         });
         
 
