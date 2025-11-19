@@ -77,6 +77,8 @@ namespace Rapidex
         /// <param name="configuration"></param>
         public static void Setup(string rootFolder, string binaryFolder, IServiceCollection services, IConfiguration configuration = null, ILogger defaultLogger = null)
         {
+            Rapidex.Common.DefaultLogger?.LogInformation("Rapidex.Common.Setup started. RootFolder: {0}, BinaryFolder: {1}", rootFolder, binaryFolder);
+
             if (configuration != null)
                 Common.Configuration = configuration;
 
@@ -120,6 +122,12 @@ namespace Rapidex
             {
                 Common.DefaultLogger = serviceProvider.GetService<ILogger<Common>>();
             }
+        }
+
+        public static void UseLogger(ILogger logger)
+        {
+            logger.NotNull();
+            Common.DefaultLogger = logger;
         }
 
     }

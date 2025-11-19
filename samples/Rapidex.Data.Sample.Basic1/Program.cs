@@ -58,7 +58,7 @@ builder.Services.AddApplicationServices(); //<- Add own services
 //Rapidex ==============================
 //See: https://github.com/ArionWM/Rapidex.Data/blob/main/docs/QuickStart.md
 
-builder.Services.AddRapidexDataLevel(null, null, builder.Configuration); //<- Add Rapidex services
+builder.Services.AddRapidexDataLevel(configuration: builder.Configuration); //<- Add Rapidex services
 
 //For single database and schema application, this useful ...
 builder.Services.AddTransient<IDbSchemaScope>(sp =>

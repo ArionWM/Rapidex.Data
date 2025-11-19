@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Extensions.Logging;
 using Serilog.Sinks.File;
 using System.Collections.Concurrent;
 
@@ -18,16 +19,87 @@ public static class ServiceExtensions
 {
     private static LoggingLevelSwitch? GlobalLevelSwitch;
     private static ConcurrentDictionary<string, LoggingLevelSwitch>? CategoryLevelSwitches;
+    private static Microsoft.Extensions.Logging.ILogger? BootstrapLogger;
+    private static SerilogLoggerFactory? BootstrapLoggerFactory;
+
+    /// <summary>
+    /// DI container oluþmadan önce kullanýlmak üzere erken bir bootstrap logger oluþturur.
+    /// Bu logger uygulama baþlangýcýnda, IServiceProvider oluþmadan önce loglama yapmak için kullanýlabilir.
+    /// </summary>
+    /// <param name="configuration">Configuration (opsiyonel)</param>
+    /// <param name="configureOptions">Opsiyonel konfigürasyon</param>
+    /// <returns>Microsoft.Extensions.Logging.ILogger instance</returns>
+    public static Microsoft.Extensions.Logging.ILogger CreateBootstrapLogger(RapidexLoggingConfiguration config)
+    {
+        // Mevcut bootstrap logger varsa onu döndür
+        if (BootstrapLogger.IsNOTNullOrEmpty())
+        {
+            return BootstrapLogger;
+        }
+
+        // Basit bir bootstrap logger configuration
+        var bootstrapLoggerConfig = new LoggerConfiguration()
+            .MinimumLevel.Is(ConvertToSerilogLevel(config.DefaultMinimumLevel))
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Stage", "Bootstrap");
+
+        // Console'a yaz
+        bootstrapLoggerConfig.WriteTo.Console(
+            outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [Bootstrap] {Message:lj}{NewLine}{Exception}");
+
+        // Basit bir dosyaya yaz (bootstrap loglarý için)
+        var logDir = System.IO.Path.Combine(AppContext.BaseDirectory, config.LogDirectory);
+        System.IO.Directory.CreateDirectory(logDir);
+        var bootstrapLogPath = System.IO.Path.Combine(logDir, $"{config.LogFilePrefix}-bootstrap-.log");
+
+        bootstrapLoggerConfig.WriteTo.File(
+            bootstrapLogPath,
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: config.OutputTemplate,
+            retainedFileCountLimit: 7); // Bootstrap loglarý için 7 gün yeterli
+
+        var serilogLogger = bootstrapLoggerConfig.CreateLogger();
+
+        // Serilog'u Microsoft.Extensions.Logging.ILogger'a çevir
+        BootstrapLoggerFactory = new SerilogLoggerFactory(serilogLogger, dispose: false);
+        BootstrapLogger = BootstrapLoggerFactory.CreateLogger("Bootstrap");
+
+        return BootstrapLogger;
+    }
+
+    /// <summary>
+    /// DI container oluþmadan önce kullanýlmak üzere erken bir bootstrap logger oluþturur (generic version).
+    /// </summary>
+    public static ILogger<T> CreateBootstrapLogger<T>(RapidexLoggingConfiguration config)
+    {
+        if (BootstrapLoggerFactory.IsNullOrEmpty())
+        {
+            CreateBootstrapLogger(config);
+        }
+
+        return BootstrapLoggerFactory.CreateLogger<T>();
+    }
+
+    /// <summary>
+    /// Bootstrap logger'ý temizler ve kaynaklarý serbest býrakýr.
+    /// Normal logger devreye girdikten sonra çaðrýlmalýdýr.
+    /// </summary>
+    public static void DisposeBootstrapLogger()
+    {
+        BootstrapLoggerFactory?.Dispose();
+        BootstrapLoggerFactory = null;
+        BootstrapLogger = null;
+    }
 
     /// <summary>
     /// Rapidex Serilog implementasyonunu kullanýr.
     /// Hem standart Serilog konfigürasyonunu (appsettings.json) hem de Rapidex özelliklerini destekler.
     /// </summary>
     public static IServiceCollection UseRapidexSerilog(
-        this IServiceCollection services, 
-        ILoggingBuilder loggingBuilder, 
-        IConfiguration configuration = null, 
-        IHostEnvironment environment = null, 
+        this IServiceCollection services,
+        ILoggingBuilder loggingBuilder,
+        IConfiguration configuration = null,
+        IHostEnvironment environment = null,
         Action<RapidexLoggingConfiguration>? configureOptions = null)
     {
         services.NotNull();
@@ -70,8 +142,8 @@ public static class ServiceExtensions
         loggerConfig.Enrich.FromLogContext();
 
         if (environment != null)
-        { 
-            loggerConfig 
+        {
+            loggerConfig
                 .Enrich.WithProperty("Application", environment.ApplicationName)
                 .Enrich.WithProperty("Environment", environment.EnvironmentName);
         }
@@ -100,6 +172,10 @@ public static class ServiceExtensions
         // ASP.NET Core logging'i Serilog'a yönlendir
         loggingBuilder.ClearProviders();
         loggingBuilder.AddSerilog(serilogLogger, dispose: true);
+
+        var bootstrapLogger = CreateBootstrapLogger(config);
+        Rapidex.Common.UseLogger(bootstrapLogger);
+
 
         // ILogLevelController service'ini kaydet (runtime'da seviye deðiþimi için)
         services.AddSingleton<ILogLevelController>(sp =>
