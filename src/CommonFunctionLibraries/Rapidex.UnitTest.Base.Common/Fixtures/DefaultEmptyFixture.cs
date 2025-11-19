@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Rapidex.Base.Common.Logging.Serilog.Core8;
 using Rapidex.UnitTests;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,13 @@ public class DefaultEmptyFixture : ICoreTestFixture
         //Database.Configuration.DefaultDatabaseNamePrefix = "RapidexAppUnitTest";
 
         string logDir = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "Logs");
-        builder.UseSerilog(logDir, Serilog.Events.LogEventLevel.Verbose);
+        builder.UseRapidexSerilog(conf =>{
+            conf.LogDirectory = logDir;
+            conf.UseBufferForNonErrors = true;
+            conf.UseSeperateErrorLogFile = true;
+            conf.UseSeperateWarningLogFile = true;
+        });
+        
 
         Rapidex.Common.Setup(AppContext.BaseDirectory, AppContext.BaseDirectory, builder.Services);
 

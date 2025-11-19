@@ -26,7 +26,6 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
     protected override void Setup(IServiceCollection services)
     {
-        services.UseSerilog(Path.Combine(AppContext.BaseDirectory, "Logs"));
         services.AddRapidexDataLevel();
 
         Rapidex.Common.Assembly.Add(typeof(DbFixture).Assembly);

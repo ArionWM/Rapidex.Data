@@ -30,6 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\src\CommonFunctionLibraries\Rapidex.Base.Common.Logging.Serilog\Rapidex.Base.Common.Logging.SerilogImp.Core8.csproj" />
 	  <ProjectReference Include="..\Rapidex.Data.Sample.Library\Rapidex.Data.Sample.Library.csproj" />
 	</ItemGroup>
 

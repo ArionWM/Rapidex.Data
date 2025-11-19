@@ -26,8 +26,8 @@ public class Logging : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture
         //Rapidex.Log.Info("Test category", "Test message");
         //Rapidex.Log.Info("Test category", new Exception("Test exception"), "Test message with exception");
         //Rapidex.Log.Info(new Exception("Test exception"), "Test message with exception");
-        //Rapidex.Log.Debug("Test category", "Debug message");
-        //Rapidex.Log.Debug("Debug message");
+        //Rapidex.Common.DefaultLogger?.LogDebug("Test category", "Debug message");
+        //Rapidex.Common.DefaultLogger?.LogDebug("Debug message");
     }
 
 }

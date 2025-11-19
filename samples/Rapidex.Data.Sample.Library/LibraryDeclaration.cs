@@ -13,6 +13,7 @@ public class LibraryDeclaration : AssemblyDefinitionBase, IRapidexMetadataReleat
 
     public override int Index => 1000;
 
+
     public void SetupMetadata(IDbScope db)
     {
         
@@ -22,6 +23,12 @@ public class LibraryDeclaration : AssemblyDefinitionBase, IRapidexMetadataReleat
     {
         
     }
+
+    public override void Initialize(IServiceProvider serviceProvider)
+    {
+
+    }
+
 
     public override void Start(IServiceProvider serviceProvider)
     {

@@ -3,7 +3,7 @@ global using Rapidex.Data;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-
+using Rapidex.Base.Common.Logging.Serilog.Core8;
 using Rapidex.Data.Sample.App1;
 using Rapidex.Data.Sample.App1.ConcreteEntities;
 
@@ -43,7 +43,13 @@ builder.Services.AddSwaggerGen(c =>
     c.DocInclusionPredicate((name, api) => true);
 });
 
-builder.Services.UseSerilog(Path.Combine(AppContext.BaseDirectory, "Logs"));
+builder.UseRapidexSerilog(conf =>
+{
+    conf.LogDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "Logs");
+    conf.UseBufferForNonErrors = true;
+    conf.UseSeperateErrorLogFile = true;
+    conf.UseSeperateWarningLogFile = true;
+});
 #endregion
 
 

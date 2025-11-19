@@ -16,8 +16,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Rapidex.Data" Version="0.2.0.2" />
-    <PackageReference Include="Rapidex.Data.SqlServer" Version="0.2.0.2" />
+    <!--<PackageReference Include="Rapidex.Data" Version="0.2.0.2" />
+    <PackageReference Include="Rapidex.Data.SqlServer" Version="0.2.0.2" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Rapidex.Data.Behaviors\Rapidex.Data.Behaviors.csproj" />
+    <ProjectReference Include="..\..\src\Rapidex.Data.SqlServer\Rapidex.Data.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\Rapidex.Data\Rapidex.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

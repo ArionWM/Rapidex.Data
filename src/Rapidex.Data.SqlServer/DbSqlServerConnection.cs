@@ -41,7 +41,7 @@ internal class DbSqlServerConnection : IDisposable
 
             if (retryCount > 200)
             {
-                Log.Error("Database", "Connection is not established after 10 second. ConnectionString: " + this.ConnectionString);
+                Common.DefaultLogger?.LogError("Database", "Connection is not established after 10 second. ConnectionString: " + this.ConnectionString);
                 throw new InvalidOperationException("SQL Server Connection is not established after 10 second. Check SQL server accessibility."); //TODO: DatabaseConnectionException
             }
         }
@@ -90,11 +90,10 @@ internal class DbSqlServerConnection : IDisposable
         using (SqlCommand command = this.CreateCommand(parameters))
             try
             {
-                if (Log.IsDebugEnabled)
-                {
-                    string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
-                    Log.Debug("Database", logLine);
-                }
+#if DEBUG                    
+                string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                Common.DefaultLogger?.LogDebug("Database", logLine);
+#endif         
 
                 command.CommandText = sql;
                 using (SqlDataReader reader = command.ExecuteReader(CommandBehavior.Default)) //Ne zaman CommandBehavior.SequentialAccess kullanalım?
@@ -102,8 +101,9 @@ internal class DbSqlServerConnection : IDisposable
                     DataTable table = new DataTable();
                     table.Load(reader);
 
-                    if (Log.IsDebugEnabled)
-                        Log.Debug("Database", $"{table.Rows.Count} row(s) returned");
+#if DEBUG
+                    Common.DefaultLogger?.LogDebug("Database", $"{table.Rows.Count} row(s) returned");
+#endif
 
                     return table;
                 }
@@ -111,8 +111,8 @@ internal class DbSqlServerConnection : IDisposable
             catch (Exception ex)
             {
                 string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
-                Log.Error("Database", $"{ex.Message}\r\n{logLine}");
-                Log.Warn("Database", Environment.StackTrace);
+                Common.DefaultLogger?.LogError("Database", $"{ex.Message}\r\n{logLine}");
+                Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
                 var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
                 tex.Log();
                 throw tex;
@@ -137,8 +137,8 @@ internal class DbSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
-                Log.Warn("Database", Environment.StackTrace);
-                Log.Error("Database", $"{ex.Message}\r\n{sql}");
+                Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
+                Common.DefaultLogger?.LogError("Database", $"{ex.Message}\r\n{sql}");
 
                 var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, sql + " / " + variableTable.TableName) ?? ex;
                 tex.Log();
@@ -149,7 +149,7 @@ internal class DbSqlServerConnection : IDisposable
     {
         if (this.Connection != null)
         {
-            Log.Debug("Database", $"Connection [{Thread.CurrentThread.ManagedThreadId} / {this.Connection.ClientConnectionId}]: closed.");
+            Common.DefaultLogger?.LogDebug("Database", $"Connection [{Thread.CurrentThread.ManagedThreadId} / {this.Connection.ClientConnectionId}]: closed.");
 
             this.Connection.Close();
             this.Connection.Dispose();

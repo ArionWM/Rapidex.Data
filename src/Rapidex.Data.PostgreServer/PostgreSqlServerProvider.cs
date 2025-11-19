@@ -136,14 +136,14 @@ public class PostgreSqlServerProvider : IDbProvider
     {
         this.ValidateInitialization();
 
-        return new PostgreSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
+        return new PostgreSqlServerDataModificationProvider(this.ParentScope, this, this.ConnectionString);
     }
 
     public IDbStructureProvider GetStructureProvider()
     {
         this.ValidateInitialization();
 
-        return new PostgreSqlStructureProvider(this, ConnectionString);
+        return new PostgreSqlStructureProvider(this, this.ConnectionString);
 
     }
 

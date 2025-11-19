@@ -63,47 +63,4 @@ public interface IEmptyCheckObject
 
 
 
-public interface ILoggingHelper
-{
-    void EnterCategory(string category);
-    void ExitCategory();
-
-    void Info(string category, string message);
-    void Info(string message);
-
-    void Info(string category, Exception ex, string message = null);
-
-    void Info(Exception ex, string message = null);
-
-    void Debug(string category, string message);
-
-    void Debug(string category, string format, params object[] args);
-
-    void Debug(string format, params object[] args);
-
-    void Debug(string message);
-
-    void Verbose(string category, string message);
-
-    void Verbose(string category, string format, params object[] args);
-
-    void Verbose(string format, params object[] args);
-
-    void Verbose(string message);
-
-    void Warn(string category, string message);
-
-    void Warn(string message);
-
-    void Error(string category, string message);
-
-    void Error(string message);
-
-    void Error(string category, Exception ex, string message = null);
-
-    void Error(Exception ex, string message = null);
-
-    void Flush();
-}
-
 

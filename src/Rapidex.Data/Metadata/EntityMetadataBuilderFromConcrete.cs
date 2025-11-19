@@ -41,7 +41,7 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
                 if (field.Type.IsGenericType)
                 {
                     Type enumType = field.Type.GetGenericArguments()[0];
-                    //Log.Debug(string.Format("Enumeration field: {0} / {1} / {}", em.Name, field.Name, enumType.Name));
+                    //Common.DefaultLogger?.LogDebug(string.Format("Enumeration field: {0} / {1} / {}", em.Name, field.Name, enumType.Name));
 
                     this.EnumerationDefinitionFactory.Add(enumType);
                 }
@@ -116,7 +116,7 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
     {
         this.Validate();
 
-        Log.Debug("Database", $"Metadata; Add: {type.FullName}");
+        Common.DefaultLogger?.LogDebug("Database", $"Metadata; Add: {type.FullName}");
 
         this.ValidateConcreteType(type);
 

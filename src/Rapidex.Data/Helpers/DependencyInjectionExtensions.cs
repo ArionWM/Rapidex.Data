@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 namespace Rapidex.Data;
 public static class DependencyInjectionExtensions
 {
-    public static void AddRapidexDataLevel(this IServiceCollection services, string rootFolder = null, string binaryFolder = null, IConfiguration configuration = null)
+    public static void AddRapidexDataLevel(this IServiceCollection services, string rootFolder = null, string binaryFolder = null, IConfiguration configuration = null, ILogger defaultLogger = null)
     {
         try
         {

@@ -419,7 +419,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
                 }
                 else
                 {
-                    Log.Debug($"Add column: {fm.Name}");
+                    Common.DefaultLogger?.LogDebug($"Add column: {fm.Name}");
 
                     StringBuilder addColumnSql = new StringBuilder();
                     addColumnSql.Append($"ALTER TABLE {tableName} ADD COLUMN \"{columnName}\" {typeName}");

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,10 +15,19 @@ namespace Rapidex.Base.Common.Assemblies
         //Bu basitleştirilmişi...
 
         protected static ConcurrentDictionary<string, Type> Types = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
+
+        private readonly ILogger logger;
+
         protected HashSet<AssemblyInfo> assemblyDefinitions = new HashSet<AssemblyInfo>();
+
 
         public IReadOnlyCollection<AssemblyInfo> AssemblyDefinitions { get { return assemblyDefinitions.ToArray().AsReadOnly(); } } //Performance?
         public SortedComponentList<IRapidexAssemblyDefinition> AssemblyInstances { get; private set; } = new SortedComponentList<IRapidexAssemblyDefinition>(); //TODO: Readonly
+
+        public AssemblyManager(ILogger logger)
+        {
+            this.logger = logger;
+        }
 
 
         /// <summary>
@@ -36,7 +46,7 @@ namespace Rapidex.Base.Common.Assemblies
         {
             List<AssemblyInfo> infos = new List<AssemblyInfo>();
 
-            Log.Info($"Checking assembly: {assembly.FullName}");
+            this.logger?.LogInformation($"Checking assembly: {assembly.FullName}");
 
             Type[] moduleTypes = this.FindDerivedClassTypes(assembly, typeof(IRapidexAssemblyDefinition));
             if (moduleTypes.IsNOTNullOrEmpty())
@@ -89,7 +99,7 @@ namespace Rapidex.Base.Common.Assemblies
             if (assembly.IsDynamic)
                 return new AssemblyInfo[0];
 
-            Log.Info($"Checking assembly: {nameOrPath}");
+            this.logger?.LogInformation($"Checking assembly: {nameOrPath}");
             return this.Add(assembly);
         }
 
@@ -192,14 +202,14 @@ namespace Rapidex.Base.Common.Assemblies
                 builder.AppendLine("--------------------------------------");
                 builder.AppendLine("--------------------------------------");
                 builder.AppendLine(rtl.ToString());
-                Log.Error(rtl);
+                this.logger?.LogError(rtl);
                 builder.AppendLine("--------------------------------------");
                 builder.AppendLine("--------------------------------------");
 
                 foreach (Exception ex in rtl.LoaderExceptions)
                 {
                     builder.AppendLine(ex.ToString());
-                    Log.Error(ex);
+                    ex.Log();
 
                     builder.AppendLine("--------------------------------------");
 
@@ -227,7 +237,7 @@ namespace Rapidex.Base.Common.Assemblies
 
         public Type[] FindDerivedClassTypes<T>()
         {
-            return FindDerivedClassTypes(typeof(T));
+            return this.FindDerivedClassTypes(typeof(T));
         }
 
 
@@ -235,7 +245,7 @@ namespace Rapidex.Base.Common.Assemblies
         {
             //TODO: Cache. Ancak CheckAssemblyInformation kullanıldığında (yeni eklendiğinde vs.) cache sıfırlanmalı
             List<Type> typeList = new();
-            Type[] types = FindDerivedClassTypes(ainfo.Assembly, baseTypeOrInterface);
+            Type[] types = this.FindDerivedClassTypes(ainfo.Assembly, baseTypeOrInterface);
             foreach (var type in types)
             {
                 typeList.Add(type);
@@ -251,7 +261,7 @@ namespace Rapidex.Base.Common.Assemblies
             List<(Type type, AssemblyInfo assembly)> typeList = new List<(Type type, AssemblyInfo assembly)>();
             foreach (AssemblyInfo ai in this.AssemblyDefinitions)
             {
-                Type[] types = FindDerivedClassTypes(ai.Assembly, baseTypeOrInterface);
+                Type[] types = this.FindDerivedClassTypes(ai.Assembly, baseTypeOrInterface);
                 foreach (var type in types)
                 {
                     typeList.Add((type, ai));
@@ -263,7 +273,7 @@ namespace Rapidex.Base.Common.Assemblies
 
         public (Type type, AssemblyInfo assembly)[] FindDerivedClassTypesWithAssemblyInfo<T>()
         {
-            return FindDerivedClassTypesWithAssemblyInfo(typeof(T));
+            return this.FindDerivedClassTypesWithAssemblyInfo(typeof(T));
         }
 
         public Type[] FindTypesHasAttribute(Type attributeType, bool inherit)

@@ -159,7 +159,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         catch (SqlException sex) when (sex.Number == 2714)
         {
             throw sex;
-            //Log.Warn($"Table {entityMetadata.TableName} already exists");
+            //Common.DefaultLogger?.LogWarn($"Table {entityMetadata.TableName} already exists");
         }
         catch (SqlException sex) when (DbSqlServerHelper.SQL_Errors_Permission.Contains(sex.Number))
         {
@@ -194,7 +194,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         catch (SqlException sex) when (sex.Number == 2714)
         {
             throw sex;
-            //Log.Warn($"Table {entityMetadata.Name} already exists");
+            //Common.DefaultLogger?.LogWarn($"Table {entityMetadata.Name} already exists");
         }
         catch (SqlException sex) when (DbSqlServerHelper.SQL_Errors_Permission.Contains(sex.Number))
         {
@@ -425,7 +425,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
                 }
                 else
                 {
-                    Log.Debug($"Add column: {fm.Name}");
+                    Common.DefaultLogger?.LogDebug($"Add column: {fm.Name}");
 
                     StringBuilder addColumnSql = new StringBuilder();
                     addColumnSql.Append($"alter table {tableName} add ");
@@ -523,8 +523,9 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         }
         catch (SqlException sex) when (sex.Number == 2714)
         {
+            Common.DefaultLogger?.LogWarning($"Table {em.TableName} already exists");
             throw;
-            Log.Warn($"Table {em.TableName} already exists");
+            
         }
         catch (SqlException sex) when (DbSqlServerHelper.SQL_Errors_Permission.Contains(sex.Number))
         {
@@ -582,7 +583,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         catch (SqlException sex) when (sex.Number == 2714)
         {
             throw;
-            //Log.Warn($"Table {entityMetadata.TableName} already exists");
+            //Common.DefaultLogger?.LogWarn($"Table {entityMetadata.TableName} already exists");
         }
         catch (SqlException sex) when (DbSqlServerHelper.SQL_Errors_Permission.Contains(sex.Number))
         {

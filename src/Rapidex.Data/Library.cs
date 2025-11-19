@@ -1,4 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Reflection;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+
+using System.Runtime.CompilerServices;
 using Rapidex.Data.Entities;
 using Rapidex.Data.Metadata;
 using Rapidex.Data.Scopes;

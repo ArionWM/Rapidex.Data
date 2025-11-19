@@ -147,10 +147,10 @@ public static class CryptoHelper
         string hashedPassword = Convert.ToBase64String(hashResult);
         if (hashedPassword.Contains(" "))
         {
-            Log.Warn($"Whitespace in base64! :{hashedPassword}");
+            Common.DefaultLogger?.LogWarning($"Whitespace in base64! :{hashedPassword}");
             Thread.Sleep(500);
             string hashedPassword2 = Convert.ToBase64String(hashResult);
-            Log.Warn($"Whitespace in base64! :{hashedPassword}, reconvert: {hashedPassword2}");
+            Common.DefaultLogger?.LogWarning($"Whitespace in base64! :{hashedPassword}, reconvert: {hashedPassword2}");
 
             if (!hashedPassword2.Contains(" "))
                 hashedPassword = hashedPassword2;

@@ -87,7 +87,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
 #if DEBUG
-        Log.Debug("Database", $"{sql} \r\n {variables.Select(v=>$"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        Common.DefaultLogger?.LogDebug("Database", $"{sql} \r\n {variables.Select(v=>$"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
         DataTable table = this.Connection.Execute(sql, variables);
@@ -134,7 +134,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         }
 
 #if DEBUG
-        Log.Debug(dbVariables.ToLogStr());
+        Common.DefaultLogger?.LogDebug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();
@@ -188,7 +188,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         }
 
 #if DEBUG
-        Log.Debug(dbVariables.ToLogStr());
+        Common.DefaultLogger?.LogDebug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();

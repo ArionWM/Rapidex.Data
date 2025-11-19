@@ -38,7 +38,7 @@ internal class PostgreSqlServerConnection : IDisposable
         this.Connection = new NpgsqlConnection(this.ConnectionString);
         this.Connection.Open();
 
-        Log.Debug("Database", "Connection [{0}, {1}, {2}]: opened.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
+        Common.DefaultLogger?.LogDebug("Database", "Connection [{0}, {1}, {2}]: opened.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
     }
 
     protected void CheckConnectionState()
@@ -52,7 +52,7 @@ internal class PostgreSqlServerConnection : IDisposable
             retryCount++;
             if (retryCount > 200)
             {
-                Log.Error("Database", $"Connection is not established after 10 seconds. {this.DebugId}; ConnectionString: {this.ConnectionString}");
+                Common.DefaultLogger?.LogError("Database", $"Connection is not established after 10 seconds. {this.DebugId}; ConnectionString: {this.ConnectionString}");
                 throw new InvalidOperationException("Connection is not established after 10 seconds.");
             }
         }
@@ -103,11 +103,10 @@ internal class PostgreSqlServerConnection : IDisposable
             {
                 try
                 {
-                    if (Log.IsDebugEnabled)
-                    {
-                        string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
-                        Log.Debug("Database", logLine);
-                    }
+#if DEBUG
+                    string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                    Common.DefaultLogger?.LogDebug("Database", logLine);
+#endif
 
                     command.CommandText = sql;
                     using (var reader = command.ExecuteReader(CommandBehavior.Default))
@@ -115,8 +114,9 @@ internal class PostgreSqlServerConnection : IDisposable
                         DataTable table = new DataTable();
                         table.Load(reader);
 
-                        if (Log.IsDebugEnabled)
-                            Log.Debug("Database", $"{table.Rows.Count} row(s) returned");
+#if DEBUG
+                        Common.DefaultLogger?.LogDebug("Database", $"{table.Rows.Count} row(s) returned");
+#endif
 
                         table.CaseSensitive = false;
                         return table;
@@ -125,8 +125,8 @@ internal class PostgreSqlServerConnection : IDisposable
                 catch (Exception ex)
                 {
                     string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
-                    Log.Error("Database", $"{this.DebugId}; {ex.Message}\r\n{logLine}");
-                    Log.Warn("Database", Environment.StackTrace);
+                    Common.DefaultLogger?.LogError("Database", $"{this.DebugId}; {ex.Message}\r\n{logLine}");
+                    Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
                     var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
                     tex.Log();
                     throw tex;
@@ -149,8 +149,8 @@ internal class PostgreSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
-                Log.Warn("Database", Environment.StackTrace);
-                Log.Error("Database", $"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
+                Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
+                Common.DefaultLogger?.LogError("Database", $"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
 
                 var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, schemaName + ", " + variableTable.TableName) ?? ex;
                 tex.Log();
@@ -163,7 +163,7 @@ internal class PostgreSqlServerConnection : IDisposable
     {
         //TODO: Check https://github.com/npgsql/npgsql/issues/1201 NpgsqlConnection.ClearPool(NpgsqlConnection) ?
 
-        Log.Debug("Database", "Connection [{0}, {1}, {2}]: closed.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
+        Common.DefaultLogger?.LogDebug("Database", "Connection [{0}, {1}, {2}]: closed.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
         if (this.Connection != null)
         {
             this.Connection.Close();

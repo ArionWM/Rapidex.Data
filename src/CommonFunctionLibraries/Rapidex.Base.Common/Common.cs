@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
-using Rapidex.Base.Common.Assemblies;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Rapidex.Base.Common.Assemblies;
 
 namespace Rapidex
 {
@@ -41,6 +42,7 @@ namespace Rapidex
         public static string DataFolder { get; set; }
 
         public static IConfiguration Configuration { get; set; }
+        public static ILogger DefaultLogger { get; internal set; }
         public static RapidexTypeConverter Converter { get; internal set; }
         public static AssemblyManager Assembly { get; set; }// = new AssemblyManager();
 
@@ -73,7 +75,7 @@ namespace Rapidex
         /// Load configuration and prepare for work
         /// </summary>
         /// <param name="configuration"></param>
-        public static void Setup(string rootFolder, string binaryFolder, IServiceCollection services, IConfiguration configuration = null)
+        public static void Setup(string rootFolder, string binaryFolder, IServiceCollection services, IConfiguration configuration = null, ILogger defaultLogger = null)
         {
             if (configuration != null)
                 Common.Configuration = configuration;
@@ -85,7 +87,9 @@ namespace Rapidex
             if (configuration == null && Common.Configuration == null)
                 LoadConfiguration();
 
-            AssemblyManager asman = new AssemblyManager();
+            DefaultLogger = defaultLogger;
+
+            AssemblyManager asman = new AssemblyManager(defaultLogger);
             Common.Assembly = asman;
             services.AddSingleton<AssemblyManager>(asman);
             Common.Assembly.Setup(services);
