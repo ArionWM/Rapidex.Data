@@ -93,6 +93,8 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
 
     public IDbEntityMetadata Add(Type enumType, string module = null, string prefix = null, Action<Enum, ObjDictionary> callb = null)
     {
+        string forDebug = enumType.Name;
+
         IDbEntityMetadata em = this.Parent.Get(enumType.Name);
         if (em == null || em.IsPremature)
         {

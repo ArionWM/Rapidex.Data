@@ -52,7 +52,7 @@ public class ReferenceDbFieldMetadata : DbFieldMetadata
         if (this.ReferencedEntityMetadata != null)
         {
             //HasPicture?
-            string behaviorNames = this.ReferencedEntityMetadata.Behaviors.Join(",");
+            string behaviorNames = this.ReferencedEntityMetadata.EnsureIsNotPremature(scope.ParentDbScope).Behaviors.Join(",");
             data.Data.Set("targetBehaviors", behaviorNames);
         }
 

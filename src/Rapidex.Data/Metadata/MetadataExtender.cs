@@ -207,4 +207,25 @@ public static class MetadataExtender
         EntityMetadataBuilderFromConcrete mb = new(em.Parent, Database.EntityMetadataFactory, em.Parent.GetFieldMetadataFactory());
         mb.Check(em);
     }
+
+    public static IDbEntityMetadata EnsureIsNotPremature(this IDbEntityMetadata em, IDbMetadataContainer container)
+    {
+        if (em.IsPremature)
+        {
+            var emC = container.Get(em.Name);
+            emC.NotNull($"Entity metadata '{em.Name}' is premature. It should be defined properly before use.");
+
+            if (emC.IsPremature)
+                throw new InvalidOperationException($"Entity metadata '{em.Name}' is still premature. It should be defined properly before use.");
+
+            return emC;
+        }
+
+        return em;
+    }
+
+    public static IDbEntityMetadata EnsureIsNotPremature(this IDbEntityMetadata em, IDbScope db)
+    {
+        return em.EnsureIsNotPremature(db.Metadata);
+    }
 }

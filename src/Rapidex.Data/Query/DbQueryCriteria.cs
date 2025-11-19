@@ -163,9 +163,11 @@ namespace Rapidex.Data.Query
             if (refFm == null)
                 throw new InvalidOperationException($"Field '{referenceField}' is not a reference field in entity '{this.EntityMetadata.Name}'");
 
-            IDbEntityMetadata refEm = refFm.ReferencedEntityMetadata;
+            IDbEntityMetadata refEm = refFm.ReferencedEntityMetadata.EnsureIsNotPremature(this.Schema.ParentDbScope);
+            if(refEm.IsPremature)
+                throw new InvalidOperationException($"Field '{referenceField}' is referred metada is premature '{refEm.Name}'");
 
-            return Nested(fm.Name, refEm.PrimaryKey.Name, refEm, nestedCriteria);
+            return this.Nested(fm.Name, refEm.PrimaryKey.Name, refEm, nestedCriteria);
         }
 
 

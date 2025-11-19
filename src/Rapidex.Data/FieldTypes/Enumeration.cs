@@ -27,7 +27,7 @@ namespace Rapidex.Data
 
             if (placeOptions)
             {
-                var results = scope.GetQuery(rfm.ReferencedEntityMetadata.NotNull())
+                var results = scope.GetQuery(rfm.ReferencedEntityMetadata.EnsureIsNotPremature(scope.ParentDbScope))
                       .Eq(FIELD_IS_ARCHIVED, false)
                       .Load();
 
