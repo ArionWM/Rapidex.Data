@@ -104,7 +104,7 @@ internal class PostgreSqlServerConnection : IDisposable
                 try
                 {
 #if DEBUG
-                    string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                    string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
                     Common.DefaultLogger?.LogDebug("Database", logLine);
 #endif
 
@@ -124,7 +124,7 @@ internal class PostgreSqlServerConnection : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                    string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
                     Common.DefaultLogger?.LogError("Database", $"{this.DebugId}; {ex.Message}\r\n{logLine}");
                     Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
                     var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;

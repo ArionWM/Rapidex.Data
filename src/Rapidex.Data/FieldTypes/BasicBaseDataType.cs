@@ -88,7 +88,7 @@ public abstract class BasicBaseDataType : IDataType
 public abstract class BasicBaseDataType<TBasicDataType>
     : BasicBaseDataType, IDataType<TBasicDataType>
 {
-    public TBasicDataType Value { get; set; }
+    public virtual TBasicDataType Value { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore]
     public override Type BaseType => typeof(TBasicDataType);

@@ -17,10 +17,6 @@ using YamlDotNet.Serialization;
 namespace Rapidex.Data;
 
 
-
-
-
-
 public interface IBlobRepository
 {
     IResult<BlobRecord> Set(Stream content, string name, string contentType, long id = DatabaseConstants.DEFAULT_EMPTY_ID);
@@ -44,6 +40,16 @@ public interface ILazyBlob : IReference, IDataType<long>
 public interface IRapidexMetadataReleatedAssemblyDefinition : IRapidexAssemblyDefinition
 {
     void SetupMetadata(IDbScope db);
+}
+
+
+public interface ICache
+{
+    T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
+    Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
+    void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
+    Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
+    void Remove(string key);
 }
 
 ///// <summary>

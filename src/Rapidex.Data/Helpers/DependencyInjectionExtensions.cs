@@ -1,17 +1,18 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Rapidex.Data.Cache;
 
 namespace Rapidex.Data;
 public static class DependencyInjectionExtensions
 {
-    public static void AddRapidexDataLevel(this IServiceCollection services, string rootFolder = null, string binaryFolder = null, IConfiguration configuration = null, ILogger defaultLogger = null)
+    public static void AddRapidexDataLevel(this IServiceCollection services, string rootFolder = null, string binaryFolder = null, IConfiguration configuration = null, ILogger defaultLogger = null) 
     {
         try
         {
@@ -21,8 +22,11 @@ public static class DependencyInjectionExtensions
             if (binaryFolder.IsNullOrEmpty())
                 binaryFolder = AppContext.BaseDirectory;
 
+            services.AddTransient<CacheFactory>();
+
             Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration, defaultLogger);
             Rapidex.Common.Assembly.SetupAssemblyServices(services);
+            
             Rapidex.Data.Database.Setup();
         }
         catch (Exception ex)

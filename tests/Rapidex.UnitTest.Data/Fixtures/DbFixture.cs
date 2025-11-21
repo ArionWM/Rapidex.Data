@@ -1,17 +1,18 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Rapidex.Base.Common.Logging.Serilog.Core8;
 using Rapidex.Data;
 using Rapidex.Data.Entities;
 using Rapidex.Data.Metadata;
 using Rapidex.Data.Scopes;
 using Rapidex.UnitTest.Base.Common.Fixtures;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Rapidex.Base.Common.Logging.Serilog.Core8;
-using Microsoft.Extensions.Logging;
+using Rapidex.UnitTest.Data.Helpers;
 
 namespace Rapidex.UnitTest.Data.Fixtures;
 
@@ -26,6 +27,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
     protected override void Setup(IServiceCollection services)
     {
+        services.AddSingleton<ICache, DummyCache>();
         services.AddRapidexDataLevel();
 
         Rapidex.Common.Assembly.Add(typeof(DbFixture).Assembly);

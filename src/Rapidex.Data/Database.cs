@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Rapidex.Data.Cache;
 
 namespace Rapidex.Data;
 
@@ -7,7 +8,7 @@ public static class Database
     public static DbEntityFactory EntityFactory { get; private set; } //Internal olmalı ancak DbDataModificationManager ların erişmesi lazım ?
     public static DbConfigurationManager Configuration { get; private set; }
     public static IDbEntityMetadataFactory EntityMetadataFactory { get; private set; }
-
+    public static ICache Cache { get; private set; }
 
     [Obsolete("Use Database.Dbs instead", true)]
     public static IDbManager Scopes { get => Database.Dbs; set => Database.Dbs = value; }
@@ -42,6 +43,12 @@ public static class Database
         Database.Configuration.Setup();
     }
 
+    private static void InitializeCache(IServiceProvider sp)
+    {
+        CacheFactory cacheFactory = sp.GetRequiredService<CacheFactory>();
+        Database.Cache = cacheFactory.Create();
+    }
+
     public static void Start(IServiceProvider sp)
     {
         //TODO: Refactor this, should not required for this.
@@ -56,6 +63,8 @@ public static class Database
 
         Database.EntityMetadataFactory = sp.GetRapidexService<IDbEntityMetadataFactory>()
             .NotNull("Db entity metadata factory not found");
+
+        Database.InitializeCache(sp);
 
         //Database.FieldMetadataFactory = sp.GetRapidexService<IFieldMetadataFactory>()
         //    .NotNull();

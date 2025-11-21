@@ -5,6 +5,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 
 using System.Runtime.CompilerServices;
+using Rapidex.Data.Cache;
 using Rapidex.Data.Entities;
 using Rapidex.Data.Metadata;
 using Rapidex.Data.Scopes;
@@ -38,6 +39,8 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<FilterTextParser, FilterTextParser>();
 
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
+
+        services.AddTransientForProd<CacheFactory, CacheFactory>();
 
         RapidexTypeConverter.RegisterTypeConverter<ConcreteEnumTypeConverter>();
 

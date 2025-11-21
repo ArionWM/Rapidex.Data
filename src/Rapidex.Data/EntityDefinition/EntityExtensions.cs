@@ -98,6 +98,7 @@ public static class EntityExtensions
     public static void EnsureDataTypeInitialization(this IEntity entity)
     {
         entity.NotNull();
+        entity._Schema.NotNull();
 
         if (entity is IPartialEntity partialEntity)
             entity._Schema.Mapper.EnsureAdvancedDataTypesForPartial(partialEntity);

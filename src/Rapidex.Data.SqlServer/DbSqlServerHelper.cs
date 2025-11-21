@@ -232,4 +232,44 @@ internal static class DbSqlServerHelper
         //TODO: Tekilliği garanti edilmeli
         return $"{em.Name.AbbrFromFirstLetters()}{RandomHelper.RandomNumeric(6)}";
     }
+
+    private static bool NeedQuote(DbVariable var)
+    {
+        switch (var.DbType)
+        {
+            case DbFieldType.String:
+            case DbFieldType.DateTime:
+            case DbFieldType.DateTime2:
+            case DbFieldType.DateTimeOffset:
+            case DbFieldType.Guid:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    
+
+    public static string CreateSqlLog(int debugId, string sql, params DbVariable[] parameters)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine($"- Executing ({debugId})");
+        if (parameters.IsNOTNullOrEmpty())
+        {
+            sb.AppendLine("-- Parameters:");
+            foreach (var param in parameters)
+            {
+                if (NeedQuote(param))
+                    sb.AppendLine($" declare {param.ParameterName} = '{param.Value}' -- ({param.DbType}, {param.Value?.GetType().Name})");
+                else
+                    sb.AppendLine($" declare {param.ParameterName} {GetDataTypeName(param)} = {param.Value} -- ({param.DbType}, {param.Value?.GetType().Name})");
+            }
+        }
+
+        sb.AppendLine($"-- SQL: ({debugId})");
+        sb.AppendLine(sql);
+
+        return sb.ToString();
+
+    }
 }

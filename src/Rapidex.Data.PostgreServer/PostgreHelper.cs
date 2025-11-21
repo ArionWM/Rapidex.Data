@@ -1,8 +1,9 @@
-﻿using Npgsql;
-using NpgsqlTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Text;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Rapidex.Data.PostgreServer;
 
@@ -220,5 +221,43 @@ internal static class PostgreHelper
         string lower = objectName.ToLowerInvariant();
         if (lower != objectName)
             throw new BaseValidationException($"Invalid object name: '{objectName}'. Postgre object names must be invariant lowercase (seperate words with '_' if required). See: abc");
+    }
+
+    private static bool NeedQuote(DbVariable var)
+    {
+        switch (var.DbType)
+        {
+            case DbFieldType.String:
+            case DbFieldType.DateTime:
+            case DbFieldType.DateTime2:
+            case DbFieldType.DateTimeOffset:
+            case DbFieldType.Guid:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static string CreateSqlLog(int debugId, string sql, params DbVariable[] parameters)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine($"- Executing ({debugId})");
+        if (parameters.IsNOTNullOrEmpty())
+        {
+            sb.AppendLine("-- Parameters:");
+            foreach (var param in parameters)
+            {
+                if (NeedQuote(param))
+                    sb.AppendLine($" @set {param.ParameterName.TrimStart('@')} = '{param.Value}' -- ({param.DbType}, {param.Value?.GetType().Name})");
+                else
+                    sb.AppendLine($" @set {param.ParameterName.TrimStart('@')} = {param.Value} -- ({param.DbType}, {param.Value?.GetType().Name})");
+            }
+        }
+
+        sb.AppendLine($"-- SQL: ({debugId})");
+        sb.AppendLine(sql);
+
+        return sb.ToString();
+
     }
 }

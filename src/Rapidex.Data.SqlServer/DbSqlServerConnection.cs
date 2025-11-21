@@ -91,7 +91,7 @@ internal class DbSqlServerConnection : IDisposable
             try
             {
 #if DEBUG                    
-                string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, sql, parameters);
                 Common.DefaultLogger?.LogDebug("Database", logLine);
 #endif         
 
@@ -110,7 +110,7 @@ internal class DbSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
-                string logLine = LogHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, sql, parameters);
                 Common.DefaultLogger?.LogError("Database", $"{ex.Message}\r\n{logLine}");
                 Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
                 var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;

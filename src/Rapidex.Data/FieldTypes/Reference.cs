@@ -121,7 +121,19 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
     /// </summary>
     public virtual string ReferencedEntityConcreteTypeName { get; protected set; }
 
-    public virtual long TargetId { get { return this.Value; } set { this.Value = value; } }
+    protected long targetId;
+
+
+    public virtual long TargetId
+    {
+        get { return this.targetId; }
+        set
+        {
+            this.targetId = value;
+        }
+    }
+
+    public override long Value { get => this.TargetId; set => this.TargetId = value; }
 
 
 
@@ -130,7 +142,13 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
     [System.Text.Json.Serialization.JsonIgnore]
     public override Type BaseType => typeof(long);
 
-    public bool IsEmpty { get { return this.TargetId == DatabaseConstants.DEFAULT_EMPTY_ID || this.TargetId == 0; } }
+    public bool IsEmpty
+    {
+        get
+        {
+            return this.TargetId == DatabaseConstants.DEFAULT_EMPTY_ID || this.TargetId == 0;
+        }
+    }
 
 
     public ReferenceBase()
@@ -150,6 +168,8 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
 
         if (this.TargetId.IsPrematureId())
             throw new InvalidOperationException("Premature references can't get content");
+
+        //TODO: local cache
 
         IDbSchemaScope scope = parent._Schema;
         IEntity entity = scope.Find(this.ReferencedEntity, this.TargetId);
@@ -273,7 +293,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
         return clone;
     }
 
-   
+
 
 }
 
@@ -303,50 +323,9 @@ public class Reference : ReferenceBase, ILazy, IReference
 
 
 [TypeConverter(typeof(ReferenceBase.ReferenceTypeConverter))]
-public class Reference<T> : ReferenceBase, ILazy<T>, IReference 
+public class Reference<T> : ReferenceBase, ILazy<T>, IReference
     where T : IEntity
 {
-    //public class ReferenceTypeConverter<T> : System.ComponentModel.TypeConverter where T : IEntity
-    //{
-    //    static Type[] supportedTypes = new Type[]
-    //    {
-    //        typeof(int),
-    //        typeof(long)
-
-    //    };
-    //    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
-    //    {
-
-    //        if (supportedTypes.Contains(sourceType))
-    //            return true;
-
-    //        return base.CanConvertFrom(context, sourceType);
-    //    }
-
-
-    //    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
-    //    {
-    //        long? targetId = null;
-    //        switch (value)
-    //        {
-    //            case int i:
-    //                targetId = i;
-    //                break;
-    //            case long l:
-    //                targetId = l;
-    //                break;
-    //            default:
-    //                return base.ConvertFrom(context, culture, value);
-    //        }
-
-
-            
-    //        //ReferenceBase reference = (ReferenceBase)Activator.CreateInstance(this.Type);
-
-
-    //    }
-    //}
-
     public override string TypeName => "referenceConcrete";
 
 

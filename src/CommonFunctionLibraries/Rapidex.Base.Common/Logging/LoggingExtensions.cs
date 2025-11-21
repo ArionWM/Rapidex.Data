@@ -26,6 +26,14 @@ public static class LoggingExtensions
         }
     }
 
+    public static void LogError(this ILogger logger, Exception? exception, string message = null)
+    {
+        if (exception != null)
+        {
+            logger.LogError(exception, message ?? exception.Message);
+        }
+    }
+
     public static void Log(this Exception ex, string message = null)
     {
         Common.DefaultLogger?.LogError(ex, message);
