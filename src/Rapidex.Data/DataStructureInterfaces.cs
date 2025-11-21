@@ -487,7 +487,8 @@ public class DbEntityIdEqualityComparerById : IEqualityComparer<DbEntityId>
 
 public interface IDbEntityLoader
 {
-    void Setup(params IDbEntityLoader[] loaders);
+    IDbSchemaScope ParentScope { get; }
+    void Setup(IDbSchemaScope schema, params IDbEntityLoader[] loaders);
 
     IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids);
 
@@ -553,7 +554,7 @@ public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader,
 
     IDbInternalTransactionScope BeginTransaction(string transactionName = null);
 
-    void IDbEntityLoader.Setup(params IDbEntityLoader[] loaders)
+    void IDbEntityLoader.Setup(IDbSchemaScope scope, params IDbEntityLoader[] loaders)
     {
         //Do nothing
     }

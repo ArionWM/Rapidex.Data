@@ -14,12 +14,14 @@ internal class CacheFactory
     private HybridCache genericHybridCache;
     private CacheSignalImplementer signalImplementer;
 
-    public CacheFactory(CacheSignalImplementer signalImplementer, ICache availableCache, [FromKeyedServices("rdata")] HybridCache hcache, HybridCache genericHCcache)
+    public CacheFactory(IServiceProvider serviceProvider)
     {
-        this.signalImplementer = signalImplementer;
-        this.availableCache = availableCache;
-        this.keyedHybridCache = hcache;
-        this.genericHybridCache = genericHCcache;
+        // CacheSignalImplementer signalImplementer, ICache availableCache, [FromKeyedServices("rdata")] HybridCache hcache, HybridCache genericHCcache
+
+        this.signalImplementer = serviceProvider.GetRequiredService< CacheSignalImplementer>();
+        this.availableCache = serviceProvider.GetService<ICache>();
+        this.keyedHybridCache = serviceProvider.GetKeyedService<HybridCache>("rdata");
+        this.genericHybridCache = serviceProvider.GetService<HybridCache>(); ;
     }
 
     public ICache Create()

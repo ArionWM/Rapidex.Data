@@ -8,21 +8,46 @@ namespace Rapidex.Data.DataModification.Loaders;
 
 internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
 {
-    public override IEntityLoadResult GetInternal(IQueryLoader loader)
+    public override IEntityLoadResult LoadInternal(IQueryLoader loader)
     {
-        EntityLoadResult lres = new EntityLoadResult();
-        return lres;
+        IEntityLoadResult lastLoadResult = null;
+        foreach (var sloader in this.SecondaryLoaders)
+        {
+            lastLoadResult = sloader.Load(loader);
+            if (lastLoadResult.IsNOTNullOrEmpty())
+            {
+                Database.Cache.SetEntities(lastLoadResult);
+                return lastLoadResult;
+            }
+        }
+
+        return lastLoadResult;
     }
 
-    public override ILoadResult<DataRow> GetInternalRaw(IQueryLoader loader)
+    public override ILoadResult<DataRow> LoadRawInternal(IQueryLoader loader)
     {
-        LoadResult<DataRow> lres = new LoadResult<DataRow>();
-        return lres;
+        ILoadResult<DataRow> lastLoadResult = null;
+        foreach (var sloader in this.SecondaryLoaders)
+        {
+            lastLoadResult = sloader.LoadRaw(loader);
+            if (lastLoadResult.IsNOTNullOrEmpty())
+            {
+                return lastLoadResult;
+            }
+        }
+
+        return lastLoadResult;
     }
 
-    protected override IEntity GetInternal(DbEntityId id)
+    protected override IEntity GetInternal(IDbEntityMetadata em, DbEntityId id)
     {
-        return null;
-        //throw new NotImplementedException();
+        var entity = Database.Cache.GetEntity(this.ParentScope, em.Name, id.Id);
+
+        if (entity == null || entity.DbVersion != id.Version)
+        {
+            return null;
+        }
+
+        return entity;
     }
 }

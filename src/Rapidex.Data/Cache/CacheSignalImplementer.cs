@@ -12,7 +12,7 @@ internal class CacheSignalImplementer
     public ISignalHandlingResult AfterCommitCallback(IEntityReleatedMessageArguments args)
     {
         var entity = args.Entity;
-        Database.Cache.AddEntity(entity);
+        Database.Cache.SetEntity(entity);
         return args.CreateHandlingResult(null);
     }
 

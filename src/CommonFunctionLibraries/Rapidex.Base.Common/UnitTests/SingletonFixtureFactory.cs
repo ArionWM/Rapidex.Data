@@ -11,6 +11,24 @@ public class SingletonFixtureFactory<T> where T : ICoreTestFixture
     protected static Dictionary<Type, ICoreTestFixture> fixtures = new Dictionary<Type, ICoreTestFixture>();
 
     protected static object _lock = new object();
+
+    //public T GetFixture()
+    //{
+    //    lock (_lock)
+    //        try
+    //        {
+    //            T fixture = TypeHelper.CreateInstance<T>(typeof(T));
+
+    //            fixture.Init();
+    //            return fixture;
+
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            throw;
+    //        }
+    //}
+
     public T GetFixture()
     {
         lock (_lock)

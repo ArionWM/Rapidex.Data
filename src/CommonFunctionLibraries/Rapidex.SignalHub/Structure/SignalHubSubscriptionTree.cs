@@ -138,17 +138,19 @@ internal class SignalHubSubscriptionTree : SignalHubSubscriptionTreeItem
         this.Add(subscriber);
     }
 
-    public void Remove(SignalHubSubscriber subscriber)
-    {
-        throw new NotImplementedException();
-        ////this.subscriberHandlerIndex.Remove(subscriber.Id);
-        //base.Remove(subscriber);
-    }
+    //public void Remove(SignalHubSubscriber subscriber)
+    //{
+    //    //throw new NotImplementedException();
+    //    this.subscriberHandlerIndex.Remove(subscriber.Id);
+    //    base.Remove(subscriber);
+    //}
 
     public void Remove(int subscriberId)
     {
-        throw new NotImplementedException();
-        ////this.subscriberHandlerIndex.Remove(subscriber.Id);
-        //base.Remove(subscriber);
+        if (this.subscriberHandlerIndex.TryGetValue(subscriberId, out var subscriber))
+        {
+            this.subscriberHandlerIndex.Remove(subscriberId);
+        }
+
     }
 }

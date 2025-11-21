@@ -237,6 +237,9 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         try
         {
             IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
+
+            
+
             HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
             List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
 

@@ -14,19 +14,26 @@ public static class CacheExtensions
         string dbName = dbSchema.ParentDbScope.Name;
         string schemaName = dbSchema.SchemaName;
         var typeName = entity._TypeName;
-        int typeHash = typeName.GetHashCode();
         var id = entity.GetId();
 
-        return $"{dbName}:{schemaName}:{typeHash}:{id}";
+        return $"{dbName}:{schemaName}:{typeName}:{id}";
     }
 
-    public static void AddEntity(this ICache cache, IEntity entity)
+    public static void SetEntity(this ICache cache, IEntity entity)
     {
         if (entity.HasPrematureId())
             return;
 
         string key = GetEntityCacheKey(entity);
         cache.Set(key, entity);
+    }
+
+    public static void SetEntities(this ICache cache, IEnumerable< IEntity>  entities)
+    {
+        foreach (var entity in entities)
+        {
+            cache.SetEntity(entity);
+        }
     }
 
     public static IEntity GetEntity(this ICache cache, IDbSchemaScope dbSchema, string typeName, long id)

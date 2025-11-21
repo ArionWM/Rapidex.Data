@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Rapidex.Data.Cache;
 
-internal class DefaultInMemoryCache : ICache   
+internal class DefaultInMemoryCache : ICache
 {
     MemoryCache Cache { get; }
     TimeSpan DefaultExpiration { get; }
@@ -18,7 +18,7 @@ internal class DefaultInMemoryCache : ICache
         this.Cache = new MemoryCache(new MemoryCacheOptions());
     }
 
-    public T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public virtual T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
     {
         if (!this.Cache.TryGetValue(key, out T value))
         {
@@ -28,7 +28,7 @@ internal class DefaultInMemoryCache : ICache
         return value;
     }
 
-    public async Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public virtual async Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
     {
         if (!this.Cache.TryGetValue(key, out T value))
         {
@@ -38,17 +38,17 @@ internal class DefaultInMemoryCache : ICache
         return value;
     }
 
-    public void Remove(string key)
+    public virtual void Remove(string key)
     {
         this.Cache.Remove(key);
     }
 
-    public void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public virtual void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
     {
         this.Cache.Set(key, value, expiration ?? this.DefaultExpiration);
     }
 
-    public Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public virtual Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
     {
         this.Cache.Set(key, value, expiration ?? this.DefaultExpiration);
         return Task.CompletedTask;

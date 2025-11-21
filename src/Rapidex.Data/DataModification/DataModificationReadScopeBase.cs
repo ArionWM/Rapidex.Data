@@ -20,8 +20,6 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
         this.Initialize();
     }
 
-
-
     protected virtual void Initialize()
     {
 
@@ -29,13 +27,11 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
 
     protected IDbEntityLoader SelectLoader(IDbEntityMetadata em)
     {
-        DbEntityWithCacheLoader cacheLoader = new DbEntityWithCacheLoader();
-        cacheLoader.Setup(this.DmProvider);
-        return cacheLoader;
+        //TODO: Create `LoaderSelector` class (and interface) to select loader based on entity metadata and other criteria
 
-        ////TODO: Select loader 
-        ////DbEntityInMemoryCacheLoader cacheLoader = new DbEntityInMemoryCacheLoader();
-        ////cacheLoader.Setup(this.DmProvider);
+        DbEntityWithCacheLoader cacheLoader = new DbEntityWithCacheLoader();
+        cacheLoader.Setup(this.ParentSchema, this.DmProvider);
+        return cacheLoader;
 
         //return this.DmProvider;
     }
@@ -77,11 +73,9 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
                 IQueryAggregate totalCounter = (IQueryAggregate)queryLoader.Clone();
                 totalCounter.Alias = queryLoader.Alias;
                 totalCounter.ClearPaging();
-                //totalCounter.Page(int.MaxValue, 0);
                 loadedResult.TotalItemCount = totalCounter.Count();
                 loadedResult.IncludeTotalItemCount = true;
                 loadedResult.PageCount = (long)Math.Ceiling(Convert.ToDecimal(loadedResult.TotalItemCount) / Convert.ToDecimal(loadedResult.PageSize.Value));
-
             }
         }
 

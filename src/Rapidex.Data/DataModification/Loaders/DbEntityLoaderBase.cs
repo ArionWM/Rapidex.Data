@@ -9,23 +9,22 @@ namespace Rapidex.Data.DataModification.Loaders;
 
 public abstract class DbEntityLoaderBase : IDbEntityLoader
 {
-    protected IDbEntityLoader[] SearchLoaders { get; set; }
-
+    protected IDbEntityLoader[] SecondaryLoaders { get; set; }
+    public IDbSchemaScope ParentScope { get; private set; }
 
     public DbEntityLoaderBase()
     {
     }
 
 
-    protected abstract IEntity GetInternal(DbEntityId id);
+    protected abstract IEntity GetInternal(IDbEntityMetadata em, DbEntityId id);
 
-    public abstract ILoadResult<DataRow> GetInternalRaw(IQueryLoader loader);
 
-    public abstract IEntityLoadResult GetInternal(IQueryLoader loader);
 
-    public void Setup(params IDbEntityLoader[] loaders)
+    public void Setup(IDbSchemaScope schema, params IDbEntityLoader[] loaders)
     {
-        this.SearchLoaders = loaders;
+        this.ParentScope = schema;
+        this.SecondaryLoaders = loaders;
     }
 
     protected virtual IEntity[] LoadInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids, IDbEntityLoader[] secondaryLoaders)
@@ -35,7 +34,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
         foreach (var id in ids)
         {
-            var entity = this.GetInternal(id);
+            var entity = this.GetInternal(em, id);
             if (entity == null)
                 notAvailable.Add(id);
             else
@@ -70,19 +69,23 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
     public virtual IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
-        IEntity[] loaded = this.LoadInternal(em, ids, this.SearchLoaders);
+        IEntity[] loaded = this.LoadInternal(em, ids, this.SecondaryLoaders);
         EntityLoadResult values = new EntityLoadResult(loaded);
         return values;
     }
 
-    public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
+    public abstract ILoadResult<DataRow> LoadRawInternal(IQueryLoader loader);
+
+    public virtual ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
     {
-        throw new NotImplementedException();
+        return this.LoadRawInternal(loader);
     }
 
-    public IEntityLoadResult Load(IQueryLoader loader)
+    public abstract IEntityLoadResult LoadInternal(IQueryLoader loader);
+
+    public virtual IEntityLoadResult Load(IQueryLoader loader)
     {
-        throw new NotImplementedException();
+        return this.LoadInternal(loader);
     }
 
 

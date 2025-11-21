@@ -27,7 +27,7 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
     protected override void Setup(IServiceCollection services)
     {
-        services.AddSingleton<ICache, DummyCache>();
+        services.AddSingleton<ICache, TestCache>();
         services.AddRapidexDataLevel();
 
         Rapidex.Common.Assembly.Add(typeof(DbFixture).Assembly);

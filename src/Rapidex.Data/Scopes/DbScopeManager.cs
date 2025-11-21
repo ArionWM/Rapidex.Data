@@ -9,10 +9,18 @@ namespace Rapidex.Data.Scopes;
 
 internal class DbScopeManager : IDbManager
 {
+    private readonly ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
+    private readonly IServiceProvider serviceProvider;
+
+
     internal bool IsMultiDb { get; set; } = false;
     internal Dictionary<string, IDbScope> DbScopes { get; private set; } = new Dictionary<string, IDbScope>(StringComparer.InvariantCultureIgnoreCase);
 
-    private ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
+
+    public DbScopeManager(IServiceProvider serviceProvider)
+    {
+        this.serviceProvider = serviceProvider;
+    }
 
     public IDbScope AddMainDbIfNotExists()
     {
