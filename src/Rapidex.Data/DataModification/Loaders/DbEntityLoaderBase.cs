@@ -28,9 +28,6 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
         this.SearchLoaders = loaders;
     }
 
-
-
-
     protected virtual IEntity[] LoadInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids, IDbEntityLoader[] secondaryLoaders)
     {
         List<IEntity> available = new List<IEntity>();
@@ -38,7 +35,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
         foreach (var id in ids)
         {
-            var entity = GetInternal(id);
+            var entity = this.GetInternal(id);
             if (entity == null)
                 notAvailable.Add(id);
             else
@@ -47,7 +44,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
         foreach (var loader in secondaryLoaders)
         {
-            var loadResult = loader.Load(em, notAvailable);
+            var loadResult = loader.Load(em, notAvailable); //TODO: Multiple load with multiple ids
             if (loadResult.Any())
             {
                 available.AddRange(loadResult);
@@ -73,7 +70,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
     public virtual IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
-        IEntity[] loaded = LoadInternal(em, ids, this.SearchLoaders);
+        IEntity[] loaded = this.LoadInternal(em, ids, this.SearchLoaders);
         EntityLoadResult values = new EntityLoadResult(loaded);
         return values;
     }

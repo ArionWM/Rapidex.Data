@@ -16,7 +16,7 @@
 		<Compile Include="..\..\RapidexAssemblyInfo.cs" Link="RapidexAssemblyInfo.cs" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Npgsql" Version="9.0.3" />
+		<PackageReference Include="Npgsql" Version="9.0.4" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\Rapidex.Data\Rapidex.Data.csproj" />

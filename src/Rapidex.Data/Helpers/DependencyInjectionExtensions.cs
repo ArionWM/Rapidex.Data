@@ -27,7 +27,7 @@ public static class DependencyInjectionExtensions
             Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration, defaultLogger);
             Rapidex.Common.Assembly.SetupAssemblyServices(services);
             
-            Rapidex.Data.Database.Setup();
+            Rapidex.Data.Database.Setup(services);
         }
         catch (Exception ex)
         {

@@ -2,7 +2,7 @@ global using Rapidex;
 global using Rapidex.Data;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Rapidex.Base.Common.Logging.Serilog.Core8;
 using Rapidex.Data.Sample.App1;
 using Rapidex.Data.Sample.App1.ConcreteEntities;

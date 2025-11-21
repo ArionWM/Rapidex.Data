@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rapidex.Data.DataModification.Loaders;
 
 namespace Rapidex.Data.DataModification;
 internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDisposable
@@ -28,11 +29,15 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
 
     protected IDbEntityLoader SelectLoader(IDbEntityMetadata em)
     {
-        //TODO: Select loader 
-        //DbEntityInMemoryCacheLoader cacheLoader = new DbEntityInMemoryCacheLoader();
-        //cacheLoader.Setup(this.DmProvider);
+        DbEntityWithCacheLoader cacheLoader = new DbEntityWithCacheLoader();
+        cacheLoader.Setup(this.DmProvider);
+        return cacheLoader;
 
-        return this.DmProvider;
+        ////TODO: Select loader 
+        ////DbEntityInMemoryCacheLoader cacheLoader = new DbEntityInMemoryCacheLoader();
+        ////cacheLoader.Setup(this.DmProvider);
+
+        //return this.DmProvider;
     }
 
 

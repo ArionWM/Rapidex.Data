@@ -167,6 +167,8 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             entity = resEntity;
 
         this.ChangesCollection.Delete(entity);
+
+        Database.Cache.RemoveEntity(entity);
     }
 
     public virtual void Add(IQueryUpdater updater)

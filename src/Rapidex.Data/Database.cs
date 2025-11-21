@@ -32,7 +32,7 @@ public static class Database
     /// Load configuration and prepare for work
     /// </summary>
     /// <param name="configuration"></param>
-    public static void Setup(IConfiguration configuration = null)
+    public static void Setup(IServiceCollection services, IConfiguration configuration = null)
     {
         Database.Configuration = new DbConfigurationManager();
         if (configuration != null)

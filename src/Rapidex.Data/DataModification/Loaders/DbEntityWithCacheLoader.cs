@@ -6,7 +6,7 @@ using System.Text;
 namespace Rapidex.Data.DataModification.Loaders;
 
 
-internal class DbEntityInMemoryCacheLoader : DbEntityLoaderBase, IDbEntityLoader
+internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
 {
     public override IEntityLoadResult GetInternal(IQueryLoader loader)
     {

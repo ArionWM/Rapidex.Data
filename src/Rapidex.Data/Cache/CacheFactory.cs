@@ -12,9 +12,11 @@ internal class CacheFactory
     private ICache availableCache;
     private HybridCache keyedHybridCache;
     private HybridCache genericHybridCache;
+    private CacheSignalImplementer signalImplementer;
 
-    public CacheFactory(ICache availableCache, [FromKeyedServices("rdata")] HybridCache hcache, HybridCache genericHCcache)
+    public CacheFactory(CacheSignalImplementer signalImplementer, ICache availableCache, [FromKeyedServices("rdata")] HybridCache hcache, HybridCache genericHCcache)
     {
+        this.signalImplementer = signalImplementer;
         this.availableCache = availableCache;
         this.keyedHybridCache = hcache;
         this.genericHybridCache = genericHCcache;
@@ -27,13 +29,13 @@ internal class CacheFactory
 
         //Check hybrid cache first
         if (this.keyedHybridCache != null)
-            return new DefaultCache(this.keyedHybridCache);
+            return new DefaultHybridCache(this.keyedHybridCache);
 
         //Fallback to generic hybrid cache
         if (this.genericHybridCache != null)
-            return new DefaultCache(this.genericHybridCache);
+            return new DefaultHybridCache(this.genericHybridCache);
 
         Rapidex.Common.DefaultLogger.LogWarning("No cache is configured. See: abc");
-        return new InMemoryCache();
+        return new DefaultInMemoryCache();
     }
 }

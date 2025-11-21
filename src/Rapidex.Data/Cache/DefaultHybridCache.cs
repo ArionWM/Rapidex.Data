@@ -6,11 +6,11 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Rapidex.Data.Cache;
 
-internal class DefaultCache : ICache
+internal class DefaultHybridCache : ICache
 {
     private readonly HybridCache cache;
 
-    public DefaultCache([FromKeyedServices("rdata")] HybridCache hcache)
+    public DefaultHybridCache([FromKeyedServices("rdata")] HybridCache hcache)
     {
         this.cache = hcache;
     }

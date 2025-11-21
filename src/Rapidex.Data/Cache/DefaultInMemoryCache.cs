@@ -7,12 +7,12 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Rapidex.Data.Cache;
 
-internal class InMemoryCache : ICache   
+internal class DefaultInMemoryCache : ICache   
 {
     MemoryCache Cache { get; }
     TimeSpan DefaultExpiration { get; }
 
-    public InMemoryCache()
+    public DefaultInMemoryCache()
     {
         this.DefaultExpiration = TimeSpan.FromMinutes(10);
         this.Cache = new MemoryCache(new MemoryCacheOptions());

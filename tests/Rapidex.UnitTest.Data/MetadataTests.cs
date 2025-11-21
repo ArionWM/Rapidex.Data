@@ -1,4 +1,3 @@
-using NuGet.Frameworks;
 
 using Rapidex.Data;
 using Rapidex.Data.SqlServer;
