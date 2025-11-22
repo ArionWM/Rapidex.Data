@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.Data.TestBase;
 public abstract class WorkScopeTestBase<T> : DbDependedTestsBase<T> where T : IDbProvider
 {
-    protected WorkScopeTestBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+    protected WorkScopeTestBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
     {
     }
 

@@ -8,6 +8,13 @@ namespace Rapidex.Data.Scopes;
 
 internal class DbProviderFactory
 {
+    private readonly IServiceProvider serviceProvider;
+
+    public DbProviderFactory(IServiceProvider serviceProvider)
+    {
+        this.serviceProvider = serviceProvider;
+    }
+
     public IDbProvider CreateProvider(string dbProviderTypeName, string connectionString = null)
     {
         dbProviderTypeName.NotEmpty();
@@ -15,7 +22,9 @@ internal class DbProviderFactory
         Type type = Common.Assembly.FindType(dbProviderTypeName)
             .NotNull($"Type '{dbProviderTypeName}' is not found.");
 
-        IDbProvider provider = (IDbProvider)Activator.CreateInstance(type, connectionString);
+        IDbProvider provider = this.serviceProvider.GetKeyedService<IDbProvider>(type.Name);
+        provider.NotNull(string.Format("DbProvider of type '{0}' is not registered in the DI container.", type.FullName));
+        provider.Initialize(connectionString);
         return provider;
     }
 
@@ -43,7 +52,8 @@ internal class DbProviderFactory
         {
             case MasterDbConnectionStatus.Valid:
             case MasterDbConnectionStatus.Created:
-                IDbScope dbScope = new DbScope(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_ALIAS_NAME, provider);
+                var dbScope = this.serviceProvider.GetRequiredService<IDbScope>();
+                dbScope.Initialize(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_ALIAS_NAME, provider);
                 return dbScope;
             default:
                 throw new DataConnectionException($"Master database connection is not valid. \r\n{checkResult.description} \r\nSee: https://github.com/ArionWM/Rapidex.Data/blob/main/docs/DatabaseConnectionAndRequiredRights.md");
@@ -70,7 +80,8 @@ internal class DbProviderFactory
         if (trySwitchDb)
             provider.SwitchDb(dbNameOrAliasName);
 
-        DbScope scope = new DbScope(id, dbNameOrAliasName, provider);
+        var scope = this.serviceProvider.GetRequiredService<IDbScope>();
+        scope.Initialize(id, dbNameOrAliasName, provider);
         return scope;
     }
 

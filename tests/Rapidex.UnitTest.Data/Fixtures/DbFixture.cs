@@ -80,20 +80,19 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
 
         this.Setup(builder.Services);
 
-        //??
-        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
-        DbProviderFactory DbProviderFactory = new DbProviderFactory();
-        IDbProvider provider = DbProviderFactory.CreateProvider(connectionInfo);
-        this.DropAllTablesInDatabase(provider, false);
-
         IHost host = builder.Build();
         this.ServiceProvider = host.Services;
+
+        //??
+        DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
+        DbProviderFactory DbProviderFactory = this.ServiceProvider.GetRequiredService<DbProviderFactory>();
+        IDbProvider provider = DbProviderFactory.CreateProvider(connectionInfo);
+        this.DropAllTablesInDatabase(provider, false);
 
         var loggerFactory = this.ServiceProvider.GetRequiredService<ILoggerFactory>();
         this.Logger = loggerFactory.CreateLogger(this.GetType());
 
         this.ServiceProvider.StartRapidexDataLevel();
-
 
         var dbScope = Database.Dbs.AddMainDbIfNotExists();
         dbScope.Structure.ApplyAllStructure();

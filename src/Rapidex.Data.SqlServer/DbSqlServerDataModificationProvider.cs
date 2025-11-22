@@ -87,12 +87,12 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug("Database", $"{sql} \r\n {variables.Select(v=>$"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        Common.DefaultLogger?.LogDebug("Database", $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
         DataTable table = this.Connection.Execute(sql, variables);
 
-        IEntity[] entities = this.ParentScope.Mapper.MapToNew(loader.EntityMetadata, table);
+        IEntity[] entities = this.ParentScope.Mapper.MapToNew(loader.EntityMetadata, table, ent => { ent._loadSource = LoadSource.Database; });
         return new EntityLoadResult(entities);
     }
 

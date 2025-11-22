@@ -11,7 +11,7 @@ namespace Rapidex.UnitTest.Data.TestBase;
 
 public abstract class LazyLoadTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
 {
-    protected LazyLoadTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+    protected LazyLoadTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
     {
     }
 }

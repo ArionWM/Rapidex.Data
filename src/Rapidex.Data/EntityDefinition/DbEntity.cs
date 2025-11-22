@@ -11,14 +11,16 @@ namespace Rapidex.Data
         protected ObjDictionary _Values { get; }
 #pragma warning restore IDE1006 // Naming Styles
 
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         IDbEntityMetadata IEntity._Metadata { get; set; }
 
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         object IEntity._VirtualId { get; set; }
 
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public IDbSchemaScope _Schema { get; set; }
+
+        public LoadSource _loadSource { get; set; } = LoadSource.Unknown;
 
         public object this[string columnName]
         {

@@ -1,6 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System.Xml.Linq;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
 using Rapidex.Data.SqlServer;
-using System.Xml.Linq;
 
 namespace Rapidex.Data.SqlServer;
 
@@ -8,33 +9,66 @@ public class DbSqlServerProvider : IDbProvider
 {
     protected string _connectionString;
     protected string _databaseName;
-
+    protected bool isInitialized = false;
+    protected ILogger logger;
+    protected IServiceProvider ServiceProvider { get; }
     protected SqlConnectionStringBuilder Connectionbuilder { get; set; }
-    //protected Dictionary<IDbSchemaScope, IDbDataModificationPovider> dmProviders = new();
 
-    internal static IExceptionTranslator SqlServerExceptionTranslator { get; }
+    internal static IExceptionTranslator SqlServerExceptionTranslator { get; } = new DbSqlServerExceptionTranslator();
 
     public IDbSchemaScope ParentScope { get; private set; }
-    public string ConnectionString { get { return _connectionString; } set { SetConnectionString(value); } }
-    public string DatabaseName { get { return _databaseName; } set { SetDatabaseName(value); } }
+    public string ConnectionString { get { return _connectionString; } set { this.SetConnectionString(value); } }
+    public string DatabaseName { get { return _databaseName; } set { this.SetDatabaseName(value); } }
 
     public string StartDbName { get; protected set; }
 
     public IExceptionTranslator ExceptionTranslator => SqlServerExceptionTranslator;
 
-    static DbSqlServerProvider()
+
+
+    public DbSqlServerProvider(IServiceProvider serviceProvider, ILogger<DbSqlServerProvider> logger)
     {
-        SqlServerExceptionTranslator = new DbSqlServerExceptionTranslator();
+        this.ServiceProvider = serviceProvider;
+        this.logger = logger;
     }
 
-    public DbSqlServerProvider(IDbSchemaScope parentScope, string connectionString) : this(connectionString)
-    {
-        this.ParentScope = parentScope;
-    }
+    //public DbSqlServerProvider(IDbSchemaScope parentScope, string connectionString) : this(connectionString)
+    //{
+    //    this.ParentScope = parentScope;
+    //}
 
-    public DbSqlServerProvider(string connectionString)
+    //public DbSqlServerProvider(string connectionString)
+    //{
+    //    this.ConnectionString = connectionString;
+    //}
+
+    public void Initialize(string connectionString)
     {
+        //this.ParentScope = parentScope;
         this.ConnectionString = connectionString;
+        this.isInitialized = this.ParentScope != null;
+    }
+
+    public void SetParentScope(IDbSchemaScope parent)
+    {
+        parent.NotNull();
+        if (this.ParentScope != null)
+        {
+            throw new InvalidOperationException("Parent scope is already set");
+        }
+
+        this.ParentScope = parent;
+        this.isInitialized = this.ConnectionString.IsNOTNullOrEmpty();
+    }
+
+    protected void CheckInitialized()
+    {
+        if (!this.isInitialized)
+        {
+            throw new InvalidOperationException("Provider is not initialized. Call Initialize method first.");
+        }
+
+        this.ConnectionString.NotEmpty("Connection string cannot be empty or null");
     }
 
     protected void SetConnectionString(string connectionString)
@@ -62,30 +96,18 @@ public class DbSqlServerProvider : IDbProvider
         this._connectionString = this.Connectionbuilder.ConnectionString;
     }
 
-    protected void ValidateInitialization()
-    {
-        this.ConnectionString.NotEmpty("Connection string cannot be empty or null");
-        //this.ParentScope.NotNull("Parent scope cannot be null");
-    }
-
     public IValidationResult ValidateConnection()
     {
+        this.CheckInitialized();
         ConfigurationValidator validator = new ConfigurationValidator();
         return validator.Validate(this);
     }
 
-    public void SetParentScope(IDbSchemaScope parent)
-    {
-        if (this.ParentScope != null)
-        {
-            throw new InvalidOperationException("Parent scope is already set");
-        }
 
-        this.ParentScope = parent;
-    }
 
     public void SwitchDb(string dbNameOrAlias)
     {
+
         var strMan = this.GetStructureProvider();
         dbNameOrAlias = this.GetDatabaseName(dbNameOrAlias);
         strMan.SwitchDatabase(dbNameOrAlias);
@@ -94,31 +116,18 @@ public class DbSqlServerProvider : IDbProvider
 
 
 
-    public void Setup(IServiceCollection services)
-    {
-
-    }
-    public void Start() //Hangisi?
-    {
-
-    }
-
-    public void Start(IServiceProvider serviceProvider) //Hangisi?
-    {
-
-    }
 
     public IDbDataModificationPovider GetDataModificationProvider()
     {
-        this.ValidateInitialization();
+        this.CheckInitialized();
         return new DbSqlServerDataModificationProvider(this.ParentScope, this, ConnectionString);
     }
 
     public IDbStructureProvider GetStructureProvider()
     {
-        this.ValidateInitialization();
-
-        return new DbSqlStructureProvider(this, ConnectionString);
+        var sp = this.ServiceProvider.GetRequiredKeyedService<IDbStructureProvider>("mssql");
+        sp.Initialize(this, this.ConnectionString);
+        return sp; 
 
     }
 
@@ -129,7 +138,7 @@ public class DbSqlServerProvider : IDbProvider
 
     public IDbAuthorizationChecker GetAuthorizationChecker()
     {
-        this.ValidateInitialization();
+        this.CheckInitialized();
         return new DbSqlServerAuthorizationChecker(this.ConnectionString);
     }
 }

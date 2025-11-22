@@ -9,7 +9,7 @@ namespace Rapidex.UnitTest.Data.PostgreServer
 {
     public class PostgreServer_08_AggregationTests : AggregationTestsBase<PostgreSqlServerProvider>
     {
-        public PostgreServer_08_AggregationTests( SingletonFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
+        public PostgreServer_08_AggregationTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
         {
         }
     }

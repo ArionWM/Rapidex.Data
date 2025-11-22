@@ -6,25 +6,25 @@ using System.Threading.Tasks;
 
 namespace Rapidex.UnitTests;
 
-public class SingletonFixtureFactory<T> where T : ICoreTestFixture
+public class EachTestClassIsolatedFixtureFactory<T> where T : ICoreTestFixture
 {
     protected static Dictionary<Type, ICoreTestFixture> fixtures = new Dictionary<Type, ICoreTestFixture>();
 
     protected static object _lock = new object();
 
-    public T GetFixture()
+    public T GetFixture(Type classType)
     {
         lock (_lock)
             try
             {
-                if (!fixtures.ContainsKey(typeof(T)))
+                if (!fixtures.ContainsKey(classType))
                 {
                     T fixture = TypeHelper.CreateInstance<T>(typeof(T));
-                    fixtures.Add(typeof(T), fixture);
+                    fixtures.Add(classType, fixture);
                     fixture.Init();
                 }
 
-                return (T)fixtures[typeof(T)];
+                return (T)fixtures[classType];
             }
             catch (Exception ex)
             {
@@ -32,4 +32,8 @@ public class SingletonFixtureFactory<T> where T : ICoreTestFixture
             }
     }
 
+    public T GetFixture<R>()
+    {
+        return this.GetFixture(typeof(R));
+    }
 }

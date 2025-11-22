@@ -36,7 +36,7 @@ internal class DbScopeManager : IDbManager
 
             try
             {
-                DbProviderFactory dbCreator = new DbProviderFactory();
+                DbProviderFactory dbCreator = this.serviceProvider.GetRequiredService<DbProviderFactory>(); // new DbProviderFactory();
                 IDbScope dbScope = dbCreator.CheckMasterDb();
 
                 this.DbScopes.Add(DatabaseConstants.MASTER_DB_ALIAS_NAME, dbScope);
@@ -60,7 +60,7 @@ internal class DbScopeManager : IDbManager
         if (this.DbScopes.ContainsKey(dbNameOrAliasName))
             return this.DbScopes.Get(dbNameOrAliasName);
 
-        DbProviderFactory dbCreator = new DbProviderFactory(); //TODO: to DI
+        DbProviderFactory dbCreator = this.serviceProvider.GetRequiredService<DbProviderFactory>(); 
         IDbScope dbScope = dbCreator.Create(id, dbNameOrAliasName);
 
         this.DbScopes.Add(dbNameOrAliasName, dbScope);

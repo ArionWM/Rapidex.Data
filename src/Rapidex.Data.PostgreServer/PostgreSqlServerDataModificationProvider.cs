@@ -79,7 +79,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         string fieldName = this.ParentScope.Structure.CheckObjectName(em.PrimaryKey.Name);
 
-        query.Query.WhereIn(fieldName, idArray);
+        query.Query.WhereIn(fieldName, idArray); //TODO: Temp table for large data
 
         return this.Load(query);
     }
@@ -99,8 +99,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         DataTable table = this.Connection.Execute(sql, variables);
 
-
-        IEntity[] entities = this.ParentScope.Mapper.MapToNew(loader.EntityMetadata, table);
+        IEntity[] entities = this.ParentScope.Mapper.MapToNew(loader.EntityMetadata, table, ent => { ent._loadSource = LoadSource.Database; });
         return new EntityLoadResult(entities);
     }
 

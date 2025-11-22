@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestBase
 {
-    public class DbDependedTestsBase<T> : IClassFixture<SingletonFixtureFactory<DbWithProviderFixture<T>>> where T : IDbProvider
+    public class DbDependedTestsBase<T> : IClassFixture<EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>>> where T : IDbProvider
     {
         protected ILogger Logger => this.Fixture.Logger;
         protected DbWithProviderFixture<T> Fixture { get; }
-        public DbDependedTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory)
+        public DbDependedTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory)
         {
-            this.Fixture = factory.GetFixture();
+            this.Fixture = factory.GetFixture(this.GetType());
             this.Logger?.LogInformation("DbDependedTestsBase initialized.");
         }
 

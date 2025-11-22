@@ -9,7 +9,7 @@ namespace Rapidex.UnitTest.Data.SqlServer;
 
 public class SqlServer_06_QueryTests : QueryTestsBase<DbSqlServerProvider>
 {
-    public SqlServer_06_QueryTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SqlServer_06_QueryTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

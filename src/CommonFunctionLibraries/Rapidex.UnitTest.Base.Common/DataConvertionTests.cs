@@ -13,9 +13,9 @@ public class DataConvertionTests : IClassFixture<SingletonFixtureFactory<Default
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;
 
-    public DataConvertionTests(SingletonFixtureFactory<DefaultEmptyFixture> factory)
+    public DataConvertionTests(EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture> factory)
     {
-        this.Fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture(this.GetType());
         this.Logger?.LogInformation("DataConvertionTests initialized.");
     }
 

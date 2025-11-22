@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.Data.SqlServer;
 public class SqlServer_09_MultiDatabaseAndSchemaTests : MultiDatabaseAndSchemaTestsBase<DbSqlServerProvider>
 {
-    public SqlServer_09_MultiDatabaseAndSchemaTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SqlServer_09_MultiDatabaseAndSchemaTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 }

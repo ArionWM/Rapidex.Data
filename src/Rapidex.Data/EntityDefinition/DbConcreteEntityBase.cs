@@ -22,7 +22,7 @@ namespace Rapidex.Data
         [System.Text.Json.Serialization.JsonIgnore]
         public IDbSchemaScope _Schema { get; set; }
 
-
+        public LoadSource _loadSource { get; set; } = LoadSource.Unknown;
 
         public object this[string columnName]
         {

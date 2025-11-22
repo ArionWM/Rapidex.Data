@@ -27,7 +27,9 @@ internal class TestCache : DefaultInMemoryCache, ICache
         {
             return base.GetOrSetAsync<T>(key, valueFactory, expiration, localCacheExpiration);
         }
-        return Task<T>.FromResult(default(T));
+#pragma warning disable CS8619 
+        return Task.FromResult(default(T));
+#pragma warning restore CS8619 
 
     }
 

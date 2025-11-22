@@ -9,7 +9,7 @@ namespace Rapidex.UnitTest.Data;
 
 public class FundamentalStructureTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public FundamentalStructureTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public FundamentalStructureTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

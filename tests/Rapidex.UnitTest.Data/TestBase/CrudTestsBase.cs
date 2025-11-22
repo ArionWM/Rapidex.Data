@@ -10,7 +10,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 {
     public abstract class CrudTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
     {
-        protected CrudTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+        protected CrudTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
         {
         }
 

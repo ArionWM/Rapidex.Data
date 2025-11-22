@@ -10,7 +10,7 @@ namespace Rapidex.UnitTest.Data.PostgreServer
 {
     public class PostgreServer_07_RelationTests : RelationsTestBase<PostgreSqlServerProvider>
     {
-        public PostgreServer_07_RelationTests( SingletonFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
+        public PostgreServer_07_RelationTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<PostgreSqlServerProvider>> factory) : base(factory)
         {
         }
 

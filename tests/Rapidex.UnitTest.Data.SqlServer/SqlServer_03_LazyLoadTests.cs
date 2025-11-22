@@ -3,7 +3,7 @@ namespace Rapidex.UnitTest.Data.SqlServer;
 
 public class SqlServer_03_LazyLoadTests : LazyLoadTestsBase<DbSqlServerProvider>
 {
-    public SqlServer_03_LazyLoadTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SqlServer_03_LazyLoadTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

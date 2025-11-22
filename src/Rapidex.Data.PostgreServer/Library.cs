@@ -19,6 +19,9 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
     public override void SetupServices(IServiceCollection services)
     {
         services.AddSingletonForProd<IExceptionTranslator, PostgreSqlServerExceptionTranslator>();
+        services.AddKeyedTransient<IDbProvider, PostgreSqlServerProvider>("PostgreSqlServerProvider");
+        services.AddKeyedTransient<IDbProvider, PostgreSqlServerProvider>("Rapidex.Data.PostgreServer.PostgreSqlServerProvider");
+        services.AddKeyedTransient<IDbStructureProvider, PostgreSqlStructureProvider>("postgresql");
     }
 
     public override void Initialize(IServiceProvider serviceProvider)

@@ -10,16 +10,39 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace Rapidex.Data.SqlServer;
 
-public class DbSqlStructureProvider(IDbProvider parent, string connectionString) : IDbStructureProvider
+public class DbSqlStructureProvider : IDbStructureProvider
 {
+    private readonly ILogger<DbSqlStructureProvider> logger;
+    protected bool isInitialized = false;
     protected SqlConnectionStringBuilder Connectionbuilder { get; set; }
     protected DbSqlDdlGenerator DdlGenerator { get; set; } = new DbSqlDdlGenerator();
     internal DbSqlServerConnection Connection { get; set; }
 
-    public string ConnectionString => connectionString;
-    public IDbProvider ParentDbProvider => parent;
+    public string ConnectionString { get; protected set; }
+    public IDbProvider ParentDbProvider { get; protected set; }
 
-    public IDbSchemaScope ParentScope => parent.ParentScope;
+    public IDbSchemaScope ParentScope => this.ParentDbProvider?.ParentScope;
+
+    public DbSqlStructureProvider(ILogger<DbSqlStructureProvider> logger)
+    {
+        this.logger = logger;
+    }
+
+    public void Initialize(IDbProvider parent, string connectionString)
+    {
+        if (this.isInitialized)
+            return;
+
+        this.ParentDbProvider = parent;
+        this.ConnectionString = connectionString;
+        this.isInitialized = true;
+    }
+
+    protected void Checkinitialized()
+    {
+        if (!this.isInitialized)
+            throw new InvalidOperationException("Provider is not initialized");
+    }
 
     protected void SwitchConnectionToMaster()
     {
@@ -89,6 +112,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public void SwitchDatabase(string dbName)
     {
+        this.Checkinitialized();
         this.CheckConnection(false);
 
         if (!this.IsDatabaseAvailable(dbName))
@@ -103,6 +127,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public bool IsDatabaseAvailable(string dbName)
     {
+        this.Checkinitialized();
         bool directTargetDatabase = this.CheckConnection(true);
         string sql = this.DdlGenerator.IsDatabaseAvailable(dbName);
         DataTable dataTable = this.Connection.Execute(sql);
@@ -112,6 +137,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public bool IsExists(string schemaName, string entityName)
     {
+        this.Checkinitialized();
         this.CheckConnection();
         string sql = this.DdlGenerator.IsTableAvailable(schemaName, entityName);
         //TODO: Daha hızlı bir yol? tüm exists'ler için ...
@@ -122,6 +148,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public bool IsExists(string schemaName, string entityName, IDbFieldMetadata cm)
     {
+        this.Checkinitialized();
         this.CheckConnection();
         string sql = this.DdlGenerator.IsColumnAvailable(schemaName, entityName, cm.Name);
         DataTable dataTable = this.Connection.Execute(sql);
@@ -131,6 +158,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public bool IsSchemaAvailable(string schemaName)
     {
+        this.Checkinitialized();
         this.CheckConnection();
         string sql = this.DdlGenerator.IsSchemaAvailable(schemaName);
         DataTable dataTable = this.Connection.Execute(sql);
@@ -142,6 +170,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     {
         dbName.NotEmpty();
 
+        this.Checkinitialized();
         this.CheckConnection();
 
         try
@@ -177,6 +206,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public void CreateOrUpdateSchema(string schemaName)
     {
+        this.Checkinitialized();
         this.CheckConnection();
 
         if (this.IsSchemaAvailable(schemaName))
@@ -236,24 +266,28 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     {
         try
         {
-            IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
+            this.logger.LogInformation("Applying database structure...");
 
-            
+            this.Checkinitialized();
+            IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
 
             HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
             List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
 
             this.ParentDbProvider.CanCreateTable(this.ParentDbProvider.ParentScope.SchemaName);
 
+            this.logger.LogInformation("Applying behaviors to entities...");
             var allEms = scope.ParentDbScope.Metadata.GetAll();
             foreach (var em in allEms)
             {
                 if (!this.CanApplyToSchema(em))
                     continue;
 
+                this.logger.LogDebug($"Applying behaviors to entity: {em.Name}");
                 em.ApplyBehaviors();
             }
 
+            this.logger.LogInformation("Applying entity structures...");
             allEms = scope.ParentDbScope.Metadata.GetAll();
             foreach (var em in allEms)
             {
@@ -457,6 +491,8 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     {
         em.NotNull();
 
+        this.logger.LogDebug($"Applying structure for entity: {em.Name}"); 
+
         if (em.IsPremature)
             throw new InvalidOperationException($"Entity metadata '{this.ParentDbProvider.ParentScope.SchemaName}/{em.Name}' is premature");
 
@@ -528,7 +564,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
         {
             Common.DefaultLogger?.LogWarning($"Table {em.TableName} already exists");
             throw;
-            
+
         }
         catch (SqlException sex) when (DbSqlServerHelper.SQL_Errors_Permission.Contains(sex.Number))
         {
@@ -546,6 +582,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     public void ApplyEntityStructure(IDbEntityMetadata em, bool applyScopedData = false)
     {
         em.NotNull();
+        this.Checkinitialized();
 
         HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
         List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
@@ -561,6 +598,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public void DropEntity(IDbEntityMetadata em)
     {
+        this.Checkinitialized();
         if (this.IsExists(this.ParentDbProvider.ParentScope.SchemaName, em.TableName))
         {
             string sql = this.DdlGenerator.DropTable(this.ParentDbProvider.ParentScope.SchemaName, em.TableName);
@@ -571,7 +609,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public void DestroyDatabase(string dbName)
     {
-
+        this.Checkinitialized();
         this.CheckConnection();
         this.SwitchDatabase("master");
 
@@ -603,12 +641,14 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
 
     public void DestroySchema(string schemaName)
     {
+        this.Checkinitialized();
         string sql1 = this.DdlGenerator.DropSchema(schemaName);
         this.Connection.Execute(sql1);
     }
 
     public void CreateSequenceIfNotExists(string name, int minValue = -1, int startValue = -1)
     {
+        this.Checkinitialized();
         using var provider = (DbSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider();
         var seq = new DbSqlSequence(provider, name);
         seq.CreateIfNotExists(minValue, startValue);
@@ -628,6 +668,7 @@ public class DbSqlStructureProvider(IDbProvider parent, string connectionString)
     {
         try
         {
+            this.Checkinitialized();
             bool directHit = this.CheckConnection(true);
             if (!directHit)
             {

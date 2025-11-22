@@ -11,7 +11,7 @@ namespace Rapidex.UnitTest.Data
 {
 	public class MappingAndAssignmentTests : DbDependedTestsBase<DbSqlServerProvider>
 	{
-		public MappingAndAssignmentTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+		public MappingAndAssignmentTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
 		{
 		}
 

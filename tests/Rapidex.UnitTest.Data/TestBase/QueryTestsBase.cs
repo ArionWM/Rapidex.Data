@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.Data.TestBase;
 public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
 {
-    public QueryTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+    public QueryTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
     {
     }
 

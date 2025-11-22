@@ -108,11 +108,11 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
 
 
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     IDbEntityMetadata ParentMetadata { get; set; }
 
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     Type Type { get; set; }
 
     [JsonPropertyName("type")]
@@ -125,11 +125,11 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     string Caption { get; set; }
 
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     Type BaseType { get; set; }
 
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     //[YamlMember(Order = -9996)]
     //[JsonPropertyOrder(-9996)]
     DbFieldType? DbType { get; set; }
@@ -148,33 +148,33 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     /// False ise bu alan veritabanı işlemlerine dahil edilmez (sanaldır)
     /// </summary>
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     bool IsPersisted { get; set; }
 
     /// <summary>
     /// True ise veritabanından yükler iken bu alan sorgulanmaz
     /// </summary>
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     bool SkipDirectLoad { get; set; }
 
     /// <summary>
     /// True ise bu alan güncellenmeye çalışılmaz
     /// </summary>
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     bool SkipDirectSet { get; set; }
 
     /// <summary>
     /// True ise bu alanın değişikliği veritabanı kaydında sürüm arttırmaya neden olmaz
     /// </summary>
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     bool SkipDbVersioning { get; set; } //Karmaşıklaştırıyor mu?
 
     //[JsonPropertyOrder(100)]
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     DbFieldProperties DbProperties { get; }
 
 
@@ -182,7 +182,7 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     /// Alt seviyeden (veritabanına yazılacak) değerini döndürür. Örn; bir reference için id değeri
     /// </summary>
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     EntityFieldValueGetterDelegate ValueGetterLower { get; }
 
     /// <summary>
@@ -190,11 +190,11 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     /// Basit bir değerse ValueGetterLower ile aynı olabilir
     /// </summary>
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     EntityFieldValueGetterDelegate ValueGetterUpper { get; }
 
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     ValueSetterDelegate ValueSetter { get; }
 
     //DictionaryA<object> ExtraData { get; }
@@ -262,15 +262,15 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
 
     List<string> Tags { get; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     [YamlIgnore]
     IDbFieldMetadata PrimaryKey { get; internal set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     [YamlIgnore]
     IDbFieldMetadata Caption { get; internal set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     [YamlIgnore]
     DbFieldMetadataList Fields { get; }
 
@@ -279,7 +279,7 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
     [YamlMember(Alias = "Fields", Order = 9999)]
     List<IDbFieldMetadata> FieldsList { get; set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     [YamlIgnore]
     ComponentDictionary<IEntityBehaviorDefinition> BehaviorDefinitions { get; }
 
@@ -360,13 +360,15 @@ public interface IDbMetadataContainer
 
 
 
-public interface IDbProvider : IManager
+public interface IDbProvider
 {
     string ConnectionString { get; }
     string StartDbName { get; }
     string DatabaseName { get; }
     IDbSchemaScope ParentScope { get; }
     IExceptionTranslator ExceptionTranslator { get; }
+
+    void Initialize(string connectionString);
 
     /// <summary>
     /// Switch given database
@@ -385,7 +387,8 @@ public interface IDbProvider : IManager
     IDataUnitTestHelper GetTestHelper();
     IDbAuthorizationChecker GetAuthorizationChecker();
 
-    void Start();
+
+
 }
 
 
@@ -628,6 +631,8 @@ public interface IDbStructureProvider : IDisposable
     IDbProvider ParentDbProvider { get; }
     IDbSchemaScope ParentScope { get; }
 
+    void Initialize(IDbProvider parent, string connectionString);
+
     string CheckObjectName(string name);
 
     (MasterDbConnectionStatus status, string description) CheckMasterConnection();
@@ -685,7 +690,6 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
     EntityMapper Mapper { get; }
 
     IDbSchemaScope IDbDataReadScope.ParentSchema => this.Data.ParentSchema;
-    //IDbDataModificationPovider IDbDataReadScope.DmProvider => this.Data.DmProvider;
     IDbDataModificationScope IDbDataModificationStaticHost.CurrentWork => this.Data.CurrentWork;
     IDbDataModificationScope IDbDataModificationStaticHost.BeginWork()
     {
@@ -734,7 +738,7 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
     }
 
 
-    void Setup();
+    void Initialize(string schemaName, IDbScope parentDbScope, IDbProvider provider);
 }
 
 
@@ -767,6 +771,13 @@ public interface IDbScope : IDbSchemaScope //TODO: Rename: IDb
 
     IDbSchemaScope Schema(string schemaName = null);
 
+    void Initialize(long databaseId, string dbName, IDbProvider dbProvider);
+
+    void IDbSchemaScope.Initialize(string schemaName, IDbScope parentDbScope, IDbProvider provider)
+    {
+
+    }
+
 }
 
 
@@ -781,17 +792,16 @@ public interface IDbManager
     IDbScope Db(string dbName = null, bool throwErrorIfNotExists = true);
 }
 
-//[JsonDerivedBase]
-//[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
-//[JsonConverter(typeof(EntityJsonConverter))]
 public interface IEntity
 {
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
 #pragma warning disable IDE1006 // Naming Styles
     internal IDbEntityMetadata _Metadata { get; set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     object _VirtualId { get; set; }
+
+    LoadSource _loadSource { get; set; } 
 
     string _TypeName { get; internal set; }
     string _DbName { get; internal set; }
@@ -799,18 +809,15 @@ public interface IEntity
     bool _IsNew { get; set; }
     bool _IsDeleted { get; set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     IDbSchemaScope _Schema { get; internal set; }
 
 #pragma warning restore IDE1006 // Naming Styles
 
     object this[string columnName] { get; set; }
 
-    //IEntityRelationCollection Details { get; }
-
     int DbVersion { get; set; }
     string ExternalId { get; set; }
-
 
 
     object GetId();
@@ -919,7 +926,7 @@ public interface IDataType : ICloneable
     string TypeName { get; }
 
     [YamlIgnore]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     Type BaseType { get; }
 
 

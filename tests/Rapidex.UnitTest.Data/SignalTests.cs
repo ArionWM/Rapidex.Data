@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Rapidex.UnitTest.Data.MessageHub;
 public class SignalTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public SignalTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SignalTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

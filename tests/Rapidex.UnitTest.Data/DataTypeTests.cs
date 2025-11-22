@@ -17,7 +17,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
     //Reference with types
     //type conversions (see: BasicBaseDataTypeDescriptionProvider)
 
-    public DataTypeTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public DataTypeTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

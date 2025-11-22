@@ -2,7 +2,7 @@
 
 public class SqlServer_01_DatabaseStructureTests : DatabaseStructureTestsBase<DbSqlServerProvider>
 {
-    public SqlServer_01_DatabaseStructureTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public SqlServer_01_DatabaseStructureTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 

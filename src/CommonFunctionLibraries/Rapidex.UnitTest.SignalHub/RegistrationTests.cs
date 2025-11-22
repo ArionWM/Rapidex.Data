@@ -15,9 +15,9 @@ public class RegistrationTests : IClassFixture<SingletonFixtureFactory<DefaultEm
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;
 
-    public RegistrationTests(SingletonFixtureFactory<DefaultEmptyFixture> factory)
+    public RegistrationTests(EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture> factory)
     {
-        this.Fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture(this.GetType());
         this.Logger?.LogInformation("RegistrationTests initialized.");
     }
 

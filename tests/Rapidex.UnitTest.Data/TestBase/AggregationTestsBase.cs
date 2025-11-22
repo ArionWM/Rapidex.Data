@@ -11,7 +11,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 {
     public abstract class AggregationTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
     {
-        protected AggregationTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+        protected AggregationTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
         {
         }
 

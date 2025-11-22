@@ -15,12 +15,17 @@ namespace Rapidex.Data.Scopes
 #pragma warning restore IDE1006 // Naming Styles
 #endif
 
-        protected readonly string name;
-        protected readonly string defaultSchemaName;
-        protected readonly long id;
+        protected readonly IServiceProvider serviceProvider;
+        protected bool isInitialized = false;
+        protected ILogger logger;
+
+
+        protected string name;
+        protected string defaultSchemaName;
+        protected long id;
 
         protected IDbSchemaScope baseScope;
-        protected readonly IDbProvider dbProvider;
+        protected IDbProvider dbProvider;
 
         protected Dictionary<string, IDbSchemaScope> schemaScopes = new Dictionary<string, IDbSchemaScope>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -52,49 +57,20 @@ namespace Rapidex.Data.Scopes
 
 
 
-        public DbScope(long id, string dbName, IDbProvider dbProvider)
+        public DbScope(IServiceProvider serviceProvider)
         {
-            dbName.ValidateInvariantName();
-
-            this.id = id;
-            this.name = dbName;
-
-            this.dbProvider = dbProvider;
-            this.defaultSchemaName = DatabaseConstants.DEFAULT_SCHEMA_NAME;
-
-            dbProvider.SetParentScope(this);
-
 #if DEBUG
             this._debugTracker = RandomHelper.Random(1000000);
 #endif
-
-            this.Initialize();
+            this.serviceProvider = serviceProvider;
+            this.logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger<DbScope>();
         }
 
-        protected void Initialize()
+        protected void CheckInitialized()
         {
-            this.Metadata = new DbMetadataContainer(this);
-
-            //Call all assemblies to setup metadata
-            Common.Assembly.IterateAsemblies(ass =>
-            {
-                if (ass is IRapidexMetadataReleatedAssemblyDefinition mass)
-                    mass.SetupMetadata(this);
-            });
-
-            //if (this.Name != DatabaseConstants.MASTER_DB_ALIAS_NAME)
-            //{
-            //    this.DbProvider.SwitchDb(this.Name);
-            //}
-
-            //Check 'base' schema
-            this.baseScope = this.AddSchemaIfNotExists(this.DefaultSchemaName, 1);
-            this.baseScope.Structure.ApplyAllStructure();
-
-            //Load other schemas
-            this.LoadRecordedSchemaInfos();
+            if (!this.isInitialized)
+                throw new InvalidOperationException($"DbScope not initialized");
         }
-
 
 
         protected IDbSchemaScope AddSchema(string schemaName)
@@ -102,18 +78,18 @@ namespace Rapidex.Data.Scopes
             if (this.schemaScopes.Keys.Contains(schemaName))
                 return this.schemaScopes.Get(schemaName);
 
-            DbProviderFactory dbCreator = new DbProviderFactory();
+            DbProviderFactory dbCreator = this.serviceProvider.GetRequiredService<DbProviderFactory>();
             IDbProvider dbProvider = dbCreator.CreateProvider(this.dbProvider.GetType().FullName, this.ConnectionString);
 
-            DbSchemaScope sscope = new DbSchemaScope(schemaName, this, dbProvider);
+            IDbSchemaScope sscope = this.serviceProvider.GetRequiredService<IDbSchemaScope>();
+            sscope.Initialize(schemaName, this, dbProvider);
 
             var validationResults = dbProvider.ValidateConnection();
             if (!validationResults.Success)
                 throw new DataConnectionException(validationResults.ToString());
 
-
             sscope.Structure.CreateOrUpdateSchema(schemaName);
-            sscope.Setup();
+            
             schemaScopes.Set(schemaName, sscope);
             sscope.Structure.ApplyAllStructure();
 
@@ -129,7 +105,7 @@ namespace Rapidex.Data.Scopes
             var schemas = this.baseScope.Data.Load<SchemaInfo>();
             foreach (var schema in schemas)
             {
-                AddSchema(schema.Name);
+                this.AddSchema(schema.Name);
             }
         }
 
@@ -149,12 +125,12 @@ namespace Rapidex.Data.Scopes
             work.CommitChanges();
         }
 
-        public IDbSchemaScope AddSchemaIfNotExists(string schemaName = null, long id = DatabaseConstants.DEFAULT_EMPTY_ID)
+        protected IDbSchemaScope AddSchemaIfNotExistsInternal(string schemaName = null, long id = DatabaseConstants.DEFAULT_EMPTY_ID)
         {
             schemaName.ValidateInvariantName();
 
             if (this.schemaScopes.ContainsKey(schemaName))
-                return this.Schema(schemaName);
+                return this.schemaScopes.Get(schemaName);
 
             IDbSchemaScope sscope = this.AddSchema(schemaName);
             if (string.Compare(schemaName, this.defaultSchemaName, true) != 0)
@@ -163,8 +139,17 @@ namespace Rapidex.Data.Scopes
             return sscope;
         }
 
+        public IDbSchemaScope AddSchemaIfNotExists(string schemaName = null, long id = DatabaseConstants.DEFAULT_EMPTY_ID)
+        {
+            this.CheckInitialized();
+
+            return this.AddSchemaIfNotExistsInternal(schemaName, id);
+        }
+
         public IDbSchemaScope Schema(string schemaName = null)
         {
+            this.CheckInitialized();
+
             return this.schemaScopes.Get(schemaName).NotNull($"Schema '{schemaName}' not available");
         }
 
@@ -173,11 +158,46 @@ namespace Rapidex.Data.Scopes
 
         }
 
+        public void Initialize(long databaseId, string dbName, IDbProvider dbProvider)
+        {
+            if (this.isInitialized)
+                throw new InvalidOperationException($"DbScope already initialized");
+
+            dbName.ValidateInvariantName();
+
+            this.id = databaseId;
+            this.name = dbName;
+
+            this.dbProvider = dbProvider;
+            this.defaultSchemaName = DatabaseConstants.DEFAULT_SCHEMA_NAME;
+
+            dbProvider.SetParentScope(this);
+
+            this.Metadata = new DbMetadataContainer(this);
+
+            //Call all assemblies to setup metadata
+            Common.Assembly.IterateAsemblies(ass =>
+            {
+                if (ass is IRapidexMetadataReleatedAssemblyDefinition mass)
+                    mass.SetupMetadata(this);
+            });
+
+
+            //Check 'base' schema
+            this.baseScope = this.AddSchemaIfNotExistsInternal(this.DefaultSchemaName, 1);
+            this.baseScope.Structure.ApplyAllStructure();
+
+            //Load other schemas
+            this.LoadRecordedSchemaInfos();
+
+            this.isInitialized = true;
+        }
+
         public IIntSequence Sequence(string name)
         {
             return baseScope.Data.Sequence(name);
         }
 
-
+       
     }
 }

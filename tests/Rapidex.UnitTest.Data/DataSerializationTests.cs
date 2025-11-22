@@ -12,7 +12,7 @@ namespace Rapidex.UnitTest.Data;
 
 public class DataSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    public DataSerializationTests( SingletonFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
+    public DataSerializationTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
     }
 
@@ -346,7 +346,7 @@ public class DataSerializationTests : DbDependedTestsBase<DbSqlServerProvider>
         var entDynamic2 = entDynamics.FirstOrDefault(x => x.GetId().As<long>() == 124);
 
         Assert.NotNull(entDynamic1);
-        Assert.IsType<ConcreteEntity01>(entDynamic1);   
+        Assert.IsType<ConcreteEntity01>(entDynamic1);
         Assert.Equal("Test Entity 1", entDynamic1["Name"].As<string>());
         Assert.Equal(1000.50m, (entDynamic1["CreditLimit1"].As<decimal>()));
         Assert.Equal(ContactType.Personal, (ContactType)entDynamic1["ContactType"].As<Enumeration>().Value);

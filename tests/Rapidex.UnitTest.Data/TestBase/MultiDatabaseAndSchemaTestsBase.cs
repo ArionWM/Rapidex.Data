@@ -8,9 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Data.TestBase;
+
 public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
 {
-    public MultiDatabaseAndSchemaTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+    public MultiDatabaseAndSchemaTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
     {
     }
 
@@ -18,7 +19,7 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
     public virtual void T01_MultipleSchemas()
     {
         DbConnectionInfo connectionInfo = Database.Configuration.ConnectionInfo.Get(DatabaseConstants.MASTER_DB_ALIAS_NAME);
-        DbProviderFactory DbProviderFactory = new DbProviderFactory();
+        DbProviderFactory DbProviderFactory = this.Fixture.ServiceProvider.GetRequiredService<DbProviderFactory>();
         IDbProvider provider = DbProviderFactory.CreateProvider(connectionInfo);
 
         this.Fixture.DropAllSchemasInDatabase(provider, true);
@@ -28,7 +29,7 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
         db.Structure.ApplyAllStructure();
 
-        
+
 
         string newSchemaName1 = "Schema" + RandomHelper.RandomText(5);
 

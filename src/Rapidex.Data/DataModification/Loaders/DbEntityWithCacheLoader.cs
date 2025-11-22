@@ -43,7 +43,7 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
     {
         var entity = Database.Cache.GetEntity(this.ParentScope, em.Name, id.Id);
 
-        if (entity == null || entity.DbVersion != id.Version)
+        if (id.Version > -1 && (entity == null || entity.DbVersion != id.Version))
         {
             return null;
         }

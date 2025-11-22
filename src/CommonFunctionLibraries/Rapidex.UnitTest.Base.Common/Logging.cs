@@ -13,9 +13,9 @@ public class Logging : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;
 
-    public Logging(SingletonFixtureFactory<DefaultEmptyFixture> factory)
+    public Logging(EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture> factory)
     {
-        this.Fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture(this.GetType());
         this.Logger?.LogInformation("Logging initialized.");
     }
 

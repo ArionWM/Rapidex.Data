@@ -294,6 +294,7 @@ public class EntityMapper
 
         to._TypeName = from._TypeName;
         to.ExternalId = from.ExternalId;
+        to._loadSource = from._loadSource;
 
         foreach (var fm in em.Fields.Values)
         {
@@ -318,7 +319,7 @@ public class EntityMapper
         return to;
     }
 
-    public IEntity Map(IDbEntityMetadata em, EntityTypeMap map, DataRow from, IEntity fillTo)
+    public IEntity Map(IDbEntityMetadata em, EntityTypeMap map, DataRow from, IEntity fillTo, Action<IEntity> set = null)
     {
         foreach (IDbFieldMetadata fm in em.Fields.Values)
         {
@@ -343,17 +344,19 @@ public class EntityMapper
         fillTo._Schema = this.Parent;
         fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));
 
+        set?.Invoke(fillTo);
+
         return fillTo;
     }
 
-    public IEntity MapToNew(IDbEntityMetadata em, EntityTypeMap map, DataRow from)
+    public IEntity MapToNew(IDbEntityMetadata em, EntityTypeMap map, DataRow from, Action<IEntity> set = null)
     {
         IEntity instance = Database.EntityFactory.Create(em, this.Parent, false);
-        return this.Map(em, map, from, instance);
+        return this.Map(em, map, from, instance, set);
     }
 
 
-    public IEntity[] MapToNew(IDbEntityMetadata em, DataTable table)
+    public IEntity[] MapToNew(IDbEntityMetadata em, DataTable table, Action<IEntity> set = null)
     {
         var mapping = this.GetMapping(em);
         mapping.CheckUpdateMap(table);
@@ -362,12 +365,13 @@ public class EntityMapper
         List<IEntity> entities = new List<IEntity>();
         foreach (DataRow row in table.Rows)
         {
-            entities.Add(this.MapToNew(em, mapping, row));
+            entities.Add(this.MapToNew(em, mapping, row, set));
         }
 
         return entities.ToArray();
     }
-    public IPartialEntity Map(IDbEntityMetadata em, EntityTypeMap map, DataRow from, IPartialEntity fillTo, string[] fields)
+
+    public IPartialEntity Map(IDbEntityMetadata em, EntityTypeMap map, DataRow from, IPartialEntity fillTo, string[] fields, Action<IEntity> set = null)
     {
         foreach (string fieldName in fields)
         {
@@ -402,11 +406,13 @@ public class EntityMapper
         fillTo._Schema = this.Parent;
         fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));
 
+        set?.Invoke(fillTo);
+
         return fillTo;
     }
 
 
-    public IEntity Map(IDbEntityMetadata em, IDictionary<string, object> from, IEntity fillTo)
+    public IEntity Map(IDbEntityMetadata em, IDictionary<string, object> from, IEntity fillTo, Action<IEntity> set = null)
     {
         fillTo.ShouldNotSupportTo<IPartialEntity>("Partial entities can't be map");
 
@@ -430,10 +436,12 @@ public class EntityMapper
         fillTo._Schema = this.Parent;
         fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));
 
+        set?.Invoke(fillTo);
+
         return fillTo;
     }
 
-    public IEntity Map(IDbEntityMetadata em, IPartialEntity from, IEntity fillTo)
+    public IEntity Map(IDbEntityMetadata em, IPartialEntity from, IEntity fillTo, Action<IEntity> set = null)
     {
         fillTo.ShouldNotSupportTo<IPartialEntity>("Partial entities can't be map");
 
@@ -462,19 +470,21 @@ public class EntityMapper
         fillTo._Schema = this.Parent;
         fillTo.SetId(em.PrimaryKey.ValueGetterLower(fillTo, em.PrimaryKey.Name));
 
+        set?.Invoke(fillTo);
+
         return fillTo;
     }
 
-    public IEntity MapToNew(IDbEntityMetadata em, IDictionary<string, object> from)
+    public IEntity MapToNew(IDbEntityMetadata em, IDictionary<string, object> from, Action<IEntity> set = null)
     {
         IEntity instance = Database.EntityFactory.Create(em, this.Parent, true);
-        return this.Map(em, from, instance);
+        return this.Map(em, from, instance, set);
     }
 
-    public IEntity Map(IDbEntityMetadata em, IDictionary<string, object> from)
+    public IEntity Map(IDbEntityMetadata em, IDictionary<string, object> from, Action<IEntity> set = null)
     {
         IEntity instance = Database.EntityFactory.Create(em, this.Parent, false);
-        return this.Map(em, from, instance);
+        return this.Map(em, from, instance, set);
     }
 
 

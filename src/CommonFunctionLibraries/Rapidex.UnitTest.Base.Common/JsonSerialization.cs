@@ -15,9 +15,9 @@ public class JsonSerialization : IClassFixture<SingletonFixtureFactory<DefaultEm
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;
 
-    public JsonSerialization(SingletonFixtureFactory<DefaultEmptyFixture> factory)
+    public JsonSerialization(EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture> factory)
     {
-        this.Fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture(this.GetType());
         this.Logger?.LogInformation("JsonSerialization initialized.");
     }
 

@@ -150,3 +150,10 @@ public enum DbFieldType
 
     Vector = 90
 }
+
+public enum LoadSource
+{
+    Unknown = 0,
+    Cache = 1,
+    Database = 2
+}

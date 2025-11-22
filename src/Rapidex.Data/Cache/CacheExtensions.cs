@@ -28,7 +28,7 @@ public static class CacheExtensions
         cache.Set(key, entity);
     }
 
-    public static void SetEntities(this ICache cache, IEnumerable< IEntity>  entities)
+    public static void SetEntities(this ICache cache, IEnumerable<IEntity> entities)
     {
         foreach (var entity in entities)
         {
@@ -44,7 +44,9 @@ public static class CacheExtensions
         string dbName = dbSchema.ParentDbScope.Name;
         string schemaName = dbSchema.SchemaName;
         string key = $"{dbName}:{schemaName}:{typeName}:{id}";
-        return cache.GetOrSet<IEntity>(key, () => null);
+        var entity = cache.GetOrSet<IEntity>(key, () => null);
+        entity._loadSource = LoadSource.Cache;
+        return entity;
     }
 
     public static void RemoveEntity(this ICache cache, IEntity entity)

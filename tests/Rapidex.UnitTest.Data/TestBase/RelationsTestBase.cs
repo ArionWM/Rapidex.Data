@@ -10,7 +10,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 {
     public abstract class RelationsTestBase<T> : DbDependedTestsBase<T> where T : IDbProvider
     {
-        public RelationsTestBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+        public RelationsTestBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
         {
         }
 

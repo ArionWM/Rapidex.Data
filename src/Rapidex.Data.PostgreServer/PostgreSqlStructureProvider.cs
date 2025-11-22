@@ -10,16 +10,42 @@ using static Rapidex.Data.RelationN2N;
 
 namespace Rapidex.Data.PostgreServer;
 
-public class PostgreSqlStructureProvider(IDbProvider parent, string connectionString) : IDbStructureProvider
+public class PostgreSqlStructureProvider : IDbStructureProvider
 {
+    private readonly ILogger<PostgreSqlStructureProvider> logger;
+    protected bool isInitialized = false;
+
     protected NpgsqlConnectionStringBuilder Connectionbuilder { get; set; }
     protected PostgreSqlDdlGenerator DdlGenerator { get; set; } = new PostgreSqlDdlGenerator();
     internal PostgreSqlServerConnection Connection { get; set; }
 
-    public string ConnectionString => connectionString;
-    public IDbProvider ParentDbProvider => parent;
+    public string ConnectionString { get; protected set; }
+    public IDbProvider ParentDbProvider { get; protected set; }
 
-    public IDbSchemaScope ParentScope => parent.ParentScope;
+    public IDbSchemaScope ParentScope => this.ParentDbProvider?.ParentScope;
+
+
+    public PostgreSqlStructureProvider(ILogger<PostgreSqlStructureProvider> logger)
+    {
+        this.logger = logger;
+
+    }
+
+    public void Initialize(IDbProvider parent, string connectionString)
+    {
+        if (this.isInitialized)
+            return;
+        this.ParentDbProvider = parent;
+        this.ConnectionString = connectionString;
+        this.isInitialized = true;
+    }
+
+    protected void Checkinitialized()
+    {
+        if (!this.isInitialized)
+            throw new InvalidOperationException("Provider is not initialized");
+    }
+
 
     protected void CloseConnection()
     {
@@ -70,6 +96,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
         //dbName = 
 
+        this.Checkinitialized();
+
         if (!this.IsDatabaseAvailable(dbName))
         {
             this.CreateDatabase(dbName);
@@ -83,6 +111,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public bool IsDatabaseAvailable(string dbName)
     {
+        this.Checkinitialized();
+
         //dbName = PostgreHelper.CheckObjectName(dbName);
         bool directTargetDatabase = this.CheckConnection(true);
         string sql = this.DdlGenerator.IsDatabaseAvailable(dbName);
@@ -93,6 +123,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public bool IsExists(string schemaName, string entityName)
     {
+        this.Checkinitialized();
+
         schemaName = PostgreHelper.CheckObjectName(schemaName);
         entityName = PostgreHelper.CheckObjectName(entityName);
         this.CheckConnection();
@@ -104,6 +136,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public bool IsExists(string schemaName, string entityName, IDbFieldMetadata cm)
     {
+        this.Checkinitialized();
+
         schemaName = PostgreHelper.CheckObjectName(schemaName);
         entityName = PostgreHelper.CheckObjectName(entityName);
         this.CheckConnection();
@@ -115,6 +149,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public bool IsSchemaAvailable(string schemaName)
     {
+        this.Checkinitialized();
+
         schemaName = PostgreHelper.CheckObjectName(schemaName);
 
         this.CheckConnection();
@@ -128,7 +164,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     {
         dbName.NotEmpty();
 
-
+        this.Checkinitialized();
         this.CheckConnection();
 
         try
@@ -165,6 +201,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     {
         schemaName = PostgreHelper.CheckObjectName(schemaName);
 
+        this.Checkinitialized();
         this.CheckConnection();
 
         if (this.IsSchemaAvailable(schemaName))
@@ -222,6 +259,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     {
         try
         {
+            this.Checkinitialized();
+
             IDbSchemaScope scope = this.ParentDbProvider.ParentScope.NotNull("Parent scope is null");
             HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
             List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
@@ -525,6 +564,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     public void ApplyEntityStructure(IDbEntityMetadata em, bool applyScopedData = false)
     {
         em.NotNull();
+        this.Checkinitialized();
 
         HashSet<IDbEntityMetadata> appliedMetadatas = new HashSet<IDbEntityMetadata>();
         List<IDbEntityMetadata> applyRequiredMetadatas = new List<IDbEntityMetadata>();
@@ -539,6 +579,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public void DropEntity(IDbEntityMetadata em)
     {
+        this.Checkinitialized();
+
         if (this.IsExists(this.ParentDbProvider.ParentScope.SchemaName, em.TableName))
         {
             string sql = this.DdlGenerator.DropTable(this.ParentDbProvider.ParentScope.SchemaName, em.TableName);
@@ -550,6 +592,7 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     {
         //TODO: create 'Master' connection and use it.
 
+        this.Checkinitialized();
         this.CheckConnection();
 
         // No master database in PostgreSQL, so just connect and drop
@@ -581,12 +624,16 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
 
     public void DestroySchema(string schemaName)
     {
+        this.Checkinitialized();
+
         string sql1 = this.DdlGenerator.DropSchema(schemaName);
         this.Connection.Execute(sql1);
     }
 
     public void CreateSequenceIfNotExists(string name, int minValue = -1, int startValue = -1)
     {
+        this.Checkinitialized();
+
         using var provider = (PostgreSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider();
         var seq = new PostgreSqlSequence(provider, name);
         seq.CreateIfNotExists(minValue, startValue);
@@ -608,6 +655,8 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
     {
         try
         {
+            this.Checkinitialized();
+
             bool directHit = this.CheckConnection(true);
             if (!directHit)
             {
@@ -628,4 +677,6 @@ public class PostgreSqlStructureProvider(IDbProvider parent, string connectionSt
             return (MasterDbConnectionStatus.CantAccess, tex.Message);
         }
     }
+
+    
 }

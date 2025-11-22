@@ -33,14 +33,17 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<IFieldMetadataFactory, FieldMetadataFactory>();
         services.AddSingletonForProd<DbEntityFactory, DbEntityFactory>();
 
+        services.AddTransient<DbProviderFactory>();
         services.AddSingletonForProd<IDbManager, DbScopeManager>();
+        services.AddTransient<IDbScope, DbScope>();
+        services.AddTransient<IDbSchemaScope, DbSchemaScope>();
 
         services.AddTransientForProd<IDbCriteriaParser, FilterTextParser>();
         services.AddTransientForProd<FilterTextParser, FilterTextParser>();
 
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
-        
+
         services.AddSingleton<CacheSignalImplementer>((sp) =>
         {
             CacheSignalImplementer csi = new();

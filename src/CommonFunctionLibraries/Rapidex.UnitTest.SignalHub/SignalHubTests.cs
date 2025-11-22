@@ -14,9 +14,9 @@ public class SignalHubTests : IClassFixture<SingletonFixtureFactory<DefaultEmpty
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;
 
-    public SignalHubTests(SingletonFixtureFactory<DefaultEmptyFixture> factory)
+    public SignalHubTests(EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture> factory)
     {
-        this.Fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture(this.GetType());
         this.Logger?.LogInformation("SignalHubTests initialized.");
     }
 

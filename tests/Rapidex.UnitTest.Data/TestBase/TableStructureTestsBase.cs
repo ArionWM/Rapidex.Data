@@ -13,7 +13,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 {
     public abstract class TableStructureTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
     {
-        protected TableStructureTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+        protected TableStructureTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
         {
         }
 

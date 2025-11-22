@@ -58,11 +58,6 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
                 break;
         }
 
-        if (notAvailable.Any())
-        {
-            throw new InvalidOperationException($"Not all entities are loaded ({em.Name})");
-        }
-
         return available.ToArray();
     }
 

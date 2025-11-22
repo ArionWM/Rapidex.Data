@@ -9,9 +9,9 @@ public class TopicParsing : IClassFixture<SingletonFixtureFactory<DefaultEmptyFi
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;
 
-    public TopicParsing(SingletonFixtureFactory<DefaultEmptyFixture> factory)
+    public TopicParsing(EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture> factory)
     {
-        this.Fixture = factory.GetFixture();
+        this.Fixture = factory.GetFixture(this.GetType());
         this.Logger?.LogInformation("TopicParsingTests initialized.");
     }
 

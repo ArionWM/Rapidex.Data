@@ -19,6 +19,9 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
     public override void SetupServices(IServiceCollection services)
     {
         services.AddSingletonForProd<IExceptionTranslator, DbSqlServerExceptionTranslator>();
+        services.AddKeyedTransient<IDbProvider, DbSqlServerProvider>("DbSqlServerProvider");
+        services.AddKeyedTransient<IDbProvider, DbSqlServerProvider>("Rapidex.Data.SqlServer.DbSqlServerProvider");
+        services.AddKeyedTransient<IDbStructureProvider, DbSqlStructureProvider>("mssql");
     }
 
     public override void Initialize(IServiceProvider serviceProvider)

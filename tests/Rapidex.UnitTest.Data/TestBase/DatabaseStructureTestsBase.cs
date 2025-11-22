@@ -14,7 +14,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 {
     public abstract class DatabaseStructureTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
     {
-        protected DatabaseStructureTestsBase(SingletonFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
+        protected DatabaseStructureTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
         {
         }
 
