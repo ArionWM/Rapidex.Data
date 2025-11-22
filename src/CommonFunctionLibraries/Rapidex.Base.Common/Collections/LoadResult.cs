@@ -3,77 +3,91 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace Rapidex
+namespace Rapidex;
+
+public class LoadResult<T> : ILoadResult<T>
 {
-    public class LoadResult<T> : ILoadResult<T>
+    // ✅ Public property olarak değiştir - JSON serialization için kritik
+    [JsonPropertyName("items")]
+    [JsonPropertyOrder(1)]
+    public List<T> Items { get; set; } = new List<T>();
+
+    private long totalCount;
+
+    public T this[int index]
     {
-        private List<T> _items = new List<T>();
+        get { return this.Items[index]; }
+        set { this.Items[index] = value; }
+    }
 
-        private long _totalCount;
-
-        public T this[int index]
+    [JsonPropertyOrder(2)]
+    public long TotalItemCount
+    {
+        get
         {
-            get { return _items[index]; }
-            set { _items[index] = value; }
-        }
-
-        public long TotalItemCount
-        {
-            get
+            if (this.PageSize < 0 || this.PageSize == int.MaxValue)
             {
-                if (this.PageSize < 0 || this.PageSize == int.MaxValue)
-                {
-                    return this.ItemCount;
-                }
-                return _totalCount;
+                return this.ItemCount;
             }
-            set { _totalCount = value; }
+            return totalCount;
         }
+        set { totalCount = value; }
+    }
 
+    [JsonPropertyOrder(3)]
+    public long? StartIndex { get; set; }
+    
+    [JsonPropertyOrder(4)]
+    public long? PageCount { get; set; }
+    
+    [JsonPropertyOrder(5)]
+    public long? PageIndex { get; set; }
+    
+    [JsonPropertyOrder(6)]
+    public long? PageSize { get; set; }
 
+    // ✅ Computed property - serialize edilmemeli
+    [JsonIgnore]
+    public long ItemCount => Items.Count;
 
+    // ✅ Public property - explicit interface'den kaldır
+    [JsonPropertyOrder(7)]
+    public bool IncludeTotalItemCount { get; set; }
 
-        public long? StartIndex { get; set; }
-        public long? PageCount { get; set; }
-        public long? PageIndex { get; set; }
-        public long? PageSize { get; set; }
+    // ✅ Explicit interface implementation - JSON'da görünmez (doğru)
+    [JsonIgnore]
+    int IReadOnlyCollection<T>.Count => this.Items.Count;
 
-        public long ItemCount => _items.Count;
+    // ✅ Computed property - serialize edilmemeli
+    [JsonIgnore]
+    public bool IsEmpty => !this.Items.Any();
 
-        bool IPaging.IncludeTotalItemCount { get; set; }
+    public LoadResult()
+    {
 
-        [System.Text.Json.Serialization.JsonIgnore]
-        int IReadOnlyCollection<T>.Count => this._items.Count;
+    }
 
-        public bool IsEmpty => !this._items.Any();
+    public LoadResult(IEnumerable<T> items)
+    {
+        this.Items.AddRange(items);
+        this.TotalItemCount = this.Items.Count;
+    }
 
-        public LoadResult()
-        {
+    public LoadResult(IEnumerable<T> items, long pageSize, long pageIndex, long pageCount, long totalCount) : this(items)
+    {
+        this.PageSize = pageSize;
+        this.PageIndex = pageIndex;
+        this.PageCount = pageCount;
+        this.TotalItemCount = totalCount;
+    }
 
-        }
+    public IEnumerator<T> GetEnumerator()
+    {
+        return this.Items.GetEnumerator();
+    }
 
-        public LoadResult(IEnumerable<T> items)
-        {
-            _items.AddRange(items);
-            this.TotalItemCount = _items.Count;
-        }
-
-        public LoadResult(IEnumerable<T> items, long pageSize, long pageIndex, long pageCount, long totalCount) : this(items)
-        {
-            this.PageSize = pageSize;
-            this.PageIndex = pageIndex;
-            this.PageCount = pageCount;
-            this.TotalItemCount = totalCount;
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return this.Items.GetEnumerator();
     }
 }

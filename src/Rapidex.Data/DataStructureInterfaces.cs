@@ -1,12 +1,13 @@
-﻿using Rapidex.Data.Helpers;
-using Rapidex.Data.SerializationAndMapping.JsonConverters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Rapidex.Data.Helpers;
+using Rapidex.Data.SerializationAndMapping.JsonConverters;
+using SqlKata;
 using YamlDotNet.Serialization;
 
 namespace Rapidex.Data;
@@ -226,7 +227,35 @@ public interface IDbEntityMetadataValidator
     /// <param name="em"></param>
     /// <returns>True if valid</returns>
     IValidationResult Validate(IDbEntityMetadata em);
+}
 
+public class CacheOptions
+{
+    public static CacheOptions Disabled => new CacheOptions()
+    {
+        IsIdCacheEnabled = false,
+        IsQueryCacheEnabled = false,
+        Duration = TimeSpan.Zero
+    };
+
+    public static CacheOptions Default => new CacheOptions()
+    {
+        IsIdCacheEnabled = true,
+        IsQueryCacheEnabled = false,
+        Duration = TimeSpan.FromMinutes(5)
+    };
+
+    public static CacheOptions FullEnabled => new CacheOptions()
+    {
+        IsIdCacheEnabled = true,
+        IsQueryCacheEnabled = true,
+        Duration = TimeSpan.FromMinutes(10)
+    };
+
+    public bool IsIdCacheEnabled { get; set; }
+    public bool IsQueryCacheEnabled { get; set; }
+
+    public TimeSpan Duration { get; set; }
 }
 
 public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanlı olsa? İlk katman kolayca serileşebilecek bir DTO, ikinci katmanda metotlar + filtreler?
@@ -259,6 +288,8 @@ public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanl
     /// If is 'true' this entity don't create other schemas
     /// </summary>
     bool OnlyBaseSchema { get; internal set; }
+
+    CacheOptions CacheOptions { get; set; }
 
     List<string> Tags { get; }
 
@@ -491,11 +522,13 @@ public class DbEntityIdEqualityComparerById : IEqualityComparer<DbEntityId>
 public interface IDbEntityLoader
 {
     IDbSchemaScope ParentScope { get; }
-    void Setup(IDbSchemaScope schema, params IDbEntityLoader[] loaders);
+    void Setup(IDbSchemaScope schema, IDbDataModificationPovider baseDmProvider);
 
     IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids);
 
     IEntityLoadResult Load(IQueryLoader loader);
+
+    IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result);
 
     ILoadResult<DataRow> LoadRaw(IQueryLoader loader);
 }
@@ -552,12 +585,12 @@ public interface IDbDataModificationPovider : IDbEntityUpdater, IDbEntityLoader,
 {
     IDbProvider ParentProvider { get; }
 
-
+    SqlKata.Compilers.Compiler GetCompiler();
     IIntSequence Sequence(string name);
 
     IDbInternalTransactionScope BeginTransaction(string transactionName = null);
 
-    void IDbEntityLoader.Setup(IDbSchemaScope scope, params IDbEntityLoader[] loaders)
+    void IDbEntityLoader.Setup(IDbSchemaScope scope, IDbDataModificationPovider baseDmProvider)
     {
         //Do nothing
     }
@@ -801,7 +834,7 @@ public interface IEntity
     [JsonIgnore]
     object _VirtualId { get; set; }
 
-    LoadSource _loadSource { get; set; } 
+    LoadSource _loadSource { get; set; }
 
     string _TypeName { get; internal set; }
     string _DbName { get; internal set; }

@@ -40,6 +40,8 @@ namespace Rapidex.Data.Metadata
 
         public bool OnlyBaseSchema { get; set; }
 
+        public CacheOptions CacheOptions { get; set; } = CacheOptions.Default;
+
         [System.Text.Json.Serialization.JsonIgnore]
         [YamlIgnore]
         public IDbFieldMetadata PrimaryKey { get; set; }

@@ -2,23 +2,48 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using SqlKata;
 
 namespace Rapidex.Data.DataModification.Loaders;
 
 
 internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
 {
-    public override IEntityLoadResult LoadInternal(IQueryLoader loader)
+    protected IEntityLoadResult LoadInternal(IDbEntityMetadata em, SqlResult result)
     {
-        IEntityLoadResult lastLoadResult = null;
-        foreach (var sloader in this.SecondaryLoaders)
+        var loadResultFromCache = Database.Cache.GetQuery(em, this.ParentScope, result);
+        if (loadResultFromCache != null)
         {
-            lastLoadResult = sloader.Load(loader);
-            if (lastLoadResult.IsNOTNullOrEmpty())
+            return loadResultFromCache;
+        }
+        return null;
+    }
+
+    public override IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result)
+    {
+
+        if (em.CacheOptions.IsQueryCacheEnabled)
+        {
+            var loadResultFromCache = this.LoadInternal(em, result);
+            if (loadResultFromCache != null)
             {
-                Database.Cache.SetEntities(lastLoadResult);
-                return lastLoadResult;
+                return loadResultFromCache;
             }
+        }
+
+        IEntityLoadResult lastLoadResult = null;
+        lastLoadResult = this.BaseDmProvider.Load(em, result);
+        if (lastLoadResult.IsNOTNullOrEmpty())
+        {
+            Database.Cache.SetEntities(lastLoadResult);
+
+            if (em.CacheOptions.IsQueryCacheEnabled)
+            {
+                Database.Cache.StoreQuery(em, this.ParentScope, result, lastLoadResult);
+            }
+
+            return lastLoadResult;
         }
 
         return lastLoadResult;
@@ -27,13 +52,10 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
     public override ILoadResult<DataRow> LoadRawInternal(IQueryLoader loader)
     {
         ILoadResult<DataRow> lastLoadResult = null;
-        foreach (var sloader in this.SecondaryLoaders)
+        lastLoadResult = this.BaseDmProvider.LoadRaw(loader);
+        if (lastLoadResult.IsNOTNullOrEmpty())
         {
-            lastLoadResult = sloader.LoadRaw(loader);
-            if (lastLoadResult.IsNOTNullOrEmpty())
-            {
-                return lastLoadResult;
-            }
+            return lastLoadResult;
         }
 
         return lastLoadResult;

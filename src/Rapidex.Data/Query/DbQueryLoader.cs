@@ -9,7 +9,7 @@ namespace Rapidex.Data.Query
 {
     internal class DbQueryLoader : DbQueryOrder, IQueryLoader
     {
-        public DbQueryLoader(IDbSchemaScope schema, IDbEntityMetadata em) : base(schema, em)
+        public DbQueryLoader(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo) : base(schema, em, aliasNo)
         {
         }
 
@@ -18,7 +18,6 @@ namespace Rapidex.Data.Query
         {
             this.Query.Skip(0).Take(1);
             return this.Load().FirstOrDefault();
-                
         }
 
         public ILoadResult<DbEntityId> GetIds()

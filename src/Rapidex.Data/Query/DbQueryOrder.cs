@@ -6,7 +6,7 @@ namespace Rapidex.Data.Query
 {
     internal abstract class DbQueryOrder : DbQueryPager, IQueryOrder
     {
-        public DbQueryOrder(IDbSchemaScope schema, IDbEntityMetadata em) : base(schema, em)
+        public DbQueryOrder(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo) : base(schema, em, aliasNo)
         {
             this.Order = new OrderCollection();
         }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Rapidex.Data.DataModification.Loaders;
 
 namespace Rapidex.Data.DataModification;
+
 internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDisposable
 {
     public IDbSchemaScope ParentSchema { get; protected set; }
@@ -15,7 +16,7 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
     public DataModificationReadScopeBase(IDbSchemaScope parentScope)
     {
         this.ParentSchema = parentScope;
-        this.DmProvider = parentScope.DbProvider.GetDataModificationProvider(); 
+        this.DmProvider = parentScope.DbProvider.GetDataModificationProvider();
 
         this.Initialize();
     }
@@ -29,11 +30,12 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
     {
         //TODO: Create `LoaderSelector` class (and interface) to select loader based on entity metadata and other criteria
 
+        if (!em.CacheOptions.IsIdCacheEnabled)
+            return this.DmProvider;
+
         DbEntityWithCacheLoader cacheLoader = new DbEntityWithCacheLoader();
         cacheLoader.Setup(this.ParentSchema, this.DmProvider);
         return cacheLoader;
-
-        //return this.DmProvider;
     }
 
 

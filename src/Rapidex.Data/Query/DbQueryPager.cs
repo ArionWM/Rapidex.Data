@@ -9,7 +9,7 @@ namespace Rapidex.Data.Query
 
         public IPaging Paging { get; set; }
 
-        public DbQueryPager(IDbSchemaScope schema, IDbEntityMetadata em) : base(schema, em)
+        public DbQueryPager(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo) : base(schema, em, aliasNo)
         {
             this.Paging = new PagingInfo();
         }

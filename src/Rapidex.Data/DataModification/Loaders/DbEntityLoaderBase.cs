@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Data;
+using System.Text;
+using SqlKata;
+using SqlKata.Compilers;
 
 namespace Rapidex.Data.DataModification.Loaders;
 
 public abstract class DbEntityLoaderBase : IDbEntityLoader
 {
-    protected IDbEntityLoader[] SecondaryLoaders { get; set; }
+    protected IDbDataModificationPovider BaseDmProvider { get; set; }
+    protected SqlKata.Compilers.Compiler SqlKataCompiler { get; set; }
     public IDbSchemaScope ParentScope { get; private set; }
 
     public DbEntityLoaderBase()
@@ -19,15 +22,14 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
     protected abstract IEntity GetInternal(IDbEntityMetadata em, DbEntityId id);
 
-
-
-    public void Setup(IDbSchemaScope schema, params IDbEntityLoader[] loaders)
+    public void Setup(IDbSchemaScope schema, IDbDataModificationPovider baseDmProvider)
     {
         this.ParentScope = schema;
-        this.SecondaryLoaders = loaders;
+        this.BaseDmProvider = baseDmProvider;
+        this.SqlKataCompiler = this.BaseDmProvider.GetCompiler();
     }
 
-    protected virtual IEntity[] LoadInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids, IDbEntityLoader[] secondaryLoaders)
+    protected virtual IEntity[] LoadInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
         List<IEntity> available = new List<IEntity>();
         List<DbEntityId> notAvailable = new List<DbEntityId>();
@@ -41,21 +43,15 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
                 available.Add(entity);
         }
 
-        foreach (var loader in secondaryLoaders)
+        var loadResult = this.BaseDmProvider.Load(em, notAvailable); //TODO: Multiple load with multiple ids
+        if (loadResult.Any())
         {
-            var loadResult = loader.Load(em, notAvailable); //TODO: Multiple load with multiple ids
-            if (loadResult.Any())
-            {
-                available.AddRange(loadResult);
+            available.AddRange(loadResult);
 
-                var availableIds = loadResult.ToDbEntityIds();
+            var availableIds = loadResult.ToDbEntityIds();
 
-                //TODO: Load result ile sadece Id değil, version karşılaştırması da yapılmalı
-                notAvailable = notAvailable.Except(availableIds, new DbEntityIdEqualityComparerById()).ToList();
-            }
-
-            if (!notAvailable.Any())
-                break;
+            //TODO: Load result ile sadece Id değil, version karşılaştırması da yapılmalı
+            notAvailable = notAvailable.Except(availableIds, new DbEntityIdEqualityComparerById()).ToList();
         }
 
         return available.ToArray();
@@ -64,7 +60,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
     public virtual IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
-        IEntity[] loaded = this.LoadInternal(em, ids, this.SecondaryLoaders);
+        IEntity[] loaded = this.LoadInternal(em, ids);
         EntityLoadResult values = new EntityLoadResult(loaded);
         return values;
     }
@@ -76,11 +72,14 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
         return this.LoadRawInternal(loader);
     }
 
-    public abstract IEntityLoadResult LoadInternal(IQueryLoader loader);
+
+
+    public abstract IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result);
 
     public virtual IEntityLoadResult Load(IQueryLoader loader)
     {
-        return this.LoadInternal(loader);
+        SqlResult result = this.SqlKataCompiler.NotNull().Compile(loader.Query);
+        return this.Load(loader.EntityMetadata, result);
     }
 
 

@@ -1,13 +1,14 @@
-﻿using Npgsql;
-using SqlKata.Compilers;
-using SqlKata;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Rapidex.Data.PostgreServer;
+using SqlKata;
+using SqlKata.Compilers;
+using Superpower.Model;
 using static Rapidex.Data.DbEntityFactory;
 
 namespace Rapidex.Data.PostgreServer;
@@ -62,6 +63,11 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         }
     }
 
+    public SqlKata.Compilers.Compiler GetCompiler()
+    {
+        return new PostgresCompiler();
+    }
+
     public IDbInternalTransactionScope BeginTransaction(string transactionName = null)
     {
         if (this.CurrentTransaction != null && this.CurrentTransaction.Live)
@@ -84,12 +90,9 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return this.Load(query);
     }
 
-    public IEntityLoadResult Load(IQueryLoader loader)
+    public IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result)
     {
         this.CheckConnection();
-
-        var compiler = new PostgresCompiler();
-        SqlResult result = compiler.Compile(loader.Query);
         string sql = result.Sql;
         DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
@@ -99,15 +102,23 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         DataTable table = this.Connection.Execute(sql, variables);
 
-        IEntity[] entities = this.ParentScope.Mapper.MapToNew(loader.EntityMetadata, table, ent => { ent._loadSource = LoadSource.Database; });
+        IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
         return new EntityLoadResult(entities);
+    }
+
+    public IEntityLoadResult Load(IQueryLoader loader)
+    {
+        var compiler = this.GetCompiler();
+        SqlResult result = compiler.Compile(loader.Query);
+
+        return this.Load(loader.EntityMetadata, result);
     }
 
     public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
     {
         this.CheckConnection();
 
-        var compiler = new PostgresCompiler();
+        var compiler = this.GetCompiler();
         SqlResult result = compiler.Compile(loader.Query);
         string sql = result.ToString();
 
@@ -411,6 +422,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         foreach (IEntity entity in entities)
         {
             this.Update(em, entity);
+            entity.DbVersion++;
             result.Modified(entity);
         }
 
@@ -482,7 +494,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         _updateQuery.ClearComponent("select");
         _updateQuery.AsUpdate(query.UpdateData);
 
-        var compiler = new PostgresCompiler();
+        var compiler = this.GetCompiler();
         SqlResult result = compiler.Compile(_updateQuery);
         string sql = result.ToString();
 

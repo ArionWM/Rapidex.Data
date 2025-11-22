@@ -8,7 +8,7 @@ namespace Rapidex.Data.Query
 {
     internal abstract class DbQueryAggregate : DbQueryLoader, IQueryAggregate
     {
-        public DbQueryAggregate(IDbSchemaScope schema, IDbEntityMetadata em) : base(schema, em)
+        public DbQueryAggregate(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo) : base(schema, em, aliasNo)
         {
         }
 

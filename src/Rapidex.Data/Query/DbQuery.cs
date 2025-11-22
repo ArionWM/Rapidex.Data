@@ -10,7 +10,7 @@ namespace Rapidex.Data.Query
     {
         public ObjDictionary UpdateData { get; internal set; }
 
-        public DbQuery(IDbSchemaScope schema, IDbEntityMetadata em) : base(schema, em)
+        public DbQuery(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo = 0) : base(schema, em, aliasNo)
         {
         }
 
@@ -159,11 +159,12 @@ namespace Rapidex.Data.Query
 
     internal class Query<T> : DbQuery, IQuery<T> where T : IConcreteEntity
     {
-        public Query(IDbSchemaScope schema) : base(schema, schema.ParentDbScope.Metadata.Get<T>().NotNull($"'{typeof(T).Name}' metadata not found"))
+        public Query(IDbSchemaScope schema)
+            : base(schema, schema.ParentDbScope.Metadata.Get<T>().NotNull($"'{typeof(T).Name}' metadata not found"))
         {
         }
 
-        public Query(IDbSchemaScope schema, IDbEntityMetadata em) : base(schema, em)
+        public Query(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo) : base(schema, em, aliasNo)
         {
         }
 

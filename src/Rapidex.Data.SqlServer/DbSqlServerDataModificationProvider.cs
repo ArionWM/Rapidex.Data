@@ -53,7 +53,11 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
             tex.Log();
             throw tex;
         }
+    }
 
+    public SqlKata.Compilers.Compiler GetCompiler()
+    {
+        return new SqlServerCompiler();
     }
 
     public IDbInternalTransactionScope BeginTransaction(string transactionName = null)
@@ -77,12 +81,10 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return this.Load(query);
     }
 
-    public IEntityLoadResult Load(IQueryLoader loader)
+    public IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result)
     {
         this.CheckConnection();
 
-        SqlServerCompiler mySqlCompiler = new SqlServerCompiler();
-        SqlResult result = mySqlCompiler.Compile(loader.Query);
         string sql = result.Sql;
         DbVariable[] variables = DbVariable.Get(result.NamedBindings);
 
@@ -92,15 +94,23 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
         DataTable table = this.Connection.Execute(sql, variables);
 
-        IEntity[] entities = this.ParentScope.Mapper.MapToNew(loader.EntityMetadata, table, ent => { ent._loadSource = LoadSource.Database; });
+        IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
         return new EntityLoadResult(entities);
+    }
+
+    public IEntityLoadResult Load(IQueryLoader loader)
+    {
+        Compiler mySqlCompiler = this.GetCompiler();
+        SqlResult result = mySqlCompiler.Compile(loader.Query);
+
+        return this.Load(loader.EntityMetadata, result);
     }
 
     public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
     {
         this.CheckConnection();
 
-        SqlServerCompiler mySqlCompiler = new SqlServerCompiler();
+        Compiler mySqlCompiler = this.GetCompiler();
         SqlResult result = mySqlCompiler.Compile(loader.Query);
         string sql = result.ToString();
 
@@ -411,6 +421,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         foreach (IEntity entity in entities)
         {
             this.Update(em, entity);
+            entity.DbVersion++;
             result.Modified(entity);
         }
 
@@ -483,7 +494,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         _updateQuery.ClearComponent("select");
         _updateQuery.AsUpdate(query.UpdateData);
 
-        SqlServerCompiler mySqlCompiler = new SqlServerCompiler();
+        Compiler mySqlCompiler = this.GetCompiler();
         SqlResult result = mySqlCompiler.Compile(_updateQuery);
         string sql = result.ToString();
 

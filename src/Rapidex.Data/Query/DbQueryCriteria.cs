@@ -14,7 +14,7 @@ namespace Rapidex.Data.Query
     {
 
 
-        public DbQueryCriteria(IDbSchemaScope schema, IDbEntityMetadata em) : base(schema, em)
+        public DbQueryCriteria(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo) : base(schema, em, aliasNo)
         {
         }
 
@@ -121,7 +121,7 @@ namespace Rapidex.Data.Query
 
         public IQueryCriteria Nested(string entityAFieldName, string entityBFieldName, IDbEntityMetadata refEm, Action<IQueryCriteria> nestedCriteria)
         {
-            DbQueryCriteria refQuery = new DbQueryCriteria(this.Schema, refEm);
+            DbQueryCriteria refQuery = new DbQueryCriteria(this.Schema, refEm, this.GetAliasSubIndex());
 
             nestedCriteria.NotNull();
 
@@ -175,7 +175,7 @@ namespace Rapidex.Data.Query
 
         public IQueryCriteria Not(Action<IQueryCriteria> act)
         {
-            DbQueryCriteria newCrit = new DbQueryCriteria(this.Schema, this.EntityMetadata);
+            DbQueryCriteria newCrit = new DbQueryCriteria(this.Schema, this.EntityMetadata, this.GetAliasSubIndex());
             newCrit.Alias = this.Alias;
             act(newCrit);
             this.Query.WhereNot(c => newCrit.Query);
@@ -184,7 +184,7 @@ namespace Rapidex.Data.Query
 
         public IQueryCriteria And(params Action<IQueryCriteria>[] acts)
         {
-            DbQueryCriteria newCrit = new DbQueryCriteria(this.Schema, this.EntityMetadata);
+            DbQueryCriteria newCrit = new DbQueryCriteria(this.Schema, this.EntityMetadata, this.GetAliasSubIndex());
             newCrit.Alias = this.Alias;
             foreach (var act in acts)
             {
@@ -199,11 +199,9 @@ namespace Rapidex.Data.Query
         {
             this.Query.Where(q =>
             {
-
-
                 foreach (var act in acts)
                 {
-                    DbQueryCriteria newCrit = new DbQueryCriteria(this.Schema, this.EntityMetadata);
+                    DbQueryCriteria newCrit = new DbQueryCriteria(this.Schema, this.EntityMetadata, this.GetAliasSubIndex());
                     newCrit.Alias = this.Alias;
 
                     act(newCrit);

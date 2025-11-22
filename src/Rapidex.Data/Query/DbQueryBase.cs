@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Rapidex.Data.Query
 {
@@ -14,6 +15,8 @@ namespace Rapidex.Data.Query
 
         protected QMode Mode { get; set; } = QMode.Select;
 
+        internal int queryAliasesNo = 0;
+        internal int queryAliasesSubIndex = 0;
 
         public IDbSchemaScope Schema { get; set; }
         public IDbEntityMetadata EntityMetadata { get; set; }
@@ -23,19 +26,21 @@ namespace Rapidex.Data.Query
 
 
 
+
         protected DbQueryBase()
         {
 
         }
 
-        protected DbQueryBase(IDbSchemaScope schema, IDbEntityMetadata em)
+        protected DbQueryBase(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo)
         {
             schema.NotNull("Schema can't be null");
             em.NotNull("Metadata can't be null");
 
             this.Schema = schema;
             this.EntityMetadata = em;
-            this.Alias = em.Name.AbbrFromFirstLetters() + RandomHelper.RandomNumeric(5); //Tekilliği garanti edilmeli
+            this.queryAliasesNo = aliasNo;
+            this.Alias = em.Name.AbbrFromFirstLetters() + this.queryAliasesNo.ToString("00") + this.GetAliasSubIndex().ToString("00"); //Tekilliği garanti edilmeli
 
             this.Query = new SqlKata.Query();
 
@@ -50,6 +55,12 @@ namespace Rapidex.Data.Query
             string tableNameWithAlias = $"{this.TableName} as {this.Alias}";
 
             this.Query.From(tableNameWithAlias).As(this.Alias);
+        }
+
+        internal int GetAliasSubIndex()
+        {
+            Interlocked.Increment(ref this.queryAliasesSubIndex);
+            return this.queryAliasesSubIndex;
         }
 
         protected string GetFieldName(string field)
