@@ -57,7 +57,7 @@ namespace Rapidex.Data.Query
 
         public virtual object Clone()
         {
-            IQueryLoader newLoader = TypeHelper.CreateInstance<IQueryLoader>(this.GetType(), this.Schema, this.EntityMetadata);
+            IQueryLoader newLoader = TypeHelper.CreateInstance<IQueryLoader>(this.GetType(), this.Schema, this.EntityMetadata, this.queryAliasesNo);
             newLoader.Query = this.Query.Clone();
             newLoader.Paging = this.Paging;
             newLoader.Order = this.Order;
