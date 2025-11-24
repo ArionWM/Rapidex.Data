@@ -35,8 +35,8 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
 
         services.AddTransient<DbProviderFactory>();
         services.AddSingletonForProd<IDbManager, DbScopeManager>();
-        services.AddTransient<IDbScope, DbScope>();
-        services.AddTransient<IDbSchemaScope, DbSchemaScope>();
+        services.AddKeyedTransient<IDbScope, DbScope>("raw");
+        services.AddKeyedTransient<IDbSchemaScope, DbSchemaScope>("raw");
 
         services.AddTransientForProd<IDbCriteriaParser, FilterTextParser>();
         services.AddTransientForProd<FilterTextParser, FilterTextParser>();

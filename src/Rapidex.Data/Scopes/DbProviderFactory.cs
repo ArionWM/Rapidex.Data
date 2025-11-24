@@ -52,7 +52,7 @@ internal class DbProviderFactory
         {
             case MasterDbConnectionStatus.Valid:
             case MasterDbConnectionStatus.Created:
-                var dbScope = this.serviceProvider.GetRequiredService<IDbScope>();
+                var dbScope = this.serviceProvider.GetKeyedService<IDbScope>("raw").NotNull();
                 dbScope.Initialize(DatabaseConstants.MASTER_TENANT_ID, DatabaseConstants.MASTER_DB_ALIAS_NAME, provider);
                 return dbScope;
             default:
@@ -80,7 +80,7 @@ internal class DbProviderFactory
         if (trySwitchDb)
             provider.SwitchDb(dbNameOrAliasName);
 
-        var scope = this.serviceProvider.GetRequiredService<IDbScope>();
+        var scope = this.serviceProvider.GetKeyedService<IDbScope>("raw");
         scope.Initialize(id, dbNameOrAliasName, provider);
         return scope;
     }

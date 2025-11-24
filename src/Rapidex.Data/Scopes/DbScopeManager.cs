@@ -83,7 +83,7 @@ internal class DbScopeManager : IDbManager
 
         if (throwErrorIfNotExists && !this.DbScopes.ContainsKey(dbName))
         {
-            throw new InvalidOperationException($"Database with alias '{dbName}' is not found.");
+             throw new InvalidOperationException($"Database with alias '{dbName}' is not found.");
         }
 
         return this.DbScopes.Get(dbName).NotNull($"Database scope '{dbName}' not found");

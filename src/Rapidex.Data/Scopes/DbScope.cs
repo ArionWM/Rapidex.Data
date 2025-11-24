@@ -81,7 +81,7 @@ namespace Rapidex.Data.Scopes
             DbProviderFactory dbCreator = this.serviceProvider.GetRequiredService<DbProviderFactory>();
             IDbProvider dbProvider = dbCreator.CreateProvider(this.dbProvider.GetType().FullName, this.ConnectionString);
 
-            IDbSchemaScope sscope = this.serviceProvider.GetRequiredService<IDbSchemaScope>();
+            IDbSchemaScope sscope = this.serviceProvider.GetKeyedService<IDbSchemaScope>("raw").NotNull();
             sscope.Initialize(schemaName, this, dbProvider);
 
             var validationResults = dbProvider.ValidateConnection();
@@ -89,7 +89,7 @@ namespace Rapidex.Data.Scopes
                 throw new DataConnectionException(validationResults.ToString());
 
             sscope.Structure.CreateOrUpdateSchema(schemaName);
-            
+
             schemaScopes.Set(schemaName, sscope);
             sscope.Structure.ApplyAllStructure();
 
@@ -198,6 +198,6 @@ namespace Rapidex.Data.Scopes
             return baseScope.Data.Sequence(name);
         }
 
-       
+
     }
 }
