@@ -18,7 +18,7 @@ internal class PostgreSqlInternalTransactionScope : IDbInternalTransactionScope
 
     public void Commit()
     {
-        this.Connection.Transaction.Commit();
+        this.Connection.CommitTransaction();
         this.Live = false;
     }
 
@@ -26,7 +26,7 @@ internal class PostgreSqlInternalTransactionScope : IDbInternalTransactionScope
     {
         try
         {
-            this.Connection.Transaction.Rollback();
+            this.Connection.RollbackTransaction();
         }
         finally
         {

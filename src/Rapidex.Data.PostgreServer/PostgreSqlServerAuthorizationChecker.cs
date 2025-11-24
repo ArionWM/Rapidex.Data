@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.PostgreServer;
 internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
 {
-    PostgreSqlServerConnection _connection;
+    PostgreSqlServerConnection connection;
 
     public PostgreSqlServerAuthorizationChecker(string connectionString)
     {
-        _connection = new PostgreSqlServerConnection(connectionString);
+        connection = new PostgreSqlServerConnection(connectionString);
     }
 
     public bool CanCreateDatabase()
     {
-        DataTable result = _connection.Execute("SELECT rolcreatedb FROM pg_roles WHERE rolname = current_user;");
+        DataTable result = connection.Execute("SELECT rolcreatedb FROM pg_roles WHERE rolname = current_user;");
         if (result.Rows.Count == 0)
             return false;
 
@@ -27,7 +27,7 @@ internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
 
     public bool CanCreateSchema()
     {
-        DataTable result = _connection.Execute("SELECT has_database_privilege(current_user, current_database(), 'CREATE');");
+        DataTable result = connection.Execute("SELECT has_database_privilege(current_user, current_database(), 'CREATE');");
         if (result.Rows.Count == 0)
             return false;
 
@@ -38,7 +38,7 @@ internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
     public bool CanCreateTable(string schemaName)
     {
         schemaName = schemaName.ToLowerInvariant();
-        DataTable result = _connection.Execute($"SELECT has_schema_privilege(current_user, '{schemaName}', 'CREATE');");
+        DataTable result = connection.Execute($"SELECT has_schema_privilege(current_user, '{schemaName}', 'CREATE');");
         if (result.Rows.Count == 0)
             return false;
 
@@ -48,7 +48,7 @@ internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
 
     public string GetCurrentUserId()
     {
-        DataTable result = _connection.Execute("SELECT current_user;");
+        DataTable result = connection.Execute("SELECT current_user;");
         if (result.Rows.Count == 0)
             return null;
 
@@ -57,7 +57,7 @@ internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
 
     public void Dispose()
     {
-        _connection?.Dispose();
-        _connection = null;
+        connection?.Dispose();
+        connection = null;
     }
 }
