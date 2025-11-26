@@ -20,6 +20,31 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         return null;
     }
 
+    protected override IEntity GetInternal(IDbEntityMetadata em, DbEntityId id)
+    {
+        var entity = Database.Cache.GetEntity(this.ParentScope, em.Name, id.Id);
+
+        if (id.Version > -1 && (entity == null || entity.DbVersion != id.Version))
+        {
+            return null;
+        }
+
+        return entity;
+    }
+
+    protected override IEntity[] LoadInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
+    {
+        IEntity[] result = base.LoadInternal(em, ids);
+        if (em.CacheOptions.IsIdCacheEnabled)
+        {
+            var uncachedEntities = result.Where(e => e._loadSource == LoadSource.Database);
+            if (uncachedEntities.Any())
+                Database.Cache.SetEntities(uncachedEntities);
+        }
+
+        return result;
+    }
+
     public override IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result)
     {
 
@@ -61,15 +86,5 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         return lastLoadResult;
     }
 
-    protected override IEntity GetInternal(IDbEntityMetadata em, DbEntityId id)
-    {
-        var entity = Database.Cache.GetEntity(this.ParentScope, em.Name, id.Id);
 
-        if (id.Version > -1 && (entity == null || entity.DbVersion != id.Version))
-        {
-            return null;
-        }
-
-        return entity;
-    }
 }

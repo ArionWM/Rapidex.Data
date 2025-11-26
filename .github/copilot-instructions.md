@@ -47,6 +47,13 @@ Use `switch` instead of `if-else` whenever possible
 - Use `AssertionHelper` extensions (`NotEmpty()`) for array, list, string empty checks (if required for throw exception)
 - Use `AssertionHelper` extensions (`ShouldSupportTo<T>()`, `ShouldSupportTo(Type)`) for type checks (if required for throw exception)
 
+### DateTime
+
+Use `DateTimeOffset` instead of `DateTime` whenever possible
+
+### Collections
+
+Use `CollectionExtensions.cs` extensions in `Rapidex.Base.Common`
 
 ## Others
  

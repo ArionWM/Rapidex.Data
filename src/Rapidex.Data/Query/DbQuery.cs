@@ -105,9 +105,15 @@ namespace Rapidex.Data.Query
             return (IQuery)base.Page(pageSize, skip, includeTotalCount);
         }
 
-        IQuery IQuery.ClearPaging()
+
+        IQuery IQuery.Limit(long limit)
         {
-            return (IQuery)base.ClearPaging();
+            return (IQuery)base.Limit(limit);
+        }
+
+        IQuery IQuery.ClearPagingAndLimit()
+        {
+            return (IQuery)base.ClearPagingAndLimit();
         }
 
         public void Update(IDbDataModificationScope workScope, IDictionary<string, object> data)
@@ -291,9 +297,14 @@ namespace Rapidex.Data.Query
             return (IQuery<T>)base.Page(pageSize, skip);
         }
 
-        IQuery<T> IQuery<T>.ClearPaging()
+        IQuery<T> IQuery<T>.Limit(long limit)
         {
-            return (IQuery<T>)base.ClearPaging();
+            return (IQuery<T>)base.Limit(limit);
+        }
+
+        IQuery<T> IQuery<T>.ClearPagingAndLimit()
+        {
+            return (IQuery<T>)base.ClearPagingAndLimit();
         }
 
         public new IQuery<T> EnterUpdateMode()

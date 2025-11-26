@@ -70,11 +70,11 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
             loadedResult.PageSize = queryLoader.Paging.PageSize;
             loadedResult.PageIndex = loadedResult.StartIndex / queryLoader.Paging.PageSize;
 
-            if (queryLoader.Paging.IsPagingSet() && queryLoader.Paging.IncludeTotalItemCount)
+            if (queryLoader.Paging.IncludeTotalItemCount)
             {
                 IQueryAggregate totalCounter = (IQueryAggregate)queryLoader.Clone();
                 totalCounter.Alias = queryLoader.Alias;
-                totalCounter.ClearPaging();
+                totalCounter.ClearPagingAndLimit();
                 loadedResult.TotalItemCount = totalCounter.Count();
                 loadedResult.IncludeTotalItemCount = true;
                 loadedResult.PageCount = (long)Math.Ceiling(Convert.ToDecimal(loadedResult.TotalItemCount) / Convert.ToDecimal(loadedResult.PageSize.Value));

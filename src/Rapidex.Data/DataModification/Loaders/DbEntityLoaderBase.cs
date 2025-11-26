@@ -43,15 +43,18 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
                 available.Add(entity);
         }
 
-        var loadResult = this.BaseDmProvider.Load(em, notAvailable); //TODO: Multiple load with multiple ids
-        if (loadResult.Any())
+        if (notAvailable.Any())
         {
-            available.AddRange(loadResult);
+            var loadResult = this.BaseDmProvider.Load(em, notAvailable); //TODO: Multiple load with multiple ids
+            if (loadResult.Any())
+            {
+                available.AddRange(loadResult);
 
-            var availableIds = loadResult.ToDbEntityIds();
+                var availableIds = loadResult.ToDbEntityIds();
 
-            //TODO: Load result ile sadece Id değil, version karşılaştırması da yapılmalı
-            notAvailable = notAvailable.Except(availableIds, new DbEntityIdEqualityComparerById()).ToList();
+                //TODO: Load result ile sadece Id değil, version karşılaştırması da yapılmalı
+                notAvailable = notAvailable.Except(availableIds, new DbEntityIdEqualityComparerById()).ToList();
+            }
         }
 
         return available.ToArray();
@@ -73,6 +76,9 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
     }
 
 
+    //TODO: Load(IDbEntityMetadata em, SqlResult result) metotlarını kaldır, Load(IQueryLoader loader) ile devam et
+    //DbEntityWithCacheLoader içerisinde ayrıca SqlResult result = this.SqlKataCompiler.NotNull().Compile(loader.Query); kullan
+    //IQueryLoader içerisinde "UseQueryCache" + "DontUseQueryCache"
 
     public abstract IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result);
 

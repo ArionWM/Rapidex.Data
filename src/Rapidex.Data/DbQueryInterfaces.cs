@@ -74,7 +74,8 @@ public interface IQueryPager : IQueryCriteria
 {
     IPaging Paging { get; set; }
     IQueryPager Page(long pageSize, long skip, bool includeTotalCount = true);
-    IQueryPager ClearPaging();
+    IQueryPager ClearPagingAndLimit();
+    IQueryPager Limit(long limit);
 }
 
 public class OrderInfo
@@ -185,7 +186,8 @@ public interface IQuery : IQueryBase, IQueryCriteria, IQueryPager, IQueryOrder, 
 
     new IQuery OrderBy(OrderDirection direction, params string[] fields);
     new IQuery Page(long pageSize, long skip, bool includeTotalCount = true);
-    new IQuery ClearPaging();
+    new IQuery Limit(long limit);
+    new IQuery ClearPagingAndLimit();
 
     new IQuery EnterUpdateMode();
 
@@ -251,9 +253,9 @@ public interface IQuery<T> : IQuery, IQueryLoader<T> where T : IConcreteEntity
 
     new IQuery<T> OrderBy(OrderDirection direction, params string[] fields);
     new IQuery<T> Page(long pageSize, long skip, bool includeTotalCount = true);
-
-    //TODO: Limit / Top
-    new IQuery<T> ClearPaging();
+    new IQuery<T> Limit(long limit);
+    //TODO: Limit / Top (IncludeTotalItemCount: false)
+    new IQuery<T> ClearPagingAndLimit();
     new IQuery<T> EnterUpdateMode();
 
 }

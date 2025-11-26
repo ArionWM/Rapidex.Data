@@ -21,10 +21,17 @@ namespace Rapidex.Data.Query
             this.Paging.IncludeTotalItemCount = includeTotalCount;
             this.Query.Skip(Convert.ToInt32(startIndex)).Take(Convert.ToInt32(pageSize)); //:(
             return this;
-
         }
 
-        public IQueryPager ClearPaging()
+        public IQueryPager Limit(long limit)
+        {
+            this.Paging.PageSize = limit;
+            this.Paging.IncludeTotalItemCount = false;
+            this.Query.Take(Convert.ToInt32(limit));
+            return this;
+        }
+
+        public IQueryPager ClearPagingAndLimit()
         {
             this.Query.ClearComponent("offset");
             this.Query.ClearComponent("limit");

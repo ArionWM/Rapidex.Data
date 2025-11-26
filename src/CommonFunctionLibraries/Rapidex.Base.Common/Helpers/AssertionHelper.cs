@@ -60,17 +60,40 @@ public static class AssertionHelper
         return obj;
     }
 
-    public static T ShouldBeSuccess<T>(this T obj, string? message = null) where T : IResult
+    public static T ShouldBeSuccess<T>(this T result, string? message = null) where T : IResult
     {
-        obj.NotNull(message);
+        result.NotNull(message);
 
-        if (!obj.Success)
+        if (!result.Success)
         {
             DebugBreak();
             throw new BaseValidationException(message ?? "Result fail");
         }
 
-        return obj;
+        return result;
+    }
+
+    public static T ShouldBeSuccess<T, E>(this T result, string? message = null)
+        where T : IResult
+        where E : Exception
+    {
+        result.NotNull(message);
+
+        if (!result.Success)
+        {
+            DebugBreak();
+
+            if (message.IsNullOrEmpty())
+            {
+                message = result.Description;
+            }
+
+#pragma warning disable CS8597 
+            throw (E)Activator.CreateInstance(typeof(E), message);
+#pragma warning restore CS8597 
+        }
+
+        return result;
     }
 
     public static TObj ShouldSupportTo<TObj>(this object obj, string? message = null)
@@ -94,7 +117,7 @@ public static class AssertionHelper
             throw new BaseValidationException(message ?? "Object is zero");
         }
         return obj;
-    }   
+    }
 
     public static Type ShouldSupportTo(this Type type, Type desiredType, string? message = null)
     {

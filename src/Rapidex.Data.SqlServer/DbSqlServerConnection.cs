@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Rapidex.Data.SqlServer;
 
-internal class DbSqlServerConnection : IDisposable
+internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initialize 
 {
     protected int DebugId { get; }
     protected string ConnectionString { get; }
@@ -102,7 +102,7 @@ internal class DbSqlServerConnection : IDisposable
                     table.Load(reader);
 
 #if DEBUG
-                    Common.DefaultLogger?.LogDebug("Database", $"{table.Rows.Count} row(s) returned");
+                    Common.DefaultLogger?.LogDebug("Database", $"({this.DebugId}) {table.Rows.Count} row(s) returned");
 #endif
 
                     return table;
@@ -111,8 +111,8 @@ internal class DbSqlServerConnection : IDisposable
             catch (Exception ex)
             {
                 string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, sql, parameters);
-                Common.DefaultLogger?.LogError("Database", $"{ex.Message}\r\n{logLine}");
-                Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
+                Common.DefaultLogger?.LogError("Database", $"({this.DebugId}) {ex.Message}\r\n{logLine}");
+                Common.DefaultLogger?.LogWarning("Database", $"({this.DebugId}) \r\n" + Environment.StackTrace);
                 var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
                 tex.Log();
                 throw tex;
@@ -137,7 +137,7 @@ internal class DbSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
-                Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
+                Common.DefaultLogger?.LogWarning("Database", $"({this.DebugId}) \r\n" + Environment.StackTrace);
                 Common.DefaultLogger?.LogError("Database", $"{ex.Message}\r\n{sql}");
 
                 var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, sql + " / " + variableTable.TableName) ?? ex;

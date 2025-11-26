@@ -80,12 +80,27 @@ public class AutoStringToBasicConverter : JsonConverter<object>
 
         if (reader.TokenType == JsonTokenType.Number)
         {
-            switch (Type.GetTypeCode(typeToConvert))
+            var typeCode = Type.GetTypeCode(typeToConvert);
+
+            if (typeCode == TypeCode.Object)
+            {
+                if (typeToConvert.IsGenericType && typeToConvert.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    Type underlyingType = Nullable.GetUnderlyingType(typeToConvert)!;
+                    typeCode = Type.GetTypeCode(underlyingType);
+                }
+                else
+                {
+                    throw new NotSupportedException($"unsupported type {typeToConvert}");
+                }
+            }
+
+            switch (typeCode)
             {
                 case TypeCode.Byte:
                     return reader.TryGetByte(out byte valByte) ? valByte : reader.GetByte();
                 case TypeCode.SByte:
-                    return reader.TryGetByte(out byte valSByte) ? valSByte : reader.GetSByte();
+                    return reader.TryGetSByte(out sbyte valSByte) ? valSByte : reader.GetSByte();
                 case TypeCode.UInt16:
                     return reader.TryGetUInt16(out ushort valUInt16) ? valUInt16 : reader.GetUInt16();
                 case TypeCode.UInt32:

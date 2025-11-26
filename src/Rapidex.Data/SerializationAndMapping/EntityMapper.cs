@@ -477,7 +477,10 @@ public class EntityMapper
 
     public IEntity MapToNew(IDbEntityMetadata em, IDictionary<string, object> from, Action<IEntity> set = null)
     {
-        IEntity instance = Database.EntityFactory.Create(em, this.Parent, true);
+        object obj = from.Get(DatabaseConstants.FIELD_ID);
+        bool isNew = obj == null || Convert.IsDBNull(obj) || Convert.ToInt64(obj) <= 0;
+        IEntity instance = Database.EntityFactory.Create(em, this.Parent, isNew);
+        instance._IsNew = true;
         return this.Map(em, from, instance, set);
     }
 

@@ -10,7 +10,7 @@ using Rapidex.Data.Helpers;
 
 namespace Rapidex.Data.PostgreServer;
 
-internal class PostgreSqlServerConnection : IDisposable
+internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + initialize 
 {
     protected object lockObject = new object();
     private NpgsqlConnection connectionWithTransaction;
@@ -175,7 +175,7 @@ internal class PostgreSqlServerConnection : IDisposable
                             table.Load(reader);
 
 #if DEBUG
-                            Common.DefaultLogger?.LogDebug("Database", $"{table.Rows.Count} row(s) returned");
+                            Common.DefaultLogger?.LogDebug("Database", $"({this.DebugId}) {table.Rows.Count} row(s) returned");
 #endif
 
                             table.CaseSensitive = false;
@@ -185,8 +185,8 @@ internal class PostgreSqlServerConnection : IDisposable
                     catch (Exception ex)
                     {
                         string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
-                        Common.DefaultLogger?.LogError("Database", $"{this.DebugId}; {ex.Message}\r\n{logLine}");
-                        Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
+                        Common.DefaultLogger?.LogError("Database", $"({this.DebugId}) {ex.Message}\r\n{logLine}");
+                        Common.DefaultLogger?.LogWarning("Database", $"({this.DebugId}) \r\n" + Environment.StackTrace);
                         var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
                         tex.Log();
                         throw tex;
@@ -221,7 +221,7 @@ internal class PostgreSqlServerConnection : IDisposable
             }
             catch (Exception ex)
             {
-                Common.DefaultLogger?.LogWarning("Database", Environment.StackTrace);
+                Common.DefaultLogger?.LogWarning("Database", $"({this.DebugId}) \r\n" + Environment.StackTrace);
                 Common.DefaultLogger?.LogError("Database", $"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
 
                 var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, schemaName + ", " + variableTable.TableName) ?? ex;

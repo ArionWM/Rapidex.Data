@@ -37,7 +37,7 @@ internal class CacheFactory
         if (this.genericHybridCache != null)
             return new DefaultHybridCache(this.genericHybridCache);
 
-        Rapidex.Common.DefaultLogger.LogWarning("No cache is configured. See: abc");
+        Rapidex.Common.DefaultLogger.LogWarning("using DefaultInMemoryCache (No another cache is configured) See: abc");
         return new DefaultInMemoryCache();
     }
 }
