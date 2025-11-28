@@ -81,12 +81,12 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return this.Load(query);
     }
 
-    public IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result)
+    public IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql)
     {
         this.CheckConnection();
 
-        string sql = result.Sql;
-        DbVariable[] variables = DbVariable.Get(result.NamedBindings);
+        string sql = compiledSql.Sql;
+        DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 #if DEBUG
         Common.DefaultLogger?.LogDebug("Database", $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
@@ -103,7 +103,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         Compiler mySqlCompiler = this.GetCompiler();
         SqlResult result = mySqlCompiler.Compile(loader.Query);
 
-        return this.Load(loader.EntityMetadata, result);
+        return this.Load(loader.EntityMetadata, loader, result);
     }
 
     public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)

@@ -1,13 +1,15 @@
-﻿using Rapidex.Data.Entities;
-using Rapidex.Data.Query;
-using Rapidex.UnitTest.Data.TestContent;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rapidex.Data.Entities;
+using Rapidex.Data.Query;
+using Rapidex.UnitTest.Data.Helpers;
+using Rapidex.UnitTest.Data.TestContent;
 
 namespace Rapidex.UnitTest.Data.TestBase;
+
 public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
 {
     public QueryTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
@@ -507,7 +509,45 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
     }
 
+    [Fact]
+    public virtual void Load_07_DateTimeWithOffset()
+    {
+        TestCache cache = Database.Cache.ShouldSupportTo<TestCache>();
+        Assert.False(TestCache.CacheEnabled);
 
+        var db = Database.Dbs.Db();
+        db.ReAddReCreate<ConcreteEntity01>();
+        db.Structure.ApplyAllStructure();
+
+        using var work1 = db.BeginWork();
+        ConcreteEntity01 entity1 = work1.New<ConcreteEntity01>();
+        entity1.Name = "DateTimeOffset Test";
+        entity1.BirthDate = new DateTimeOffset(2024, 6, 15, 10, 30, 0, TimeSpan.Zero);
+        entity1.Save();
+
+        ConcreteEntity01 entity2 = work1.New<ConcreteEntity01>();
+        entity2.Name = "DateTimeOffset Test";
+        entity2.BirthDate = new DateTimeOffset(2024, 2, 17, 09, 21, 0, TimeSpan.FromHours(2));
+        entity2.Save();
+
+
+        work1.CommitChanges();
+
+        long id1 = entity1.Id;
+        long id2 = entity2.Id;
+
+        ConcreteEntity01 loadedEntity1 = db.Find<ConcreteEntity01>(id1);
+        Assert.Equal(new DateTimeOffset(2024, 6, 15, 10, 30, 0, TimeSpan.Zero), loadedEntity1.BirthDate);
+
+        ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id2);
+        Assert.Equal(new DateTimeOffset(2024, 2, 17, 09, 21, 0, TimeSpan.FromHours(2)), loadedEntity2.BirthDate);
+        //Load with native
+
+
+
+
+
+    }
 }
 
 

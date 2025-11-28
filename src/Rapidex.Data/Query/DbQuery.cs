@@ -161,6 +161,18 @@ namespace Rapidex.Data.Query
             base.EnterUpdateMode();
             return this;
         }
+
+        public new IQuery UseQueryCache()
+        {
+            base.UseQueryCache();
+            return this;
+        }
+
+        public new IQuery SkipQueryCache()
+        {
+            base.SkipQueryCache();
+            return this;
+        }
     }
 
     internal class Query<T> : DbQuery, IQuery<T> where T : IConcreteEntity
@@ -312,6 +324,20 @@ namespace Rapidex.Data.Query
             base.EnterUpdateMode();
             return this;
         }
+
+        public new IQuery<T> UseQueryCache()
+        {
+            base.UseQueryCache();
+            return this;
+        }
+
+        public new IQuery<T> SkipQueryCache()
+        {
+            base.SkipQueryCache();
+            return this;
+        }
+
+
 
 
     }

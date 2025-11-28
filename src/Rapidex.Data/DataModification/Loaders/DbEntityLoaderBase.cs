@@ -20,7 +20,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
     }
 
 
-    protected abstract IEntity GetInternal(IDbEntityMetadata em, DbEntityId id);
+    protected abstract IEntity FindWithCacheInternal(IDbEntityMetadata em, DbEntityId id);
 
     public void Setup(IDbSchemaScope schema, IDbDataModificationPovider baseDmProvider)
     {
@@ -29,14 +29,14 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
         this.SqlKataCompiler = this.BaseDmProvider.GetCompiler();
     }
 
-    protected virtual IEntity[] LoadInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
+    protected virtual IEntity[] LoadWithCacheInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
         List<IEntity> available = new List<IEntity>();
         List<DbEntityId> notAvailable = new List<DbEntityId>();
 
         foreach (var id in ids)
         {
-            var entity = this.GetInternal(em, id);
+            var entity = this.FindWithCacheInternal(em, id);
             if (entity == null)
                 notAvailable.Add(id);
             else
@@ -63,7 +63,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
     public virtual IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
-        IEntity[] loaded = this.LoadInternal(em, ids);
+        IEntity[] loaded = this.LoadWithCacheInternal(em, ids);
         EntityLoadResult values = new EntityLoadResult(loaded);
         return values;
     }
@@ -80,12 +80,12 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
     //DbEntityWithCacheLoader içerisinde ayrıca SqlResult result = this.SqlKataCompiler.NotNull().Compile(loader.Query); kullan
     //IQueryLoader içerisinde "UseQueryCache" + "DontUseQueryCache"
 
-    public abstract IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result);
+    public abstract IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql);
 
     public virtual IEntityLoadResult Load(IQueryLoader loader)
     {
         SqlResult result = this.SqlKataCompiler.NotNull().Compile(loader.Query);
-        return this.Load(loader.EntityMetadata, result);
+        return this.Load(loader.EntityMetadata, loader, result);
     }
 
 

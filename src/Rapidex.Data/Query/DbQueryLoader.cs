@@ -9,6 +9,9 @@ namespace Rapidex.Data.Query
 {
     internal class DbQueryLoader : DbQueryOrder, IQueryLoader
     {
+        public virtual bool ForceUseQueryCache { get; protected set; }
+        public virtual bool ForceSkipQueryCache { get; protected set; }
+
         public DbQueryLoader(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo) : base(schema, em, aliasNo)
         {
         }
@@ -63,7 +66,25 @@ namespace Rapidex.Data.Query
             newLoader.Order = this.Order;
             newLoader.Alias = this.Alias;
             return newLoader;
-
         }
+
+        public virtual IQueryLoader UseQueryCache()
+        {
+            this.ForceSkipQueryCache = false;
+            this.ForceUseQueryCache = true;
+
+            return this;
+        }
+
+        public virtual IQueryLoader SkipQueryCache()
+        {
+            this.ForceSkipQueryCache = true;
+            this.ForceUseQueryCache = false;
+
+            return this;
+        }
+
+
     }
+
 }

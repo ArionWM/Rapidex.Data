@@ -36,12 +36,12 @@ public interface IQueryBase
 
     void SetSchema(IDbSchemaScope schema)
     {
-        Schema = schema;
+        this.Schema = schema;
     }
 
     void Map(IDbEntityMetadata em)
     {
-        EntityMetadata = em;
+        this.EntityMetadata = em;
     }
 }
 
@@ -116,6 +116,20 @@ public interface IQueryOrder : IQueryPager
 
 public interface IQueryLoader : IQueryOrder, ICloneable
 {
+    bool ForceUseQueryCache { get; }
+
+    bool ForceSkipQueryCache { get; }
+
+    /// <summary>
+    /// If entity metadata has EnableQueryCache = true, query cache will be used.
+    /// If entity metadata has EnableQueryCache = false, first use query cache will not be used, but next calls will use query cache is called (With UseQueryCache()).
+    /// </summary>
+    /// <returns></returns>
+    IQueryLoader UseQueryCache();
+
+    IQueryLoader SkipQueryCache();
+
+
     IEntityLoadResult Load();
 
     ILoadResult<DataRow> LoadPartial(params string[] fields); //Şimdilik DataRow dönsün
@@ -123,12 +137,12 @@ public interface IQueryLoader : IQueryOrder, ICloneable
     IEntity First();
 
     //IEntity Last();
-
     ILoadResult<DbEntityId> GetIds();
 }
 
 public interface IQueryLoader<T> : IQueryLoader, IQueryBase where T : IConcreteEntity
 {
+
     new IEntityLoadResult<T> Load();
 
     T Find(long id);
@@ -190,6 +204,8 @@ public interface IQuery : IQueryBase, IQueryCriteria, IQueryPager, IQueryOrder, 
     new IQuery ClearPagingAndLimit();
 
     new IQuery EnterUpdateMode();
+    new IQuery UseQueryCache();
+    new IQuery SkipQueryCache();
 
 }
 
@@ -257,5 +273,7 @@ public interface IQuery<T> : IQuery, IQueryLoader<T> where T : IConcreteEntity
     //TODO: Limit / Top (IncludeTotalItemCount: false)
     new IQuery<T> ClearPagingAndLimit();
     new IQuery<T> EnterUpdateMode();
+    new IQuery UseQueryCache();
+    new IQuery SkipQueryCache();
 
 }

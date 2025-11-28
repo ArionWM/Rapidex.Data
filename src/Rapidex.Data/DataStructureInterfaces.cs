@@ -235,27 +235,27 @@ public class CacheOptions
     {
         IsIdCacheEnabled = false,
         IsQueryCacheEnabled = false,
-        Duration = TimeSpan.Zero
+        Expiration = null
     };
 
     public static CacheOptions Default => new CacheOptions()
     {
         IsIdCacheEnabled = true,
         IsQueryCacheEnabled = false,
-        Duration = TimeSpan.FromMinutes(5)
+        Expiration = null
     };
 
     public static CacheOptions FullEnabled => new CacheOptions()
     {
         IsIdCacheEnabled = true,
         IsQueryCacheEnabled = true,
-        Duration = TimeSpan.FromMinutes(10)
+        Expiration = null
     };
 
     public bool IsIdCacheEnabled { get; set; }
     public bool IsQueryCacheEnabled { get; set; }
 
-    public TimeSpan Duration { get; set; }
+    public TimeSpan? Expiration { get; set; }
 }
 
 public interface IDbEntityMetadata : IImplementTarget, IComponent //İki katmanlı olsa? İlk katman kolayca serileşebilecek bir DTO, ikinci katmanda metotlar + filtreler?
@@ -497,8 +497,8 @@ public struct DbEntityId //TODO: Rename?
 
     public DbEntityId(long id, int version)
     {
-        Id = id;
-        Version = version;
+        this.Id = id;
+        this.Version = version;
     }
 }
 
@@ -528,7 +528,7 @@ public interface IDbEntityLoader
 
     IEntityLoadResult Load(IQueryLoader loader);
 
-    IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result);
+    IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql);
 
     ILoadResult<DataRow> LoadRaw(IQueryLoader loader);
 }

@@ -8,6 +8,7 @@ namespace Rapidex.Data.Cache;
 
 internal class DefaultHybridCache : ICache
 {
+    private const string TAG = "entity";
     private readonly HybridCache cache;
 
     public DefaultHybridCache([FromKeyedServices("rdata")] HybridCache hcache)

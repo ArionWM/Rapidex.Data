@@ -50,18 +50,7 @@ public interface ICache
     void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
     Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
     void Remove(string key);
+    
 }
 
-///// <summary>
-///// Concrete entity'ler için metadata özelleştirmeleri ve filtreler için çalışır
-///// </summary>
-//public interface IEntityMetadataImplementer
-//{
-//    IDbScope Scope { get; }
-//    IDbEntityMetadata Entity { get; }
-//    IDbEntityMetadataManager Manager { get; }
 
-//    //Predefined values
-
-//    void Apply();
-//}

@@ -10,7 +10,7 @@ namespace Rapidex.Data.DataModification.Loaders;
 
 internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
 {
-    protected IEntityLoadResult LoadInternal(IDbEntityMetadata em, SqlResult result)
+    protected IEntityLoadResult LoadWithCacheInternal(IDbEntityMetadata em, SqlResult result)
     {
         var loadResultFromCache = Database.Cache.GetQuery(em, this.ParentScope, result);
         if (loadResultFromCache != null)
@@ -20,7 +20,7 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         return null;
     }
 
-    protected override IEntity GetInternal(IDbEntityMetadata em, DbEntityId id)
+    protected override IEntity FindWithCacheInternal(IDbEntityMetadata em, DbEntityId id)
     {
         var entity = Database.Cache.GetEntity(this.ParentScope, em.Name, id.Id);
 
@@ -32,25 +32,26 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         return entity;
     }
 
-    protected override IEntity[] LoadInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
+    protected override IEntity[] LoadWithCacheInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
-        IEntity[] result = base.LoadInternal(em, ids);
+        IEntity[] result = base.LoadWithCacheInternal(em, ids);
         if (em.CacheOptions.IsIdCacheEnabled)
         {
             var uncachedEntities = result.Where(e => e._loadSource == LoadSource.Database);
             if (uncachedEntities.Any())
-                Database.Cache.SetEntities(uncachedEntities);
+                Database.Cache.SetEntities(uncachedEntities, em.CacheOptions.Expiration);
         }
 
         return result;
     }
 
-    public override IEntityLoadResult Load(IDbEntityMetadata em, SqlResult result)
+    public override IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql)
     {
 
-        if (em.CacheOptions.IsQueryCacheEnabled)
+        bool useQueryCache = (em.CacheOptions.IsQueryCacheEnabled || loader.ForceUseQueryCache) && !loader.ForceSkipQueryCache;
+        if (useQueryCache)
         {
-            var loadResultFromCache = this.LoadInternal(em, result);
+            var loadResultFromCache = this.LoadWithCacheInternal(em, compiledSql);
             if (loadResultFromCache != null)
             {
                 return loadResultFromCache;
@@ -58,14 +59,14 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         }
 
         IEntityLoadResult lastLoadResult = null;
-        lastLoadResult = this.BaseDmProvider.Load(em, result);
+        lastLoadResult = this.BaseDmProvider.Load(em, loader, compiledSql);
         if (lastLoadResult.IsNOTNullOrEmpty())
         {
-            Database.Cache.SetEntities(lastLoadResult);
+            Database.Cache.SetEntities(lastLoadResult, em.CacheOptions.Expiration);
 
-            if (em.CacheOptions.IsQueryCacheEnabled)
+            if (useQueryCache)
             {
-                Database.Cache.StoreQuery(em, this.ParentScope, result, lastLoadResult);
+                Database.Cache.StoreQuery(em, this.ParentScope, compiledSql, lastLoadResult, em.CacheOptions.Expiration);
             }
 
             return lastLoadResult;

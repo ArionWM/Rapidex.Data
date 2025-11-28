@@ -21,20 +21,20 @@ public static class CacheExtensions
         return $"{dbName}:{schemaName}:{typeName}:{id}";
     }
 
-    public static void SetEntity(this ICache cache, IEntity entity)
+    public static void SetEntity(this ICache cache, IEntity entity, TimeSpan? expiration = null)
     {
         if (entity.HasPrematureId())
             return;
 
         string key = GetEntityCacheKey(entity);
-        cache.Set(key, entity);
+        cache.Set(key, entity, expiration, expiration);
     }
 
-    public static void SetEntities(this ICache cache, IEnumerable<IEntity> entities)
+    public static void SetEntities(this ICache cache, IEnumerable<IEntity> entities, TimeSpan? expiration = null)
     {
         foreach (var entity in entities)
         {
-            cache.SetEntity(entity);
+            cache.SetEntity(entity, expiration);
         }
     }
 
@@ -137,10 +137,10 @@ public static class CacheExtensions
         return $"{dbName}:{schemaName}:{typeName}:QUERY:{queryHash}";
     }
 
-    public static void StoreQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result, IEntityLoadResult loadResult)
+    public static void StoreQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result, IEntityLoadResult loadResult, TimeSpan? expiration = null)
     {
         string key = GetQueryCacheKey(em, dbSchema, result);
-        cache.Set(key, loadResult);
+        cache.Set(key, loadResult, expiration, expiration);
     }
 
     public static IEntityLoadResult GetQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result)
