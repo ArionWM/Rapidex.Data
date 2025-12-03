@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.SignalHub;
+
 internal class SignalHub : ISignalHub
 {
     public ISignalDefinitionCollection Definitions { get; } = new SignalDefinitionCollection();
@@ -86,13 +87,13 @@ internal class SignalHub : ISignalHub
         topic.Check()
             .Sections.NotEmpty();
 
+        args.Id = Guid.NewGuid();
         args.Topic = topic;
+        args.SignalName ??= topic.Event;
 
         SignalHubSubscriber[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
         if (subscribers.IsNullOrEmpty())
             return new SignalProcessResult(SignalProcessStatus.Completed, args);
-
-        args.Id = Guid.NewGuid();
 
         return this.PublishInternalSync(topic, args);
 

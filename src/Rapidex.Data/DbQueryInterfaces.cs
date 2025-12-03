@@ -273,7 +273,7 @@ public interface IQuery<T> : IQuery, IQueryLoader<T> where T : IConcreteEntity
     //TODO: Limit / Top (IncludeTotalItemCount: false)
     new IQuery<T> ClearPagingAndLimit();
     new IQuery<T> EnterUpdateMode();
-    new IQuery UseQueryCache();
-    new IQuery SkipQueryCache();
+    new IQuery<T> UseQueryCache();
+    new IQuery<T> SkipQueryCache();
 
 }

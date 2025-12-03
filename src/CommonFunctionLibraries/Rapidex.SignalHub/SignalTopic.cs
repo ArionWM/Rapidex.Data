@@ -42,7 +42,7 @@ public class SignalTopic : ICloneable, IComparable<SignalTopic>, IEquatable<Sign
 
     public SignalTopic()
     {
-        
+
     }
 
     public SignalTopic(string databaseOrTenantShortName, string workspace, string module, string @event, string entity = null, string entityId = null, string field = null)
@@ -179,7 +179,7 @@ public class SignalTopic : ICloneable, IComparable<SignalTopic>, IEquatable<Sign
         }
         else
         {
-            throw new ValidationException($"Invalid topic: {topicText}");
+            throw new ValidationException($"Invalid topic: '{result.Description}' -> '{topicText}'");
         }
     }
 
