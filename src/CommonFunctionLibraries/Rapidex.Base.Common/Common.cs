@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Rapidex.Base.Common.Assemblies;
+using Rapidex.Logging;
 
 namespace Rapidex
 {
@@ -113,10 +114,11 @@ namespace Rapidex
 
         public static void Start(IServiceProvider serviceProvider)
         {
+            //Change bootstrap logger to the real one
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             var logger = loggerFactory?.CreateLogger("Rapidex");
             if (logger != null)
-                Common.DefaultLogger = logger;
+                Common.UseLogger(logger);
 
             MappingHelper.Start();
 
@@ -128,6 +130,8 @@ namespace Rapidex
         {
             logger.NotNull();
             Common.DefaultLogger = logger;
+
+            LoggingHelper.LogSystemInformation();
         }
 
     }

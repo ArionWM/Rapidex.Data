@@ -35,4 +35,19 @@ public static class FileHelper
 
         return files.Select(file => file.FullName).ToArray();
     }
+
+    public static string GetTempFileName(string fileNamePart)
+    {
+        string tempPath = Path.GetTempPath();
+        string fileName = $"{fileNamePart}_{Guid.NewGuid()}.tmp";
+        return Path.Combine(tempPath, fileName);
+    }
+
+    public static string GetTempFileName(string fileNamePart, string extension)
+    {
+        extension = extension.TrimStart('.');
+        string tempPath = Path.GetTempPath();
+        string fileName = $"{fileNamePart}_{Guid.NewGuid()}.{extension}";
+        return Path.Combine(tempPath, fileName);
+    }
 }

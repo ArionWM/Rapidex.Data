@@ -33,20 +33,20 @@ namespace Rapidex
 
         public Result(T content)
         {
-            Content = content;
+            this.Content = content;
         }
 
         public Result(bool success, string message)
         {
             base.Success = success;
-            Description = message;
+            this.Description = message;
         }
 
         public Result(bool success, string message, T content)
         {
             base.Success = success;
-            Description = message;
-            Content = content;
+            this.Description = message;
+            this.Content = content;
         }
 
         public static Result<T> Ok(T content)
