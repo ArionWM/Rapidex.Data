@@ -47,6 +47,16 @@ public static class AssertionHelper
         return obj;
     }
 
+    public static void ShouldBeNull<T>([AllowNull] this T obj, string? message = null)
+    {
+        if (obj != null)
+        {
+            DebugBreak();
+            throw new ArgumentNullException(message ?? "Object is not null");
+        }
+        
+    }
+
     public static T NotEmpty<T>([NotNull] this T obj, string? message = null)
     {
         obj.NotNull(message);

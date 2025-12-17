@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using static Rapidex.SignalHub.TopicParser;
 
 namespace Rapidex.UnitTest.SignalHub;
-public class SignalHubTests : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
+public class SignalHubTests : IClassFixture<EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture>>
 {
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;

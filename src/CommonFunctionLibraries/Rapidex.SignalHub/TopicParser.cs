@@ -53,6 +53,7 @@ public class TopicParser
     public static TopicParseResult Parse(ISignalHub hub, string topicText)
     {
 
+        topicText = topicText.TrimEnd('/');
         if (!mqttTopicRegex.IsMatch(topicText))
         {
             return TopicParseResult.Invalid("Topic not match regular structure");

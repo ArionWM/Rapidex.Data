@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.SignalHub;
-public class RegistrationTests : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
+public class RegistrationTests : IClassFixture<EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture>>
 {
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rapidex.UnitTest.Base.Common;
 
-public class DataConvertionTests : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
+public class DataConvertionTests : IClassFixture<EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture>>
 {
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;

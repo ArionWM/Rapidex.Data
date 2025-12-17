@@ -112,7 +112,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
 
     public void SwitchDatabase(string dbName)
     {
-        this.Checkinitialized();
+        //this.Checkinitialized();
         this.CheckConnection(false);
 
         if (!this.IsDatabaseAvailable(dbName))
@@ -170,7 +170,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
     {
         dbName.NotEmpty();
 
-        this.Checkinitialized();
+        //this.Checkinitialized();
         this.CheckConnection();
 
         try

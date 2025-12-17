@@ -30,6 +30,7 @@ public interface ISignalDefinitionCollection : IDictionary<string, ISignalDefini
 
 public interface ISignalArguments : ICloneable
 {
+    DateTimeOffset Time { get; set; }
     SignalTopic Topic { get; set; }
 
     /// <summary>
@@ -80,6 +81,7 @@ public interface ISignalHub
     /// <param name="topic">The signal to subscribe to.</param>
     /// <param name="handler">The handler to call when the signal is raised.</param>
     IResult<int> Subscribe(SignalTopic topic, Func<ISignalArguments, ISignalHandlingResult> handler);
+    IResult<int> Subscribe(SignalTopic topic, Func<ISignalArguments, Task<ISignalHandlingResult>> handler);
 
     /// <summary>
     ///     Unsubscribe from a signal.

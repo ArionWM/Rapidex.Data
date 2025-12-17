@@ -138,7 +138,7 @@ public class DbSqlServerProvider : IDbProvider
 
     public IDbAuthorizationChecker GetAuthorizationChecker()
     {
-        this.CheckInitialized();
+        //this.CheckInitialized();
         return new DbSqlServerAuthorizationChecker(this.ConnectionString);
     }
 }

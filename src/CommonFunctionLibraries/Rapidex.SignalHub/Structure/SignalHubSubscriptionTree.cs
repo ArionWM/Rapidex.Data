@@ -132,7 +132,7 @@ internal class SignalHubSubscriptionTree : SignalHubSubscriptionTreeItem
         base.Add(subscriber);
     }
 
-    public virtual void Add(int handlerId, SignalTopic topic, Func<ISignalArguments, ISignalHandlingResult> handler)
+    public virtual void Add(int handlerId, SignalTopic topic, Func<ISignalArguments, Task<ISignalHandlingResult>> handler)
     {
         var subscriber = new SignalHubSubscriber(handlerId, topic, handler);
         this.Add(subscriber);

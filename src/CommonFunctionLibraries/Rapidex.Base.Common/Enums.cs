@@ -26,13 +26,5 @@ namespace Rapidex
         Markdown
     }
 
-    public enum RunnableComponentStatus
-    {
-        Idle = 10 ,
-        Running = 20, 
-        WaitingStop = 40,
-        Completed = 50,
-        Failure = 99
-             
-    }
+
 }

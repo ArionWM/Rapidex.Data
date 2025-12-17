@@ -4,7 +4,7 @@ using Rapidex.UnitTest.Base.Common.Fixtures;
 
 namespace Rapidex.UnitTest.SignalHub;
 
-public class TopicParsing : IClassFixture<SingletonFixtureFactory<DefaultEmptyFixture>>
+public class TopicParsing : IClassFixture<EachTestClassIsolatedFixtureFactory<DefaultEmptyFixture>>
 {
     DefaultEmptyFixture Fixture { get; }
     public ILogger Logger => this.Fixture.Logger;

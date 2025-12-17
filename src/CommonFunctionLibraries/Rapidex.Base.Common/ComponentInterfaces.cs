@@ -26,14 +26,7 @@ public interface IOrderedComponent : IComponent
     int Index { get; }
 }
 
-public interface IOneTimeRunnableComponent 
-{
-    RunnableComponentStatus Status { get;  set; }
-    string StatusMessage { get; set; }
-    double ProgressPercentage { get; set; }
 
-    event Action OnEnd;
-}
 
 /// <summary>
 /// Setup zamanında çalışmayan, start ile çalıştırılan servislerdir.

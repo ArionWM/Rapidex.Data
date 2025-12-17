@@ -22,14 +22,27 @@ internal class SignalHub : ISignalHub
         return this.lastId;
     }
 
-    protected ISignalHandlingResult Invoke(SignalHubSubscriber subscriber, ISignalArguments args)
+    protected async Task<ISignalHandlingResult> Invoke(SignalHubSubscriber subscriber, ISignalArguments args)
     {
-        ISignalHandlingResult resultArgs = subscriber.Handler.Invoke(args);
+        ISignalHandlingResult resultArgs = await subscriber.Handler.Invoke(args);
         return resultArgs;
     }
 
-    protected ISignalProcessResult PublishInternalSync(SignalTopic topic, ISignalArguments args)
+    protected virtual async Task<ISignalProcessResult> PublishInternal(SignalTopic topic, ISignalArguments args)
     {
+        if (topic.SignalDefinition != null)
+        {
+            topic.SignalDefinition = this.Definitions.Get(topic.Event);
+        }
+
+        topic.Check()
+            .Sections.NotEmpty();
+
+        args.Id = Guid.NewGuid();
+        args.Topic = topic;
+        args.SignalName ??= topic.Event;
+        args.Time = DateTimeOffset.UtcNow;
+
         args.NotNull();
         args.Topic.NotNull();
 
@@ -46,7 +59,7 @@ internal class SignalHub : ISignalHub
             {
                 ISignalArguments argsForInvoke = _input.CloneFor(subs.Id);
 
-                ISignalHandlingResult hResult = this.Invoke(subs, argsForInvoke);
+                ISignalHandlingResult hResult = await this.Invoke(subs, argsForInvoke);
                 if (hResult == null)
                 {
                     var nhResult = new SignalHandlingResult(subs.Id);
@@ -77,51 +90,34 @@ internal class SignalHub : ISignalHub
 
     }
 
-    protected virtual ISignalProcessResult PublishInternal(SignalTopic topic, ISignalArguments args)
-    {
-        if (topic.SignalDefinition != null)
-        {
-            topic.SignalDefinition = this.Definitions.Get(topic.Event);
-        }
-
-        topic.Check()
-            .Sections.NotEmpty();
-
-        args.Id = Guid.NewGuid();
-        args.Topic = topic;
-        args.SignalName ??= topic.Event;
-
-        SignalHubSubscriber[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
-        if (subscribers.IsNullOrEmpty())
-            return new SignalProcessResult(SignalProcessStatus.Completed, args);
-
-        return this.PublishInternalSync(topic, args);
-
-        //Job_PublishInternalAsync
-    }
-
     public Task<ISignalProcessResult> PublishAsync(SignalTopic topic, ISignalArguments args)
     {
-        return Task<ISignalProcessResult>.Run(() =>
+        return Task<ISignalProcessResult>.Run(async () =>
         {
-            return this.PublishInternal(topic, args);
+            return await this.PublishInternal(topic, args);
         });
     }
 
-    //public ISignalProcessResult PublishSync(SignalTopic topic, ISignalArguments args)
-    //{
-    //    return this.PublishInternal(topic, args);
-    //}
 
+    [Obsolete("Use Subscribe with Func<ISignalArguments, Task<ISignalHandlingResult>> handler")]
     public IResult<int> Subscribe(SignalTopic topic, Func<ISignalArguments, ISignalHandlingResult> handler)
     {
         topic.Check()
             .Sections.NotEmpty();
 
         int handlerId = this.GetId();
+        this.Subscriptions.Add(handlerId, topic,
+            (args) => Task.FromResult(handler.Invoke(args)));
+        return Result<int>.Ok(handlerId);
+    }
+
+    public IResult<int> Subscribe(SignalTopic topic, Func<ISignalArguments, Task<ISignalHandlingResult>> handler)
+    {
+        topic.Check()
+            .Sections.NotEmpty();
+        int handlerId = this.GetId();
         this.Subscriptions.Add(handlerId, topic, handler);
         return Result<int>.Ok(handlerId);
-
     }
 
     public IResult Unsubscribe(int handlerId)

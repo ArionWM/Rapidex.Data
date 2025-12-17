@@ -35,7 +35,6 @@ internal class EntityMetadataBuilderFromEnum : EntityMetadataBuilderBase
         List<ObjDictionary> result = new List<ObjDictionary>();
         foreach (int ival in enumValues)
         {
-            //int i = Convert.ToInt32(eval);
             if (ival < 1)
                 throw new InvalidOperationException($"Enumeration '{em.Name}' invalid. Minimum enum value should bigger than 0. Minimum enumeration value is 1. Sample: enum ABC {{ Start = 1; Next = 2; }}");
 
