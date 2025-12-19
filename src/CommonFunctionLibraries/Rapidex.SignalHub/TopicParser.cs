@@ -88,10 +88,10 @@ public class TopicParser
         topic.Event = parts[0];
         parts.RemoveAt(0);
 
-        if (TopicParser.WildcardStrs.Contains(topic.Event))
-        {
-            return TopicParseResult.Invalid($"'Signal' section can't have any wildcard ('{topic.Event}')");
-        }
+        //if (TopicParser.WildcardStrs.Contains(topic.Event))
+        //{
+        //    return TopicParseResult.Invalid($"'Signal' section can't have any wildcard ('{topic.Event}')");
+        //}
 
         ISignalDefinition sdef = hub?.Definitions.Find(topic.Event);
         bool isMatch = sdef != null;

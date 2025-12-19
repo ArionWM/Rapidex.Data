@@ -45,7 +45,7 @@ namespace Rapidex
                 value = jelement.GetValueAsOriginalType();
             }
 
-            return Common.Converter.Convert(value, targetType);
+            return Common.Converter.NotNull("Common.Converter is not initialized").Convert(value, targetType);
         }
 
 

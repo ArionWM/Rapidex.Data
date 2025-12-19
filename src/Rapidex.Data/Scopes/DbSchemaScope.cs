@@ -22,6 +22,7 @@ namespace Rapidex.Data.Scopes
         protected IDbDataModificationStaticHost dataManager;
         protected EntityMapper mapper;
         protected IBlobRepository blobRepository;
+        protected IServiceProvider serviceProvider;
 
         public IDbScope ParentDbScope
         {
@@ -79,6 +80,7 @@ namespace Rapidex.Data.Scopes
             this._debugTracker = RandomHelper.Random(1000000);
 #endif
 
+            this.serviceProvider = serviceProvider;
             this.logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger<DbSchemaScope>();
 
         }
@@ -100,7 +102,7 @@ namespace Rapidex.Data.Scopes
             provider.SetParentScope(this);
             this.structureManager = this.dbProvider.GetStructureProvider();
 
-            this.dataManager = new DataModificationStaticHost(this);
+            this.dataManager = new DataModificationStaticHost(this, this.serviceProvider);
             this.mapper = new EntityMapper(this);
             this.blobRepository = new DefaultDbBlobRepository(this);
             this.isInitialized = true;

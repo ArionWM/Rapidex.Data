@@ -66,6 +66,12 @@ public class AsyncLocalStack<T> : IEmptyCheckObject
         return this.localStack.Value.Contains(item);
     }
 
+    public bool TryRemove(T item)
+    {
+        this.CheckStack();
+        return this.localStack.Value.Remove(item);
+    }
+
     public IEnumerable<T> ToList()
     {
         this.CheckStack();

@@ -19,7 +19,7 @@ public static class AssertionHelper
     }
 
     //see https://stackoverflow.com/questions/61384377/how-to-suppress-possible-null-reference-warnings
-    public static T NotNull<T>([NotNull] this T obj, string? message = null)
+    public static T NotNull<T>([NotNull][AllowNull] this T obj, string? message = null)
     {
         if (obj == null)
         {
@@ -30,7 +30,7 @@ public static class AssertionHelper
         return obj;
     }
 
-    public static T NotNull<T, E>([NotNull] this T obj, string? message = null) where E : Exception, new()
+    public static T NotNull<T, E>([NotNull][AllowNull] this T obj, string? message = null) where E : Exception, new()
     {
         if (obj == null)
         {
@@ -57,7 +57,7 @@ public static class AssertionHelper
         
     }
 
-    public static T NotEmpty<T>([NotNull] this T obj, string? message = null)
+    public static T NotEmpty<T>([NotNull][AllowNull] this T obj, string? message = null)
     {
         obj.NotNull(message);
 

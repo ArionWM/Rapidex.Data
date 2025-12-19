@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.SymbolStore;
 using System.Text;
+using YamlDotNet.Core.Tokens;
 
 namespace Rapidex;
 
@@ -159,6 +160,24 @@ public static class DictionaryHelper
 
             object valueOriginalType = dict[key];
             return valueOriginalType.As<ReqType>();
+        }
+    }
+
+    public static ReqType ValueOr<ReqType>(this IDictionary dict, object key, Func<ReqType> notAvailFunc)
+    {
+        dict.NotNull();
+        key.NotNull();
+
+        lock (dict)
+        {
+            if (dict.Contains(key))
+            {
+                object valueOriginalType = dict[key];
+                return valueOriginalType.As<ReqType>();
+            }
+            ReqType val = notAvailFunc();
+            dict[key] = val;
+            return val;
         }
     }
 

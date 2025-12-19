@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.DataModification;
+
 internal class DataModificationStaticHost : DataModificationReadScopeBase, IDbDataModificationStaticHost
 {
 #if DEBUG
@@ -17,6 +18,7 @@ internal class DataModificationStaticHost : DataModificationReadScopeBase, IDbDa
 
     private AsyncLocalStack<IDbDataModificationScope> localStack = new AsyncLocalStack<IDbDataModificationScope>();
     private ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim();
+    private ILogger logger;
 
     public IDbDataModificationScope CurrentWork
     {
@@ -36,11 +38,12 @@ internal class DataModificationStaticHost : DataModificationReadScopeBase, IDbDa
         }
     }
 
-    public DataModificationStaticHost(IDbSchemaScope parentScope) : base(parentScope)
+    public DataModificationStaticHost(IDbSchemaScope parentScope, IServiceProvider serviceProvider) : base(parentScope)
     {
 #if DEBUG
         this._debugTracker = RandomHelper.Random(1000000);
 #endif
+        this.logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger<DataModificationStaticHost>();
     }
 
     public IDbDataModificationScope BeginWork()
@@ -75,12 +78,22 @@ internal class DataModificationStaticHost : DataModificationReadScopeBase, IDbDa
         {
             var top = localStack.Peek();
             if (top != scope)
-                throw new InvalidOperationException("Scope collision detected. " +
+            {
+                this.logger?.LogWarning("Scope collision detected. " +
                     "\r\nThis finalized scope is not top on the stack. " +
                     "\r\nAre you using 'Task.Run'?" +
                     "\r\nClose scopes with reverse order");
+            }
 
-            localStack.Pop();
+            if (!localStack.TryRemove(scope))
+            {
+#if DEBUG
+                AssertionHelper.DebugBreak();
+#endif
+
+                throw new InvalidOperationException("Scope removal failed. Scope not found in the stack.");
+
+            }
         }
         finally
         {
