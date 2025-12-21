@@ -70,11 +70,32 @@ internal class SignalHubSubscriptionTreeItem
         if (SignalConstants.WildcardStrs.Contains(section))
         {
             var subSections = _sections.ToArray();
-            //deeper for all
-            foreach (var item in this.Items)
+
+            if (section == "+")
             {
-                subscribers.AddRange(item.Value.GetSubscribers(subSections));
+                if (subSections.IsNullOrEmpty())
+                {
+                    //Tek seviye wildcard, alt section'lara inilmez
+                    //Kısa kalanlar (+ yerine geçer)
+                    subscribers.AddRange(this.Subscribers);
+                }
+                else
+                {
+                    //Tek seviye wildcard, alt section'lara inilir
+                    foreach (var item in this.Items)
+                    {
+                        subscribers.AddRange(item.Value.GetSubscribers(subSections));
+                    }
+                }
             }
+
+            if (section == "#")
+            {
+                //Tüm seviye wildcard, alt section'lara inilmez
+                //Kısa kalanlar (# yerine geçer)
+                subscribers.AddRange(this.Subscribers);
+            }
+
         }
         else
         {

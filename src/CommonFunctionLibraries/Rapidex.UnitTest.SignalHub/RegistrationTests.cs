@@ -66,16 +66,17 @@ public class RegistrationTests : IClassFixture<EachTestClassIsolatedFixtureFacto
             tree.GetSubscribers("tenant1/workspace1/module1");
         });
 
-        Assert.Throws<ValidationException>(() =>
-        {
-            //No signal info, can't process
-            tree.GetSubscribers("tenant1/workspace1/module111/+");
-        });
+        //Changed, wildcards are allowed on signal position
+        //Assert.Throws<ValidationException>(() =>
+        //{
+        //    //No signal info, can't process
+        //    tree.GetSubscribers("tenant1/workspace1/module111/+");
+        //});
 
-        Assert.Throws<ValidationException>(() =>
-        {
-            tree.Add(99, "tenant1/workspace1/module111/+/target1", null);
-        });
+        //Assert.Throws<ValidationException>(() =>
+        //{
+        //    tree.Add(99, "tenant1/workspace1/module111/+/target1", null);
+        //});
 
     }
 

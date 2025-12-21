@@ -114,6 +114,8 @@ public static class ServiceExtensions
         configuration.GetSection("RapidexLogging").Bind(config);
         configureOptions?.Invoke(config);
 
+        services.AddSingleton<RapidexLoggingConfiguration>();
+
         // Level switch'leri oluþtur
         var defaultMinLevel = ConvertToSerilogLevel(config.DefaultMinimumLevel);
         GlobalLevelSwitch = new LoggingLevelSwitch(defaultMinLevel);

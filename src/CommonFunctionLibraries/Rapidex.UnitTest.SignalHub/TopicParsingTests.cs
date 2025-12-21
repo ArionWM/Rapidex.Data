@@ -45,6 +45,6 @@ public class TopicParsing : IClassFixture<EachTestClassIsolatedFixtureFactory<De
         Assert.True(result.Topic.IsSystemLevel);
 
         result = TopicParser.Parse(null, "tenant1/workspace1/module1/+/entity1");
-        Assert.False(result.Valid);
+        Assert.True(result.Valid);
     }
 }

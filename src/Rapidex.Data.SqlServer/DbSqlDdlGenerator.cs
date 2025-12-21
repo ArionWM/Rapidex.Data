@@ -177,20 +177,17 @@ DECLARE @requestedCount INT = {numberCount};
 DECLARE @currentValue BIGINT;
 DECLARE @counter INT = 0;
 
--- Geçici tablo oluştur
-CREATE TABLE #SequenceValues (SequenceValue BIGINT);
+DECLARE @SequenceValues TABLE (SequenceValue BIGINT);
 
--- WHILE döngüsü kullanarak SEQUENCE'den değerleri al ve geçici tabloya ekle
 WHILE @counter < @requestedCount
 BEGIN
-	insert into #SequenceValues (SequenceValue)
+	insert into @SequenceValues (SequenceValue)
     SELECT NEXT VALUE FOR [{schemaName}].[{sequenceName}]
     SET @counter = @counter + 1;
 END
 
-SELECT SequenceValue FROM #SequenceValues;
+SELECT SequenceValue FROM @SequenceValues;
 
-DROP TABLE #SequenceValues;
 
 ";
 

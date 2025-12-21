@@ -223,7 +223,8 @@ public static class JsonHelper
     {
         CheckInitialized();
 
-        return JsonSerializer.Serialize<T>(obj, DefaultJsonSerializerOptions);
+        //return JsonSerializer.Serialize<T>(obj, DefaultJsonSerializerOptions);
+        return JsonSerializer.Serialize(obj, DefaultJsonSerializerOptions);
     }
 
 
