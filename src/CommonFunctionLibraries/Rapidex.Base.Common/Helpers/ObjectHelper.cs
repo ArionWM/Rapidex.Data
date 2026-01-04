@@ -14,7 +14,7 @@ namespace Rapidex
         private static DateTimeOffset ZEROTIME = new DateTimeOffset(1, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
 
-        public static bool IsNullOrEmpty([AllowNull] this object? obj)
+        public static bool IsNullOrEmpty([NotNullWhen(false)] this object? obj)
         {
             if (obj == null)
                 return true;
@@ -63,7 +63,7 @@ namespace Rapidex
             return false;
         }
 
-        public static bool IsNOTNullOrEmpty([AllowNull, NotNull] this object? obj)
+        public static bool IsNOTNullOrEmpty([AllowNull, NotNull, NotNullWhen(true)] this object? obj)
         {
 #pragma warning disable CS8777 // Parameter must have a non-null value when exiting.
             return obj != null && !obj.IsNullOrEmpty();

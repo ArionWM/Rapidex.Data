@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
@@ -19,7 +20,8 @@ public class EntityMapper
 
         public IDbEntityMetadata EntityMetadata { get; set; }
         public List<IDbFieldMetadata> AdvancedFields { get; } = new();
-        public DictionaryA<string> TableFieldMappings { get; } = new();
+
+        public ConcurrentDictionary<string, string> TableFieldMappings { get; } = new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase); //TODO: ConcurrentDict
 
         public void CreateMap()
         {

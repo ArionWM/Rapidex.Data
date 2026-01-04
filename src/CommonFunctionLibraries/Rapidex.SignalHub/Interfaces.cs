@@ -39,7 +39,7 @@ public interface ISignalArguments : ICloneable
     Guid Id { get; set; }
     int HandlerId { get; set; }
     string SignalName { get; set; }
-    bool IsSynchronous { get; set; }
+    bool? IsSynchronous { get; set; }
     string Tags { get; }
     string Data { get; }
     string ContentType { get; }
@@ -50,6 +50,7 @@ public interface ISignalArguments : ICloneable
 public enum SignalProcessStatus
 {
     NotProcessed = 0,
+    Processing = 1,
     Completed = 2,
     Failed = 3
 }
@@ -70,6 +71,10 @@ public interface ISignalHandlingResult : IValidationResult
 
 public interface ISignalHub
 {
+#if DEBUG
+    int DebugId { get; }
+#endif
+
     ISignalDefinitionCollection Definitions { get; }
 
 

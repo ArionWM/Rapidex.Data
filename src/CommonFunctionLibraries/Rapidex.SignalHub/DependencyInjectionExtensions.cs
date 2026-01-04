@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Rapidex.SignalHub;
 
 namespace Rapidex;
 public static class DependencyInjectionExtensions
@@ -12,9 +13,8 @@ public static class DependencyInjectionExtensions
     {
         services.AddSingleton<ISignalHub>((sp) =>
         {
-            SignalHub.SignalHub hub = new SignalHub.SignalHub();
-            Rapidex.Signal.Hub = hub;
-            return hub;
+            Rapidex.Signal.Hub = SignalHubFactory.Create();
+            return Rapidex.Signal.Hub;
         });
 
     }

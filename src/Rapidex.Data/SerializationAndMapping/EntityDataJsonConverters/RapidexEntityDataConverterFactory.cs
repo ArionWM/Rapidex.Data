@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +10,8 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
 internal class RapidexEntityDataConverterFactory : JsonConverterFactory
 {
-    readonly static Dictionary<Type, Type?> ConverterTypes = new();
-    readonly static Dictionary<Type, JsonConverter> Converters = new();
+    readonly static ConcurrentDictionary<Type, Type?> ConverterTypes = new();
+    readonly static ConcurrentDictionary<Type, JsonConverter> Converters = new();
 
 
     public RapidexEntityDataConverterFactory()

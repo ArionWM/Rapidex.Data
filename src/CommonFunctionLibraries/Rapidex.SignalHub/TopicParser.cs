@@ -12,7 +12,7 @@ public class TopicParser
     public static readonly char[] WildcardChars = new[] { '+', '#' };
     public static readonly string[] WildcardStrs = new[] { "+", "#" };
 
-    private static readonly Regex mqttTopicRegex = new Regex(
+    private static readonly Regex MqttTopicRegex = new Regex(
         @"^(\/?([a-zA-Z0-9_\-]+|(\+)))*(\/(\#))?$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant
     );
@@ -54,7 +54,7 @@ public class TopicParser
     {
 
         topicText = topicText.TrimEnd('/');
-        if (!mqttTopicRegex.IsMatch(topicText))
+        if (!MqttTopicRegex.IsMatch(topicText))
         {
             return TopicParseResult.Invalid("Topic not match regular structure");
         }
