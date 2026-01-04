@@ -9,22 +9,28 @@ namespace Rapidex.SignalHub;
 
 internal class SignalHub : ISignalHub
 {
+
+    int lastId = 1000000;
+    ITimeProvider timeProvider;
+    
+
 #if DEBUG
     public int DebugId { get; private set; }
 #endif
 
     public ISignalDefinitionCollection Definitions { get; } = new SignalDefinitionCollection();
 
-    int lastId = 1000000;
+    
 
     internal SignalHubSubscriptionTree Subscriptions { get; } = new SignalHubSubscriptionTree();
 
 
-    public SignalHub()
+    public SignalHub(IServiceProvider serviceProvider)
     {
 #if DEBUG
         this.DebugId = RandomHelper.Random(99999999);
 #endif
+        this.timeProvider = serviceProvider.GetRequiredService<ITimeProvider>();
     }
 
     protected int GetId()
@@ -141,7 +147,7 @@ internal class SignalHub : ISignalHub
         args.Id = Guid.NewGuid();
         args.Topic = topic;
         args.SignalName ??= topic.Event;
-        args.Time = DateTimeOffset.UtcNow;
+        args.Time = this.timeProvider.UtcNow;
 
         args.NotNull();
         args.Topic.NotNull();

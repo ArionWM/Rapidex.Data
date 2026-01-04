@@ -7,16 +7,19 @@ using Microsoft.Extensions.Configuration;
 using Rapidex.SignalHub;
 
 namespace Rapidex;
+
 public static class DependencyInjectionExtensions
 {
     public static void AddRapidexSignalHub(this IServiceCollection services)
     {
-        services.AddSingleton<ISignalHub>((sp) =>
-        {
-            Rapidex.Signal.Hub = SignalHubFactory.Create();
-            return Rapidex.Signal.Hub;
-        });
+        services.AddTransient<SignalHubFactory>();
 
+        services.AddSingleton<ISignalHub, Rapidex.SignalHub.SignalHub>(sp =>
+        {
+            var hub = new Rapidex.SignalHub.SignalHub(sp);
+            Signal.Hub = hub;
+            return hub;
+        });
     }
 
     public static void StartRapidexSignalHub(this IServiceProvider serviceProvider)

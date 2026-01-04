@@ -14,7 +14,7 @@ public interface IResult
 
     [JsonPropertyOrder(-9998)]
 
-    string Description { get; set; }
+    string? Description { get; set; }
 }
 
 public interface IResult<T> : IResult

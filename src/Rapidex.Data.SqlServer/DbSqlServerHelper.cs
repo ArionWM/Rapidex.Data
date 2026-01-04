@@ -253,7 +253,7 @@ internal static class DbSqlServerHelper
     public static string CreateSqlLog(int debugId, string sql, params DbVariable[] parameters)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"- Executing ({debugId})");
+        sb.AppendLine($"-- Executing ({debugId})");
         if (parameters.IsNOTNullOrEmpty())
         {
             sb.AppendLine("-- Parameters:");

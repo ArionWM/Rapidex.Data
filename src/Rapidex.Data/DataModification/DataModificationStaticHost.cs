@@ -79,7 +79,7 @@ internal class DataModificationStaticHost : DataModificationReadScopeBase, IDbDa
             var top = localStack.Peek();
             if (top != scope)
             {
-                this.logger?.LogWarning("Scope collision detected. " +
+                this.logger?.LogDebug("Scope collision detected. " +
                     "\r\nThis finalized scope is not top on the stack. " +
                     "\r\nAre you using 'Task.Run'?" +
                     "\r\nClose scopes with reverse order");

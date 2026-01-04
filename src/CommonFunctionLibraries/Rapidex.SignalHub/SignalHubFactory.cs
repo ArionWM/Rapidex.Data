@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 
 namespace Rapidex.SignalHub;
 
+
 public class SignalHubFactory
 {
-    public static ISignalHub Create()
+    private IServiceProvider serviceProvider;
+
+    public SignalHubFactory(IServiceProvider serviceProvider)
     {
-        Rapidex.SignalHub.SignalHub hub = new Rapidex.SignalHub.SignalHub();
+        this.serviceProvider = serviceProvider;
+    }
+
+    public ISignalHub Create()
+    {
+        Rapidex.SignalHub.SignalHub hub = new Rapidex.SignalHub.SignalHub(this.serviceProvider);
         return hub;
     }
 }

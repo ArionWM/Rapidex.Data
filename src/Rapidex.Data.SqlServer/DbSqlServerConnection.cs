@@ -39,10 +39,10 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
 
             retryCount++;
 
-            if (retryCount > 200)
+            if (retryCount > 500)
             {
-                Common.DefaultLogger?.LogError("Database", "Connection is not established after 10 second. ConnectionString: " + this.ConnectionString);
-                throw new InvalidOperationException("SQL Server Connection is not established after 10 second. Check SQL server accessibility."); //TODO: DatabaseConnectionException
+                Common.DefaultLogger?.LogError("Database", "Connection is not established after 30 second. ConnectionString: " + this.ConnectionString);
+                throw new InvalidOperationException("SQL Server Connection is not established after 30 second. Check SQL server accessibility."); //TODO: DatabaseConnectionException
             }
         }
 
