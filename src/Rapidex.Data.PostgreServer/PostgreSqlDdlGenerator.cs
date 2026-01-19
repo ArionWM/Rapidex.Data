@@ -200,7 +200,7 @@ public class PostgreSqlDdlGenerator
         return sb.ToString();
     }
 
-    public string Update(string schemaName, IDbEntityMetadata em, DbVariable id, DbVariable[] fields)
+    public string Update(string schemaName, IDbEntityMetadata em, DbVariable id, DbVariable[] fields, params string[] excludes)
     {
         schemaName = PostgreHelper.CheckObjectName(schemaName);
         string tableName = PostgreHelper.CheckObjectName(em.TableName);
@@ -208,7 +208,7 @@ public class PostgreSqlDdlGenerator
         StringBuilder sb = new StringBuilder();
         sb.AppendLine($"UPDATE {schemaName}.{tableName} SET");
 
-        List<string> fieldValues = fields.Select(f => $"\"{PostgreHelper.CheckObjectName(f.FieldName)}\" = {f.ParameterName}").ToList();
+        List<string> fieldValues = fields.Where(f => !excludes.Contains(f.FieldName)).Select(f => $"\"{PostgreHelper.CheckObjectName(f.FieldName)}\" = {f.ParameterName}").ToList();
         sb.AppendLine(string.Join(",\n", fieldValues));
         sb.AppendLine($"WHERE id = {id.ParameterName};");
         sb.AppendLine($"SELECT COUNT(*) FROM {schemaName}.{tableName} WHERE id = {id.ParameterName};");

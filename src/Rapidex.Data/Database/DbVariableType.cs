@@ -13,6 +13,8 @@ namespace Rapidex.Data
 
         public bool IsString { get { return this.DbType == DbFieldType.String || this.DbType == DbFieldType.AnsiString || this.DbType == DbFieldType.StringFixedLength || this.DbType == DbFieldType.AnsiStringFixedLength; } }
 
+        public bool IsBinary { get { return this.DbType == DbFieldType.Binary; } }
+
         public DbVariableType()
         {
 
@@ -26,6 +28,9 @@ namespace Rapidex.Data
 
             if (this.IsString && lenght >= 4000)
                 this.Lenght = -1;
+
+            if(this.IsBinary && lenght >= 4000)
+                this.Lenght = -1;
         }
 
         public DbVariableType(DbFieldType dbType, int lenght)
@@ -35,6 +40,9 @@ namespace Rapidex.Data
             this.Scale = 0;
 
             if (this.IsString && lenght >= 4000)
+                this.Lenght = -1;
+
+            if (this.IsBinary && lenght >= 4000)
                 this.Lenght = -1;
         }
 

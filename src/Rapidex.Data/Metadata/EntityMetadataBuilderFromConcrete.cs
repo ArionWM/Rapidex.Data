@@ -116,7 +116,7 @@ internal class EntityMetadataBuilderFromConcrete : EntityMetadataBuilderBase
     {
         this.Validate();
 
-        Common.DefaultLogger?.LogDebug("Database", $"Metadata; Add: {type.FullName}");
+        Common.DefaultLogger?.LogDebug( $"Metadata; Add: {type.FullName}");
 
         this.ValidateConcreteType(type);
 

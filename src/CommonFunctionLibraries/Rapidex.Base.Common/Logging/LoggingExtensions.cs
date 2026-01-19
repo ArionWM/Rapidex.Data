@@ -22,34 +22,34 @@ public static class LoggingExtensions
         Common.DefaultLogger?.LogError(ex, message);
     }
 
-    public static void LogDebug(this ILogger logger, string category, string message, params object[] args)
-    {
-        logger.LogDebug(message, args);
-    }
+    //public static void LogDebug(this ILogger logger, string category, string message, params object[] args)
+    //{
+    //    logger.LogDebug(message, args);
+    //}
 
-    public static void LogInformation(this ILogger logger, string category, string message, params object[] args)
-    {
-        logger.LogInformation(message, args);
-    }
+    //public static void LogInformation(this ILogger logger, string category, string message, params object[] args)
+    //{
+    //    logger.LogInformation(message, args);
+    //}
 
-    public static void LogWarning(this ILogger logger, string category, string message, params object[] args)
-    {
-        logger.LogWarning(message, args);
-    }
+    //public static void LogWarning(this ILogger logger, string category, string message, params object[] args)
+    //{
+    //    logger.LogWarning(message, args);
+    //}
 
-    public static void LogCritical(this ILogger logger, string category, string message, params object[] args)
-    {
-        logger.LogCritical(message, args);
-    }
+    //public static void LogCritical(this ILogger logger, string category, string message, params object[] args)
+    //{
+    //    logger.LogCritical(message, args);
+    //}
 
-    public static void LogError(this ILogger logger, string category, string message, params object[] args)
-    {
-        logger.LogError(message, args);
-    }
+    //public static void LogError(this ILogger logger, string category, string message, params object[] args)
+    //{
+    //    logger.LogError(message, args);
+    //}
 
-    public static void LogTrace(this ILogger logger, string category, string message, params object[] args)
-    {
-        logger.LogTrace(message, args);
-    }
+    //public static void LogTrace(this ILogger logger, string category, string message, params object[] args)
+    //{
+    //    logger.LogTrace(message, args);
+    //}
 
 }

@@ -45,7 +45,7 @@ internal static class DbSqlServerHelper
                 return SqlDbType.Float;
 
             case DbFieldType.Binary:
-                return SqlDbType.Image;
+                return SqlDbType.VarBinary;
 
             case DbFieldType.Int16:
                 return SqlDbType.SmallInt;
@@ -141,8 +141,12 @@ internal static class DbSqlServerHelper
                 return "float";
 
             case SqlDbType.Image:
-                return "image";
-
+            case SqlDbType.Binary:
+            case SqlDbType.VarBinary:
+                int lenghtB = variableType.Lenght;
+                if (lenghtB == 0)
+                    lenghtB = -1;
+                return $"varbinary({((lenghtB > 4000 || lenghtB == -1) ? "max" : lenghtB.ToString())})";
             case SqlDbType.SmallInt:
                 return "smallint";
 

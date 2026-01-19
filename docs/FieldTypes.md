@@ -164,7 +164,7 @@ A binary/blob data field.
 |---|---|
 | JSON Type | binary, byte[] |
 | C# Type | byte[] |
-| SQL Type | image |
+| SQL Type | varbinary(max) |
 | SQLite Type | --- |
 | PostgreSQL Type | --- |
 | Length | Unlimited |
@@ -300,7 +300,7 @@ A binary blob field for images.
 |---|---|
 | JSON Type | image |
 | C# Type | Image |
-| SQL Type | image |
+| SQL Type | varbinary(max) |
 | SQLite Type | --- |
 | PostgreSQL Type | --- |
 | Lazy Loading | Yes |

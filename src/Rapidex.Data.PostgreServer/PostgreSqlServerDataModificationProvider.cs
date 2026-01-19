@@ -97,7 +97,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug("Database", $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        Common.DefaultLogger?.LogDebug( $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
         DataTable table = this.Connection.Execute(sql, variables);
@@ -137,12 +137,12 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return dbVariable;
     }
 
-    protected DbVariable[] GetDbVariables(IDbEntityMetadata em, IEntity entity, string parameterPostfix)
+    protected DbVariable[] GetDbVariables(IDbEntityMetadata em, IEntity entity, string parameterPostfix, params string[] excludes)
     {
         List<DbVariable> dbVariables = new List<DbVariable>();
         foreach (IDbFieldMetadata fm in em.Fields.Values)
         {
-            if (!fm.IsPersisted)
+            if (!fm.IsPersisted || excludes.Contains(fm.Name))
                 continue;
 
             DbVariable dbVariable = this.GetDbVariable(fm, entity, parameterPostfix);
@@ -192,7 +192,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return table;
     }
 
-    protected DbVariable[] GetDbVariables(IDbEntityMetadata em, IPartialEntity entity, string parameterPostfix)
+    protected DbVariable[] GetDbVariables(IDbEntityMetadata em, IPartialEntity entity, string parameterPostfix, params string[] excludes)
     {
         PartialEntity partialEntity = (PartialEntity)entity;
         ObjDictionary values = partialEntity.GetAllValues();
@@ -202,7 +202,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         foreach (var kv in values)
         {
             IDbFieldMetadata fm = em.Fields[kv.Key];
-            if (!fm.IsPersisted)
+            if (!fm.IsPersisted || excludes.Contains(fm.Name))
                 continue;
 
             DbVariable dbVariable = this.GetDbVariable(fm, entity, parameterPostfix);
@@ -404,7 +404,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         DbVariable idVariable = this.GetDbVariable(em.PrimaryKey, entity, null);
 
-        string sql = this.DdlGenerator.Update(this.ParentScope.SchemaName, em, idVariable, variables);
+        string sql = this.DdlGenerator.Update(this.ParentScope.SchemaName, em, idVariable, variables, em.PrimaryKey.Name);
         DataTable table = this.Connection.Execute(sql, variables);
         int updatedRecordCount = 0;
         updatedRecordCount = table.Rows[0].To<int>(0);

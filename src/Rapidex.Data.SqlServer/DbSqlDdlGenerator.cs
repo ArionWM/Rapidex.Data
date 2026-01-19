@@ -300,7 +300,7 @@ SELECT SequenceValue FROM @SequenceValues;
 
     //TODO: aliases
     //TODO: Template
-    public string Update(string schemaName, IDbEntityMetadata em, DbVariable id, DbVariable[] fields)
+    public string Update(string schemaName, IDbEntityMetadata em, DbVariable id, DbVariable[] fields, params string[] excludes)
     {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine($"UPDATE [{schemaName}].[{em.TableName}]");
@@ -310,6 +310,9 @@ SELECT SequenceValue FROM @SequenceValues;
 
         foreach (var dbVariable in fields)
         {
+            if (excludes.Contains(dbVariable.FieldName))
+                continue;
+
             fieldValues.Add($"[{dbVariable.FieldName}] = {dbVariable.ParameterName}");
         }
 
