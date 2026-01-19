@@ -37,6 +37,8 @@ internal class DbSqlServerExceptionTranslator : IExceptionTranslator
                 return new TranslatedException(ExceptionTarget.ApplicationSupport, "Violation of unique index constraint." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 53:
                 return new TranslatedException(ExceptionTarget.ITDepartment_Infrastructure, "Network-related or instance-specific error." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
+            case -2:
+                return new TranslatedException(ExceptionTarget.ITDepartment_Infrastructure, "Yürütülen işlem zaman aşımına uğradı." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 2:
                 return new TranslatedException(ExceptionTarget.ITDepartment_Infrastructure, "SQL Server bağlantısı zaman aşımına uğradı. Bağlantı bilgilerinin doğruluğunu ya da SQL Server'ın çalışır durumda olduğunu kontrol edin." + (additionalInfo.IsNullOrEmpty() ? "" : "\r\n" + additionalInfo), ex);
             case 1205:

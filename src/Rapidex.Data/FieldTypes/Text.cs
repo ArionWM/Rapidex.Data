@@ -40,7 +40,7 @@ namespace Rapidex.Data
                 typeCm.BaseType = typeof(string);
                 typeCm.DbType = DbFieldType.String;
                 typeCm.SkipDbVersioning = this.SkipDbVersioning;
-                typeCm.DbProperties.Length = 10;
+                typeCm.DbProperties.Length = -1;
                 typeCm.Invisible = true;
 
                 parentMetadata.AddFieldIfNotExist(typeCm);

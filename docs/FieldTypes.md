@@ -294,7 +294,7 @@ Eg: For `EventPeriod` field, it will add `EventPeriodStart` and `EventPeriodEnd`
 
 ## image
 
-A binary blob field for images.  
+A binary blob field for images. 
 
 | | |
 |---|---|

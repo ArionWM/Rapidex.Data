@@ -65,7 +65,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
     {
         SqlCommand command = this.Connection.CreateCommand();
         command.Transaction = this.Transaction;
-        //command.CommandTimeout = this.CommandTimeout;
+        
         return command;
     }
 
