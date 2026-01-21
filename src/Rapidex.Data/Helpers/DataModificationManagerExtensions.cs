@@ -123,6 +123,17 @@ public static class DataModificationManagerExtensions
         return (TEntity)result;
     }
 
+    public static TEntity[] Find<TEntity>(this IDbDataReadScope dmm, params long[] ids) where TEntity : IConcreteEntity
+    {
+        dmm.NotNull();
+
+        var em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
+        em.NotNull($"Entity metadata not found for {typeof(TEntity).Name}");
+
+        var result = dmm.Find(em, ids);
+        return result.Cast<TEntity>().ToArray();
+    }
+
 
     public static void Delete(this IDbDataModificationScope dmm, IEnumerable<IEntity> entities)
     {

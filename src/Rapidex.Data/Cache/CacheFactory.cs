@@ -18,10 +18,10 @@ internal class CacheFactory
     {
         // CacheSignalImplementer signalImplementer, ICache availableCache, [FromKeyedServices("rdata")] HybridCache hcache, HybridCache genericHCcache
 
-        this.signalImplementer = serviceProvider.GetRequiredService< CacheSignalImplementer>();
+        this.signalImplementer = serviceProvider.GetRequiredService<CacheSignalImplementer>();
         this.availableCache = serviceProvider.GetService<ICache>();
         this.keyedHybridCache = serviceProvider.GetKeyedService<HybridCache>("rdata");
-        this.genericHybridCache = serviceProvider.GetService<HybridCache>(); ;
+        this.genericHybridCache = serviceProvider.GetService<HybridCache>(); 
     }
 
     public ICache Create()

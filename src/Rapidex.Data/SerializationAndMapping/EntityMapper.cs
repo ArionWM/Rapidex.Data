@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -22,6 +21,11 @@ public class EntityMapper
         public List<IDbFieldMetadata> AdvancedFields { get; } = new();
 
         public ConcurrentDictionary<string, string> TableFieldMappings { get; } = new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase); //TODO: ConcurrentDict
+        
+        /// <summary>
+        /// Maintains the count of TableFieldMappings to avoid the locking overhead of ConcurrentDictionary.Count
+        /// </summary>
+        private int tableFieldMappingsCount;
 
         public void CreateMap()
         {
@@ -45,14 +49,17 @@ public class EntityMapper
         protected void UpdateMapInternal(DataTable table)
         {
             this.TableFieldMappings.Clear();
+            int count = 0;
             foreach (DataColumn col in table.Columns)
             {
                 var fm = this.EntityMetadata.Fields.Get(col.ColumnName);
                 if (fm != null)
                 {
                     this.TableFieldMappings.Set(fm.Name, col.ColumnName);
+                    count++;
                 }
             }
+            Interlocked.Exchange(ref this.tableFieldMappingsCount, count);
         }
 
         public void UpdateMap(DataTable table)
@@ -73,7 +80,7 @@ public class EntityMapper
             this.SyncLock.EnterUpgradeableReadLock();
             try
             {
-                if (this.TableFieldMappings.Count != table.Columns.Count)
+                if (this.tableFieldMappingsCount != table.Columns.Count)
                 {
                     this.SyncLock.EnterWriteLock();
                     try

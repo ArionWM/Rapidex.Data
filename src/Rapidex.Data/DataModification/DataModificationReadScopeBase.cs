@@ -102,6 +102,18 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
         return result.FirstOrDefault();
     }
 
+    public IEntity[] Find(IDbEntityMetadata em, params long[] ids)
+    {
+        if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
+            return this.ParentSchema.ParentDbScope.Find(em, ids);
+
+        var dbEntityIds = ids.Select(id => new DbEntityId(id, -1)).ToArray();
+
+        IDbEntityLoader loader = this.SelectLoader(em);
+        IEntityLoadResult result = loader.Load(em, dbEntityIds);
+        return result.ToArray();
+    }
+
     public virtual void Dispose()
     {
         this.DmProvider?.Dispose();

@@ -608,6 +608,8 @@ public interface IDbDataReadScope
 
     IEntity Find(IDbEntityMetadata em, long id);
 
+    IEntity[] Find(IDbEntityMetadata em, params long[] ids);
+
     IEntityLoadResult Load(IQueryLoader loader);
 
     ILoadResult<DataRow> LoadRaw(IQueryLoader loader);
@@ -763,6 +765,11 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
     IEntity IDbDataReadScope.Find(IDbEntityMetadata em, long id)
     {
         return this.Data.Find(em, id);
+    }
+
+    IEntity[] IDbDataReadScope.Find(IDbEntityMetadata em, params long[] ids)
+    {
+        return this.Data.Find(em, ids);
     }
 
     (bool Found, string? Desc) IDbDataModificationStaticHost.FindAndAnalyseInScopes(IDbEntityMetadata em, long id)
