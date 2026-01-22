@@ -5,12 +5,14 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Rapidex.Data.Exceptions;
 using Rapidex.Data.Metadata;
 using Rapidex.Data.SerializationAndMapping.MetadataImplementers;
 
 namespace Rapidex.Data.SerializationAndMapping.JsonConverters;
+
 internal class EntityJsonConverter : JsonConverter<IEntity>
 {
     const int OPERATION_FLAG_NONE = 0;
@@ -21,8 +23,14 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
     const int OPERATION_FLAG_ADD = 10;
     const int OPERATION_FLAG_REMOVE = 11;
 
-    [ThreadStatic]
-    internal static bool? UseNestedEntities = null;
+
+    private static readonly AsyncLocal<bool?> UseNestedEntitiesStore = new();
+
+    internal static bool? UseNestedEntities
+    {
+        get => UseNestedEntitiesStore.Value;
+        set => UseNestedEntitiesStore.Value = value;
+    }
 
     public override IEntity? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -60,7 +68,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
                     break;
                 case OPERATION_FLAG_ISNEW:
                     entity = Database.EntityFactory.Create(em, EntityDataJsonConverter.DeserializationContext.Scope, true);
-                    if(entityId.HasValue && !entityId.Value.IsEmptyId())
+                    if (entityId.HasValue && !entityId.Value.IsEmptyId())
                         entity.SetId(entityId.Value);
                     break;
                 case OPERATION_FLAG_ISDELETED:
@@ -88,6 +96,8 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
                 //We support direct field definitions on root level as well
                 this.SetEntityFields(em, entity, root, options, skipReservedFields: true);
             }
+
+            entity.EnsureDataTypeInitialization();
 
             return entity;
         }
@@ -145,23 +155,6 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
         return OPERATION_FLAG_NONE;
     }
 
-    //private (bool? isNew, bool? isDeleted) GetFlags(JsonObject root)
-    //{
-    //    bool? isNew = null;
-    //    bool? isDeleted = null;
-    //    if (root.TryGetPropertyValue("IsNew", out JsonNode? isNewElement))
-    //    {
-    //        isNew = isNewElement.GetBoolean();
-    //    }
-
-    //    if (root.TryGetPropertyValue("IsDeleted", out JsonNode? isDeletedElement))
-    //    {
-    //        isDeleted = isDeletedElement.GetBoolean();
-    //    }
-
-    //    return (isNew, isDeleted);
-    //}
-
     private long? GetEntityId(JsonObject root, bool required)
     {
         if (root.TryGetPropertyValue("Values", out JsonNode? valuesElement))
@@ -205,7 +198,7 @@ internal class EntityJsonConverter : JsonConverter<IEntity>
 
             try
             {
-                if(fieldElement == null)
+                if (fieldElement == null)
                 {
                     entity.SetValue(fieldMetadata.Name, null);
                     continue;

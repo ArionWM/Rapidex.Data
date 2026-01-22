@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data;
+
 public static class EntityDataJsonConverter
 {
     public class EntityDeserializationContext
@@ -30,9 +32,9 @@ public static class EntityDataJsonConverter
         }
     }
 
-    [ThreadStatic]
+    
 #pragma warning disable IDE1006 // Naming Styles
-    static EntityDeserializationContext deserializationContext = null;
+    static AsyncLocal<EntityDeserializationContext> deserializationContext = new();
 #pragma warning restore IDE1006 // Naming Styles
 
     public static void AddDefaultJsonOptions(this IServiceCollection services)
@@ -45,8 +47,8 @@ public static class EntityDataJsonConverter
 
     internal static EntityDeserializationContext DeserializationContext
     {
-        get => deserializationContext;
-        private set => deserializationContext = value;
+        get => deserializationContext.Value;
+        private set => deserializationContext.Value = value;
     }
 
 

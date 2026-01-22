@@ -16,18 +16,19 @@ internal static class JsonConvertersHelper
             bool useNestedEntities = useNestedEntitiesRef ?? true;
             EntityJsonConverter.UseNestedEntities = false;
 
+            if (!useNestedEntities)
+            {
+                writer.WriteNullValue();
+                //writer.WriteStartObject();
+                //writer.WriteString("_description", "Nested content available");
+                //writer.WriteEndObject();
+                return;
+            }
+
             IEntityLoadResult? loadResult = (IEntityLoadResult)((ILazy)value).GetContent();
             if (loadResult.IsNullOrEmpty())
             {
                 writer.WriteNullValue();
-                return;
-            }
-
-            if (!useNestedEntities)
-            {
-                writer.WriteStartObject();
-                writer.WriteString("_description", "Nested content available");
-                writer.WriteEndObject();
                 return;
             }
 

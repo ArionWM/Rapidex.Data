@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Hybrid;
+using Rapidex.Data.SerializationAndMapping.JsonConverters;
 
 namespace Rapidex.Data.Cache;
 
@@ -36,7 +37,9 @@ internal class HybridCacheSerializer<T> : IHybridCacheSerializer<T>
             brotliStream.CopyTo(decompressedStream);
             decompressedStream.Position = 0;
 
-            return JsonSerializer.Deserialize<T>(decompressedStream.ToArray(), JsonHelper.DefaultJsonSerializerOptions)!;
+            var byteData = decompressedStream.ToArray();
+            var json = Encoding.UTF8.GetString(byteData);
+            return JsonSerializer.Deserialize<T>(json, JsonHelper.DefaultJsonSerializerOptions)!;
         }
         else
         {
@@ -47,30 +50,41 @@ internal class HybridCacheSerializer<T> : IHybridCacheSerializer<T>
 
     public void Serialize(T value, IBufferWriter<byte> target)
     {
-        var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(value, JsonHelper.DefaultJsonSerializerOptions);
+        EntityJsonConverter.UseNestedEntities = false;
 
-        // Sıkıştırma gerekli mi kontrol et
-        bool shouldCompress = jsonBytes.Length >= compressionThreshold;
-
-        if (shouldCompress)
+        try
         {
-            // Compressed flag (1)
-            target.Write(new byte[] { 1 });
+            var json = JsonSerializer.Serialize(value, JsonHelper.DefaultJsonSerializerOptions);
+            //var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(value, JsonHelper.DefaultJsonSerializerOptions);
 
-            // Brotli ile sıkıştır
-            using var compressedStream = new MemoryStream();
-            using (var brotliStream = new BrotliStream(compressedStream, compressionLevel))
+            var jsonBytes = Encoding.UTF8.GetBytes(json);
+            // Sıkıştırma gerekli mi kontrol et
+            bool shouldCompress = jsonBytes.Length >= compressionThreshold;
+
+            if (shouldCompress)
             {
-                brotliStream.Write(jsonBytes);
-            }
+                // Compressed flag (1)
+                target.Write(new byte[] { 1 });
 
-            target.Write(compressedStream.ToArray());
+                // Brotli ile sıkıştır
+                using var compressedStream = new MemoryStream();
+                using (var brotliStream = new BrotliStream(compressedStream, compressionLevel))
+                {
+                    brotliStream.Write(jsonBytes);
+                }
+
+                target.Write(compressedStream.ToArray());
+            }
+            else
+            {
+                // Uncompressed flag (0)
+                target.Write(new byte[] { 0 });
+                target.Write(jsonBytes);
+            }
         }
-        else
+        finally
         {
-            // Uncompressed flag (0)
-            target.Write(new byte[] { 0 });
-            target.Write(jsonBytes);
+            EntityJsonConverter.UseNestedEntities = null;
         }
 
     }
