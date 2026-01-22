@@ -41,6 +41,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
     {
         Rapidex.Common.EnviromentCode = CommonConstants.ENV_UNITTEST;
 
+        
     }
 
     public override void Initialize(IServiceProvider serviceProvider)

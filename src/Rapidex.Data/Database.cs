@@ -40,7 +40,9 @@ public static class Database
         else
             Database.Configuration.Configuration = Common.Configuration;
 
-        Database.Configuration.Setup();
+        Database.Configuration.Setup(services);
+
+
     }
 
     private static void InitializeCache(IServiceProvider sp)

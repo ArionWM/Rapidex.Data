@@ -36,13 +36,13 @@ public class LoadResult<T> : ILoadResult<T>
 
     [JsonPropertyOrder(3)]
     public long? StartIndex { get; set; }
-    
+
     [JsonPropertyOrder(4)]
     public long? PageCount { get; set; }
-    
+
     [JsonPropertyOrder(5)]
     public long? PageIndex { get; set; }
-    
+
     [JsonPropertyOrder(6)]
     public long? PageSize { get; set; }
 
@@ -69,7 +69,8 @@ public class LoadResult<T> : ILoadResult<T>
 
     public LoadResult(IEnumerable<T> items)
     {
-        this.Items.AddRange(items);
+        if (items != null)
+            this.Items.AddRange(items);
         this.TotalItemCount = this.Items.Count;
     }
 

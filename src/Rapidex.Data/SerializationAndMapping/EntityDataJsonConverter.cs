@@ -50,6 +50,16 @@ public static class EntityDataJsonConverter
     }
 
 
+    public static void SetContext(IDbSchemaScope scope)
+    {
+        DeserializationContext = new EntityDeserializationContext(scope);
+    }
+
+    public static void ClearContext()
+    {
+        DeserializationContext = null;
+    }
+
     public static string Serialize(IEntity entity)
     {
         if (entity == null)

@@ -29,6 +29,11 @@ public class DefaultEmptyFixture : ICoreTestFixture
     {
     }
 
+    public void CheckInit()
+    {
+
+    }
+
     public virtual void Init()
     {
         if (initialized)
@@ -93,4 +98,6 @@ public class DefaultEmptyFixture : ICoreTestFixture
         string filePath = Path.Combine(Rapidex.Common.RootFolder, relativeFilePath);
         return System.IO.File.ReadAllBytes(filePath);
     }
+
+    
 }

@@ -22,6 +22,7 @@ public class EachTestClassIsolatedFixtureFactory<T> where T : ICoreTestFixture
                     T fixture = TypeHelper.CreateInstance<T>(typeof(T));
                     fixtures.Add(classType, fixture);
                     fixture.Init();
+                    fixture.CheckInit();
                 }
 
                 return (T)fixtures[classType];

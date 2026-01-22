@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,7 @@ public static class DependencyInjectionExtensions
             if (binaryFolder.IsNullOrEmpty())
                 binaryFolder = AppContext.BaseDirectory;
 
+            services.AddSingleton(typeof(IHybridCacheSerializer<>), typeof(HybridCacheSerializer<>));
             services.AddTransient<CacheFactory>();
 
             Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration, defaultLogger);

@@ -31,6 +31,11 @@ public class DefaultEmptyFixture : ICoreTestFixture
         //commonLib.SetupServices(services);
     }
 
+    public virtual void CheckInit()
+    {
+
+    }
+
     public virtual void Init()
     {
         if (initialized)

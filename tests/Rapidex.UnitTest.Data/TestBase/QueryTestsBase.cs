@@ -513,7 +513,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
     public virtual void Load_07_DateTimeWithOffset()
     {
         TestCache cache = Database.Cache.ShouldSupportTo<TestCache>();
-        Assert.False(TestCache.CacheEnabled);
+        Assert.False(TestCache.MemoryCacheEnabled);
 
         var db = Database.Dbs.Db();
         db.ReAddReCreate<ConcreteEntity01>();

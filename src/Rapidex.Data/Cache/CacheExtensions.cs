@@ -10,6 +10,11 @@ namespace Rapidex.Data;
 
 public static class CacheExtensions
 {
+    /// <summary>
+    /// For tests
+    /// </summary>
+    internal static List<string> TagContext { get; set; } = new List<string>();
+
     public static string GetEntityCacheKey(IEntity entity)
     {
         IDbSchemaScope dbSchema = entity._Schema;
@@ -140,20 +145,36 @@ public static class CacheExtensions
     public static void StoreQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result, IEntityLoadResult loadResult, TimeSpan? expiration = null)
     {
         string key = GetQueryCacheKey(em, dbSchema, result);
-        cache.Set(key, loadResult, expiration, expiration);
+        IEntity[] entities = loadResult.ToArray(); //WARN: Wrong
+        cache.Set(key, entities, expiration, expiration);
     }
 
     public static IEntityLoadResult GetQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result)
     {
         string key = GetQueryCacheKey(em, dbSchema, result);
-        var loadResult = cache.GetOrSet<IEntityLoadResult>(key, () => null);
-        if (loadResult != null)
+        var items = cache.GetOrSet<IEntity[]>(key, () => null);
+        if (items != null)
         {
-            foreach (var entity in loadResult)
+            foreach (var entity in items)
             {
                 entity._loadSource = LoadSource.Cache;
             }
         }
-        return loadResult;
+
+        if (items.IsNullOrEmpty())
+            return null;
+
+        EntityLoadResult lres = new EntityLoadResult(items);
+        return lres;
+    }
+
+    internal static void SetTagContext(this ICache cache, params string[] tags)
+    {
+        TagContext.AddRange(tags);
+    }
+
+    internal static void ClearTagContext(this ICache cache)
+    {
+        TagContext.Clear();
     }
 }

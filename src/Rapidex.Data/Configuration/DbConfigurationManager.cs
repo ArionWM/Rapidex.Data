@@ -21,6 +21,7 @@ public class DbConfigurationManager
     public IConfiguration Configuration { get; set; }
     public IConfigurationSection? Root { get;protected set; }
     public IDictionary<string, DbConnectionInfo> ConnectionInfo { get; set; } = new Dictionary<string, DbConnectionInfo>();
+    public CacheConfigurationInfo CacheConfigurationInfo { get; set; } = new CacheConfigurationInfo();
 
 
     public IDictionary<string, DbConnectionInfo> ReadConnectionInfo()
@@ -57,13 +58,32 @@ public class DbConfigurationManager
         return connections;
     }
 
-    public void Setup()
+    public void ReadCacheConfiguration(IServiceCollection services)
+    {
+        var cacheConfigSection = this.Root.GetSection("Cache");
+        if (cacheConfigSection != null)
+        {
+            this.CacheConfigurationInfo = cacheConfigSection.Get<CacheConfigurationInfo>();
+        }
+
+        if(this.CacheConfigurationInfo?.Distributed?.ConnectionString.IsNOTNullOrEmpty() ?? false)
+        {
+            services.AddHybridCache();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = this.CacheConfigurationInfo?.Distributed?.ConnectionString;
+            });
+        }
+    }
+
+    public void Setup(IServiceCollection services)
     {
         this.Root = Database.Configuration.Configuration.GetSection(this.RapidexSectionName);
         this.Root.NotNull($"'{this.RapidexSectionName}' section not found in configuration file. See: appsettings.json");
 
         this.SoftDefinitionsBaseFolder = this.Root.GetValue<string>("SoftDefinitionsBaseFolder", this.SoftDefinitionsBaseFolder);
         this.ReadConnectionInfo();
+        this.ReadCacheConfiguration(services);
     }
 
     public void LoadDbScopeDefinition(string dbName)

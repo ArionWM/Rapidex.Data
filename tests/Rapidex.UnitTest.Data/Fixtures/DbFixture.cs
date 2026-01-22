@@ -30,6 +30,14 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         services.AddSingleton<ICache, TestCache>();
         services.AddRapidexDataLevel();
 
+        services.AddSingleton<ISignalHub, TestSignalHub>(sp =>
+        {
+            var hub = new TestSignalHub(sp);
+            Signal.ClearHubForTest();
+            Signal.Hub = hub;
+            return hub;
+        });
+
         Rapidex.Common.Assembly.Add(typeof(DbFixture).Assembly);
     }
 
@@ -55,6 +63,14 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         }
     }
 
+
+    public override void CheckInit()
+    {
+        base.CheckInit();
+
+        this.ServiceProvider.GetRequiredService<ICache>()
+            .ShouldSupportTo<TestCache>();
+    }
 
     public override void Init()
     {

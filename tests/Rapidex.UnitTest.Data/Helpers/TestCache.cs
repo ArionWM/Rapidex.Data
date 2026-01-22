@@ -3,58 +3,112 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Hybrid;
 using Rapidex.Data.Cache;
 
 namespace Rapidex.UnitTest.Data.Helpers;
 
-internal class TestCache : DefaultInMemoryCache, ICache
+internal class TestCache : ICache
 {
-    public static bool CacheEnabled { get; set; } = false;
+    protected DefaultInMemoryCache MemoryCache { get; }
+    protected DefaultHybridCache HybridCache { get; }
 
-    public override T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public static bool MemoryCacheEnabled { get; set; } = false;
+    public static bool HybridCacheEnabled { get; set; } = false;
+
+    public TestCache(IServiceProvider serviceProvider)
     {
-        if (CacheEnabled)
+        this.MemoryCache = new DefaultInMemoryCache();
+
+        var hybridCache = serviceProvider.GetService<HybridCache>();
+        this.HybridCache = new DefaultHybridCache(hybridCache);
+    }
+
+    public T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    {
+        if (MemoryCacheEnabled)
         {
-            return base.GetOrSet<T>(key, valueFactory, expiration, localCacheExpiration);
+            return this.MemoryCache.GetOrSet<T>(key, valueFactory, expiration, localCacheExpiration);
+        }
+
+        if (HybridCacheEnabled)
+        {
+            return this.HybridCache.GetOrSet<T>(key, valueFactory, expiration, localCacheExpiration);
         }
 
         return default;
     }
 
-    public override Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
     {
-        if (CacheEnabled)
+        if (MemoryCacheEnabled)
         {
-            return base.GetOrSetAsync<T>(key, valueFactory, expiration, localCacheExpiration);
+            return this.MemoryCache.GetOrSetAsync<T>(key, valueFactory, expiration, localCacheExpiration);
         }
+
+        if (HybridCacheEnabled)
+        {
+            return this.HybridCache.GetOrSetAsync<T>(key, valueFactory, expiration, localCacheExpiration);
+        }
+
+
 #pragma warning disable CS8619 
         return Task.FromResult(default(T));
 #pragma warning restore CS8619 
 
     }
 
-    public override void Remove(string key)
+    public void Remove(string key)
     {
-        if (CacheEnabled)
+        if (MemoryCacheEnabled)
         {
-            base.Remove(key);
+            this.MemoryCache.Remove(key);
+        }
+
+        if (HybridCacheEnabled)
+        {
+            this.HybridCache.Remove(key);
         }
     }
 
-    public override void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
     {
-        if (CacheEnabled)
+        if (MemoryCacheEnabled)
         {
-            base.Set<T>(key, value, expiration, localCacheExpiration);
+            this.MemoryCache.Set<T>(key, value, expiration, localCacheExpiration);
         }
+
+        if (HybridCacheEnabled)
+        {
+            this.HybridCache.Set<T>(key, value, expiration, localCacheExpiration);
+        }
+
+
     }
 
-    public override Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
     {
-        if (CacheEnabled)
+        if (MemoryCacheEnabled)
         {
-            return base.SetAsync<T>(key, value, expiration, localCacheExpiration);
+            return this.MemoryCache.SetAsync<T>(key, value, expiration, localCacheExpiration);
+        }
+
+        if (HybridCacheEnabled)
+        {
+            return this.HybridCache.SetAsync<T>(key, value, expiration, localCacheExpiration);
         }
         return Task.CompletedTask;
+    }
+
+    public void RemoveByTag(string tag)
+    {
+        if (MemoryCacheEnabled)
+        {
+        }
+
+        if (HybridCacheEnabled)
+        {
+            this.HybridCache.RemoveByTag(tag);
+        }
     }
 }

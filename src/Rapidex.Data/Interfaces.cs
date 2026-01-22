@@ -45,15 +45,15 @@ public interface IRapidexMetadataReleatedAssemblyDefinition : IRapidexAssemblyDe
 
 public interface ICache
 {
-    T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null) where T : IEntity;
-    IEntityLoadResult GetOrSetMultiple<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null) where T : IEntity;
-    Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null) where T : IEntity;
+    T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
+    Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
 
-    void Set<T>(string key, T entity, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null) where T : IEntity;
-    void Set<T>(string key, IEntityLoadResult<T> entities, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null) where T : IEntity;
-    Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null) where T : IEntity;
+    void Set<T>(string key, T entity, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
+    Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
 
     void Remove(string key);
+
+    void RemoveByTag(string tag);
 
 }
 

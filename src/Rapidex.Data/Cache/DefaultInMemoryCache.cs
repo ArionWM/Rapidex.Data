@@ -14,8 +14,12 @@ internal class DefaultInMemoryCache : ICache
 
     public DefaultInMemoryCache()
     {
-        this.DefaultExpiration = TimeSpan.FromMinutes(10);
-        this.Cache = new MemoryCache(new MemoryCacheOptions());
+        this.DefaultExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo?.InMemory?.Expiration ?? 600);
+        var mcOptions = new MemoryCacheOptions();
+        if(Database.Configuration.CacheConfigurationInfo?.InMemory?.ItemLimit.HasValue ?? false)
+            mcOptions.SizeLimit = Database.Configuration.CacheConfigurationInfo.InMemory.ItemLimit.Value;
+
+        this.Cache = new MemoryCache(mcOptions);
     }
 
     public virtual T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
@@ -52,5 +56,10 @@ internal class DefaultInMemoryCache : ICache
     {
         this.Cache.Set(key, value, expiration ?? this.DefaultExpiration);
         return Task.CompletedTask;
+    }
+
+    public void RemoveByTag(string tag)
+    {
+        
     }
 }

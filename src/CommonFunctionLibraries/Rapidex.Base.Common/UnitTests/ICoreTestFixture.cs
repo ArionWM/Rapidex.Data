@@ -11,6 +11,8 @@ public interface ICoreTestFixture //From ProCore
 
     void Init();
 
+    void CheckInit();
+
     /// <summary>
     /// Sadece ön bellekler temizlenir
     /// </summary>

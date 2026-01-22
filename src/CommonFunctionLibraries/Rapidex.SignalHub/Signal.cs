@@ -7,27 +7,27 @@ using System.Threading.Tasks;
 namespace Rapidex;
 public class Signal
 {
-    private static ISignalHub signalHub;
+    private static ISignalHub SIGNAL_HUB;
 
     public static ISignalHub Hub
     {
         get
         {
-            return signalHub;
+            return SIGNAL_HUB;
         }
 
         internal set
         {
-            if (signalHub != null)
+            if (SIGNAL_HUB != null)
             {
                 throw new InvalidOperationException("MessageHub already set");
             }
-            signalHub = value;
+            SIGNAL_HUB = value;
         }
     }
 
     internal static void ClearHubForTest()
     {
-        signalHub = null;
+        SIGNAL_HUB = null;
     }
 }

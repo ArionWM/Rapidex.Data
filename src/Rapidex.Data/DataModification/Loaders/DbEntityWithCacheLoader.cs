@@ -12,24 +12,40 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
 {
     protected IEntityLoadResult LoadWithCacheInternal(IDbEntityMetadata em, SqlResult result)
     {
-        var loadResultFromCache = Database.Cache.GetQuery(em, this.ParentScope, result);
-        if (loadResultFromCache != null)
+        EntityDataJsonConverter.SetContext(this.ParentScope);
+        try
         {
-            return loadResultFromCache;
+            var loadResultFromCache = Database.Cache.GetQuery(em, this.ParentScope, result);
+            if (loadResultFromCache != null)
+            {
+                return loadResultFromCache;
+            }
+            return null;
         }
-        return null;
+        finally
+        {
+            EntityDataJsonConverter.ClearContext();
+        }
     }
 
     protected override IEntity FindWithCacheInternal(IDbEntityMetadata em, DbEntityId id)
     {
-        var entity = Database.Cache.GetEntity(this.ParentScope, em.Name, id.Id);
-
-        if (id.Version > -1 && (entity == null || entity.DbVersion != id.Version))
+        EntityDataJsonConverter.SetContext(this.ParentScope);
+        try
         {
-            return null;
-        }
+            var entity = Database.Cache.GetEntity(this.ParentScope, em.Name, id.Id);
 
-        return entity;
+            if (id.Version > -1 && (entity == null || entity.DbVersion != id.Version))
+            {
+                return null;
+            }
+
+            return entity;
+        }
+        finally
+        {
+            EntityDataJsonConverter.ClearContext();
+        }
     }
 
     protected override IEntity[] LoadWithCacheInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)

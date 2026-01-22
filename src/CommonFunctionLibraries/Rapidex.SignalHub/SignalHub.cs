@@ -45,7 +45,7 @@ internal class SignalHub : ISignalHub
         return resultArgs;
     }
 
-    protected bool IsSynchronousSignal(SignalTopic topic, ISignalArguments args)
+    protected virtual bool IsSynchronousSignal(SignalTopic topic, ISignalArguments args)
     {
         if (args.IsSynchronous.HasValue)
             return args.IsSynchronous.Value;

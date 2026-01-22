@@ -22,6 +22,7 @@ public class SingletonFixtureFactory<T> where T : ICoreTestFixture
                     T fixture = TypeHelper.CreateInstance<T>(typeof(T));
                     fixtures.Add(typeof(T), fixture);
                     fixture.Init();
+                    fixture.CheckInit();
                 }
 
                 return (T)fixtures[typeof(T)];
