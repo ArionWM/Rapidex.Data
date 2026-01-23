@@ -23,7 +23,7 @@ public class SignalHubTests : IClassFixture<EachTestClassIsolatedFixtureFactory<
     [Fact]
     public void T01_Basics_SubscribeAndFind()
     {
-        var messageHub = new Rapidex.SignalHub.SignalHub();
+        var messageHub = new Rapidex.SignalHub.SignalHub(this.Fixture.ServiceProvider);
 
         IResult<int> subs1Result = messageHub.Subscribe("/+/base/+/new/myEntity", (args) =>
            {
@@ -74,7 +74,7 @@ public class SignalHubTests : IClassFixture<EachTestClassIsolatedFixtureFactory<
     [Fact]
     public async Task T02_Basics_Invoke()
     {
-        var messageHub = new Rapidex.SignalHub.SignalHub();
+        var messageHub = new Rapidex.SignalHub.SignalHub(this.Fixture.ServiceProvider);
 
         List<string> subs1Invokes = new List<string>();
         List<string> subs2Invokes = new List<string>();
@@ -97,6 +97,9 @@ public class SignalHubTests : IClassFixture<EachTestClassIsolatedFixtureFactory<
         args01.Tags = "invoke01";
 
         await messageHub.PublishAsync("/myTenant2/base/+/new/myEntity", args01);
+
+        Task.Delay(1000).Wait(); 
+
         Assert.Equal(1, subs1Invokes.Count);
         Assert.Equal(0, subs2Invokes.Count);
         Assert.Equal("invoke01", subs1Invokes[0]);
@@ -105,6 +108,9 @@ public class SignalHubTests : IClassFixture<EachTestClassIsolatedFixtureFactory<
         SignalArguments args02 = new SignalArguments();
         args02.Tags = "invoke02";
         await messageHub.PublishAsync("/myTenant1/base/+/new/myEntity", args02);
+
+        Task.Delay(1000).Wait();
+
         Assert.Equal(1, subs1Invokes.Count);
         Assert.Equal(1, subs2Invokes.Count);
         Assert.Equal("invoke02", subs1Invokes[0]);

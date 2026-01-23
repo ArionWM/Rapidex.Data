@@ -44,7 +44,8 @@ public class DefaultEmptyFixture : ICoreTestFixture
         //Database.Configuration.DefaultDatabaseNamePrefix = "RapidexAppUnitTest";
 
         string logDir = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "Logs");
-        builder.UseRapidexSerilog(conf =>{
+        builder.UseRapidexSerilog(conf =>
+        {
             conf.LogDirectory = logDir;
             conf.DefaultMinimumLevel = LogLevel.Debug;
             conf.UseBufferForNonErrors = true;
@@ -52,7 +53,8 @@ public class DefaultEmptyFixture : ICoreTestFixture
             conf.UseSeperateWarningLogFile = true;
             //conf.SetMinimumLogLevelAndOthers(new[] { "Rapidex" }, LogLevel.Debug, LogLevel.Warning);
         });
-        
+
+        builder.Services.AddSingletonForProd<ITimeProvider, DefaultTimeProvider>();
 
         Rapidex.Common.Setup(AppContext.BaseDirectory, AppContext.BaseDirectory, builder.Services);
 
@@ -99,5 +101,5 @@ public class DefaultEmptyFixture : ICoreTestFixture
         return System.IO.File.ReadAllBytes(filePath);
     }
 
-    
+
 }
