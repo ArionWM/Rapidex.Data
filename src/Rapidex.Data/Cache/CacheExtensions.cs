@@ -145,6 +145,9 @@ public static class CacheExtensions
     public static void StoreQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result, IEntityLoadResult loadResult, TimeSpan? expiration = null)
     {
         string key = GetQueryCacheKey(em, dbSchema, result);
+
+        //Rapidex.Common.DefaultLogger?.LogDebug($"QueryCacheSet: {key}"); 
+
         IEntity[] entities = loadResult.ToArray(); //WARN: Wrong
         cache.Set(key, entities, expiration, expiration);
     }

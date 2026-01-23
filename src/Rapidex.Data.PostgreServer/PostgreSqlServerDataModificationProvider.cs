@@ -114,17 +114,28 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return this.Load(loader.EntityMetadata, loader, result);
     }
 
+    public ILoadResult<DataRow> LoadRaw(IQueryLoader loader, SqlResult compiledSql)
+    {
+        this.CheckConnection();
+
+        string sql = compiledSql.Sql;
+        DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
+
+#if DEBUG
+        Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+#endif
+
+        DataTable table = this.Connection.Execute(sql, variables);
+        return new LoadResult<DataRow>(table.Rows.AsEnumerable());
+    }
+
     public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
     {
         this.CheckConnection();
 
         var compiler = this.GetCompiler();
         SqlResult result = compiler.Compile(loader.Query);
-        string sql = result.ToString();
-
-        DataTable table = this.Connection.Execute(sql);
-
-        return new LoadResult<DataRow>(table.Rows.Cast<DataRow>());
+        return this.LoadRaw(loader, result);
     }
 
     protected DbVariable GetDbVariable(IDbFieldMetadata fm, IEntity entity, string parameterPostfix)

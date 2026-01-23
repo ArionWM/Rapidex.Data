@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SqlKata;
 
@@ -10,6 +11,7 @@ namespace Rapidex.Data.DataModification.Loaders;
 
 internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
 {
+
     protected IEntityLoadResult LoadWithCacheInternal(IDbEntityMetadata em, SqlResult result)
     {
         EntityDataJsonConverter.SetContext(this.ParentScope);
@@ -61,6 +63,7 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         return result;
     }
 
+
     public override IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql)
     {
 
@@ -82,6 +85,7 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
 
             if (useQueryCache)
             {
+                //this.StoreQuery(Database.Cache, em, this.ParentScope, compiledSql, lastLoadResult, em.CacheOptions.Expiration);
                 Database.Cache.StoreQuery(em, this.ParentScope, compiledSql, lastLoadResult, em.CacheOptions.Expiration);
             }
 

@@ -89,7 +89,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug( $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
         DataTable table = this.Connection.Execute(sql, variables);
@@ -106,17 +106,28 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return this.Load(loader.EntityMetadata, loader, result);
     }
 
+    public ILoadResult<DataRow> LoadRaw(IQueryLoader loader, SqlResult compiledSql)
+    {
+        this.CheckConnection();
+
+        string sql = compiledSql.Sql;
+        DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
+
+#if DEBUG
+        Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+#endif
+
+        DataTable table = this.Connection.Execute(sql, variables);
+        return new LoadResult<DataRow>(table.Rows.AsEnumerable());
+    }
+
     public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
     {
         this.CheckConnection();
 
         Compiler mySqlCompiler = this.GetCompiler();
         SqlResult result = mySqlCompiler.Compile(loader.Query);
-        string sql = result.ToString();
-
-        DataTable table = this.Connection.Execute(sql);
-
-        return new LoadResult<DataRow>(table.Rows.AsEnumerable());
+        return this.LoadRaw(loader, result);
     }
 
 

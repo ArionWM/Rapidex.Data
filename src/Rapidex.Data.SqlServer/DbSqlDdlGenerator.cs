@@ -173,25 +173,21 @@ public class DbSqlDdlGenerator
         //TODO: Use sys.sp_sequence_get_range
 
         string sql = $@"
-DECLARE @requestedCount INT = {numberCount}; 
-DECLARE @currentValue BIGINT;
-DECLARE @counter INT = 0;
+DECLARE
+    @firstNum AS SQL_VARIANT,
+    @lastNum AS SQL_VARIANT;
 
-DECLARE @SequenceValues TABLE (SequenceValue BIGINT);
+EXECUTE sys.sp_sequence_get_range
+    @sequence_name = N'[{schemaName}].[{sequenceName}]',
+    @range_size = {numberCount},
+    @range_first_value = @firstNum OUTPUT,
+    @range_last_value = @lastNum OUTPUT;
 
-WHILE @counter < @requestedCount
-BEGIN
-	insert into @SequenceValues (SequenceValue)
-    SELECT NEXT VALUE FOR [{schemaName}].[{sequenceName}]
-    SET @counter = @counter + 1;
-END
-
-SELECT SequenceValue FROM @SequenceValues;
-
+-- The following statement returns the output values
+SELECT @firstNum AS FirstVal,
+       @lastNum AS LastVal;
 
 ";
-
-
 
         return sql;
     }

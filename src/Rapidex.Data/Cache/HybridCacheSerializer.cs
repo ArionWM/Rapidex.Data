@@ -14,6 +14,8 @@ namespace Rapidex.Data.Cache;
 
 internal class HybridCacheSerializer<T> : IHybridCacheSerializer<T>
 {
+    private const byte CurrentVersion = 1;
+    
     private readonly CompressionLevel compressionLevel;
     private readonly int compressionThreshold;
 
@@ -24,29 +26,18 @@ internal class HybridCacheSerializer<T> : IHybridCacheSerializer<T>
         if (bytes.Length == 0)
             throw new InvalidOperationException("Empty data cannot be deserialized");
 
-        // İlk byte sıkıştırma flag'i (1 = compressed, 0 = uncompressed)
-        bool isCompressed = bytes[0] == 1;
-        var data = bytes.AsSpan(1); // Flag'i atla
+        // Header'ı oku
+        CachePackageHeader header = this.ReadHeader(bytes, out int headerSize);
 
-        if (isCompressed)
+        // Versiyon kontrolü
+        var data = bytes.AsSpan(headerSize);
+
+        return header.Version switch
         {
-            using var compressedStream = new MemoryStream(data.ToArray());
-            using var brotliStream = new BrotliStream(compressedStream, CompressionMode.Decompress);
-            using var decompressedStream = new MemoryStream();
-
-            brotliStream.CopyTo(decompressedStream);
-            decompressedStream.Position = 0;
-
-            var byteData = decompressedStream.ToArray();
-            var json = Encoding.UTF8.GetString(byteData);
-            return JsonSerializer.Deserialize<T>(json, JsonHelper.DefaultJsonSerializerOptions)!;
-        }
-        else
-        {
-            return JsonSerializer.Deserialize<T>(data, JsonHelper.DefaultJsonSerializerOptions)!;
-        }
+            1 => this.DeserializeV1(data, header),
+            _ => throw new NotSupportedException($"Unsupported cache package version: {header.Version}")
+        };
     }
-
 
     public void Serialize(T value, IBufferWriter<byte> target)
     {
@@ -55,30 +46,25 @@ internal class HybridCacheSerializer<T> : IHybridCacheSerializer<T>
         try
         {
             var json = JsonSerializer.Serialize(value, JsonHelper.DefaultJsonSerializerOptions);
-            //var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(value, JsonHelper.DefaultJsonSerializerOptions);
-
             var jsonBytes = Encoding.UTF8.GetBytes(json);
-            // Sıkıştırma gerekli mi kontrol et
-            bool shouldCompress = jsonBytes.Length >= compressionThreshold;
 
+            // Sıkıştırma gerekli mi kontrol et
+            bool shouldCompress = jsonBytes.Length >= this.compressionThreshold;
+
+            // Header oluştur
+            var flags = shouldCompress ? CachePackageFlags.Compressed : CachePackageFlags.None;
+            var header = new CachePackageHeader(CurrentVersion, flags);
+
+            // Header'ı yaz
+            target.Write(header.ToBytes());
+
+            // Veriyi yaz
             if (shouldCompress)
             {
-                // Compressed flag (1)
-                target.Write(new byte[] { 1 });
-
-                // Brotli ile sıkıştır
-                using var compressedStream = new MemoryStream();
-                using (var brotliStream = new BrotliStream(compressedStream, compressionLevel))
-                {
-                    brotliStream.Write(jsonBytes);
-                }
-
-                target.Write(compressedStream.ToArray());
+                this.WriteCompressed(jsonBytes, target);
             }
             else
             {
-                // Uncompressed flag (0)
-                target.Write(new byte[] { 0 });
                 target.Write(jsonBytes);
             }
         }
@@ -86,6 +72,67 @@ internal class HybridCacheSerializer<T> : IHybridCacheSerializer<T>
         {
             EntityJsonConverter.UseNestedEntities = null;
         }
+    }
 
+    private CachePackageHeader ReadHeader(byte[] bytes, out int headerSize)
+    {
+        // Yeni format kontrolü: İlk byte sürüm numarası olabilir
+        // Eski format: İlk byte 0 veya 1 (compression flag)
+        // Yeni format: İlk byte sürüm >= 1, ikinci byte flags
+        
+        // Backward compatibility için kontrol
+        if (bytes.Length >= CachePackageHeader.HeaderSize)
+        {
+            var potentialVersion = bytes[0];
+            var potentialFlags = bytes[1];
+
+            // Eğer ikinci byte makul flag değerleri içeriyorsa yeni format
+            if (potentialVersion >= 1 && potentialFlags <= 0x0F) // Flags maksimum 4 bit kullanıyor
+            {
+                headerSize = CachePackageHeader.HeaderSize;
+                return CachePackageHeader.FromBytes(bytes.AsSpan(0, CachePackageHeader.HeaderSize));
+            }
+        }
+
+        // Eski format (backward compatibility)
+        headerSize = 1;
+        return CachePackageHeader.FromLegacyFormat(bytes[0]);
+    }
+
+    private T DeserializeV1(ReadOnlySpan<byte> data, CachePackageHeader header)
+    {
+        if (header.IsCompressed)
+        {
+            return this.DeserializeCompressed(data);
+        }
+        else
+        {
+            return JsonSerializer.Deserialize<T>(data, JsonHelper.DefaultJsonSerializerOptions)!;
+        }
+    }
+
+    private T DeserializeCompressed(ReadOnlySpan<byte> compressedData)
+    {
+        using var compressedStream = new MemoryStream(compressedData.ToArray());
+        using var brotliStream = new BrotliStream(compressedStream, CompressionMode.Decompress);
+        using var decompressedStream = new MemoryStream();
+
+        brotliStream.CopyTo(decompressedStream);
+        decompressedStream.Position = 0;
+
+        var byteData = decompressedStream.ToArray();
+        var json = Encoding.UTF8.GetString(byteData);
+        return JsonSerializer.Deserialize<T>(json, JsonHelper.DefaultJsonSerializerOptions)!;
+    }
+
+    private void WriteCompressed(byte[] data, IBufferWriter<byte> target)
+    {
+        using var compressedStream = new MemoryStream();
+        using (var brotliStream = new BrotliStream(compressedStream, this.compressionLevel))
+        {
+            brotliStream.Write(data);
+        }
+
+        target.Write(compressedStream.ToArray());
     }
 }

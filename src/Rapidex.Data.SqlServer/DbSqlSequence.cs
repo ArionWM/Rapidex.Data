@@ -67,10 +67,13 @@ internal class DbSqlSequence : IIntSequence
         string sql = this.DdlGenerator.GetNextNSequenceValues(this.SchemaName, this.Name, count);
         DataTable table = this.Parent.Connection.Execute(sql);
 
-        foreach (DataRow row in table.Rows)
+        var row = table.Rows[0];
+        long firstVal = row["FirstVal"].As<long>();
+        long lastVal = row["LastVal"].As<long>();
+
+        for (long v = firstVal; v <= lastVal; v++)
         {
-            long val = Convert.ToInt64(row[0]);
-            values.Add(val);
+            values.Add(v);
         }
 
         return values.ToArray();

@@ -8,131 +8,130 @@ using Microsoft.Extensions.Logging;
 using Rapidex.Base.Common.Assemblies;
 using Rapidex.Logging;
 
-namespace Rapidex
+namespace Rapidex;
+
+public class Common
 {
-    public class Common
-    {
 #if DEBUG
-        public const string ENV = CommonConstants.ENV_DEVELOPMENT;
+    public const string ENV = CommonConstants.ENV_DEVELOPMENT;
 #else
-        public const string ENV = CommonConstants.ENV_PRODUCTION;
+    public const string ENV = CommonConstants.ENV_PRODUCTION;
 #endif
 
 
 #if UNITTEST
-        public const string ENV = CommonConstants.ENV_UNITTEST;
+    public const string ENV = CommonConstants.ENV_UNITTEST;
 #endif
 
-        internal static IServiceProvider InternalServiceProvider;
+    internal static IServiceProvider InternalServiceProvider;
 
-        /// <summary>
-        /// Alabileceği değerler; 
-        /// - Test (birim testleri) 
-        /// - Development (ya da Development)
-        /// -- Production (ya da boş ise 'prod' olarak kabul edilir)
-        /// See: CommonConstants
-        /// See: IHostingEnvironment.HostingEnvironment
-        /// See: launchSettings.json
-        /// </summary>
-        /// <see cref="https://stackoverflow.com/questions/28258227/how-to-set-environment-name-ihostingenvironment-environmentname"/>
-        /// <see cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-5.0"/>"/>
+    /// <summary>
+    /// Alabileceği değerler; 
+    /// - Test (birim testleri) 
+    /// - Development (ya da Development)
+    /// -- Production (ya da boş ise 'prod' olarak kabul edilir)
+    /// See: CommonConstants
+    /// See: IHostingEnvironment.HostingEnvironment
+    /// See: launchSettings.json
+    /// </summary>
+    /// <see cref="https://stackoverflow.com/questions/28258227/how-to-set-environment-name-ihostingenvironment-environmentname"/>
+    /// <see cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-5.0"/>"/>
 
-        public static string EnviromentCode { get; set; } = Common.ENV;
-        public static string RootFolder { get; set; }
-        public static string BinaryFolder { get; set; }
-        public static string DataFolder { get; set; }
+    public static string EnviromentCode { get; set; } = Common.ENV;
+    public static string RootFolder { get; set; }
+    public static string BinaryFolder { get; set; }
+    public static string DataFolder { get; set; }
 
-        public static IConfiguration Configuration { get; set; }
-        public static ILogger DefaultLogger { get; internal set; }
-        public static RapidexTypeConverter Converter { get; internal set; }
-        public static AssemblyManager Assembly { get; set; }// = new AssemblyManager();
+    public static IConfiguration Configuration { get; set; }
+    public static ILogger DefaultLogger { get; internal set; }
+    public static RapidexTypeConverter Converter { get; internal set; }
+    public static AssemblyManager Assembly { get; set; }// = new AssemblyManager();
 
-        public static ITimeProvider Time { get; internal set; }
+    public static ITimeProvider Time { get; internal set; }
 
-        public static IExceptionManager ExceptionManager { get; internal set; } = new ExceptionManagerBase();
-        public static IServiceProvider ServiceProvider
+    public static IExceptionManager ExceptionManager { get; internal set; } = new ExceptionManagerBase();
+    public static IServiceProvider ServiceProvider
+    {
+        get
         {
-            get
-            {
-                return InternalServiceProvider
-                    .NotNull("Common service provider not set");
-            }
-            set
-            {
-                InternalServiceProvider = value;
-            }
+            return InternalServiceProvider
+                .NotNull("Common service provider not set");
         }
-        public static void LoadConfiguration()
+        set
         {
-            var cBuilder = new ConfigurationBuilder()
-                             .SetBasePath(AppContext.BaseDirectory)
-                             .AddJsonFile("appsettings.json", true, true)
-                             .AddJsonFile($"appsettings.{Common.EnviromentCode}.json", true, true);
-
-            Common.Configuration = cBuilder.Build();
+            InternalServiceProvider = value;
         }
+    }
+    public static void LoadConfiguration()
+    {
+        var cBuilder = new ConfigurationBuilder()
+                         .SetBasePath(AppContext.BaseDirectory)
+                         .AddJsonFile("appsettings.json", true, true)
+                         .AddJsonFile($"appsettings.{Common.EnviromentCode}.json", true, true);
 
-        /// <summary>
-        /// Load configuration and prepare for work
-        /// </summary>
-        /// <param name="configuration"></param>
-        public static void Setup(string rootFolder, string binaryFolder, IServiceCollection services, IConfiguration configuration = null, ILogger defaultLogger = null)
-        {
-            Rapidex.Common.DefaultLogger?.LogInformation("Rapidex.Common.Setup started. RootFolder: {0}, BinaryFolder: {1}", rootFolder, binaryFolder);
+        Common.Configuration = cBuilder.Build();
+    }
 
-            if (configuration != null)
-                Common.Configuration = configuration;
+    /// <summary>
+    /// Load configuration and prepare for work
+    /// </summary>
+    /// <param name="configuration"></param>
+    public static void Setup(string rootFolder, string binaryFolder, IServiceCollection services, IConfiguration configuration = null, ILogger defaultLogger = null)
+    {
+        Rapidex.Common.DefaultLogger?.LogInformation("Rapidex.Common.Setup started. RootFolder: {0}, BinaryFolder: {1}", rootFolder, binaryFolder);
 
-            RootFolder = rootFolder;
-            BinaryFolder = binaryFolder;
-            DataFolder = Path.Combine(rootFolder, "App_Data");
+        if (configuration != null)
+            Common.Configuration = configuration;
 
-            if (configuration == null && Common.Configuration == null)
-                LoadConfiguration();
+        RootFolder = rootFolder;
+        BinaryFolder = binaryFolder;
+        DataFolder = Path.Combine(rootFolder, "App_Data");
 
-            DefaultLogger = defaultLogger;
+        if (configuration == null && Common.Configuration == null)
+            LoadConfiguration();
 
-            AssemblyManager asman = new AssemblyManager(defaultLogger);
-            Common.Assembly = asman;
-            services.AddSingleton<AssemblyManager>(asman);
-            Common.Assembly.Setup(services);
+        DefaultLogger = defaultLogger;
 
-            Common.Converter = new RapidexTypeConverter();
-            Common.Converter.Setup(services);
-            Rapidex.Common.Time = new DefaultTimeProvider(); //TODO: ServiceProvider?
+        AssemblyManager asman = new AssemblyManager(defaultLogger);
+        Common.Assembly = asman;
+        services.AddSingleton<AssemblyManager>(asman);
+        Common.Assembly.Setup(services);
 
-            MappingHelper.Setup();
+        Common.Converter = new RapidexTypeConverter();
+        Common.Converter.Setup(services);
+        Rapidex.Common.Time = new DefaultTimeProvider(); //TODO: ServiceProvider?
 
-            //Geçici olarak boş bir sp yerleştiriyoruz
-            //Rapidex.Common.ServiceProvider = services.BuildServiceProvider();
+        MappingHelper.Setup();
+
+        //Geçici olarak boş bir sp yerleştiriyoruz
+        //Rapidex.Common.ServiceProvider = services.BuildServiceProvider();
 
 
 
-            //MappingHelper.Setup();
-
-        }
-
-        public static void Start(IServiceProvider serviceProvider)
-        {
-            //Change bootstrap logger to the real one
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            var logger = loggerFactory?.CreateLogger("Rapidex");
-            if (logger != null)
-                Common.UseLogger(logger);
-
-            MappingHelper.Start();
-
-            Common.ExceptionManager = serviceProvider.GetRapidexService<IExceptionManager>();
-            Common.ServiceProvider = serviceProvider;
-        }
-
-        public static void UseLogger(ILogger logger)
-        {
-            logger.NotNull();
-            Common.DefaultLogger = logger;
-
-            LoggingHelper.LogSystemInformation();
-        }
+        //MappingHelper.Setup();
 
     }
+
+    public static void Start(IServiceProvider serviceProvider)
+    {
+        //Change bootstrap logger to the real one
+        var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+        var logger = loggerFactory?.CreateLogger("Rapidex");
+        if (logger != null)
+            Common.UseLogger(logger);
+
+        MappingHelper.Start();
+
+        Common.ExceptionManager = serviceProvider.GetRapidexService<IExceptionManager>();
+        Common.ServiceProvider = serviceProvider;
+    }
+
+    public static void UseLogger(ILogger logger)
+    {
+        logger.NotNull();
+        Common.DefaultLogger = logger;
+
+        LoggingHelper.LogSystemInformation();
+    }
+
 }
