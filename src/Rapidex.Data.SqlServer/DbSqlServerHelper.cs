@@ -264,7 +264,7 @@ internal static class DbSqlServerHelper
             foreach (var param in parameters)
             {
                 if (NeedQuote(param))
-                    sb.AppendLine($" declare {param.ParameterName} = '{param.Value}' -- ({param.DbType}, {param.Value?.GetType().Name})");
+                    sb.AppendLine($" declare {param.ParameterName} {GetDataTypeName(param)} = '{param.Value}' -- ({param.DbType}, {param.Value?.GetType().Name})");
                 else
                     sb.AppendLine($" declare {param.ParameterName} {GetDataTypeName(param)} = {param.Value} -- ({param.DbType}, {param.Value?.GetType().Name})");
             }
