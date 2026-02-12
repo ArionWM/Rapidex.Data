@@ -4,6 +4,18 @@ using System.Text;
 
 namespace Rapidex
 {
+    public enum QueryMode
+    {
+        Select,
+        BulkUpdate,
+    }
+
+    public enum QueryBulkMode
+    {
+        Update,
+        Delete
+    }
+
     public enum EditingMode
     {
         Read,

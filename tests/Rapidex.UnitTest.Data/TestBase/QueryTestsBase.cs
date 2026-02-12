@@ -436,6 +436,28 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
             .Count();
 
         Assert.Equal(2, count05);
+
+        //Bulk delete
+        using var work3 = db.BeginWork();
+        db.GetQuery<ConcreteEntity01>()
+            .EnterUpdateMode()
+            .Eq("Address", "Address 03")
+            .Delete(work3);
+
+        work3.CommitChanges();
+
+        long count06 = db.GetQuery<ConcreteEntity01>()
+            .Eq("Address", "Address 03")
+            .Count();
+
+        Assert.Equal(0, count06);
+
+        long count07 = db.GetQuery<ConcreteEntity01>()
+        .Eq("Address", "Updated Address")
+        .Count();
+
+        Assert.Equal(2, count07);
+
     }
 
     //Nester

@@ -118,8 +118,10 @@ namespace Rapidex.Data.Query
 
         public void Update(IDbDataModificationScope workScope, IDictionary<string, object> data)
         {
-            if (this.Mode != QMode.Update)
+            if (this.Mode != QueryMode.BulkUpdate)
                 throw new InvalidOperationException("Query is not in update mode");
+
+            this.BulkOperationMode = QueryBulkMode.Update;
 
             workScope.CheckActive();
 
@@ -151,9 +153,26 @@ namespace Rapidex.Data.Query
             workScope.Add(this);
         }
 
-        public void Delete()
+        public void Delete(IDbDataModificationScope workScope)
         {
-            throw new NotImplementedException();
+            if (this.Mode != QueryMode.BulkUpdate)
+                throw new InvalidOperationException("Query is not in update mode");
+
+            this.BulkOperationMode = QueryBulkMode.Delete;
+
+            workScope.CheckActive();
+
+            this.Alias = null;
+            this.Query.QueryAlias = null;
+            this.Query.ClearComponent("from");
+            this.Query.From(this.TableName);
+            this.Query.AsDelete();
+
+            this.Query.Clauses.RemoveAll(c => c.Component == "select" || c.Component == "insert" || c.Component == "update");
+            if (!this.Query.Clauses.Any(c => c.Component == "where"))
+                throw new InvalidOperationException("Delete query should have where clause, use criteria to specify delete condition");
+
+            workScope.Add(this);
         }
 
         public new IQuery EnterUpdateMode()

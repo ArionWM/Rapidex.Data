@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+using static Rapidex.Data.Query.DbQueryBase;
 
 namespace Rapidex.Data;
 
@@ -23,13 +24,14 @@ public interface IDbCriteriaParser
 
 public interface IQueryBase
 {
-    public SqlKata.Query Query { get; set; }
+    SqlKata.Query Query { get; set; }
     string TableName { get; }
     string Alias { get; set; }
 
     IDbSchemaScope Schema { get; set; }
-
     IDbEntityMetadata EntityMetadata { get; set; }
+    QueryMode Mode { get; }
+    QueryBulkMode BulkOperationMode { get; }
 
     void EnterUpdateMode();
 
@@ -166,7 +168,7 @@ public interface IQueryUpdater : IQueryCriteria
     ObjDictionary UpdateData { get; }
     void Update(IDbDataModificationScope workScope, IDictionary<string, object> data);
     //TODO: IDbDataModificationScope üzerinden çağırıldığında IDbDataModificationScope workScope parametresine gerek yok. 
-    void Delete();
+    void Delete(IDbDataModificationScope workScope);
 }
 
 public interface IQuery : IQueryBase, IQueryCriteria, IQueryPager, IQueryOrder, IQueryLoader, IQueryAggregate, IQueryUpdater, ICloneable

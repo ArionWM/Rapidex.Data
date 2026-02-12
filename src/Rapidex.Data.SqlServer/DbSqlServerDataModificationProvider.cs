@@ -497,12 +497,9 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return result;
     }
 
-    public IEntityUpdateResult BulkUpdate(IDbEntityMetadata em, IQueryUpdater query)
+    protected IEntityUpdateResult BulkUpdateInternal(IDbEntityMetadata em, IQueryUpdater query)
     {
-        this.CheckConnection();
-
         SqlKata.Query _updateQuery = query.Query.Clone();
-        _updateQuery.ClearComponent("select");
         _updateQuery.AsUpdate(query.UpdateData);
 
         Compiler mySqlCompiler = this.GetCompiler();
@@ -536,6 +533,65 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         }
 
         return uResult;
+    }
+
+    protected IEntityUpdateResult BulkDeleteInternal(IDbEntityMetadata em, IQueryUpdater query)
+    {
+        SqlKata.Query _updateQuery = query.Query.Clone();
+        _updateQuery.AsDelete();
+
+        Compiler mySqlCompiler = this.GetCompiler();
+        SqlResult result = mySqlCompiler.Compile(_updateQuery);
+        string sql = result.ToString();
+
+        string topPart, wherePart;
+
+        int whereIndex = sql.IndexOf("where", StringComparison.InvariantCultureIgnoreCase);
+        if (whereIndex > -1)
+        {
+            topPart = sql.Substring(0, whereIndex);
+            wherePart = sql.Substring(whereIndex);
+        }
+        else
+        {
+            topPart = sql;
+            wherePart = null;
+        }
+
+        //Add output
+        string outputPart = " OUTPUT DELETED.Id ";
+        sql = topPart + outputPart + wherePart;
+        DataTable table = this.Connection.Execute(sql);
+
+        EntityUpdateResult uResult = new EntityUpdateResult();
+        foreach (DataRow row in table.Rows)
+        {
+            long id = row.To<long>("Id");
+            uResult.Modified(id);
+        }
+
+        return uResult;
+    }
+
+
+    public IEntityUpdateResult BulkUpdate(IDbEntityMetadata em, IQueryUpdater query)
+    {
+        this.CheckConnection();
+
+        SqlKata.Query _updateQuery = query.Query.Clone();
+        _updateQuery.ClearComponent("select");
+
+        switch (query.BulkOperationMode)
+        {
+            case QueryBulkMode.Update:
+                return this.BulkUpdateInternal(em, query);
+            case QueryBulkMode.Delete:
+                return this.BulkDeleteInternal(em, query);
+        }
+
+        return this.BulkUpdateInternal(em, query);
+
+
     }
 
     public void Dispose()

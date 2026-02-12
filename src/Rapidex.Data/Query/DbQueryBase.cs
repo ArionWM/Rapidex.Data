@@ -7,13 +7,9 @@ namespace Rapidex.Data.Query
 {
     internal abstract class DbQueryBase : IQueryBase
     {
-        public enum QMode
-        {
-            Select,
-            Update,
-        }
 
-        protected QMode Mode { get; set; } = QMode.Select;
+        public QueryMode Mode { get; set; } = QueryMode.Select;
+        public QueryBulkMode BulkOperationMode { get; set; } = QueryBulkMode.Update;
 
         internal int queryAliasesNo = 0;
         internal int queryAliasesSubIndex = 0;
@@ -69,14 +65,17 @@ namespace Rapidex.Data.Query
 
             field = this.Schema.Structure.CheckObjectName(field);
 
-            if (this.Mode == QMode.Update)
+            if (this.Mode == QueryMode.BulkUpdate)
                 return field;
             return $"{this.Alias}.{field}";
         }
 
         public void EnterUpdateMode()
         {
-            this.Mode = QMode.Update;
+            if (this.Query.HasComponent("where"))
+                throw new InvalidOperationException("For entering update mode, query should not be any condition. Enter update mode first.");
+
+            this.Mode = QueryMode.BulkUpdate;
         }
 
     }
