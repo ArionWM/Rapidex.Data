@@ -441,6 +441,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         using var work3 = db.BeginWork();
         db.GetQuery<ConcreteEntity01>()
             .EnterUpdateMode()
+            .Limit(10)
             .Eq("Address", "Address 03")
             .Delete(work3);
 
