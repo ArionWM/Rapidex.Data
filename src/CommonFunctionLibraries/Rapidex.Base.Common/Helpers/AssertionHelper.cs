@@ -77,7 +77,11 @@ public static class AssertionHelper
         if (!result.Success)
         {
             DebugBreak();
-            throw new BaseValidationException(message ?? "Result fail");
+            string exMessage = message ?? "Result fail";
+            if (result.Description.IsNOTNullOrEmpty())
+                exMessage = exMessage + $" ({result.Description})";
+
+            throw new BaseValidationException(exMessage);
         }
 
         return result;

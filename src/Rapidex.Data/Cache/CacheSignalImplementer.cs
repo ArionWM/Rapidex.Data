@@ -11,9 +11,18 @@ internal class CacheSignalImplementer
 {
     public ISignalHandlingResult AfterCommitCallback(IEntityReleatedMessageArguments args)
     {
-        var entity = args.Entity;
-        Database.Cache.SetEntity(entity);
-        return args.CreateHandlingResult(null);
+        try
+        {
+            var entity = args.Entity;
+            Database.Cache.SetEntity(entity);
+            return args.CreateHandlingResult(null);
+        }
+        catch(Exception ex)
+        {
+            ex.Log();
+            //Do nothing (yet)
+            return args.CreateHandlingResult(null);
+        }
     }
 
     public void Start()
