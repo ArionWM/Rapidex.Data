@@ -82,7 +82,10 @@ public abstract class BasicBaseDataType : IDataType
         return evalue;
     }
 
-
+    public virtual void PrepareCommit(IEntity entity, IDbDataModificationScope parentDms, DataUpdateType updateType)
+    {
+        
+    }
 }
 
 public abstract class BasicBaseDataType<TBasicDataType>

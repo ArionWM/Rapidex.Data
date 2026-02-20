@@ -59,8 +59,7 @@ public static class EntityExtensions
         if (!entity.IsAttached())
             throw new EntityAttachScopeException("AttachNeeded", "Entity is not attached to any schema");
 
-        entity._Schema.CurrentWork.NotNull("No active work found in current scope");
-
+        entity._Schema.CurrentWork.NotNull("No active work found in current scope. You can use 'work.Save(entity)'");
         entity._Schema.CurrentWork.Save(entity);
     }
 

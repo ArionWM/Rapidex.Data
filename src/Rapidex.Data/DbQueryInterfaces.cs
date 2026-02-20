@@ -31,7 +31,7 @@ public interface IQueryBase
     IDbSchemaScope Schema { get; set; }
     IDbEntityMetadata EntityMetadata { get; set; }
     QueryMode Mode { get; }
-    QueryBulkMode BulkOperationMode { get; }
+    DataUpdateType BulkOperationMode { get; }
 
     void EnterUpdateMode();
 

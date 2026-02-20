@@ -438,7 +438,7 @@ public interface IDbChangesCollection : IEmptyCheckObject
 
     IReadOnlyCollection<IQueryUpdater> BulkUpdates { get; }
 
-    void CheckNewEntities();
+    void PrepareCommit();
 
     IDbChangesCollection[] SplitForTypesAndDependencies();
 
@@ -622,6 +622,7 @@ public interface IDbDataModificationScope : IDbDataReadScope, IDisposable
     IEntity New(IDbEntityMetadata em);
 
     void Attach(IEntity entity, bool checkIntegrity = true);
+    void DeAttach(IEntity entity);
 
     void Save(IEntity entity);
 
@@ -870,6 +871,7 @@ public interface IEntity
     void SetValue(string fieldName, object value);
 
     ObjDictionary GetAllValues();
+
 }
 
 /// <summary>
@@ -1012,6 +1014,7 @@ public interface IDataType : ICloneable
 
     IValidationResult Validate();
 
+    void PrepareCommit(IEntity entity, IDbDataModificationScope parentDms, DataUpdateType updateType);
 }
 
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
 using YamlDotNet.Core.Tokens;
@@ -20,18 +21,10 @@ public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILa
 {
     public override bool? SkipDirectLoad => false;
 
+    protected ByteArrayContent UnAttachedData { get; set; }
+    protected BlobRecord AttachedData { get; set; }
 
 
-    public new virtual StreamContent GetContent()
-    {
-        if (this.TargetId.IsEmptyId())
-            return new StreamContent();
-
-        IDataType _this = this;
-        IEntity _parent = this.GetParent().NotNull("Parent not set");
-        IResult<StreamContent> fsr = _parent._Schema.Blobs.Get(this.TargetId);
-        return fsr.Content;
-    }
 
     public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
     {
@@ -69,38 +62,130 @@ public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILa
         throw new NotImplementedException();
     }
 
-    public virtual BlobRecord SetContent(Stream stream, string name, string contentType)
-    {
-        IDataType _this = this;
-        IEntity _parent = this.GetParent().NotNull("Parent not set");
-        BlobRecord blobRec = null;
-        //Doğrudan kaydediliyor !!!
-        long blobId = this.TargetId;
-        if (stream == null)
-        {
-            if (blobId > 0)
-            {
-                //Sil ..
-                _parent._Schema.Blobs.Delete(blobId);
-            }
-            this.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
-        }
-        else
-        {
-            //güncelle ya da ekle
-            IResult<BlobRecord> bres = _parent._Schema.Blobs.Set(stream, name, contentType, this.TargetId)
-                ;
-            blobRec = bres.Content;
-            this.TargetId = blobRec.Id;
-        }
+    //public virtual BlobRecord SetContent(Stream stream, string name, string contentType)
+    //{
+    //    IDataType _this = this;
+    //    IEntity _parent = this.GetParent().NotNull("Parent not set");
+    //    BlobRecord blobRec = null;
 
-        return blobRec;
+
+
+    //    //Doğrudan kaydediliyor !!!
+    //    long blobId = this.TargetId;
+    //    if (stream == null)
+    //    {
+    //        if (blobId > 0)
+    //        {
+    //            //Sil ..
+    //            _parent._Schema.Blobs.Delete(blobId);
+    //        }
+    //        this.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
+    //    }
+    //    else
+    //    {
+    //        //güncelle ya da ekle
+    //        IResult<BlobRecord> bres = _parent._Schema.Blobs.Set(stream, name, contentType, this.TargetId);
+    //        blobRec = bres.Content;
+    //        this.TargetId = blobRec.Id;
+    //    }
+
+    //    return blobRec;
+    //}
+
+    public new virtual ByteArrayContent GetContent()
+    {
+        if (this.UnAttachedData.IsNOTNullOrEmpty())
+            return this.UnAttachedData;
+
+        if (this.TargetId.IsEmptyId())
+            return null;
+
+        IEntity _parent = this.GetParent()
+            .NotNull("Parent not set");
+
+        if (!_parent.IsAttached())
+            throw new InvalidOperationException("Cannot get content of a blob field when the parent entity is not attached to a schema.");
+
+        this.AttachedData = this.AttachedData ?? _parent._Schema.Find<BlobRecord>(this.TargetId);
+        if (this.AttachedData == null)
+            throw new InvalidOperationException($"Blob record with id {this.TargetId} not found in the schema {_parent._Schema.SchemaName}");
+
+        ByteArrayContent content = this.AttachedData.GetByteArrayContent();
+
+        return content;
     }
 
-    public virtual BlobRecord SetContent(byte[] data, string name, string contentType)
+    public virtual void SetContent(byte[] data, string name, string contentType)
     {
-        using MemoryStream memoryStream = new MemoryStream(data);
-        return this.SetContent(memoryStream, name, contentType);
+        this.UnAttachedData = new ByteArrayContent(name, contentType, data);
+        //this.AttachedData = null;
+
+        /*
+        Dolu idim (id var), boşaldım -> 
+        UnAttachedData var, UnAttachedData.Data null, attachedData var / ya da yok (önemsiz), id var
+        BlobRecord sil
+
+        Dolu idim, değiştim (id var) -> 
+        UnAttachedData var, attachedData var / ya da yok (önemsiz), id var
+        BlobRecord yükle / güncelle / kaydet
+
+        Boş idim, doldum (id var)-> 
+        UnAttachedData var, attachedData var / ya da yok (önemsiz), id var
+        BlobRecord yüklenmemiş, yükle ve güncelle
+
+        Boş idim, doldum (id yok)-> 
+        UnAttachedData var, attachedData yok, id yok
+        BlobRecord ekle
+         */
+    }
+
+    public override void PrepareCommit(IEntity entity, IDbDataModificationScope parentDms, DataUpdateType updateType)
+    {
+        base.PrepareCommit(entity, parentDms, updateType);
+
+        IEntity _parent = this.GetParent()
+            .NotNull("Parent not set");
+
+        if (!_parent.IsAttached())
+            throw new InvalidOperationException("Cannot get content of a blob field when the parent entity is not attached to a schema.");
+
+        var schemaScope = _parent._Schema;
+
+
+        switch (updateType)
+        {
+            case DataUpdateType.Update:
+                if (this.UnAttachedData != null)
+                {
+                    BlobRecord brec;
+                    if (this.TargetId.IsEmptyId())
+                    {
+                        brec = parentDms.New<BlobRecord>();
+                        this.TargetId = brec.Id;
+                    }
+                    else
+                    {
+                        brec = schemaScope.Find<BlobRecord>(this.TargetId);
+                        brec.NotNull();
+                    }
+
+                    brec.Data = this.UnAttachedData.Data;
+                    brec.ContentType = this.UnAttachedData.ContentType;
+                    brec.Name = this.UnAttachedData.Name;
+                    parentDms.Save(brec);
+                }
+                break;
+            case DataUpdateType.Delete:
+                if (this.TargetId.IsPersistedRecordId())
+                {
+                    parentDms.GetQuery<BlobRecord>()
+                        .EnterUpdateMode()
+                        .IdEq(this.TargetId)
+                        .Delete(parentDms);
+                }
+                break;
+        }
+
     }
 
     public override object Clone()
@@ -110,7 +195,7 @@ public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILa
         return clone;
     }
 
-    
+
 
 }
 

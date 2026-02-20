@@ -129,6 +129,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
     {
         var command = connection.CreateCommand();
         command.Transaction = this.Transaction;
+        command.CommandTimeout = 60;
         return command;
     }
 

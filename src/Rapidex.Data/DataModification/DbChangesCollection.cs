@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -73,6 +74,7 @@ internal class DbChangesCollection : IDbChangesCollection
 
     }
 
+    protected IDbDataModificationScope parent;
 
     HashSet<IEntity> deletedEntities = new HashSet<IEntity>();
 
@@ -95,11 +97,12 @@ internal class DbChangesCollection : IDbChangesCollection
 
     public bool IsEmpty => !changedEntities.Any() && !deletedEntities.Any() && !bulkUpdates.Any();
 
-    public DbChangesCollection()
+    public DbChangesCollection(IDbDataModificationScope parent)
     {
+        this.parent = parent;
     }
 
-    public DbChangesCollection(IEnumerable<IEntity> changedEntities, IEnumerable<IEntity> deletedEntities, IEnumerable<IQueryUpdater> bulkUpdates)
+    public DbChangesCollection(IDbDataModificationScope parent, IEnumerable<IEntity> changedEntities, IEnumerable<IEntity> deletedEntities, IEnumerable<IQueryUpdater> bulkUpdates) : this(parent)
     {
         if (changedEntities.IsNOTNullOrEmpty())
             this.Add(changedEntities);
@@ -189,25 +192,33 @@ internal class DbChangesCollection : IDbChangesCollection
 
         if (entity._IsNew)
         {
-            newEntities.Add(entity);
+            this.newEntities.Add(entity);
+            //No return, see: changedEntities
         }
 
         this.CheckDependencies(entity);
-        changedEntities.Add(entity);
+        this.changedEntities.Add(entity);
     }
 
     public void Add(IEntity entity)
     {
         this.ValidateEntity(entity);
 
-        locker.EnterWriteLock();
+        bool lockAvail = locker.IsWriteLockHeld;
+        if (!lockAvail)
+        {
+            locker.EnterWriteLock();
+            lockAvail = false;
+        }
+
         try
         {
             this.InternalAdd(entity);
         }
         finally
         {
-            locker.ExitWriteLock();
+            if (!lockAvail)
+                locker.ExitWriteLock();
         }
     }
 
@@ -335,19 +346,18 @@ internal class DbChangesCollection : IDbChangesCollection
         }
     }
 
-    public void CheckNewEntities()
+    protected void CheckNewEntitiesInternal()
     {
-        locker.EnterWriteLock();
         try
         {
             this.ReserveIds();
 
-            foreach (var entity in newEntities)
+            foreach (var entity in this.newEntities)
             {
                 this.CheckNewEntity(entity);
             }
 
-            foreach (var entity in changedEntities)
+            foreach (var entity in this.changedEntities)
             {
                 if (entity.HasPrematureId() && !entity._IsNew)
                 {
@@ -368,6 +378,59 @@ internal class DbChangesCollection : IDbChangesCollection
         }
         finally
         {
+
+        }
+    }
+
+    protected void PrepareCommitInternal(HashSet<IEntity> deletedEntities, HashSet<IEntity> changedEntities)
+    {
+        foreach (var entity in deletedEntities)
+        {
+            entity.PrepareCommit(this.parent, DataUpdateType.Delete);
+        }
+
+        foreach (var entity in this.changedEntities.ToArray())
+        {
+            entity.PrepareCommit(this.parent, DataUpdateType.Update);
+        }
+
+    }
+
+    protected void PrepareCommitInternal()
+    {
+        HashSet<IEntity> deletedEntities = new();
+        HashSet<IEntity> changedEntities = new();
+
+        int iterationCount = 0;
+
+        while (iterationCount < 5 && (this.deletedEntities.Any() || this.ChangedEntities.Any()))
+        {
+            HashSet<IEntity> deletedEntitiesInner = this.deletedEntities;
+            this.deletedEntities = new HashSet<IEntity>();
+            deletedEntities.Add(deletedEntitiesInner);
+
+            HashSet<IEntity> changedEntitiesInner = this.changedEntities;
+            this.changedEntities = new HashSet<IEntity>();
+            changedEntities.Add(changedEntitiesInner);
+
+            this.PrepareCommitInternal(deletedEntitiesInner, changedEntitiesInner);
+            iterationCount++;
+        }
+
+        this.deletedEntities = deletedEntities;
+        this.changedEntities = changedEntities;
+    }
+
+    public void PrepareCommit()
+    {
+        locker.EnterWriteLock();
+        try
+        {
+            this.CheckNewEntitiesInternal();
+            this.PrepareCommitInternal();
+        }
+        finally
+        {
             locker.ExitWriteLock();
         }
     }
@@ -380,9 +443,9 @@ internal class DbChangesCollection : IDbChangesCollection
         {
             List<IDbChangesCollection> list = new List<IDbChangesCollection>();
 
-            list.AddRange(this.ChangedEntities.GroupBy(e => e._TypeName).Select(g => new DbChangesCollection(g, null, null)).ToArray());
-            list.AddRange(this.DeletedEntities.GroupBy(e => e._TypeName).Select(g => new DbChangesCollection(null, g, null)).ToArray());
-            list.AddRange(this.BulkUpdates.GroupBy(e => e.EntityMetadata.Name).Select(g => new DbChangesCollection(null, null, g)).ToArray());
+            list.AddRange(this.ChangedEntities.GroupBy(e => e._TypeName).Select(g => new DbChangesCollection(this.parent, g, null, null)).ToArray());
+            list.AddRange(this.DeletedEntities.GroupBy(e => e._TypeName).Select(g => new DbChangesCollection(this.parent, null, g, null)).ToArray());
+            list.AddRange(this.BulkUpdates.GroupBy(e => e.EntityMetadata.Name).Select(g => new DbChangesCollection(this.parent, null, null, g)).ToArray());
 
             return list.ToArray();
         }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex;
+
 public class ContentBase
 {
     public string Id { get; set; }
@@ -24,6 +25,28 @@ public class ContentBase
 
 }
 
+public class ByteArrayContent : ContentBase, IDisposable
+{
+    public byte[] Data { get; set; }
+
+    public ByteArrayContent()
+    {
+
+    }
+
+    public ByteArrayContent(string name, string contentType, byte[] data)
+    {
+        this.Data = data;
+        this.Name = name;
+        this.ContentType = contentType;
+    }
+
+    public void Dispose()
+    {
+        this.Data = null;
+    }
+}
+
 public class StreamContent : ContentBase, IDisposable
 {
     public Stream Stream { get; set; }
@@ -35,17 +58,17 @@ public class StreamContent : ContentBase, IDisposable
 
     public StreamContent(string name, string contentType, Stream stream)
     {
-        Stream = stream;
-        Name = name;
-        ContentType = contentType;
+        this.Stream = stream;
+        this.Name = name;
+        this.ContentType = contentType;
     }
 
     public void Dispose()
     {
-        if (Stream != null && Stream.CanRead)
+        if (this.Stream != null && this.Stream.CanRead)
         {
-            Stream.Dispose();
-            Stream = null;
+            this.Stream.Dispose();
+            this.Stream = null;
         }
     }
 }
@@ -61,9 +84,9 @@ public class TextContent : ContentBase
 
     public TextContent(string name, string contentType, string content)
     {
-        Content = content;
-        Name = name;
-        ContentType = contentType;
+        this.Content = content;
+        this.Name = name;
+        this.ContentType = contentType;
     }
 }
 
@@ -78,8 +101,8 @@ public class BinaryContent : ContentBase
 
     public BinaryContent(string name, string contentType, byte[] content)
     {
-        Content = content;
-        Name = name;
-        ContentType = contentType;
+        this.Content = content;
+        this.Name = name;
+        this.ContentType = contentType;
     }
 }

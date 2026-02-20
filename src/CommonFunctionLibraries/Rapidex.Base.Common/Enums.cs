@@ -10,7 +10,7 @@ namespace Rapidex
         BulkUpdate,
     }
 
-    public enum QueryBulkMode
+    public enum DataUpdateType
     {
         Update,
         Delete

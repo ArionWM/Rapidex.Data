@@ -22,11 +22,16 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         this.debugTracker = RandomHelper.Random(1000000);
     }
 
+    public override string ToString()
+    {
+        return $"{this.debugTracker}";
+    }
+
     protected override void Initialize()
     {
         base.Initialize();
 
-        this.ChangesCollection = new DbChangesCollection();
+        this.ChangesCollection = new DbChangesCollection(this);
         this.CurrentTransaction = this.DmProvider.BeginTransaction();
     }
 
@@ -145,7 +150,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
     {
         EntityUpdateResult result = new EntityUpdateResult();
 
-        this.ChangesCollection.CheckNewEntities();
+        this.ChangesCollection.PrepareCommit();
 
         var types = this.ChangesCollection.SplitForTypesAndDependencies();
 
@@ -372,5 +377,10 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             this.CheckIntegrity(entity);
 
         entity.EnsureDataTypeInitialization();
+    }
+
+    public void DeAttach(IEntity entity)
+    {
+
     }
 }

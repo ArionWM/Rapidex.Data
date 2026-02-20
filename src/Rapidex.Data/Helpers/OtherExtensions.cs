@@ -1,7 +1,9 @@
-﻿using Rapidex.Data.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using Rapidex.Data.Entities;
+using Rapidex.Data.Helpers;
 
 namespace Rapidex.Data;
 
@@ -82,7 +84,7 @@ public static class OtherExtensions
             value = entity.GetId();
         }
 
-        if(value is Enum enumVal)
+        if (value is Enum enumVal)
         {
             value = Convert.ToInt64(enumVal);
         }
@@ -172,5 +174,37 @@ public static class OtherExtensions
         return implementer.Subscribe<T>(DataReleatedSignalConstants.SIGNAL_NEW, handler);
     }
 
+    public static void PrepareCommit(this IEntity entity, IDbDataModificationScope parentDms, DataUpdateType updateType)
+    {
+        entity.NotNull();
+        if (!entity.IsAttached())
+            throw new InvalidOperationException("Entity must be attached before preparing for commit.");
 
+        var em = entity.GetMetadata();
+
+        foreach (var fl in em.Fields)
+        {
+            //IDataType            fl.
+            IDbFieldMetadata? fm = fl.Value;
+            if (fm.Type.IsSupportTo<IDataType>())
+            {
+                var fieldValue = entity.GetValue(fm.Name) as IDataType;
+                fieldValue?.PrepareCommit(entity, parentDms, updateType);
+            }
+        }
+    }
+
+    public static ByteArrayContent GetByteArrayContent(this BlobRecord blobRecord)
+    {
+        var content = new ByteArrayContent(blobRecord.Name, blobRecord.ContentType, blobRecord.Data);
+        return content;
+    }
+
+    public static StreamContent GetStreamContent(this BlobRecord blobRecord)
+    {
+        var content = new StreamContent( blobRecord.Name, blobRecord.ContentType, new MemoryStream(blobRecord.Data));
+        return content;
+    }
+
+   
 }

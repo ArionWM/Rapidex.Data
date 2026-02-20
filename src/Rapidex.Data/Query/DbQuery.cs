@@ -121,7 +121,7 @@ namespace Rapidex.Data.Query
             if (this.Mode != QueryMode.BulkUpdate)
                 throw new InvalidOperationException("Query is not in update mode");
 
-            this.BulkOperationMode = QueryBulkMode.Update;
+            this.BulkOperationMode = DataUpdateType.Update;
 
             workScope.CheckActive();
 
@@ -158,7 +158,7 @@ namespace Rapidex.Data.Query
             if (this.Mode != QueryMode.BulkUpdate)
                 throw new InvalidOperationException("Query is not in update mode");
 
-            this.BulkOperationMode = QueryBulkMode.Delete;
+            this.BulkOperationMode = DataUpdateType.Delete;
 
             workScope.CheckActive();
 

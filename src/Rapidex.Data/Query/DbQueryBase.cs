@@ -9,7 +9,7 @@ namespace Rapidex.Data.Query
     {
 
         public QueryMode Mode { get; set; } = QueryMode.Select;
-        public QueryBulkMode BulkOperationMode { get; set; } = QueryBulkMode.Update;
+        public DataUpdateType BulkOperationMode { get; set; } = DataUpdateType.Update;
 
         internal int queryAliasesNo = 0;
         internal int queryAliasesSubIndex = 0;

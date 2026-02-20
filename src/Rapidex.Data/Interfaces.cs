@@ -31,9 +31,10 @@ public interface ILazyBlob : IReference, IDataType<long>
 {
     new internal bool? SkipDirectLoad => false;
 
-    new StreamContent GetContent();
+    new ByteArrayContent GetContent();
 
-    BlobRecord SetContent(Stream stream, string name, string contentType);
+    //BlobRecord SetContent(Stream stream, string name, string contentType);
+    void SetContent(byte[] data, string name, string contentType);
 }
 
 

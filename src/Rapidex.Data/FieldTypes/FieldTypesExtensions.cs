@@ -21,20 +21,12 @@ namespace Rapidex.Data
 
 
 
-        public static BlobRecord Set(this ILazyBlob blob, byte[] value, string name, string contentType)
+        public static void Set(this ILazyBlob blob, byte[] value, string name, string contentType)
         {
-            using (var ms = value == null ? new MemoryStream() : new MemoryStream(value))
-            {
-                return blob.SetContent(ms, name, contentType);
-            }
+            blob.SetContent(value, name, contentType);
         }
 
-        public static BlobRecord Set(this ILazyBlob blob, Stream stream, string name, string contentType)
-        {
-            return blob.SetContent(stream, name, contentType);
-        }
-
-        public static BlobRecord LoadFromFile(this ILazyBlob blob, string filePath, string contentType = null)
+        public static void LoadFromFile(this ILazyBlob blob, string filePath, string contentType = null)
         {
             if (contentType.IsNullOrEmpty())
             {
@@ -44,7 +36,9 @@ namespace Rapidex.Data
 
             using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                return blob.SetContent(fs, Path.GetFileName(filePath), contentType);
+                byte[] data = new byte[fs.Length];
+                fs.Read(data, 0, data.Length);
+                blob.SetContent(data, Path.GetFileName(filePath), contentType);
             }
         }
 

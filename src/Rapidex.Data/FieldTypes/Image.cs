@@ -29,12 +29,7 @@ public class Image : BlobFieldBase<Image>, ILazy, ILazyBlob
 
     public static implicit operator byte[](Image value)
     {
-        using StreamContent streamResult = value.GetContent();
-        if (streamResult.Stream == null)
-            return new byte[0];
-
-        byte[] buffer = new byte[streamResult.Stream.Length];
-        streamResult.Stream.Read(buffer, 0, buffer.Length);
-        return buffer;
+        ByteArrayContent streamResult = value.GetContent();
+        return streamResult?.Data;
     }
 }

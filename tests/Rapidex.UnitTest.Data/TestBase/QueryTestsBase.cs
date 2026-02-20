@@ -378,7 +378,6 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         refEnt01.Name = "Ent 01";
         refEnt01.Phone = "5336722201";
         refEnt01.Address = "Address 01";
-
         refEnt01.Save();
 
         ConcreteEntity01 refEnt02 = work1.New<ConcreteEntity01>();

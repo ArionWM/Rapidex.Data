@@ -583,9 +583,9 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
         switch (query.BulkOperationMode)
         {
-            case QueryBulkMode.Update:
+            case DataUpdateType.Update:
                 return this.BulkUpdateInternal(em, query);
-            case QueryBulkMode.Delete:
+            case DataUpdateType.Delete:
                 return this.BulkDeleteInternal(em, query);
         }
 
