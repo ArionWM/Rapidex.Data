@@ -78,19 +78,22 @@ public static class ArchiveEntityExtensions
 
     public static IQueryCriteria IsNotArchived(this IQueryCriteria qo)
     {
-        return qo.Not(
-            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, true));
+        return qo.Or(
+            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, false),
+            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, null));
     }
 
     public static IQuery IsNotArchived(this IQuery qo)
     {
-        return qo.Not(
-            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, true));
+        return qo.Or(
+            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, false),
+            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, null));
     }
 
     public static IQuery<T> IsNotArchived<T>(this IQuery<T> qo) where T : IConcreteEntity
     {
-        return qo.Not(
-            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, true));
+        return qo.Or(
+            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, false),
+            qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, null));
     }
 }

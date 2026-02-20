@@ -15,10 +15,11 @@ public static class DictionaryHelper
 
         lock (dict)
         {
-            if (dict.ContainsKey(key))
-                dict[key] = value;
-            else
-                dict.Add(key, value);
+            dict[key] = value;
+            //if (dict.ContainsKey(key))
+            //    dict[key] = value;
+            //else
+            //    dict.Add(key, value);
         }
     }
 
