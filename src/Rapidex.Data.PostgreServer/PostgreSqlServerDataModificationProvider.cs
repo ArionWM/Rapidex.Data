@@ -432,6 +432,9 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         foreach (IEntity entity in entities)
         {
+            if (entity is IPartialEntity pentity && !pentity.IsAnyValueContained())
+                continue;
+
             this.Update(em, entity);
             entity.DbVersion++;
             result.Modified(entity);

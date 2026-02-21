@@ -25,7 +25,7 @@ internal static class JsonConvertersHelper
                 return;
             }
 
-            IEntityLoadResult? loadResult = (IEntityLoadResult)((ILazy)value).GetContent();
+            IEntity[]? loadResult = (IEntity[])((ILazy)value).GetContent();
             if (loadResult.IsNullOrEmpty())
             {
                 writer.WriteNullValue();

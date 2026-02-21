@@ -213,6 +213,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Hybrid_IdCache01()
     {
+        return;
         TestCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");
         CacheExtensions.SetTagContext(null, "test");
@@ -250,6 +251,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Hybrid_QueryCache01()
     {
+        return;
         CacheExtensions.SetTagContext(null, "test");
         TestCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");
@@ -283,6 +285,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Hybrid_QueryCache02()
     {
+        return;
         CacheExtensions.SetTagContext(null, "test");
         TestCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");

@@ -76,11 +76,11 @@ internal class DbChangesCollection : IDbChangesCollection
 
     protected IDbDataModificationScope parent;
 
-    HashSet<IEntity> deletedEntities = new HashSet<IEntity>();
+    List<IEntity> deletedEntities = new List<IEntity>();
 
-    HashSet<IEntity> changedEntities = new HashSet<IEntity>();
+    List<IEntity> changedEntities = new List<IEntity>();
 
-    HashSet<IEntity> newEntities = new HashSet<IEntity>();
+    List<IEntity> newEntities = new List<IEntity>();
     TwoLevelDictionary<IDbEntityMetadata, long, long> prematureIds = new();
 
     List<IQueryUpdater> bulkUpdates = new List<IQueryUpdater>();
@@ -190,13 +190,28 @@ internal class DbChangesCollection : IDbChangesCollection
             return;
         }
 
+        bool isAvail =
+            this.newEntities.Any(e => object.ReferenceEquals(e, entity)) ||
+            this.changedEntities.Any(e => object.ReferenceEquals(e, entity));
+
+        if (isAvail)
+            return;
+
         if (entity._IsNew)
         {
+            bool isAvailForSamePrematureId = this.newEntities.Any(
+                e =>
+                    !object.Equals(entity.GetId(), DatabaseConstants.DEFAULT_EMPTY_ID) && 
+                    string.Equals(entity._TypeName, e._TypeName, StringComparison.OrdinalIgnoreCase) && object.Equals(entity.GetId(), e.GetId()));
+
+            if (isAvailForSamePrematureId)
+                throw new InvalidOperationException($"Same premature ID already exists {entity.GetId()}");
+
             this.newEntities.Add(entity);
             //No return, see: changedEntities
         }
 
-        this.CheckDependencies(entity);
+        //this.CheckDependencies(entity);
         this.changedEntities.Add(entity);
     }
 
@@ -224,7 +239,13 @@ internal class DbChangesCollection : IDbChangesCollection
 
     public void Add(IEnumerable<IEntity> entities)
     {
-        locker.EnterWriteLock();
+        bool lockAvail = locker.IsWriteLockHeld;
+        if (!lockAvail)
+        {
+            locker.EnterWriteLock();
+            lockAvail = false;
+        }
+
         try
         {
             foreach (var entity in entities)
@@ -234,7 +255,8 @@ internal class DbChangesCollection : IDbChangesCollection
         }
         finally
         {
-            locker.ExitWriteLock();
+            if (!lockAvail)
+                locker.ExitWriteLock();
         }
     }
 
@@ -248,14 +270,20 @@ internal class DbChangesCollection : IDbChangesCollection
 
     public void Add(IQueryUpdater updater)
     {
-        locker.EnterWriteLock();
+        bool lockAvail = locker.IsWriteLockHeld;
+        if (!lockAvail)
+        {
+            locker.EnterWriteLock();
+            lockAvail = false;
+        }
         try
         {
             this.InternalAdd(updater);
         }
         finally
         {
-            locker.ExitWriteLock();
+            if (!lockAvail)
+                locker.ExitWriteLock();
         }
     }
 
@@ -267,7 +295,13 @@ internal class DbChangesCollection : IDbChangesCollection
 
     public void Delete(IEntity entity)
     {
-        locker.EnterWriteLock();
+        bool lockAvail = locker.IsWriteLockHeld;
+        if (!lockAvail)
+        {
+            locker.EnterWriteLock();
+            lockAvail = false;
+        }
+
         try
         {
             entity._IsDeleted = true;
@@ -275,7 +309,8 @@ internal class DbChangesCollection : IDbChangesCollection
         }
         finally
         {
-            locker.ExitWriteLock();
+            if (!lockAvail)
+                locker.ExitWriteLock();
         }
 
 
@@ -283,7 +318,13 @@ internal class DbChangesCollection : IDbChangesCollection
 
     public void Delete(IEnumerable<IEntity> entities)
     {
-        locker.EnterWriteLock();
+        bool lockAvail = locker.IsWriteLockHeld;
+        if (!lockAvail)
+        {
+            locker.EnterWriteLock();
+            lockAvail = false;
+        }
+
         try
         {
             foreach (var entity in entities)
@@ -293,7 +334,8 @@ internal class DbChangesCollection : IDbChangesCollection
         }
         finally
         {
-            locker.ExitWriteLock();
+            if (!lockAvail)
+                locker.ExitWriteLock();
         }
     }
 
@@ -307,7 +349,7 @@ internal class DbChangesCollection : IDbChangesCollection
             long oldId = (long)entity.GetId();
             if (entity.HasPrematureId())
             {
-                List<long> ids = this.newEntityIds.Get(em);
+                List<long> ids = this.reservedNewIds.Get(em);
                 long newId = 0;
                 if (ids.Any())
                 {
@@ -329,11 +371,11 @@ internal class DbChangesCollection : IDbChangesCollection
         }
     }
 
-    TwoLevelList<IDbEntityMetadata, long> newEntityIds = new TwoLevelList<IDbEntityMetadata, long>();
+    TwoLevelList<IDbEntityMetadata, long> reservedNewIds = new TwoLevelList<IDbEntityMetadata, long>();
 
     protected void ReserveIds()
     {
-        this.newEntityIds.Clear();
+        this.reservedNewIds.Clear();
         var groupForTypeName = this.newEntities.Where(e => e.HasPrematureId()).GroupBy(e => e._TypeName);
         foreach (var group in groupForTypeName)
         {
@@ -342,7 +384,7 @@ internal class DbChangesCollection : IDbChangesCollection
             TemplateInfo info = Database.EntityFactory.GetTemplate(em, group.First()._Schema);
             int requiredIdCount = group.Count();
             var reqIds = dbScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
-            this.newEntityIds.Set(em, reqIds);
+            this.reservedNewIds.Set(em, reqIds);
         }
     }
 
@@ -351,6 +393,11 @@ internal class DbChangesCollection : IDbChangesCollection
         try
         {
             this.ReserveIds();
+
+            foreach (var entity in this.changedEntities)
+            {
+                this.CheckDependencies(entity);
+            }
 
             foreach (var entity in this.newEntities)
             {
@@ -382,14 +429,14 @@ internal class DbChangesCollection : IDbChangesCollection
         }
     }
 
-    protected void PrepareCommitInternal(HashSet<IEntity> deletedEntities, HashSet<IEntity> changedEntities)
+    protected void PrepareCommitInternal(List<IEntity> deletedEntities, List<IEntity> changedEntities)
     {
         foreach (var entity in deletedEntities)
         {
             entity.PrepareCommit(this.parent, DataUpdateType.Delete);
         }
 
-        foreach (var entity in this.changedEntities.ToArray())
+        foreach (var entity in changedEntities.ToArray())
         {
             entity.PrepareCommit(this.parent, DataUpdateType.Update);
         }
@@ -398,21 +445,20 @@ internal class DbChangesCollection : IDbChangesCollection
 
     protected void PrepareCommitInternal()
     {
-        HashSet<IEntity> deletedEntities = new();
-        HashSet<IEntity> changedEntities = new();
+        List<IEntity> deletedEntities = new();
+        List<IEntity> changedEntities = new();
 
         int iterationCount = 0;
 
         while (iterationCount < 5 && (this.deletedEntities.Any() || this.ChangedEntities.Any()))
         {
-            HashSet<IEntity> deletedEntitiesInner = this.deletedEntities;
-            this.deletedEntities = new HashSet<IEntity>();
-            deletedEntities.Add(deletedEntitiesInner);
+            List<IEntity> deletedEntitiesInner = this.deletedEntities;
+            this.deletedEntities = new List<IEntity>();
+            deletedEntities.AddRange(deletedEntitiesInner);
 
-            HashSet<IEntity> changedEntitiesInner = this.changedEntities;
-            this.changedEntities = new HashSet<IEntity>();
-            changedEntities.Add(changedEntitiesInner);
-
+            List<IEntity> changedEntitiesInner = this.changedEntities;
+            this.changedEntities = new List<IEntity>();
+            changedEntities.AddRange(changedEntitiesInner);
             this.PrepareCommitInternal(deletedEntitiesInner, changedEntitiesInner);
             iterationCount++;
         }
@@ -426,8 +472,9 @@ internal class DbChangesCollection : IDbChangesCollection
         locker.EnterWriteLock();
         try
         {
-            this.CheckNewEntitiesInternal();
             this.PrepareCommitInternal();
+            this.CheckNewEntitiesInternal();
+
         }
         finally
         {

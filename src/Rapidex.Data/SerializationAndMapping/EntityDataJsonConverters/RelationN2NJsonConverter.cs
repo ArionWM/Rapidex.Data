@@ -41,8 +41,9 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
 
                     IPartialEntity entity = new PartialEntity();
                     entity.SetId(id);
-                    IEntity junctionEntity = relation.Add(entity, false);
-                    EntityDataJsonConverter.DeserializationContext.CreatedEntities.Add(junctionEntity);
+                    entity._TypeName = relation.TargetEntityName;
+                    relation.Add(entity);
+                    //EntityDataJsonConverter.DeserializationContext.CreatedEntities.Add(junctionEntity);
                 }
 
                 if (reader.TokenType == JsonTokenType.StartObject)
@@ -53,8 +54,9 @@ internal class RelationN2NJsonConverter : JsonConverter<RelationN2N>
                         long id = values.Get("id").As<long>();
                         IPartialEntity entity = new PartialEntity();
                         entity.SetId(id);
-                        IEntity junctionEntity = relation.Add(entity, false);
-                        EntityDataJsonConverter.DeserializationContext.CreatedEntities.Add(junctionEntity);
+                        entity._TypeName = relation.TargetEntityName;
+                        relation.Add(entity);
+                        //EntityDataJsonConverter.DeserializationContext.CreatedEntities.Add(junctionEntity);
                     }
                 }
             }

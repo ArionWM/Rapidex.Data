@@ -169,6 +169,7 @@ public class DbEntityFactory
         //    newEntity._IsDeleted = true;
         //}
 
+        newEntity._TypeName = em.Name;
         newEntity.EnsureDataTypeInitialization();
 
         return newEntity;
@@ -210,6 +211,8 @@ public class DbEntityFactory
         {
             newEntity._IsDeleted = true;
         }
+
+        newEntity._TypeName = em.Name;
 
         return newEntity;
     }

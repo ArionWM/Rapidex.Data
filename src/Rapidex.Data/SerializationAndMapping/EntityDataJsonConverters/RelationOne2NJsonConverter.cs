@@ -43,6 +43,7 @@ internal class RelationOne2NJsonConverter : JsonConverter<RelationOne2N>
                     IPartialEntity entity = new PartialEntity();
                     //IPartialEntity entity = Database.EntityFactory.CreatePartial(em, EntityDataJsonConverter.DeserializationContext, false, true);
                     entity.SetId(id);
+                    entity._TypeName = relation.ReferencedEntityName;
                     relation.Add(entity);
                 }
 
@@ -54,7 +55,8 @@ internal class RelationOne2NJsonConverter : JsonConverter<RelationOne2N>
                         long id = values.Get("id").As<long>();
                         IPartialEntity entity = new PartialEntity();
                         entity.SetId(id);
-                        relation.Add(entity, false);
+                        entity._TypeName = relation.ReferencedEntityName;
+                        relation.Add(entity);
                     }
                 }
             }

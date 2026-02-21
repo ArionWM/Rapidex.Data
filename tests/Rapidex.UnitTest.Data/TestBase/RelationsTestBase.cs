@@ -64,13 +64,13 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             var ent01Details = masterEntity01.Details01.GetContent();
 
-            Assert.Equal(3, ent01Details.ItemCount);
+            Assert.Equal(3, ent01Details.Length );
             Assert.Equal("Detail 01 00", ent01Details[0].Name);
             Assert.Equal("Detail 01 01", ent01Details[1].Name);
             Assert.Equal("Detail 01 02", ent01Details[2].Name);
 
             var ent02Details = masterEntity02.Details01.GetContent();
-            Assert.Equal(3, ent02Details.ItemCount);
+            Assert.Equal(3, ent02Details.Length);
             Assert.Equal("Detail 02 00", ent02Details[0].Name);
             Assert.Equal("Detail 02 01", ent02Details[1].Name);
             Assert.Equal("Detail 02 02", ent02Details[2].Name);
@@ -116,7 +116,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             db.Metadata.AddIfNotExist<GenericJunction>();
             db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest02>();
             db.Metadata.AddIfNotExist<ConcreteEntityForN2NTest01>();
-            
+
             db.Structure.DropEntity<ConcreteEntityForN2NTest02>();
             db.Structure.DropEntity<ConcreteEntityForN2NTest01>();
             db.Structure.DropEntity<GenericJunction>();
@@ -149,18 +149,18 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity02.Name = "Entity 02";
             entity02.Save();
 
-             work.CommitChanges();
+            work.CommitChanges();
 
             long entity1Id = entity01.Id;
             long entity2Id = entity02.Id;
 
             //Clear cache
 
-            var entity1 =  db.Find<ConcreteEntityForN2NTest01>(entity1Id);
+            var entity1 = db.Find<ConcreteEntityForN2NTest01>(entity1Id);
             var relations01 = entity1.Relation01.GetContent();
-            Assert.Equal(2, relations01.ItemCount);
+            Assert.Equal(2, relations01.Length);
 
-            var entity2 =  db.Find<ConcreteEntityForN2NTest01>(entity2Id);
+            var entity2 = db.Find<ConcreteEntityForN2NTest01>(entity2Id);
             var relations02 = entity2.Relation01.GetContent();
             Assert.Empty(relations02);
 
@@ -179,7 +179,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             var em1 = db.Metadata.AddJson(content);
             content = this.Fixture.GetFileContentAsString("TestContent\\json\\jsonEntity11.forN2N.json");
             var em2 = db.Metadata.AddJson(content);
-            
+
             db.Structure.DropEntity("myJsonEntity10");
             db.Structure.DropEntity("myJsonEntity11");
             db.Structure.DropEntity<GenericJunction>();
@@ -211,7 +211,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             entity02["Name"] = "Entity 02";
             entity02.Save();
 
-             work.CommitChanges();
+            work.CommitChanges();
 
             long entity1Id = entity01.GetId().As<long>();
             long entity2Id = entity02.GetId().As<long>();
@@ -219,11 +219,11 @@ namespace Rapidex.UnitTest.Data.TestBase
             //Clear cache
 
             var entity1 = db.Find("myJsonEntity11", entity1Id);
-            var relations01 = (IEntityLoadResult)((RelationN2N)entity01["Relation01"]).GetContent();
-            Assert.Equal(2, relations01.ItemCount);
+            var relations01 = ((RelationN2N)entity01["Relation01"]).GetContent();
+            Assert.Equal(2, relations01.Length);
 
             var entity2 = db.Find("myJsonEntity11", entity2Id);
-            var relations02 = (IEntityLoadResult)((RelationN2N)entity02["Relation01"]).GetContent();
+            var relations02 = ((RelationN2N)entity02["Relation01"]).GetContent();
             Assert.Empty(relations02);
 
 

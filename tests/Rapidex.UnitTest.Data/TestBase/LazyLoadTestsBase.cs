@@ -54,9 +54,33 @@ public abstract class LazyLoadTestsBase<T> : DbDependedTestsBase<T> where T : ID
         db.Structure.ApplyEntityStructure<ConcreteEntity01>();
         db.Structure.ApplyEntityStructure<ConcreteEntity02>();
 
+        ConcreteEntity01 myUnattachedEntity0 = new ConcreteEntity01();
+        Assert.False(myUnattachedEntity0.IsAttached());
+
         ConcreteEntity02 myUnattachedEntity1 = new ConcreteEntity02();
         Assert.False(myUnattachedEntity1.IsAttached());
+        myUnattachedEntity1.MyReference = myUnattachedEntity0;
 
+        ConcreteEntity04 myOne2NParentEntity = new();
+        ConcreteEntity03 myOne2NChildEntity = new();
+        myOne2NParentEntity.Details01.Add(myOne2NChildEntity);
+
+        ConcreteEntityForN2NTest01 myN2NParentEntity = new();
+        ConcreteEntityForN2NTest02 myN2NChildEntity = new();
+        myN2NParentEntity.Relation01.Add(myN2NChildEntity);
+
+
+        using var work1 = db.BeginWork();
+        work1.Save(myUnattachedEntity0);
+        work1.Save(myUnattachedEntity1);
+        work1.Save(myOne2NParentEntity);
+        work1.Save(myOne2NChildEntity);
+        work1.Save(myN2NParentEntity);
+        work1.Save(myN2NChildEntity);
+        work1.CommitChanges();
+
+        //Unattached one2n
+        //Unattached n2n
 
 
     }

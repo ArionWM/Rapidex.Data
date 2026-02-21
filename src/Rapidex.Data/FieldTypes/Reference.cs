@@ -386,7 +386,8 @@ public class Reference<T> : ReferenceBase, ILazy<T>, IReference
         else
         {
             reference.TargetId = (long)entity.GetId();
-            reference.ReferencedEntity = entity.GetMetadata().Name;
+            var em = entity.GetMetadata();
+            reference.ReferencedEntity = em?.Name;
         }
         return reference;
     }

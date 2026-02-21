@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace Rapidex.Data;
 
-//[JsonDerivedBase]
 public abstract class RelationBase : BasicBaseDataType, ILazy, IRelation
 {
+    protected HashSet<IEntity> addedEntities = new();
+    protected HashSet<IEntity> removedEntities = new();
+
 
     public RelationBase()
     {
@@ -16,9 +18,9 @@ public abstract class RelationBase : BasicBaseDataType, ILazy, IRelation
         this.SkipDirectLoad = true;
     }
 
-    //public abstract bool IsEmpty { get; }
-    //public abstract IEntity Add(IEntity entity);
-    public abstract IEntityLoadResult GetContent(Action<IQueryCriteria> additionalCriteria = null);
+    public abstract IEntity[] GetContent(Action<IQueryCriteria> additionalCriteria = null);
+    public abstract void Add(IEntity detailEntity);
+    public abstract void Remove(IEntity detailEntity);
 
     object ILazy.GetContent()
     {
@@ -57,6 +59,6 @@ public abstract class RelationBase : BasicBaseDataType, ILazy, IRelation
         throw new NotImplementedException();
     }
 
-
+    
 
 }

@@ -277,9 +277,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             var db = Database.Dbs.AddMainDbIfNotExists();
 
             db.Metadata.AddIfNotExist<ConcreteEntity01>();
-
             db.Structure.DropEntity<ConcreteEntity01>();
-
             db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
             using var work1 = db.BeginWork();
@@ -310,7 +308,62 @@ namespace Rapidex.UnitTest.Data.TestBase
             Assert.Equal(2, entCount);
         }
 
+        //[Fact]
+        //public virtual void Crud_09_MultipleInsertAndUpdatesWithSameEntity()
+        //{
+        //    var db = Database.Dbs.AddMainDbIfNotExists();
 
+        //    db.Metadata.AddIfNotExist<ConcreteEntity01>();
+        //    db.Structure.DropEntity<ConcreteEntity01>();
+        //    db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
+        //    using var work1 = db.BeginWork();
+
+        //    //Use work.New<T> method to create new entities within a work scope
+        //    ConcreteEntity01 entity01 = work1.New<ConcreteEntity01>();
+        //    entity01.Name = "Entity 001";
+        //    entity01.Save();
+
+        //    work1.Save(entity01); //Second add with same ref
+
+        //    entity01.Name = "Entity 001 - 3";
+        //    work1.Save(entity01); //Third add with same ref, passed (not add to work)
+
+        //    work1.CommitChanges();
+
+        //    this.Fixture.ClearCaches();
+
+        //    long id = entity01.Id;
+
+        //    ConcreteEntity01 entity = db.Find<ConcreteEntity01>(id);
+        //    Assert.Equal("Entity 001", entity.Name);
+        //}
+
+        [Fact]
+        public virtual void Crud_10_SamePrematureIdCheck()
+        {
+            var db = Database.Dbs.AddMainDbIfNotExists();
+
+            db.Metadata.AddIfNotExist<ConcreteEntity01>();
+            db.Structure.DropEntity<ConcreteEntity01>();
+            db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+
+            using var work1 = db.BeginWork();
+
+            //Use work.New<T> method to create new entities within a work scope
+            ConcreteEntity01 entity01 = work1.New<ConcreteEntity01>();
+            entity01.Name = "Entity 001";
+            entity01.Save();
+
+            ConcreteEntity01 fourthSameEntityWithDiffRef = new ConcreteEntity01();
+            fourthSameEntityWithDiffRef.Id = entity01.Id;
+            fourthSameEntityWithDiffRef._IsNew = true;
+            fourthSameEntityWithDiffRef.Name = "Entity 001 - 4";
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                work1.Save(fourthSameEntityWithDiffRef);
+            });
+        }
     }
 }

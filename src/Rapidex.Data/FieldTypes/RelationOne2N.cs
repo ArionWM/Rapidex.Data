@@ -110,11 +110,14 @@ public class RelationOne2N : RelationBase, ILazy
         return this.GetContent(null);
     }
 
-    public override IEntityLoadResult GetContent(Action<IQueryCriteria> additionalCriteria = null)
+    public override IEntity[] GetContent(Action<IQueryCriteria> additionalCriteria = null)
     {
         //Cachlemek mümkün mü? Eğer cache'lenir ise Add'de?
         var fm = (VirtualRelationOne2NDbFieldMetadata)((IDataType)this).FieldMetadata;
         var parentEntity = this.GetParent();
+        if (!parentEntity.IsAttached())
+            throw new InvalidOperationException("Entity must be attached for load relations");
+
         var detailEm = parentEntity._Schema.ParentDbScope.Metadata.Get(fm.DetailEntityName);
         var detailFm = detailEm.Fields.Get(fm.DetailParentFieldName);
         detailFm.NotNull($"One2N relation detail parent field '{fm.DetailParentFieldName}' not found on '{fm.DetailEntityName}' ");
@@ -125,7 +128,12 @@ public class RelationOne2N : RelationBase, ILazy
             additionalCriteria?.Invoke(crit);
         });
 
-        return loadResult;
+        List<IEntity> entities = loadResult.ToList();
+        entities.AddRange(this.addedEntities);
+        foreach (var entity in this.removedEntities)
+            entities.Remove(entity);
+
+        return entities.ToHashSet().ToArray();
     }
 
     public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
@@ -156,7 +164,7 @@ public class RelationOne2N : RelationBase, ILazy
         return fm;
     }
 
-    public void Add(IEntity detailEntity, bool saveDetailEntity = true)
+    public override void Add(IEntity detailEntity)
     {
         //TODO: validate detailEntityType
 
@@ -165,10 +173,43 @@ public class RelationOne2N : RelationBase, ILazy
         long parentId = parent.GetValue<long>(DatabaseConstants.FIELD_ID);
 
         detailEntity.SetValue(fm.DetailParentFieldName, parentId);
-        if (saveDetailEntity)
+
+        this.addedEntities.Add(detailEntity);
+        //return detailEntity;
+    }
+
+    public override void Remove(IEntity detailEntity)
+    {
+        if (detailEntity._IsNew)
         {
-            detailEntity.Save(); //Save if changed ...
+            this.addedEntities.Remove(detailEntity);
         }
+        else
+        {
+            this.removedEntities.Add(detailEntity);
+        }
+    }
+
+    public override void PrepareCommit(IEntity entity, IDbDataModificationScope parentDms, DataUpdateType updateType)
+    {
+        base.PrepareCommit(entity, parentDms, updateType);
+
+        if (updateType == DataUpdateType.Update)
+        {
+            foreach (var detailEntity in this.addedEntities)
+            {
+                parentDms.Save(detailEntity);
+            }
+
+            foreach (var detailEntity in this.removedEntities)
+            {
+                parentDms.Delete(detailEntity);
+            }
+        }
+
+        this.addedEntities.Clear();
+        this.removedEntities.Clear();
+
     }
 }
 
@@ -205,11 +246,10 @@ public class RelationOne2N<TEntity> : RelationOne2N where TEntity : IConcreteEnt
         throw new NotImplementedException();
     }
 
-    public virtual IEntityLoadResult<TEntity> GetContent()
+    public virtual TEntity[] GetContent()
     {
-        IEntityLoadResult details = (IEntityLoadResult)((ILazy)this).GetContent();
-        IEntityLoadResult<TEntity> cdetails = details.CastTo<TEntity>();
-        return cdetails;
+        IEntity[] details = (IEntity[])((ILazy)this).GetContent();
+        return details.Cast<TEntity>().ToArray();
     }
 
 
@@ -217,5 +257,7 @@ public class RelationOne2N<TEntity> : RelationOne2N where TEntity : IConcreteEnt
     {
         base.Add(detailEntity);
     }
+
+
 
 }

@@ -181,7 +181,6 @@ public static class DataModificationManagerExtensions
         pentity._Schema.Mapper.Map(em, pentity, actualEnt);
 
         return actualEnt;
-
     }
 
     /// <summary>
@@ -191,12 +190,28 @@ public static class DataModificationManagerExtensions
     /// <returns></returns>
     public static IEntity EnsureForActualEntity(this IEntity ppEntity)
     {
-        if(ppEntity is IPartialEntity pentity)
+        if (ppEntity is IPartialEntity pentity)
         {
             return pentity.ConvertToActualEntity();
         }
 
         return ppEntity;
+    }
+
+    public static bool IsAnyValueContained(this IPartialEntity pentity)
+    {
+        pentity.NotNull();
+
+        var values = pentity.GetAllValues();
+        if (values.Count > 1)
+            return true;
+
+        if (values.Count == 0)
+            return false;
+
+        var em = pentity.GetMetadata();
+        var fieldName = values.First().Key;
+        return string.Compare(em.PrimaryKey.Name, fieldName, true) != 0;
     }
 
 }

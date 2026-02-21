@@ -107,8 +107,6 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         {
             IDbEntityUpdater[] savers = this.SelectUpdaters(em, scope.ChangedEntities);
 
-            //Cache nasıl güncellenecek?
-
             foreach (var saver in savers)
             {
                 result.MergeWith(saver.InsertOrUpdate(em, scope.ChangedEntities));

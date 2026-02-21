@@ -53,6 +53,7 @@ internal class DbMetadataContainer : IDbMetadataContainer
 
     public IDbEntityMetadata Get(string entityName)
     {
+        entityName.NotEmpty();
         return this.Entities.Get(entityName);
     }
 

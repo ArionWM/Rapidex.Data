@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -169,7 +170,7 @@ internal class JunctionHelper
 
     }
 
-    public static IPartialEntity RemoveRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBId, bool directSave)
+    public static IEntity Get(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBId)
     {
         var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
 
@@ -191,6 +192,72 @@ internal class JunctionHelper
                  )
              )
              .First();
+
+        return ent;
+    }
+
+
+    public static IQuery GetJunctionQuery(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long[] entityBIds)
+    {
+        var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
+
+        string sourceFieldName = GetJunctionSourceFieldName(fm);
+        string targetFieldName = GetJunctionTargetFieldName(fm);
+
+        sourceFieldName = dbSchema.Structure.CheckObjectName(sourceFieldName);
+        targetFieldName = dbSchema.Structure.CheckObjectName(targetFieldName);
+
+
+        var query = dbSchema
+              .GetQuery(jEm)
+              .EnterUpdateMode()
+              .Or(
+                   q => q.And(
+                       q1 => q1.Eq(sourceFieldName, entityAId),
+                       q2 => q2.In(targetFieldName, entityBIds)
+                   ),
+                   q => q.And(
+                       q1 => q1.In(sourceFieldName, entityBIds),
+                       q2 => q2.Eq(targetFieldName, entityAId)
+                   )
+               );
+
+        return query;
+    }
+
+    public static IQuery GetJunctionQuery(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId)
+    {
+        var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
+
+        string sourceFieldName = GetJunctionSourceFieldName(fm);
+        string targetFieldName = GetJunctionTargetFieldName(fm);
+
+        sourceFieldName = dbSchema.Structure.CheckObjectName(sourceFieldName);
+        targetFieldName = dbSchema.Structure.CheckObjectName(targetFieldName);
+
+
+        var query = dbSchema
+              .GetQuery(jEm)
+              .EnterUpdateMode()
+              .Or(
+                   q => q.And(
+                       q1 => q1.Eq(sourceFieldName, entityAId),
+                       q2 => q2.NotEq(targetFieldName, null)
+                   ),
+                   q => q.And(
+                       q1 => q1.NotEq(sourceFieldName, null),
+                       q2 => q2.Eq(targetFieldName, entityAId)
+                   )
+               );
+
+        return query;
+    }
+
+    public static IPartialEntity RemoveRelation(IDbSchemaScope dbSchema, VirtualRelationN2NDbFieldMetadata fm, long entityAId, long entityBId, bool directSave)
+    {
+        var jEm = dbSchema.ParentDbScope.Metadata.Get(fm.JunctionEntityName);
+
+        var ent = Get(dbSchema, fm, entityAId, entityBId);
 
         if (ent != null)
         {

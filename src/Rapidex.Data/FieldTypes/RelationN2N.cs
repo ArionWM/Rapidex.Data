@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Pipelines.Sockets.Unofficial.Arenas;
 using Rapidex.Data.Metadata.Relations;
 using static Rapidex.Data.RelationOne2N;
 
@@ -130,13 +132,20 @@ public class RelationN2N : RelationBase, ILazy
         JunctionHelper.SetEntitiesCriteria(parentEntity._Schema, fm, parentEntity, query, additionalCriterias);
     }
 
-    public override IEntityLoadResult GetContent(Action<IQueryCriteria> additionalCriteria = null)
+    public override IEntity[] GetContent(Action<IQueryCriteria> additionalCriteria = null)
     {
         var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
         var parentEntity = this.GetParent();
+        if (!parentEntity.IsAttached())
+            throw new InvalidOperationException("Entity must be attached for load relations");
 
-        IEntityLoadResult res = JunctionHelper.GetEntities(parentEntity._Schema, fm, parentEntity, additionalCriteria);
-        return res;
+        IEntityLoadResult loadResult = JunctionHelper.GetEntities(parentEntity._Schema, fm, parentEntity, additionalCriteria);
+        List<IEntity> entities = loadResult.ToList();
+        entities.AddRange(this.addedEntities);
+        foreach (var entity in this.removedEntities)
+            entities.Remove(entity);
+
+        return entities.ToHashSet().ToArray();
     }
 
     public override IDbFieldMetadata SetupMetadata(IDbMetadataContainer container, IDbFieldMetadata self, ObjDictionary values)
@@ -158,25 +167,66 @@ public class RelationN2N : RelationBase, ILazy
     }
 
 
-    public IEntity Add(IEntity detailEntity, bool saveJunctionEntities = true)
+    public override void Add(IEntity detailEntity)
     {
         //TODO: validate detailEntityType
 
-        IDataType _this = this;
-        IEntity parent = this.GetParent();
-        var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
+        //IDataType _this = this;
+        //IEntity parent = this.GetParent();
+        //var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
 
-        IEntity junctionEntity = JunctionHelper.AddRelation(_this.Parent._Schema, fm, parent, detailEntity, saveJunctionEntities);
-        return junctionEntity;
+        //IEntity junctionEntity = JunctionHelper.AddRelation(_this.Parent._Schema, fm, parent, detailEntity, false);
+
+        this.addedEntities.Add(detailEntity);
+
+        //this.addedEntities.Add(junctionEntity);
     }
 
-    public void Remove(IEntity detailEntity)
+    public override void Remove(IEntity detailEntity)
     {
-        IDataType _this = this;
-        IEntity parent = this.GetParent();
+        //IDataType _this = this;
+        //IEntity parent = this.GetParent();
+        //var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
+
+        this.removedEntities.Remove(detailEntity);
+
+        //JunctionHelper.RemoveRelation(_this.Parent._Schema, fm, parent, detailEntity, true);
+
+        //throw new NotImplementedException();
+    }
+
+    public override void PrepareCommit(IEntity parent, IDbDataModificationScope parentDms, DataUpdateType updateType)
+    {
+        base.PrepareCommit(parent, parentDms, updateType);
+
         var fm = (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata;
 
-        JunctionHelper.RemoveRelation(_this.Parent._Schema, fm, parent, detailEntity, true);
+        switch (updateType)
+        {
+            case DataUpdateType.Update:
+                foreach (var detailEntity in this.addedEntities)
+                {
+                    IEntity junctionEntity = JunctionHelper.AddRelation(parentDms.ParentSchema, fm, parent, detailEntity, false);
+                    parentDms.Save(junctionEntity);
+                    parentDms.Save(detailEntity);
+                }
+
+                var removedIds = this.removedEntities.Select(e => e.GetId().As<long>()).Where(id => !id.IsPrematureId()).ToArray();
+                if (removedIds.IsNOTNullOrEmpty())
+                {
+                    var junctionQuery = JunctionHelper.GetJunctionQuery(parentDms.ParentSchema, (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata, parent.GetId().As<long>(), removedIds);
+                    junctionQuery.Delete(parentDms);
+                }
+                break;
+            case DataUpdateType.Delete:
+                var junctionQueryForAllDelete = JunctionHelper.GetJunctionQuery(parentDms.ParentSchema, (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata, parent.GetId().As<long>());
+                junctionQueryForAllDelete.Delete(parentDms);
+                //Delete junctions?
+                break;
+        }
+
+        this.addedEntities.Clear();
+        this.removedEntities.Clear();
     }
 }
 
@@ -202,11 +252,11 @@ public class RelationN2N<TEntity> : RelationN2N where TEntity : IConcreteEntity
         return fm;
     }
 
-    public virtual new IEntityLoadResult<TEntity> GetContent(Action<IQueryCriteria> additionalCriteria = null)
+    public virtual new TEntity[] GetContent(Action<IQueryCriteria> additionalCriteria = null)
     {
-        IEntityLoadResult details = (IEntityLoadResult)((ILazy)this).GetContent();
-        IEntityLoadResult<TEntity> cdetails = details.CastTo<TEntity>();
-        return cdetails;
+        IEntity[] details = (IEntity[])((ILazy)this).GetContent();
+        //IEntityLoadResult<TEntity> cdetails = details.CastTo<TEntity>();
+        return details.Cast<TEntity>().ToArray();
     }
 
     //public void Add(TEntity detailEntity)

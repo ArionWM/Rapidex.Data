@@ -151,28 +151,42 @@ public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILa
 
         var schemaScope = _parent._Schema;
 
-
         switch (updateType)
         {
             case DataUpdateType.Update:
                 if (this.UnAttachedData != null)
                 {
-                    BlobRecord brec;
-                    if (this.TargetId.IsEmptyId())
+                    if (this.UnAttachedData.Data.IsNullOrEmpty())
                     {
-                        brec = parentDms.New<BlobRecord>();
-                        this.TargetId = brec.Id;
+                        //Delete blob if exists and set TargetId to empty
+                        if (this.TargetId.IsPersistedRecordId())
+                        {
+                            BlobRecord brec = schemaScope.Find<BlobRecord>(this.TargetId);
+                            brec.NotNull();
+
+                            parentDms.Delete(brec);
+                            this.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
+                        }
                     }
                     else
                     {
-                        brec = schemaScope.Find<BlobRecord>(this.TargetId);
-                        brec.NotNull();
-                    }
+                        BlobRecord brec;
+                        if (this.TargetId.IsEmptyId())
+                        {
+                            brec = parentDms.New<BlobRecord>();
+                            this.TargetId = brec.Id;
+                        }
+                        else
+                        {
+                            brec = schemaScope.Find<BlobRecord>(this.TargetId);
+                            brec.NotNull();
+                        }
 
-                    brec.Data = this.UnAttachedData.Data;
-                    brec.ContentType = this.UnAttachedData.ContentType;
-                    brec.Name = this.UnAttachedData.Name;
-                    parentDms.Save(brec);
+                        brec.Data = this.UnAttachedData.Data;
+                        brec.ContentType = this.UnAttachedData.ContentType;
+                        brec.Name = this.UnAttachedData.Name;
+                        parentDms.Save(brec);
+                    }
                 }
                 break;
             case DataUpdateType.Delete:
