@@ -62,12 +62,22 @@ public static class OtherExtensions
         return id < DatabaseConstants.DEFAULT_EMPTY_ID;
     }
 
+    public static bool IsPrematureOrEmptyId(this long id)
+    {
+        return id <= DatabaseConstants.DEFAULT_EMPTY_ID;
+    }
+
     public static bool IsPersistedRecordId(this long id)
     {
         return id > 0;
     }
 
     public static bool HasPrematureId(this IEntity entity)
+    {
+        return ((long)entity.GetId()).IsPrematureId();
+    }
+
+    public static bool HasPrematureOrEmptyId(this IEntity entity)
     {
         return ((long)entity.GetId()).IsPrematureId();
     }

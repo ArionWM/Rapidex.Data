@@ -211,7 +211,7 @@ public class RelationN2N : RelationBase, ILazy
                     parentDms.Save(detailEntity);
                 }
 
-                var removedIds = this.removedEntities.Select(e => e.GetId().As<long>()).Where(id => !id.IsPrematureId()).ToArray();
+                var removedIds = this.removedEntities.Select(e => e.GetId().As<long>()).Where(id => id.IsPersistedRecordId()).ToArray();
                 if (removedIds.IsNOTNullOrEmpty())
                 {
                     var junctionQuery = JunctionHelper.GetJunctionQuery(parentDms.ParentSchema, (VirtualRelationN2NDbFieldMetadata)((IDataType)this).FieldMetadata, parent.GetId().As<long>(), removedIds);

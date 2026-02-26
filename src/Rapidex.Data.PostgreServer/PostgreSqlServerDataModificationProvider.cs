@@ -237,7 +237,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
         string schemaName = PostgreHelper.CheckObjectName(this.ParentScope.SchemaName);
 
-        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureId());
+        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureOrEmptyId());
         long[] ids = new long[0];
         if (requiredIdCount > 0)
         {
@@ -264,7 +264,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
             try
             {
-                if (!ures.Id.IsPrematureId())
+                if (ures.Id.IsPersistedRecordId())
                     continue;
 
                 long id = ids[idCount];
@@ -331,7 +331,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
-        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureId());
+        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureOrEmptyId());
         long[] ids = new long[0];
         if (requiredIdCount > 0)
         {
@@ -356,7 +356,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
             try
             {
-                if (!ures.Id.IsPrematureId())
+                if (ures.Id.IsPersistedRecordId())
                     continue;
 
                 long id = ids[idCount];

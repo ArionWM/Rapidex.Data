@@ -23,6 +23,7 @@ namespace Rapidex.Data
 
         public static void Set(this ILazyBlob blob, byte[] value, string name, string contentType)
         {
+            blob.NotNull();
             blob.SetContent(value, name, contentType);
         }
 

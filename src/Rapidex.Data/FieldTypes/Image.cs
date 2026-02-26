@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Rapidex.Data;
 
-public class Image : BlobFieldBase<Image>, ILazy, ILazyBlob
+public class Image : BlobFieldBase<Image>, ILazy, ILazyBlob //TODO: Image -> Blob
 {
     public override string TypeName => "image";
 

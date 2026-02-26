@@ -294,7 +294,11 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
     }
 
 
-
+    public override void PrepareCommit(IEntity entity, IDbDataModificationScope parentDms, DataUpdateType updateType)
+    {
+        //TODO: Check referenced entity content change (not possible for now)
+        base.PrepareCommit(entity, parentDms, updateType);
+    }
 }
 
 //[JsonDerivedBase]

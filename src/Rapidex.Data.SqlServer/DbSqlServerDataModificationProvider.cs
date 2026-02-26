@@ -228,7 +228,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
         //Request ids ...
-        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureId());
+        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureOrEmptyId());
         long[] ids = new long[0];
         if (requiredIdCount > 0)
         {
@@ -255,7 +255,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
             try
             {
-                if (!ures.Id.IsPrematureId())
+                if (ures.Id.IsPersistedRecordId())
                     continue;
 
                 long id = ids[idCount];
@@ -308,7 +308,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         TemplateInfo info = Database.EntityFactory.GetTemplate(em, this.ParentScope);
 
         //Request ids ...
-        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureId());
+        int requiredIdCount = entities.Count(ent => ((long)ent.GetId()).IsPrematureOrEmptyId());
         long[] ids = new long[0];
         if (requiredIdCount > 0)
         {
@@ -333,7 +333,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
             try
             {
-                if (!ures.Id.IsPrematureId())
+                if (ures.Id.IsPersistedRecordId())
                     continue;
 
                 long id = ids[idCount];
