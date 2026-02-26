@@ -34,4 +34,6 @@ public static class DatabaseConstants
     //public static string[] FIELDS_SECONDARY = new string[] { "Description", "Details", "Notes", "Comments" };
     public static string KEY_OVERRIDE = "_override";
 
+    public const long MAX_ID_VALUE = 9223372036854775800;
+
 }

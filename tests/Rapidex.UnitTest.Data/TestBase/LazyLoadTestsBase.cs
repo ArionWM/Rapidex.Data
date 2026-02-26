@@ -45,7 +45,7 @@ public abstract class LazyLoadTestsBase<T> : DbDependedTestsBase<T> where T : ID
     }
 
     [Fact]
-    public virtual void LazyThings_02()
+    public virtual void UnAttachedThings_01()
     {
         var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -81,6 +81,42 @@ public abstract class LazyLoadTestsBase<T> : DbDependedTestsBase<T> where T : ID
 
         //Unattached one2n
         //Unattached n2n
+
+
+
+
+
+    }
+
+
+    [Fact]
+    public virtual void UnAttachedThings_02()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.Metadata.AddIfNotExist<ConcreteEntity01>();
+        db.Metadata.AddIfNotExist<ConcreteEntity02>();
+
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity02>();
+
+        ConcreteEntity01 myUnattachedEntity0 = new ConcreteEntity01();
+        Assert.False(myUnattachedEntity0.IsAttached());
+
+        ConcreteEntity02 myUnattachedEntity1 = new ConcreteEntity02();
+        Assert.False(myUnattachedEntity1.IsAttached());
+        myUnattachedEntity1.MyReference = myUnattachedEntity0;
+        
+
+        using var work1 = db.BeginWork();
+        work1.Save(myUnattachedEntity1);
+        work1.CommitChanges();
+
+
+        //Unattached one2n
+        //Unattached n2n
+
+
+
 
 
     }

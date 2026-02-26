@@ -53,6 +53,8 @@ internal class DbChangesCollection : IDbChangesCollection
 
         public void Add(IEntity from, IEntity to, string fromPropertyName)
         {
+            from.NotNull();
+            to.NotNull();
             this.Add(new EntityDependency(from, to, fromPropertyName));
         }
 
@@ -347,7 +349,7 @@ internal class DbChangesCollection : IDbChangesCollection
             TemplateInfo info = Database.EntityFactory.GetTemplate(em, entity._Schema);
 
             long oldId = (long)entity.GetId();
-            if (entity.HasPrematureId())
+            if (entity.HasPrematureOrEmptyId())
             {
                 List<long> ids = this.reservedNewIds.Get(em);
                 long newId = 0;
@@ -376,7 +378,7 @@ internal class DbChangesCollection : IDbChangesCollection
     protected void ReserveIds()
     {
         this.reservedNewIds.Clear();
-        var groupForTypeName = this.newEntities.Where(e => e.HasPrematureId()).GroupBy(e => e._TypeName);
+        var groupForTypeName = this.newEntities.Where(e => e.HasPrematureOrEmptyId()).GroupBy(e => e._TypeName);
         foreach (var group in groupForTypeName)
         {
             var dbScope = group.First()._Schema;
@@ -406,7 +408,7 @@ internal class DbChangesCollection : IDbChangesCollection
 
             foreach (var entity in this.changedEntities)
             {
-                if (entity.HasPrematureId() && !entity._IsNew)
+                if (entity.HasPrematureOrEmptyId() && !entity._IsNew)
                 {
                     //WARN: Is this possible?
                     long entityId = entity.GetId().As<long>();

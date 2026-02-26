@@ -283,6 +283,12 @@ namespace Rapidex
             return random.Next(max) + 1;
         }
 
+        public static long Random64(long max)
+        {
+            Random random = RandomHelper.SeededRandom();
+            return random.NextInt64(max);
+        }
+
         /// <summary>
         /// Verilen kesirde zar atar ve sonucunu true / false olarak döner
         /// Örn: 1/5 olasılık istiyor isek Dice(5):True, olasılığın gerçekleştiği sonucunu döndürür.

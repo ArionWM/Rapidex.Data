@@ -79,7 +79,7 @@ public static class OtherExtensions
 
     public static bool HasPrematureOrEmptyId(this IEntity entity)
     {
-        return ((long)entity.GetId()).IsPrematureId();
+        return ((long)entity.GetId()).IsPrematureOrEmptyId();
     }
 
     public static object EnsureLowerValue(this object value)

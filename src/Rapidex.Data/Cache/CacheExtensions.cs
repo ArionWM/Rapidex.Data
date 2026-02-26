@@ -28,7 +28,7 @@ public static class CacheExtensions
 
     public static void SetEntity(this ICache cache, IEntity entity, TimeSpan? expiration = null)
     {
-        if (entity.HasPrematureId())
+        if (entity.HasPrematureOrEmptyId())
             return;
 
         string key = GetEntityCacheKey(entity);
@@ -45,7 +45,7 @@ public static class CacheExtensions
 
     public static IEntity GetEntity(this ICache cache, IDbSchemaScope dbSchema, string typeName, long id)
     {
-        if (id.IsPrematureId())
+        if (id.IsPrematureOrEmptyId())
             return null;
 
         string dbName = dbSchema.ParentDbScope.Name;
@@ -58,7 +58,7 @@ public static class CacheExtensions
 
     public static void RemoveEntity(this ICache cache, IEntity entity)
     {
-        if (entity.HasPrematureId())
+        if (entity.HasPrematureOrEmptyId())
             return;
 
         string key = GetEntityCacheKey(entity);

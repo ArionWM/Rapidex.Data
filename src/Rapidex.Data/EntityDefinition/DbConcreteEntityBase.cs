@@ -37,7 +37,7 @@ public abstract class DbConcreteEntityBase : IConcreteEntity, IIntEntity, IDbDef
 
     bool IEntity._IsDeleted { get; set; }
 
-    public long Id { get; set; }
+    public long Id { get; set; } = DatabaseConstants.DEFAULT_EMPTY_ID;
     public virtual string ExternalId { get; set; }
     public int DbVersion { get; set; }
 

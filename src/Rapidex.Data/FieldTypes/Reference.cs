@@ -110,7 +110,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
     }
 
 
-
+    protected IEntity addedEntity;
 
     [YamlMember(Alias = "reference", Order = 100)]
     [JsonPropertyOrder(100)]
@@ -159,6 +159,9 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
 
     public object GetContent()
     {
+        if (this.addedEntity != null)
+            return addedEntity;
+
         IEntity parent = this.GetParent();
         if (parent == null)
             throw new InvalidOperationException("Parent entity is not set");
@@ -179,6 +182,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
     public override void SetValue(IEntity entity, string fieldName, object value, bool applyToEntity)
     {
         this.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
+        this.addedEntity = null;
 
         bool set = false;
 
@@ -190,7 +194,16 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
 
         if (value is IEntity targetEntity)
         {
-            this.TargetId = (long)targetEntity.GetId();
+            long targetId = (long)targetEntity.GetId();
+            if (targetId == DatabaseConstants.DEFAULT_EMPTY_ID)
+            {
+                //We need premature Id
+                targetId = -1 * RandomHelper.Random64(DatabaseConstants.MAX_ID_VALUE);
+                targetEntity.SetId(targetId);
+            }
+
+            this.TargetId = targetId;
+            this.addedEntity = targetEntity;
             set = true;
         }
 
@@ -198,6 +211,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
         {
             this.ReferencedEntity = reference.ReferencedEntity;
             this.TargetId = reference.TargetId;
+            this.addedEntity = reference.addedEntity;
             set = true;
         }
 
@@ -218,7 +232,8 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
 
         if (value is int id)
         {
-            this.TargetId = Convert.ToInt64(id);
+            long idLong = id;
+            this.TargetId = idLong;
             set = true;
         }
 
@@ -298,6 +313,14 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
     {
         //TODO: Check referenced entity content change (not possible for now)
         base.PrepareCommit(entity, parentDms, updateType);
+
+        if (this.addedEntity != null && updateType == DataUpdateType.Update)
+        {
+            //if entity.Id == -1 ?
+            parentDms.Save(entity);
+        }
+
+        this.addedEntity = null;
     }
 }
 
@@ -310,12 +333,13 @@ public class Reference : ReferenceBase, ILazy, IReference
         Reference reference = new Reference();
         reference.TargetId = (long)entity.GetId();
         reference.ReferencedEntity = entity.GetMetadata().Name;
+        reference.addedEntity = entity;
         return reference;
     }
 
     public static implicit operator DbEntity(Reference reference)
     {
-        IEntity entity = (IEntity)((ILazy)reference).GetContent();
+        IEntity entity = reference.addedEntity ?? (IEntity)((ILazy)reference).GetContent();
         return (DbEntity)entity;
     }
 
