@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.SqlServer;
+
 internal class DbSqlInternalTransactionScope : IDbInternalTransactionScope
 {
     protected DbSqlServerConnection Connection { get; }
@@ -16,21 +17,21 @@ internal class DbSqlInternalTransactionScope : IDbInternalTransactionScope
         this.Connection.BeginTransaction();
     }
 
-    public void Commit()
+    public async Task Commit()
     {
         if (this.Live)
-            this.Connection.Transaction.Commit();
+            await this.Connection.Transaction.CommitAsync();
         else
             ;
         this.Live = false;
     }
 
-    public void Rollback()
+    public async Task Rollback()
     {
         try
         {
             if (this.Live)
-                this.Connection.Transaction.Rollback();
+                await this.Connection.Transaction.RollbackAsync();
             else
                 ;
         }

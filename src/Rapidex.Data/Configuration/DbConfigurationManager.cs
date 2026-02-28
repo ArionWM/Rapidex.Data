@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-using Rapidex.Data.Scopes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Configuration;
+using Rapidex.Data.Scopes;
+using StackExchange.Redis;
 
 namespace Rapidex.Data;
 
@@ -19,7 +21,7 @@ public class DbConfigurationManager
     public string DatabaseSectionName { get; set; } = "Databases";
     public string SoftDefinitionsBaseFolder { get; set; } = "App_Content";
     public IConfiguration Configuration { get; set; }
-    public IConfigurationSection? Root { get;protected set; }
+    public IConfigurationSection? Root { get; protected set; }
     public IDictionary<string, DbConnectionInfo> ConnectionInfo { get; set; } = new Dictionary<string, DbConnectionInfo>();
     public CacheConfigurationInfo CacheConfigurationInfo { get; set; } = new CacheConfigurationInfo();
 
@@ -66,12 +68,29 @@ public class DbConfigurationManager
             this.CacheConfigurationInfo = cacheConfigSection.Get<CacheConfigurationInfo>();
         }
 
-        if(this.CacheConfigurationInfo?.Distributed?.ConnectionString.IsNOTNullOrEmpty() ?? false)
+        if (this.CacheConfigurationInfo?.Distributed?.ConnectionString.IsNOTNullOrEmpty() ?? false)
         {
-            services.AddHybridCache();
+            services.AddMemoryCache(options =>
+            {
+                if ((this.CacheConfigurationInfo.InMemory?.ItemLimit ?? 0) > 0)
+                {
+                    options.SizeLimit = this.CacheConfigurationInfo.InMemory!.ItemLimit;
+                }
+            });
+
+            services.AddHybridCache(options =>
+            {
+                options.DefaultEntryOptions = new HybridCacheEntryOptions()
+                {
+                    Expiration = this.CacheConfigurationInfo?.Distributed?.Expiration == null ? null: TimeSpan.FromSeconds(this.CacheConfigurationInfo!.Distributed!.Expiration.Value),
+                    LocalCacheExpiration = this.CacheConfigurationInfo?.Distributed?.LocalExpiration == null ? null : TimeSpan.FromSeconds(this.CacheConfigurationInfo!.Distributed!.LocalExpiration.Value)
+                };
+            });
+
             services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = this.CacheConfigurationInfo?.Distributed?.ConnectionString;
+                options.ConfigurationOptions = ConfigurationOptions.Parse(this.CacheConfigurationInfo!.Distributed!.ConnectionString);
+                options.ConfigurationOptions.ReconnectRetryPolicy = new ExponentialRetry(5000);
             });
         }
     }

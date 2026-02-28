@@ -12,7 +12,8 @@ namespace Rapidex.Data.PostgreServer;
 
 internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + initialize 
 {
-    protected object lockObject = new object();
+    private readonly SemaphoreSlim lockObject = new SemaphoreSlim(1, 1);
+
     private NpgsqlConnection connectionWithTransaction;
 
     protected int DebugId { get; }
@@ -86,16 +87,17 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
 
     public void BeginTransaction()
     {
-        var connectionT = this.GetNewConnection();
-        this.ConnectionWithTransaction = connectionT.Result;
+        //TODO: Async
+        var connectionT = this.GetNewConnection().Result;
+        this.ConnectionWithTransaction = connectionT;
         this.Transaction = this.ConnectionWithTransaction.BeginTransaction();
     }
 
-    public void CommitTransaction()
+    public async Task CommitTransaction()
     {
         if (this.Transaction != null)
         {
-            this.Transaction.Commit();
+            await this.Transaction.CommitAsync();
             this.Transaction.Dispose();
             this.Transaction = null;
         }
@@ -105,13 +107,13 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         }
     }
 
-    public void RollbackTransaction()
+    public async Task RollbackTransaction()
     {
         try
         {
             if (this.Transaction != null)
             {
-                this.Transaction.Rollback();
+               await this.Transaction.RollbackAsync();
                 this.Transaction.Dispose();
                 this.Transaction = null;
             }
@@ -147,15 +149,18 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         return command;
     }
 
-    public DataTable Execute(string sql, params DbVariable[] parameters)
+    public async Task<DataTable> Execute(string sql, params DbVariable[] parameters)
     {
-        lock (this.lockObject) //PostgreSQL NpgsqlConnection is not support MARS
+        //PostgreSQL NpgsqlConnection is not support MARS
+        try
         {
+            await this.lockObject.WaitAsync();
+
             NpgsqlConnection connection = null;
             if (this.IsTransactionAvailable)
                 connection = this.ConnectionWithTransaction;
             else
-                connection = this.GetNewConnection().Result;
+                connection = await this.GetNewConnection();
 
             try
             {
@@ -170,7 +175,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
 #endif
 
                         command.CommandText = sql;
-                        using (var reader = command.ExecuteReader(CommandBehavior.Default))
+                        using (var reader = await command.ExecuteReaderAsync(CommandBehavior.Default))
                         {
                             DataTable table = new DataTable();
                             table.Load(reader);
@@ -202,23 +207,30 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                 }
             }
         }
+        finally
+        {
+            this.lockObject.Release();
+        }
     }
 
-    public void BulkUpdate(string schemaName, DataTable variableTable)
+    public async Task BulkUpdate(string schemaName, DataTable variableTable)
     {
-        lock (this.lockObject) //PostgreSQL NpgsqlConnection is not support MARS
+        //PostgreSQL NpgsqlConnection is not support MARS
+        try
         {
+            await this.lockObject.WaitAsync();
+
             NpgsqlConnection connection = null;
             if (this.IsTransactionAvailable)
                 connection = this.ConnectionWithTransaction;
             else
-                connection = this.GetNewConnection().Result;
+                connection = await this.GetNewConnection();
 
             try
             {
                 //See: https://gist.github.com/samlii/a646660ced448fa1d8dd6642da358f3e
                 //See: https://www.bytefish.de/blog/postgresql_bulk_insert.html
-                connection.BulkUpdate(schemaName, variableTable);
+                await connection.BulkUpdate(schemaName, variableTable);
             }
             catch (Exception ex)
             {
@@ -236,6 +248,10 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                     this.CloseConnection(ref connection);
                 }
             }
+        }
+        finally
+        {
+            this.lockObject.Release();
         }
     }
 

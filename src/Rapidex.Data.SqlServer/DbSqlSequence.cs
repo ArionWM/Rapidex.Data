@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Rapidex.Data.SqlServer;
 
@@ -14,7 +15,7 @@ internal class DbSqlSequence : IIntSequence
     public string SchemaName { get; set; }
     public string Name { get; set; }
 
-    public long CurrentValue => this.GetCurrentValue();
+    public long CurrentValue => this.GetCurrentValue().Result;
 
     public DbSqlSequence(DbSqlServerDataModificationProvider parent, string name)
     {
@@ -26,12 +27,12 @@ internal class DbSqlSequence : IIntSequence
         this.DdlGenerator = new DbSqlDdlGenerator();
     }
 
-    protected long GetCurrentValue()
+    protected async Task<long> GetCurrentValue()
     {
         this.Parent.CheckConnection();
 
         string sql = this.DdlGenerator.GetCurrentSequenceValue(this.SchemaName, this.Name);
-        DataTable table = this.Parent.Connection.Execute(sql);
+        DataTable table = await this.Parent.Connection.Execute(sql);
         return Convert.ToInt64(table.Rows[0][0]);
 
     }
@@ -46,26 +47,26 @@ internal class DbSqlSequence : IIntSequence
 
         string sql = this.DdlGenerator.CreateSequenceIfNotExists(this.SchemaName, this.Name, minValue, currentValue);
         this.Parent.CheckConnection();
-        this.Parent.Connection.Execute(sql);
+        this.Parent.Connection.Execute(sql).Wait();
     }
 
-    public long GetNext()
+    public async Task<long> GetNext()
     {
         this.Parent.CheckConnection();
 
         string sql = this.DdlGenerator.GetNextSequenceValue(this.SchemaName, this.Name);
-        DataTable table = this.Parent.Connection.Execute(sql);
+        DataTable table = await this.Parent.Connection.Execute(sql);
         long val = Convert.ToInt64(table.Rows[0][0]);
         return val;
     }
 
-    public long[] GetNextN(int count)
+    public async Task<long[]> GetNextN(int count)
     {
         this.Parent.CheckConnection();
 
         List<long> values = new List<long>();
         string sql = this.DdlGenerator.GetNextNSequenceValues(this.SchemaName, this.Name, count);
-        DataTable table = this.Parent.Connection.Execute(sql);
+        DataTable table = await this.Parent.Connection.Execute(sql);
 
         var row = table.Rows[0];
         long firstVal = row["FirstVal"].As<long>();
@@ -79,12 +80,12 @@ internal class DbSqlSequence : IIntSequence
         return values.ToArray();
     }
 
-    public long Relocate(long startAt)
+    public async Task<long> Relocate(long startAt)
     {
         this.Parent.CheckConnection();
 
         string sql = this.DdlGenerator.RelocateSequence(this.SchemaName, this.Name, startAt);
-        this.Parent.Connection.Execute(sql);
+        await this.Parent.Connection.Execute(sql);
         return startAt;
     }
 }

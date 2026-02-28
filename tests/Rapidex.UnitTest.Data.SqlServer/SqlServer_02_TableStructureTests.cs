@@ -10,7 +10,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
     {
         using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
-        DataTable table = connection.Execute($"SELECT t.name FROM sys.tables AS t INNER JOIN sys.schemas AS s ON t.[schema_id] = s.[schema_id] WHERE s.name = N'{schemaScope.SchemaName}';");
+        DataTable table = connection.Execute($"SELECT t.name FROM sys.tables AS t INNER JOIN sys.schemas AS s ON t.[schema_id] = s.[schema_id] WHERE s.name = N'{schemaScope.SchemaName}';").Result;
 
         List<string> names = new List<string>();
 
@@ -29,12 +29,12 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
         using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
-        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
+        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]").GetAwaiter().GetResult();
 
-        DataTable table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity03'");
+        DataTable table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity03'").Result;
         Assert.Equal(1, table.Rows.Count);
 
-        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity03'");
+        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity03'").Result;
 
         DataView dv = new DataView(columnsTable);
 
@@ -70,10 +70,10 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
         using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
-        DataTable table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntity01'");
+        DataTable table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntity01'").Result;
         Assert.Equal(1, table.Rows.Count);
 
-        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntity01'");
+        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntity01'").Result;
 
         DataView dv = new DataView(columnsTable);
 
@@ -99,7 +99,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
         using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
-        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
+        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'").Result;
 
         DataView dv = new DataView(columnsTable);
 
@@ -118,7 +118,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
         em.AddFieldIfNotExist<int>("AddedField");
         Database.Dbs.Db().Base.Structure.ApplyEntityStructure(em);
 
-        columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
+        columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'").Result;
         dv = new DataView(columnsTable);
 
         dv.RowFilter = "COLUMN_NAME = 'AddedField'";
@@ -136,7 +136,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
         using DbSqlServerConnection connection = Rapidex.Data.SqlServer.Library.CreateSqlServerConnection();
 
-        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
+        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'").Result;
 
         DataView dv = new DataView(columnsTable);
 
@@ -154,7 +154,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
         var em = dbScope.Metadata.Get("myJsonEntity04");
         var fm = em.Fields["ChangeField"];
 
-        columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
+        columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'").Result;
         dv = new DataView(columnsTable);
         dv.RowFilter = "COLUMN_NAME = 'ChangeField'";
         Assert.Single(dv);
@@ -170,7 +170,7 @@ public class SqlServer_02_TableStructureTests : TableStructureTestsBase<DbSqlSer
 
         Database.Dbs.Db().Base.Structure.ApplyEntityStructure(em);
 
-        columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'");
+        columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_myJsonEntity04'").Result;
         dv = new DataView(columnsTable);
 
         dv.RowFilter = "COLUMN_NAME = 'ChangeField'";

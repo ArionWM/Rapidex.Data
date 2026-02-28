@@ -26,24 +26,24 @@ public static class CacheExtensions
         return $"{dbName}:{schemaName}:{typeName}:{id}";
     }
 
-    public static void SetEntity(this ICache cache, IEntity entity, TimeSpan? expiration = null)
+    public static async Task SetEntity(this ICache cache, IEntity entity)
     {
         if (entity.HasPrematureOrEmptyId())
             return;
 
         string key = GetEntityCacheKey(entity);
-        cache.Set(key, entity, expiration, expiration);
+        await cache.SetAsync(key, entity);
     }
 
-    public static void SetEntities(this ICache cache, IEnumerable<IEntity> entities, TimeSpan? expiration = null)
+    public static async Task SetEntities(this ICache cache, IEnumerable<IEntity> entities)
     {
         foreach (var entity in entities)
         {
-            cache.SetEntity(entity, expiration);
+            await cache.SetEntity(entity);
         }
     }
 
-    public static IEntity GetEntity(this ICache cache, IDbSchemaScope dbSchema, string typeName, long id)
+    public static async Task<IEntity> GetEntity(this ICache cache, IDbSchemaScope dbSchema, string typeName, long id)
     {
         if (id.IsPrematureOrEmptyId())
             return null;
@@ -51,18 +51,18 @@ public static class CacheExtensions
         string dbName = dbSchema.ParentDbScope.Name;
         string schemaName = dbSchema.SchemaName;
         string key = $"{dbName}:{schemaName}:{typeName}:{id}";
-        var entity = cache.GetOrSet<IEntity>(key, () => null);
+        var entity = await cache.GetOrSetAsync<IEntity>(key, () => null);
         entity?._loadSource = LoadSource.Cache;
         return entity;
     }
 
-    public static void RemoveEntity(this ICache cache, IEntity entity)
+    public static async Task RemoveEntity(this ICache cache, IEntity entity)
     {
         if (entity.HasPrematureOrEmptyId())
             return;
 
         string key = GetEntityCacheKey(entity);
-        cache.Remove(key);
+        await cache.Remove(key);
     }
 
     public static string GetCacheKeyHash(this SqlResult result)
@@ -142,20 +142,20 @@ public static class CacheExtensions
         return $"{dbName}:{schemaName}:{typeName}:QUERY:{queryHash}";
     }
 
-    public static void StoreQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result, IEntityLoadResult loadResult, TimeSpan? expiration = null)
+    public static async Task StoreQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result, IEntityLoadResult loadResult)
     {
         string key = GetQueryCacheKey(em, dbSchema, result);
 
         //Rapidex.Common.DefaultLogger?.LogDebug($"QueryCacheSet: {key}"); 
 
         IEntity[] entities = loadResult.ToArray(); //WARN: Wrong
-        cache.Set(key, entities, expiration, expiration);
+        await cache.SetAsync(key, entities);
     }
 
-    public static IEntityLoadResult GetQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result)
+    public static async Task<IEntityLoadResult> GetQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result)
     {
         string key = GetQueryCacheKey(em, dbSchema, result);
-        var items = cache.GetOrSet<IEntity[]>(key, () => null);
+        var items = await cache.GetOrSetAsync<IEntity[]>(key, () => null);
         if (items != null)
         {
             foreach (var entity in items)

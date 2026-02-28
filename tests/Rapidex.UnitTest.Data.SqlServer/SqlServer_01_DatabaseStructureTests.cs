@@ -14,7 +14,7 @@ public class SqlServer_01_DatabaseStructureTests : DatabaseStructureTestsBase<Db
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
 
         using DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
-        DataTable table = connection.Execute($"SELECT SCHEMA_ID('Base') AS SchemaId");
+        DataTable table = connection.Execute($"SELECT SCHEMA_ID('Base') AS SchemaId").Result;
         Assert.Equal(1, table.Rows.Count);
 
 

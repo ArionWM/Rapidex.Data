@@ -10,56 +10,82 @@ namespace Rapidex.Data.Cache;
 internal class DefaultInMemoryCache : ICache
 {
     MemoryCache Cache { get; }
-    TimeSpan DefaultExpiration { get; }
+    TimeSpan? DefaultAbsoluteExpiration { get; }
+    TimeSpan? DefaultSlidingExpiration { get; }
 
     public DefaultInMemoryCache()
     {
-        this.DefaultExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo?.InMemory?.Expiration ?? 600);
+        if ((Database.Configuration.CacheConfigurationInfo?.InMemory?.AbsoluteExpiration ?? 0) > 0)
+        {
+            this.DefaultAbsoluteExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo!.InMemory!.AbsoluteExpiration!.Value);
+        }
+
+        if ((Database.Configuration.CacheConfigurationInfo?.InMemory?.SlidingExpiration ?? 0) > 0)
+        {
+            this.DefaultSlidingExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo!.InMemory!.SlidingExpiration!.Value);
+        }
+
         var mcOptions = new MemoryCacheOptions();
-        if(Database.Configuration.CacheConfigurationInfo?.InMemory?.ItemLimit.HasValue ?? false)
+        if (Database.Configuration.CacheConfigurationInfo?.InMemory?.ItemLimit.HasValue ?? false)
             mcOptions.SizeLimit = Database.Configuration.CacheConfigurationInfo.InMemory.ItemLimit.Value;
 
         this.Cache = new MemoryCache(mcOptions);
     }
 
-    public virtual T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    protected MemoryCacheEntryOptions GetOptions()
+    {
+        MemoryCacheEntryOptions opt = new MemoryCacheEntryOptions()
+        {
+            AbsoluteExpirationRelativeToNow = this.DefaultAbsoluteExpiration,
+            SlidingExpiration = this.DefaultSlidingExpiration,
+            Size = 1
+        };
+
+        return opt;
+    }
+
+    public virtual T GetOrSet<T>(string key, Func<T> valueFactory)
     {
         if (!this.Cache.TryGetValue(key, out T value))
         {
             value = valueFactory();
-            this.Cache.Set(key, value, expiration ?? this.DefaultExpiration);
+            this.Cache.Set(key, value, this.GetOptions());
         }
         return value;
     }
 
-    public virtual async Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public virtual async Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory)
     {
         if (!this.Cache.TryGetValue(key, out T value))
         {
             value = await Task.Run(valueFactory);
-            this.Cache.Set(key, value, expiration ?? this.DefaultExpiration);
+            this.Cache.Set(key, value, this.GetOptions());
         }
         return value;
     }
 
-    public virtual void Remove(string key)
+    public virtual Task Remove(string key)
     {
         this.Cache.Remove(key);
-    }
-
-    public virtual void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
-    {
-        this.Cache.Set(key, value, expiration ?? this.DefaultExpiration);
-    }
-
-    public virtual Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
-    {
-        this.Cache.Set(key, value, expiration ?? this.DefaultExpiration);
         return Task.CompletedTask;
     }
 
-    public void RemoveByTag(string tag)
+    public virtual void Set<T>(string key, T value)
     {
-        
+        this.Cache.Set(key, value, this.GetOptions());
+    }
+
+    public virtual Task SetAsync<T>(string key, T value)
+    {
+
+
+        this.Cache.Set(key, value, this.GetOptions());
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveByTag(string tag)
+    {
+        return Task.CompletedTask;
+
     }
 }

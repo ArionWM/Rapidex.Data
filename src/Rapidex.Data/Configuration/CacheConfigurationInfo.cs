@@ -17,7 +17,12 @@ public class InMemoryCacheConfigurationInfo
     /// <summary>
     /// Expiration time in seconds for in-memory cache items.
     /// </summary>
-    public int? Expiration { get; set; } = null;
+    public int? AbsoluteExpiration { get; set; } = null;
+
+    /// <summary>
+    /// Expiration time in seconds for in-memory cache items.
+    /// </summary>
+    public int? SlidingExpiration { get; set; } = null;
 }
 
 public class DistributedCacheConfigurationInfo

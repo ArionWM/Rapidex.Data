@@ -16,17 +16,17 @@ internal class PostgreSqlInternalTransactionScope : IDbInternalTransactionScope
         this.Connection.BeginTransaction();
     }
 
-    public void Commit()
+    public async Task Commit()
     {
-        this.Connection.CommitTransaction();
+        await this.Connection.CommitTransaction();
         this.Live = false;
     }
 
-    public void Rollback()
+    public async Task Rollback()
     {
         try
         {
-            this.Connection.RollbackTransaction();
+           await this.Connection.RollbackTransaction();
         }
         finally
         {

@@ -1,14 +1,14 @@
-﻿using Microsoft.Data.SqlClient;
-
-using SqlKata.Compilers;
-using SqlKata;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
-using static Rapidex.Data.DbEntityFactory;
-using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
+using SqlKata;
+using SqlKata.Compilers;
+using static Rapidex.Data.DbEntityFactory;
 
 
 namespace Rapidex.Data.SqlServer;
@@ -70,7 +70,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
     }
 
 
-    public IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
+    public async Task<IEntityLoadResult> Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
         var query = this.ParentScope.GetQuery(em);
 
@@ -78,10 +78,10 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
         query.Query.WhereIn(em.PrimaryKey.Name, idArray);
 
-        return this.Load(query);
+        return await this.Load(query);
     }
 
-    public IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql)
+    public async Task<IEntityLoadResult> Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql)
     {
         this.CheckConnection();
 
@@ -92,21 +92,21 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
-        DataTable table = this.Connection.Execute(sql, variables);
+        DataTable table = await this.Connection.Execute(sql, variables);
 
         IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
         return new EntityLoadResult(entities);
     }
 
-    public IEntityLoadResult Load(IQueryLoader loader)
+    public async Task<IEntityLoadResult> Load(IQueryLoader loader)
     {
         Compiler mySqlCompiler = this.GetCompiler();
         SqlResult result = mySqlCompiler.Compile(loader.Query);
 
-        return this.Load(loader.EntityMetadata, loader, result);
+        return await this.Load(loader.EntityMetadata, loader, result);
     }
 
-    public ILoadResult<DataRow> LoadRaw(IQueryLoader loader, SqlResult compiledSql)
+    public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader, SqlResult compiledSql)
     {
         this.CheckConnection();
 
@@ -117,17 +117,17 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
-        DataTable table = this.Connection.Execute(sql, variables);
+        DataTable table = await this.Connection.Execute(sql, variables);
         return new LoadResult<DataRow>(table.Rows.AsEnumerable());
     }
 
-    public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
+    public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader)
     {
         this.CheckConnection();
 
         Compiler mySqlCompiler = this.GetCompiler();
         SqlResult result = mySqlCompiler.Compile(loader.Query);
-        return this.LoadRaw(loader, result);
+        return await this.LoadRaw(loader, result);
     }
 
 
@@ -218,7 +218,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
     //https://timdeschryver.dev/blog/faster-sql-bulk-inserts-with-csharp#table-valued-parameter
     //https://timdeschryver.dev/blog/faster-sql-bulk-inserts-with-csharp
 
-    protected IEntityUpdateResult InsertV2(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    protected async Task<IEntityUpdateResult> InsertV2(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -233,9 +233,9 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         if (requiredIdCount > 0)
         {
             if (requiredIdCount == 1)
-                ids = new long[] { this.ParentScope.Data.Sequence(info.PersistentSequence).GetNext() };
+                ids = new long[] { await this.ParentScope.Data.Sequence(info.PersistentSequence).GetNext() };
             else
-                ids = this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
+                ids = await this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
         }
 
         DataTable variableTable = this.GetDbVariableTable(em, null);
@@ -288,7 +288,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         string sql = this.DdlGenerator.InsertWithValueTable(this.ParentScope.SchemaName, em.TableName, variableTable);
         //InsertWithValueTable
 
-        this.Connection.Execute(sql, variableTable);
+        await this.Connection.Execute(sql, variableTable);
 
         foreach (IEntity entity in entities)
         {
@@ -299,7 +299,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
     }
 
     [Obsolete("Use InsertV2", true)]
-    protected IEntityUpdateResult Insert(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    protected async Task<IEntityUpdateResult> Insert(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -313,9 +313,9 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         if (requiredIdCount > 0)
         {
             if (requiredIdCount == 1)
-                ids = new long[] { this.ParentScope.Data.Sequence(info.PersistentSequence).GetNext() };
+                ids = new long[] { await this.ParentScope.Data.Sequence(info.PersistentSequence).GetNext() };
             else
-                ids = this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
+                ids = await this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
         }
 
         int idCount = 0;
@@ -368,7 +368,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
             string sql = this.DdlGenerator.Insert(this.ParentScope.SchemaName, em.TableName, majorVariables, fields);
 
-            this.Connection.Execute(sql, flatFields.ToArray());
+            await this.Connection.Execute(sql, flatFields.ToArray());
         }
         else
         {
@@ -377,7 +377,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
 
             string sql = this.DdlGenerator.Insert(this.ParentScope.SchemaName, em.TableName, variables);
-            this.Connection.Execute(sql, variables);
+            await this.Connection.Execute(sql, variables);
         }
 
         foreach (IEntity entity in entities)
@@ -388,7 +388,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return result;
     }
 
-    protected void Update(IDbEntityMetadata em, IEntity entity)
+    protected async Task Update(IDbEntityMetadata em, IEntity entity)
     {
 
         this.CheckConnection();
@@ -404,22 +404,14 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         DbVariable idVariable = this.GetDbVariable(em.PrimaryKey, entity, null);
 
         string sql = this.DdlGenerator.Update(this.ParentScope.SchemaName, em, idVariable, variables, em.PrimaryKey.Name);
-        DataTable table = this.Connection.Execute(sql, variables);
+        DataTable table = await this.Connection.Execute(sql, variables);
         int updatedRecordCount = 0;
         updatedRecordCount = table.Rows[0].To<int>(0);
-
-        try
-        {
-            updatedRecordCount.MustBe(count => count == 1, $"Entity '{entity}' can't update. Possible not found with id: {entity.GetId()}");
-        }
-        catch (Exception ex)
-        {
-            throw;
-
-        }
+        updatedRecordCount.MustBe(count => count == 1, 
+            $"Entity '{entity}' can't update. Possible not found with id: {entity.GetId()}");
     }
 
-    protected IEntityUpdateResult Update(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    protected async Task<IEntityUpdateResult> Update(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -434,7 +426,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
             if (entity is IPartialEntity pentity && !pentity.IsAnyValueContained())
                 continue;
 
-            this.Update(em, entity);
+            await this.Update(em, entity);
             entity.DbVersion++;
             result.Modified(entity);
         }
@@ -442,7 +434,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return result;
     }
 
-    public IEntityUpdateResult InsertOrUpdate(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    public async Task<IEntityUpdateResult> InsertOrUpdate(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -456,12 +448,12 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
         if (newEntities != null && newEntities.Any())
         {
-            result.MergeWith(this.InsertV2(em, newEntities));
+            result.MergeWith(await this.InsertV2(em, newEntities));
         }
 
         if (updatedEntities != null && updatedEntities.Any())
         {
-            result.MergeWith(this.Update(em, updatedEntities)); //TODO: Diffset?
+            result.MergeWith(await this.Update(em, updatedEntities)); //TODO: Diffset?
         }
 
         return result;
@@ -474,13 +466,13 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return new DbSqlSequence(this, name);
     }
 
-    protected IEntityUpdateResult InternalDelete(IDbEntityMetadata em, IEnumerable<long> ids)
+    protected async Task<IEntityUpdateResult> InternalDelete(IDbEntityMetadata em, IEnumerable<long> ids)
     {
         this.CheckConnection();
         EntityUpdateResult result = new EntityUpdateResult();
 
         string sql = this.DdlGenerator.Delete(this.ParentScope.SchemaName, em, ids);
-        this.Connection.Execute(sql);
+        await this.Connection.Execute(sql);
 
         foreach (long id in ids)
         {
@@ -489,18 +481,18 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return result;
     }
 
-    public IEntityUpdateResult Delete(IDbEntityMetadata em, IEnumerable<long> ids)
+    public async Task<IEntityUpdateResult> Delete(IDbEntityMetadata em, IEnumerable<long> ids)
     {
         EntityUpdateResult result = new EntityUpdateResult();
         var parts = ids.Split(10);
         foreach (var part in parts)
             result.MergeWith(
-                this.InternalDelete(em, part));
+               await this.InternalDelete(em, part));
 
         return result;
     }
 
-    protected IEntityUpdateResult BulkUpdateInternal(IDbEntityMetadata em, IQueryUpdater query)
+    protected async Task<IEntityUpdateResult> BulkUpdateInternal(IDbEntityMetadata em, IQueryUpdater query)
     {
         SqlKata.Query _updateQuery = query.Query.Clone();
         _updateQuery.AsUpdate(query.UpdateData);
@@ -526,7 +518,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         //Add output
         string outputPart = " OUTPUT INSERTED.Id ";
         sql = topPart + outputPart + wherePart;
-        DataTable table = this.Connection.Execute(sql);
+        DataTable table = await this.Connection.Execute(sql);
 
         EntityUpdateResult uResult = new EntityUpdateResult();
         foreach (DataRow row in table.Rows)
@@ -538,7 +530,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         return uResult;
     }
 
-    protected IEntityUpdateResult BulkDeleteInternal(IDbEntityMetadata em, IQueryUpdater query)
+    protected async Task<IEntityUpdateResult> BulkDeleteInternal(IDbEntityMetadata em, IQueryUpdater query)
     {
         SqlKata.Query _updateQuery = query.Query.Clone();
         _updateQuery.AsDelete();
@@ -564,7 +556,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         //Add output
         string outputPart = " OUTPUT DELETED.Id ";
         sql = topPart + outputPart + wherePart;
-        DataTable table = this.Connection.Execute(sql);
+        DataTable table = await this.Connection.Execute(sql);
 
         EntityUpdateResult uResult = new EntityUpdateResult();
         foreach (DataRow row in table.Rows)
@@ -577,7 +569,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
     }
 
 
-    public IEntityUpdateResult BulkUpdate(IDbEntityMetadata em, IQueryUpdater query)
+    public Task<IEntityUpdateResult> BulkUpdate(IDbEntityMetadata em, IQueryUpdater query)
     {
         this.CheckConnection();
 
@@ -599,11 +591,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
 
     public void Dispose()
     {
-        if (this.Connection != null)
-        {
-            this.Connection.Dispose();
-            this.Connection = null;
-        }
-
+        this.Connection?.Dispose();
+        this.Connection = null;
     }
 }

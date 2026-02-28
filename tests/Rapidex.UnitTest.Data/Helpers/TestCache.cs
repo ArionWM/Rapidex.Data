@@ -24,31 +24,31 @@ internal class TestCache : ICache
         this.HybridCache = new DefaultHybridCache(hybridCache);
     }
 
-    public T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public T GetOrSet<T>(string key, Func<T> valueFactory)
     {
         if (MemoryCacheEnabled)
         {
-            return this.MemoryCache.GetOrSet<T>(key, valueFactory, expiration, localCacheExpiration);
+            return this.MemoryCache.GetOrSet<T>(key, valueFactory);
         }
 
         if (HybridCacheEnabled)
         {
-            return this.HybridCache.GetOrSet<T>(key, valueFactory, expiration, localCacheExpiration);
+            return this.HybridCache.GetOrSet<T>(key, valueFactory);
         }
 
         return default;
     }
 
-    public Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory)
     {
         if (MemoryCacheEnabled)
         {
-            return this.MemoryCache.GetOrSetAsync<T>(key, valueFactory, expiration, localCacheExpiration);
+            return this.MemoryCache.GetOrSetAsync<T>(key, valueFactory);
         }
 
         if (HybridCacheEnabled)
         {
-            return this.HybridCache.GetOrSetAsync<T>(key, valueFactory, expiration, localCacheExpiration);
+            return this.HybridCache.GetOrSetAsync<T>(key, valueFactory);
         }
 
 
@@ -58,49 +58,49 @@ internal class TestCache : ICache
 
     }
 
-    public void Remove(string key)
+    public async Task Remove(string key)
     {
         if (MemoryCacheEnabled)
         {
-            this.MemoryCache.Remove(key);
+           await this.MemoryCache.Remove(key);
         }
 
         if (HybridCacheEnabled)
         {
-            this.HybridCache.Remove(key);
+            await this.HybridCache.Remove(key);
         }
     }
 
-    public void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public void Set<T>(string key, T value)
     {
         if (MemoryCacheEnabled)
         {
-            this.MemoryCache.Set<T>(key, value, expiration, localCacheExpiration);
+            this.MemoryCache.Set<T>(key, value);
         }
 
         if (HybridCacheEnabled)
         {
-            this.HybridCache.Set<T>(key, value, expiration, localCacheExpiration);
+            this.HybridCache.Set<T>(key, value);
         }
 
 
     }
 
-    public Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public Task SetAsync<T>(string key, T value)
     {
         if (MemoryCacheEnabled)
         {
-            return this.MemoryCache.SetAsync<T>(key, value, expiration, localCacheExpiration);
+            return this.MemoryCache.SetAsync<T>(key, value);
         }
 
         if (HybridCacheEnabled)
         {
-            return this.HybridCache.SetAsync<T>(key, value, expiration, localCacheExpiration);
+            return this.HybridCache.SetAsync<T>(key, value);
         }
         return Task.CompletedTask;
     }
 
-    public void RemoveByTag(string tag)
+    public async Task RemoveByTag(string tag)
     {
         if (MemoryCacheEnabled)
         {
@@ -108,7 +108,7 @@ internal class TestCache : ICache
 
         if (HybridCacheEnabled)
         {
-            this.HybridCache.RemoveByTag(tag);
+            await this.HybridCache.RemoveByTag(tag);
         }
     }
 }

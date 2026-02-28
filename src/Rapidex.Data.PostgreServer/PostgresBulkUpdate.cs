@@ -8,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.PostgreServer;
+
 public static class PostgresBulkUpdate
 {
     //https://gist.github.com/samlii/a646660ced448fa1d8dd6642da358f3e
-    public static void BulkUpdate(this NpgsqlConnection connection, string schemaName, DataTable dataTable,
+    public static async Task BulkUpdate(this NpgsqlConnection connection, string schemaName, DataTable dataTable,
         Dictionary<string, string> columnMap = null, Dictionary<Type, NpgsqlDbType> columnTypes = null)
     {
         if (dataTable.PrimaryKey == null || dataTable.PrimaryKey.Length == 0)
@@ -28,26 +29,24 @@ public static class PostgresBulkUpdate
         var columnNames = (from DataColumn column in dataTable.Columns
                            select columnMap.ContainsKey(column.ColumnName) ? columnMap[column.ColumnName] : column.ColumnName);
 
-        columnNames = columnNames.Select(cn=>"\"" + cn + "\"");
+        columnNames = columnNames.Select(cn => "\"" + cn + "\"");
 
         var allColumns = string.Join(",", columnNames);
         try
         {
 
-            using (var trans = connection.BeginTransaction(IsolationLevel.ReadCommitted))
+            using (var trans = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted))
             {
 
-
-                connection.Execute($"CREATE TEMP TABLE {tableName}_tmp ON COMMIT DROP AS SELECT {allColumns} FROM {schemaName}.{tableName} LIMIT 0 ;");
-
+                await connection.Execute($"CREATE TEMP TABLE {tableName}_tmp ON COMMIT DROP AS SELECT {allColumns} FROM {schemaName}.{tableName} LIMIT 0 ;");
 
                 using (
                     var writer =
-                        connection.BeginBinaryImport($"COPY {tableName}_tmp({allColumns}) FROM STDIN (FORMAT BINARY)"))
+                        await connection.BeginBinaryImportAsync($"COPY {tableName}_tmp({allColumns}) FROM STDIN (FORMAT BINARY)"))
                 {
                     foreach (DataRow row in dataTable.Rows)
                     {
-                        writer.StartRow();
+                        await writer.StartRowAsync();
                         foreach (var item in row.ItemArray)
                         {
                             if (columnTypes.ContainsKey(item.GetType()))
@@ -74,14 +73,14 @@ public static class PostgresBulkUpdate
                 var whereClause = string.Join(" AND ",
                     dataTable.PrimaryKey.Select(c => $"orig.{c.ColumnName} = new.{c.ColumnName}"));
 
-                connection.Execute(
-                    $"LOCK TABLE {schemaName}.{tableName} IN EXCLUSIVE MODE");
+                await connection.Execute(
+                     $"LOCK TABLE {schemaName}.{tableName} IN EXCLUSIVE MODE");
 
 
-                connection.Execute(
+                await connection.Execute(
                     $"UPDATE {schemaName}.{tableName} orig SET ({allColumns}) = ({newColumns}) FROM {tableName}_tmp \"new\" WHERE {whereClause}");
 
-                connection.Execute(
+                await connection.Execute(
                     $@"INSERT INTO {schemaName}.{tableName} ({allColumns})
                                           SELECT {newColumns}
                                           FROM {tableName}_tmp ""new""
@@ -94,7 +93,7 @@ public static class PostgresBulkUpdate
         }
         finally
         {
-            connection.Execute($"DROP TABLE {tableName}_tmp");
+            await connection.Execute($"DROP TABLE {tableName}_tmp");
             if (wasClosed)
                 connection.Close();
         }

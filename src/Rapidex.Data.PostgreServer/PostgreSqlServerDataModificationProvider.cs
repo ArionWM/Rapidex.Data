@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Rapidex.Data.PostgreServer;
@@ -77,7 +78,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return this.CurrentTransaction;
     }
 
-    public IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
+    public async Task<IEntityLoadResult> Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
         var query = this.ParentScope.GetQuery(em);
 
@@ -87,34 +88,34 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         query.Query.WhereIn(fieldName, idArray); //TODO: Temp table for large data
 
-        return this.Load(query);
+        return await this.Load(query);
     }
 
-    public IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql)
+    public async Task<IEntityLoadResult> Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql)
     {
         this.CheckConnection();
         string sql = compiledSql.Sql;
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug( $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
-        DataTable table = this.Connection.Execute(sql, variables);
+        DataTable table = await this.Connection.Execute(sql, variables);
 
         IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
         return new EntityLoadResult(entities);
     }
 
-    public IEntityLoadResult Load(IQueryLoader loader)
+    public async Task<IEntityLoadResult> Load(IQueryLoader loader)
     {
         var compiler = this.GetCompiler();
         SqlResult result = compiler.Compile(loader.Query);
 
-        return this.Load(loader.EntityMetadata, loader, result);
+        return await this.Load(loader.EntityMetadata, loader, result);
     }
 
-    public ILoadResult<DataRow> LoadRaw(IQueryLoader loader, SqlResult compiledSql)
+    public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader, SqlResult compiledSql)
     {
         this.CheckConnection();
 
@@ -125,17 +126,17 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
-        DataTable table = this.Connection.Execute(sql, variables);
+        DataTable table = await this.Connection.Execute(sql, variables);
         return new LoadResult<DataRow>(table.Rows.AsEnumerable());
     }
 
-    public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
+    public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader)
     {
         this.CheckConnection();
 
         var compiler = this.GetCompiler();
         SqlResult result = compiler.Compile(loader.Query);
-        return this.LoadRaw(loader, result);
+        return await this.LoadRaw(loader, result);
     }
 
     protected DbVariable GetDbVariable(IDbFieldMetadata fm, IEntity entity, string parameterPostfix)
@@ -228,7 +229,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
     }
 
     [Obsolete("Disable for bulk update issue", true)]
-    protected IEntityUpdateResult InsertV2(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    protected async Task<IEntityUpdateResult> InsertV2(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -242,9 +243,9 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         if (requiredIdCount > 0)
         {
             if (requiredIdCount == 1)
-                ids = new long[] { this.ParentScope.Data.Sequence(info.PersistentSequence).GetNext() };
+                ids = new long[] { await this.ParentScope.Data.Sequence(info.PersistentSequence).GetNext() };
             else
-                ids = this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
+                ids = await this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
         }
 
         DataTable variableTable = this.GetDbVariableTable(schemaName, em, null);
@@ -293,7 +294,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
             variableTable.Rows.Add(row);
         }
 
-        this.Connection.BulkUpdate(schemaName, variableTable);
+        await this.Connection.BulkUpdate(schemaName, variableTable);
 
         foreach (IEntity entity in entities)
         {
@@ -303,7 +304,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return result;
     }
 
-    protected void SimpleInsertBatch(IDbEntityMetadata em, DbVariable[] majorVariables, IEnumerable<IEntity> entities)
+    protected async Task SimpleInsertBatch(IDbEntityMetadata em, DbVariable[] majorVariables, IEnumerable<IEntity> entities)
     {
         List<DbVariable[]> fields = new List<DbVariable[]>();
         List<DbVariable> flatFields = new List<DbVariable>();
@@ -320,10 +321,10 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         string sql = this.DdlGenerator.Insert(this.ParentScope.SchemaName, em.TableName, majorVariables, fields);
 
-        this.Connection.Execute(sql, flatFields.ToArray());
+        await this.Connection.Execute(sql, flatFields.ToArray());
     }
 
-    protected IEntityUpdateResult SimpleInsert(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    protected async Task<IEntityUpdateResult> SimpleInsert(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -336,9 +337,9 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         if (requiredIdCount > 0)
         {
             if (requiredIdCount == 1)
-                ids = new long[] { this.ParentScope.Data.Sequence(info.PersistentSequence).GetNext() };
+                ids = new long[] { await this.ParentScope.Data.Sequence(info.PersistentSequence).GetNext() };
             else
-                ids = this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
+                ids = await this.ParentScope.Data.Sequence(info.PersistentSequence).GetNextN(requiredIdCount);
         }
 
         int idCount = 0;
@@ -382,7 +383,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
             foreach (var batch in batchs)
             {
-                this.SimpleInsertBatch(em, majorVariables, batch);
+                await this.SimpleInsertBatch(em, majorVariables, batch);
             }
         }
         else
@@ -391,7 +392,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
             DbVariable[] variables = this.GetDbVariables(em, entity, null);
 
             string sql = this.DdlGenerator.Insert(this.ParentScope.SchemaName, em.TableName, variables);
-            this.Connection.Execute(sql, variables);
+            await this.Connection.Execute(sql, variables);
         }
 
         foreach (IEntity entity in entities)
@@ -402,7 +403,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return result;
     }
 
-    protected void Update(IDbEntityMetadata em, IEntity entity)
+    protected async Task Update(IDbEntityMetadata em, IEntity entity)
     {
         this.CheckConnection();
 
@@ -416,7 +417,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         DbVariable idVariable = this.GetDbVariable(em.PrimaryKey, entity, null);
 
         string sql = this.DdlGenerator.Update(this.ParentScope.SchemaName, em, idVariable, variables, em.PrimaryKey.Name);
-        DataTable table = this.Connection.Execute(sql, variables);
+        DataTable table = await this.Connection.Execute(sql, variables);
         int updatedRecordCount = 0;
         updatedRecordCount = table.Rows[0].To<int>(0);
 
@@ -424,7 +425,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
             string.Format("Entity '{0}' can't update. Possible not found with id: {1}", entity, entity.GetId()));
     }
 
-    protected IEntityUpdateResult Update(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    protected async Task<IEntityUpdateResult> Update(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -435,7 +436,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
             if (entity is IPartialEntity pentity && !pentity.IsAnyValueContained())
                 continue;
 
-            this.Update(em, entity);
+            await this.Update(em, entity);
             entity.DbVersion++;
             result.Modified(entity);
         }
@@ -443,7 +444,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return result;
     }
 
-    public IEntityUpdateResult InsertOrUpdate(IDbEntityMetadata em, IEnumerable<IEntity> entities)
+    public async Task<IEntityUpdateResult> InsertOrUpdate(IDbEntityMetadata em, IEnumerable<IEntity> entities)
     {
         this.CheckConnection();
 
@@ -456,12 +457,12 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
 
         if (newEntities != null && newEntities.Any())
         {
-            result.MergeWith(this.SimpleInsert(em, newEntities));
+            result.MergeWith(await this.SimpleInsert(em, newEntities));
         }
 
         if (updatedEntities != null && updatedEntities.Any())
         {
-            result.MergeWith(this.Update(em, updatedEntities));
+            result.MergeWith(await this.Update(em, updatedEntities));
         }
 
         return result;
@@ -474,13 +475,13 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return new PostgreSqlSequence(this, name);
     }
 
-    protected IEntityUpdateResult DeleteInternal(IDbEntityMetadata em, IEnumerable<long> ids)
+    protected async Task<IEntityUpdateResult> DeleteInternal(IDbEntityMetadata em, IEnumerable<long> ids)
     {
         this.CheckConnection();
         EntityUpdateResult result = new EntityUpdateResult();
 
         string sql = this.DdlGenerator.Delete(this.ParentScope.SchemaName, em, ids);
-        this.Connection.Execute(sql);
+        await this.Connection.Execute(sql);
 
         foreach (long id in ids)
         {
@@ -489,18 +490,18 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         return result;
     }
 
-    public IEntityUpdateResult Delete(IDbEntityMetadata em, IEnumerable<long> ids)
+    public async Task<IEntityUpdateResult> Delete(IDbEntityMetadata em, IEnumerable<long> ids)
     {
         EntityUpdateResult result = new EntityUpdateResult();
         var parts = ids.Split(10);
         foreach (var part in parts)
             result.MergeWith(
-                this.DeleteInternal(em, part));
+              await this.DeleteInternal(em, part));
 
         return result;
     }
 
-    public IEntityUpdateResult BulkUpdate(IDbEntityMetadata em, IQueryUpdater query)
+    public async Task<IEntityUpdateResult> BulkUpdate(IDbEntityMetadata em, IQueryUpdater query)
     {
         this.CheckConnection();
 
@@ -530,7 +531,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         //Add RETURNING
         string returningPart = " RETURNING id ";
         sql = topPart + wherePart + returningPart;
-        DataTable table = this.Connection.Execute(sql);
+        DataTable table = await this.Connection.Execute(sql);
 
         EntityUpdateResult uResult = new EntityUpdateResult();
         foreach (DataRow row in table.Rows)

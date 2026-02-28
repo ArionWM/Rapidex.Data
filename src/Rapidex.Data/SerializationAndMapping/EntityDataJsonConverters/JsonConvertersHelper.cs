@@ -48,6 +48,8 @@ internal static class JsonConvertersHelper
 
     public static void WriteReference(Utf8JsonWriter writer, IReference value, JsonSerializerOptions options)
     {
+        //TODO: Use nested entities (EntityJsonConverter.UseNestedEntities)
+
         if (value.IsNullOrEmpty())
         {
             writer.WriteNullValue();

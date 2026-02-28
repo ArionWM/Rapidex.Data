@@ -8,10 +8,117 @@ using System.Threading.Tasks;
 using Rapidex.Data.Exceptions;
 
 namespace Rapidex.Data.DataModification;
+
+
+
 internal class DataModificationScope : DataModificationReadScopeBase, IDbDataModificationScope
 {
+    #region wrapper
+    internal class DataModificationScopeInternalWrapper : IDbDataModificationScope
+    {
+        private readonly DataModificationScope scope;
+        public bool IsFinalized => this.scope.IsFinalized;
+        public bool IsFinalizing => this.scope.IsFinalizing;
+        public IDbDataModificationStaticHost Parent => this.scope.Parent;
+        public IDbInternalTransactionScope CurrentTransaction => this.scope.CurrentTransaction;
+
+        public IDbSchemaScope ParentSchema => this.Parent.ParentSchema;
+
+        public DataModificationScopeInternalWrapper(DataModificationScope scope)
+        {
+            this.scope = scope;
+        }
+        public void Add(IQueryUpdater updater)
+        {
+            this.scope.Add(updater);
+        }
+        public void Attach(IEntity entity, bool checkIntegrity = true)
+        {
+            this.scope.Attach(entity, checkIntegrity);
+        }
+        public void DeAttach(IEntity entity)
+        {
+            this.scope.DeAttach(entity);
+        }
+        public IEntity New(IDbEntityMetadata em)
+        {
+            return this.scope.NewInternal(em);
+        }
+        public void Save(IEntity entity)
+        {
+            this.scope.SaveInternal(entity);
+        }
+        public void Save(IEnumerable<IEntity> entities)
+        {
+            this.scope.SaveInternal(entities);
+        }
+        public void Delete(IEntity entity)
+        {
+            this.scope.DeleteInternal(entity);
+        }
+        public void Rollback()
+        {
+            throw new NotSupportedException();
+        }
+        public Task RollbackAsync()
+        {
+            throw new NotSupportedException();
+        }
+        public Task<IEntityUpdateResult> CommitChangesAsync()
+        {
+            throw new NotSupportedException();
+        }
+        public IEntityUpdateResult CommitChanges()
+        {
+            throw new NotSupportedException();
+        }
+
+        (bool Found, string? Desc) IDbDataModificationScope.FindAndAnalyse(IDbEntityMetadata em, long id)
+        {
+            return ((IDbDataModificationScope)this.scope).FindAndAnalyse(em, id);
+        }
+
+        public IQuery GetQuery(IDbEntityMetadata em)
+        {
+            return this.scope.GetQuery(em);
+        }
+
+        public IQuery<T> GetQuery<T>() where T : IConcreteEntity
+        {
+            return this.scope.GetQuery<T>();
+        }
+
+        public IEntity Find(IDbEntityMetadata em, long id)
+        {
+            return this.scope.Find(em, id);
+
+        }
+
+        public IEntity[] Find(IDbEntityMetadata em, params long[] ids)
+        {
+            return this.scope.Find(em, ids);
+        }
+
+        public IEntityLoadResult Load(IQueryLoader loader)
+        {
+            return this.scope.Load(loader);
+        }
+
+        public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
+        {
+            return this.scope.LoadRaw(loader);
+        }
+
+        public void Dispose()
+        {
+
+        }
+    }
+    #endregion
+
     private readonly int debugTracker;
     public bool IsFinalized { get; protected set; } = false;
+    public bool IsFinalizing { get; protected set; } = false;
     public IDbDataModificationStaticHost Parent { get; }
     public IDbInternalTransactionScope CurrentTransaction { get; protected set; }
     protected virtual IDbChangesCollection ChangesCollection { get; set; }
@@ -38,6 +145,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
     protected virtual void ApplyFinalized()
     {
         this.IsFinalized = true;
+        this.IsFinalizing = false;
         this.Parent.UnRegister(this);
     }
 
@@ -95,7 +203,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             entity.PublishOnAfterCommit();
         }
     }
-    protected IEntityUpdateResult InsertOrUpdate(IDbChangesCollection scope)
+    protected async Task<IEntityUpdateResult> InsertOrUpdateAsync(IDbChangesCollection scope)
     {
         EntityUpdateResult result = new EntityUpdateResult();
 
@@ -109,7 +217,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
             foreach (var saver in savers)
             {
-                result.MergeWith(saver.InsertOrUpdate(em, scope.ChangedEntities));
+                result.MergeWith(await saver.InsertOrUpdate(em, scope.ChangedEntities));
             }
 
             this.PublishAfterSave(scope);
@@ -121,7 +229,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
             foreach (var saver in savers)
             {
-                result.MergeWith(saver.Delete(em, scope.DeletedEntities.Select(ent => (long)ent.GetId())));
+                result.MergeWith(await saver.Delete(em, scope.DeletedEntities.Select(ent => (long)ent.GetId())));
             }
 
             this.PublishAfterDelete(scope);
@@ -135,7 +243,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             {
                 foreach (IQueryUpdater updater in scope.BulkUpdates)
                 {
-                    result.MergeWith(saver.BulkUpdate(em, updater));
+                    result.MergeWith(await saver.BulkUpdate(em, updater));
                 }
             }
         }
@@ -144,17 +252,18 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
     }
 
-    protected virtual IEntityUpdateResult CommitOrApplyChangesInternal()
+    protected virtual async Task<IEntityUpdateResult> CommitOrApplyChangesInternal()
     {
         EntityUpdateResult result = new EntityUpdateResult();
 
-        this.ChangesCollection.PrepareCommit();
+        await this.ChangesCollection.PrepareCommit();
+
 
         var types = this.ChangesCollection.SplitForTypesAndDependencies();
 
         foreach (var _scope in types)
         {
-            result.MergeWith(this.InsertOrUpdate(_scope));
+            result.MergeWith(await this.InsertOrUpdateAsync(_scope));
         }
 
         result.Success = true;
@@ -163,7 +272,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
     }
 
-    public void Delete(IEntity entity)
+    protected void DeleteInternal(IEntity entity)
     {
         IEntity resEntity = entity.PublishOnBeforeDelete().Result;
         if (resEntity != null)
@@ -171,19 +280,30 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
         this.ChangesCollection.Delete(entity);
 
-        Database.Cache.RemoveEntity(entity);
+        Database.Cache.RemoveEntity(entity).Wait();
     }
 
-    public virtual void Add(IQueryUpdater updater)
+    public void Delete(IEntity entity)
+    {
+        this.CheckActive();
+
+        this.DeleteInternal(entity);
+    }
+
+    protected virtual void AddInternal(IQueryUpdater updater)
     {
         this.ChangesCollection.Add(updater);
     }
 
-
-    public virtual IEntity New(IDbEntityMetadata em)
+    public virtual void Add(IQueryUpdater updater)
     {
         this.CheckActive();
 
+        this.AddInternal(updater);
+    }
+
+    protected virtual IEntity NewInternal(IDbEntityMetadata em)
+    {
         em.NotNull();
 
         if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME) //?? acaba?
@@ -194,6 +314,14 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         entity = entity.PublishOnNew().Result ?? entity;
 
         return entity;
+    }
+
+
+    public virtual IEntity New(IDbEntityMetadata em)
+    {
+        this.CheckActive();
+
+        return this.NewInternal(em);
     }
 
     protected Exception AnalyseException(Exception ex)
@@ -231,9 +359,8 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         return ex;
     }
 
-    public virtual void Save(IEntity entity)
+    protected virtual void SaveInternal(IEntity entity)
     {
-        this.CheckActive();
 
         try
         {
@@ -262,10 +389,15 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         }
     }
 
-    public virtual void Save(IEnumerable<IEntity> entities)
+    public virtual void Save(IEntity entity)
     {
         this.CheckActive();
 
+        this.SaveInternal(entity);
+    }
+
+    protected virtual void SaveInternal(IEnumerable<IEntity> entities)
+    {
         //TODO: Validate 
 
         try
@@ -306,26 +438,39 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         }
     }
 
+    public virtual void Save(IEnumerable<IEntity> entities)
+    {
+        this.CheckActive();
 
+        this.SaveInternal(entities);
+    }
 
     public void Rollback()
     {
+        this.RollbackAsync().Wait();
+    }
+
+    public async Task RollbackAsync()
+    {
+        this.IsFinalizing = true;
         IDbInternalTransactionScope _its = this.CurrentTransaction;
         _its.NotNull("No transaction available");
 
-        _its.Rollback();
+        await _its.Rollback();
 
         this.ApplyFinalized();
     }
 
-    public IEntityUpdateResult CommitChanges()
+    public async Task<IEntityUpdateResult> CommitChangesAsync()
     {
         this.CheckActive();
+
+        this.IsFinalizing = true;
 
         IDbInternalTransactionScope _its = this.CurrentTransaction;
         try
         {
-            var result = this.CommitOrApplyChangesInternal();
+            var result = await this.CommitOrApplyChangesInternal();
             _its?.Commit();
 
             this.PublishAfterCommit(this.ChangesCollection);
@@ -347,8 +492,16 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         }
     }
 
+    public IEntityUpdateResult CommitChanges()
+    {
+        return this.CommitChangesAsync().GetAwaiter().GetResult();
+    }
+
     public override void Dispose()
     {
+        if (this.IsFinalizing)
+            throw new InvalidOperationException("Scope already finalizing, can't dispose yet");
+
         if (!this.IsFinalized)
             this.CommitChanges();
 

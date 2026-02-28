@@ -46,15 +46,12 @@ public interface IRapidexMetadataReleatedAssemblyDefinition : IRapidexAssemblyDe
 
 public interface ICache
 {
-    T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
-    Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
+    Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory);
+    Task SetAsync<T>(string key, T value);
 
-    void Set<T>(string key, T entity, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
-    Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null);
+    Task Remove(string key);
 
-    void Remove(string key);
-
-    void RemoveByTag(string tag);
+    Task RemoveByTag(string tag);
 
 }
 

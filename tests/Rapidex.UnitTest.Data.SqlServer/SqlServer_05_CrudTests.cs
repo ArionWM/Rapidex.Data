@@ -15,7 +15,7 @@ public class SqlServer_05_CrudTests : CrudTestsBase<DbSqlServerProvider>
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
 
         using DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
-        DataTable table = connection.Execute($"SELECT * from [Base].[utest_ConcreteEntity01]");
+        DataTable table = connection.Execute($"SELECT * from [Base].[utest_ConcreteEntity01]").Result;
         object bDateVal = table.Rows[0]["BirthDate"];
         Assert.Equal(DBNull.Value, bDateVal);
     }

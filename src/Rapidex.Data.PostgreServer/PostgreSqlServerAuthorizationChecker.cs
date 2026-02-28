@@ -17,7 +17,7 @@ internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
 
     public bool CanCreateDatabase()
     {
-        DataTable result = connection.Execute("SELECT rolcreatedb FROM pg_roles WHERE rolname = current_user;");
+        DataTable result = connection.Execute("SELECT rolcreatedb FROM pg_roles WHERE rolname = current_user;").Result;
         if (result.Rows.Count == 0)
             return false;
 
@@ -27,7 +27,7 @@ internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
 
     public bool CanCreateSchema()
     {
-        DataTable result = connection.Execute("SELECT has_database_privilege(current_user, current_database(), 'CREATE');");
+        DataTable result = connection.Execute("SELECT has_database_privilege(current_user, current_database(), 'CREATE');").Result;
         if (result.Rows.Count == 0)
             return false;
 
@@ -38,7 +38,7 @@ internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
     public bool CanCreateTable(string schemaName)
     {
         schemaName = schemaName.ToLowerInvariant();
-        DataTable result = connection.Execute($"SELECT has_schema_privilege(current_user, '{schemaName}', 'CREATE');");
+        DataTable result = connection.Execute($"SELECT has_schema_privilege(current_user, '{schemaName}', 'CREATE');").Result;
         if (result.Rows.Count == 0)
             return false;
 
@@ -48,7 +48,7 @@ internal class PostgreSqlServerAuthorizationChecker : IDbAuthorizationChecker
 
     public string GetCurrentUserId()
     {
-        DataTable result = connection.Execute("SELECT current_user;");
+        DataTable result = connection.Execute("SELECT current_user;").Result;
         if (result.Rows.Count == 0)
             return null;
 

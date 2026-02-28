@@ -179,7 +179,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
         return entity;
     }
 
-    public override void SetValue(IEntity entity, string fieldName, object value, bool applyToEntity)
+    protected virtual void SetValueInternal(object value)
     {
         this.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
         this.addedEntity = null;
@@ -251,6 +251,16 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
 
         if (!set)
             throw new InvalidOperationException($"Reference value '{value}' ({value.GetType().Name}) is incorrect or not available");
+    }
+
+    public override void SetValuePremature(object value)
+    {
+        this.SetValueInternal(value);
+    }
+
+    public override void SetValue(IEntity entity, string fieldName, object value, bool applyToEntity)
+    {
+        this.SetValueInternal(value);
 
         if (applyToEntity)
             entity.SetValue(fieldName, this);
@@ -314,10 +324,10 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
         //TODO: Check referenced entity content change (not possible for now)
         base.PrepareCommit(entity, parentDms, updateType);
 
-        if (this.addedEntity != null && updateType == DataUpdateType.Update)
+        if (this.addedEntity != null && updateType == DataUpdateType.Update && this.addedEntity._IsNew)
         {
             //if entity.Id == -1 ?
-            parentDms.Save(entity);
+            parentDms.Save(this.addedEntity);
         }
 
         this.addedEntity = null;
@@ -331,9 +341,10 @@ public class Reference : ReferenceBase, ILazy, IReference
     public static implicit operator Reference(DbEntity entity)
     {
         Reference reference = new Reference();
-        reference.TargetId = (long)entity.GetId();
-        reference.ReferencedEntity = entity.GetMetadata().Name;
-        reference.addedEntity = entity;
+        reference.SetValuePremature(entity);
+        //reference.TargetId = (long)entity.GetId();
+        //reference.ReferencedEntity = entity.GetMetadata().Name;
+        //reference.addedEntity = entity;
         return reference;
     }
 
@@ -383,6 +394,7 @@ public class Reference<T> : ReferenceBase, ILazy<T>, IReference
         Reference<T> clone = new Reference<T>();
         clone.ReferencedEntity = this.ReferencedEntity;
         clone.ReferencedEntityConcreteTypeName = this.ReferencedEntityConcreteTypeName;
+        clone.addedEntity = this.addedEntity;
         clone.TargetId = this.TargetId;
         return clone;
 
@@ -391,15 +403,20 @@ public class Reference<T> : ReferenceBase, ILazy<T>, IReference
     public static implicit operator Reference<T>(DbEntity entity)
     {
         Reference<T> reference = new Reference<T>();
-        if (entity == null)
-        {
-            reference.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
-        }
-        else
-        {
-            reference.TargetId = (long)entity.GetId();
-            reference.ReferencedEntity = entity.GetMetadata().Name;
-        }
+
+        reference.SetValuePremature(entity);
+        //reference.SetValue(null, null, entity, false);
+
+        //if (entity == null)
+        //{
+        //    reference.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
+        //}
+        //else
+        //{
+        //    reference.TargetId = (long)entity.GetId();
+        //    reference.ReferencedEntity = entity.GetMetadata().Name;
+        //    reference.addedEntity = entity;
+        //}
 
         return reference;
     }
@@ -407,23 +424,25 @@ public class Reference<T> : ReferenceBase, ILazy<T>, IReference
     public static implicit operator Reference<T>(T entity)
     {
         Reference<T> reference = new Reference<T>();
-        if (entity == null)
-        {
-            reference.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
-        }
-        else
-        {
-            reference.TargetId = (long)entity.GetId();
-            var em = entity.GetMetadata();
-            reference.ReferencedEntity = em?.Name;
-        }
+        reference.SetValuePremature(entity);
+        //if (entity == null)
+        //{
+        //    reference.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
+        //}
+        //else
+        //{
+        //    reference.TargetId = (long)entity.GetId();
+        //    var em = entity.GetMetadata();
+        //    reference.ReferencedEntity = em?.Name;
+        //}
         return reference;
     }
 
     public static implicit operator Reference<T>(long entityId)
     {
         Reference<T> reference = new Reference<T>();
-        reference.TargetId = entityId;
+        reference.SetValuePremature(entityId);
+        //reference.TargetId = entityId;
         //reference.ReferencedEntityName = entity.GetMetadata().Name;
         return reference;
     }

@@ -7,6 +7,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Rapidex.Data.SqlServer;
 
@@ -85,7 +86,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
         return command;
     }
 
-    public DataTable Execute(string sql, params DbVariable[] parameters)
+    public async Task<DataTable> Execute(string sql, params DbVariable[] parameters)
     {
         this.CheckConnectionState();
         using (SqlCommand command = this.CreateCommand(parameters))
@@ -98,7 +99,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
 #endif         
 
                 command.CommandText = sql;
-                using (SqlDataReader reader = command.ExecuteReader(CommandBehavior.Default)) //Ne zaman CommandBehavior.SequentialAccess kullanalım?
+                using (SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.Default)) //Ne zaman CommandBehavior.SequentialAccess kullanalım?
                 {
                     DataTable table = new DataTable();
                     table.Load(reader);
@@ -123,7 +124,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
     }
 
 
-    public DataTable Execute(string sql, DataTable variableTable)
+    public async Task<DataTable> Execute(string sql, DataTable variableTable)
     {
         this.CheckConnectionState();
         using (SqlCommand command = this.CreateCommand())
@@ -135,7 +136,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
 
                 command.CommandType = CommandType.Text;
                 command.CommandText = sql;
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
                 return null;
             }
             catch (Exception ex)

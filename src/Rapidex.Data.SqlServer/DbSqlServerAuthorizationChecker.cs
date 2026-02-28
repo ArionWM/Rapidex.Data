@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 namespace Rapidex.Data.SqlServer;
 internal class DbSqlServerAuthorizationChecker : IDbAuthorizationChecker
 {
-    DbSqlServerConnection _connection;
+    DbSqlServerConnection connection;
     public DbSqlServerAuthorizationChecker(string connectionString)
     {
-        _connection = new DbSqlServerConnection(connectionString);
+        connection = new DbSqlServerConnection(connectionString);
     }
     public bool CanCreateDatabase()
     {
-        DataTable result = _connection.Execute("SELECT ISNULL(IS_SRVROLEMEMBER('dbcreator'), 0);");
+        DataTable result = connection.Execute("SELECT ISNULL(IS_SRVROLEMEMBER('dbcreator'), 0);").Result;
         if (result.Rows.Count == 0)
             return false;
 
@@ -40,7 +40,7 @@ internal class DbSqlServerAuthorizationChecker : IDbAuthorizationChecker
             
             SELECT @result;";
         
-        DataTable dataTable = _connection.Execute(sql);
+        DataTable dataTable = connection.Execute(sql).Result;
         if (dataTable.Rows.Count == 0)
             return false;
         var result = dataTable.Rows[0][0];
@@ -80,7 +80,7 @@ internal class DbSqlServerAuthorizationChecker : IDbAuthorizationChecker
             SELECT @result;";
 
 
-        DataTable dataTable = _connection.Execute(sql);
+        DataTable dataTable = connection.Execute(sql).Result;
         if (dataTable.Rows.Count == 0)
             return false;
         var result = dataTable.Rows[0][0];
@@ -89,7 +89,7 @@ internal class DbSqlServerAuthorizationChecker : IDbAuthorizationChecker
 
     public string GetCurrentUserId()
     {
-        DataTable dataTable = _connection.Execute("SELECT SUSER_SNAME();");
+        DataTable dataTable = connection.Execute("SELECT SUSER_SNAME();").Result;
         if (dataTable.Rows.Count == 0)
             return null;
 
@@ -98,8 +98,8 @@ internal class DbSqlServerAuthorizationChecker : IDbAuthorizationChecker
     }
     public void Dispose()
     {
-        _connection?.Dispose();
-        _connection = null;
+        connection?.Dispose();
+        connection = null;
     }
 
 }

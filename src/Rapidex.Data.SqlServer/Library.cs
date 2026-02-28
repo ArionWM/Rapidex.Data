@@ -43,7 +43,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
         DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
-        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
+        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]").Wait();
         return connection;
     }
 }

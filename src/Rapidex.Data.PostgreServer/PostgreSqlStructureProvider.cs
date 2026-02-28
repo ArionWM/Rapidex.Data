@@ -116,7 +116,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
         //dbName = PostgreHelper.CheckObjectName(dbName);
         bool directTargetDatabase = this.CheckConnection(true);
         string sql = this.DdlGenerator.IsDatabaseAvailable(dbName);
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
         bool isAvail = dataTable.Rows.Count > 0;
         return isAvail;
     }
@@ -129,7 +129,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
         entityName = PostgreHelper.CheckObjectName(entityName);
         this.CheckConnection();
         string sql = this.DdlGenerator.IsTableAvailable(schemaName, entityName);
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
         bool isAvail = dataTable.Rows.Count > 0;
         return isAvail;
     }
@@ -142,7 +142,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
         entityName = PostgreHelper.CheckObjectName(entityName);
         this.CheckConnection();
         string sql = this.DdlGenerator.IsColumnAvailable(schemaName, entityName, cm.Name);
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
         bool isAvail = dataTable.Rows.Count > 0;
         return isAvail;
     }
@@ -155,7 +155,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
 
         this.CheckConnection();
         string sql = this.DdlGenerator.IsSchemaAvailable(schemaName);
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
         bool isAvail = dataTable.Rows.Count > 0;
         return isAvail;
     }
@@ -172,7 +172,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
             this.ParentDbProvider.CanCreateDatabase();
 
             string sql1 = this.DdlGenerator.CreateDatabase01(dbName, this.Connectionbuilder.Username);
-            this.Connection.Execute(sql1);
+            this.Connection.Execute(sql1).Wait();
 
             // In PostgreSQL, owner is set at creation, so CreateDatabase02 is not needed.
             // this.DdlGenerator.CreateDatabase02(dbName, this.Connectionbuilder.Username);
@@ -214,7 +214,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
             this.ParentDbProvider.CanCreateSchema();
 
             string sql = this.DdlGenerator.CreateSchema(schemaName);
-            this.Connection.Execute(sql);
+            this.Connection.Execute(sql).Wait();
         }
         catch (PostgresException pex) when (pex.SqlState == "42P06") // duplicate_schema
         {
@@ -312,7 +312,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
 
         this.CheckConnection();
         string sql = this.DdlGenerator.GetTableStructure(this.ParentDbProvider.ParentScope.SchemaName, em);
-        DataTable table = this.Connection.Execute(sql);
+        DataTable table = this.Connection.Execute(sql).Result;
         foreach (DataRow row in table.Rows)
         {
             string columnName = row["column_name"].ToString();

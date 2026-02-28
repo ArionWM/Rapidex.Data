@@ -7,6 +7,7 @@ using Rapidex.Data;
 using Rapidex.UnitTest.Data.TestContent;
 
 namespace Rapidex.UnitTest.Data;
+
 public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
 {
     public DataUpdateWithJsonTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
@@ -76,7 +77,7 @@ public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void Serialization_07_UpdateData_Complex1()
+    public async Task Serialization_07_UpdateData_Complex1()
     {
         var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -165,7 +166,7 @@ public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
     }
 
     [Fact]
-    public void Serialization_08_UpdateData_Complex2_WithSetN2NRelation()
+    public async Task Serialization_08_UpdateData_Complex2_WithSetN2NRelation()
     {
         var db = Database.Dbs.AddMainDbIfNotExists();
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
@@ -317,7 +318,7 @@ public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
 
         ";
 
-        
+
         var entities = EntityDataJsonConverter.Deserialize(json1, db);
         using var work2 = db.BeginWork();
         entities.Save();

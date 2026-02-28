@@ -35,7 +35,7 @@ namespace Rapidex.UnitTest.Data.TestBase
         }
 
         [Fact]
-        public void Sequence_02_GetNext()
+        public async Task Sequence_02_GetNext()
         {
             var dbScope = Database.Dbs.Db();
 
@@ -43,12 +43,12 @@ namespace Rapidex.UnitTest.Data.TestBase
             dbScope.Structure.CreateSequenceIfNotExists(sequenceName, 1);
             var sequence = dbScope.Data.Sequence(sequenceName);
 
-            Assert.True(sequence.GetNext() == 1);
-            Assert.True(sequence.GetNext() == 2);
+            Assert.True(await sequence.GetNext() == 1);
+            Assert.True(await sequence.GetNext() == 2);
         }
 
         [Fact]
-        public void Sequence_03_Relocate()
+        public async Task Sequence_03_Relocate()
         {
             var dbScope = Database.Dbs.Db();
 
@@ -58,8 +58,8 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             sequence.Relocate(20001);
 
-            Assert.True(sequence.GetNext() == 20001);
-            Assert.True(sequence.GetNext() == 20002);
+            Assert.True(await sequence.GetNext() == 20001);
+            Assert.True(await sequence.GetNext() == 20002);
         }
 
         //[Fact]

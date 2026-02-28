@@ -27,7 +27,7 @@ public class EachTestClassIsolatedFixtureFactory<T> where T : ICoreTestFixture
 
                 return (T)fixtures[classType];
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

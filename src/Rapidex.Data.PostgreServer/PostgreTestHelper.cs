@@ -18,14 +18,14 @@ internal class PostgreTestHelper : IDataUnitTestHelper
             " and sch.schema_name not like 'pg_temp_%'";
         NpgsqlConnectionStringBuilder npgsqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
         using PostgreSqlServerConnection pConnection = new PostgreSqlServerConnection(npgsqlConnectionStringBuilder.ConnectionString);
-        DataTable schemas = pConnection.Execute(schemasSql);
+        DataTable schemas = pConnection.Execute(schemasSql).Result;
         foreach (DataRow row in schemas.Rows)
         {
             string schemaName = row["schema_name"].ToString();
             string sql1 = $"ALTER SCHEMA \"{schemaName}\" OWNER TO {npgsqlConnectionStringBuilder.Username}";
-            pConnection.Execute(sql1);
+            pConnection.Execute(sql1).Wait();
             string sql2 = $"DROP SCHEMA \"{schemaName}\" CASCADE";
-            pConnection.Execute(sql2);
+            pConnection.Execute(sql2).Wait();
         }
     }
 
@@ -40,7 +40,7 @@ internal class PostgreTestHelper : IDataUnitTestHelper
         using (var tempConnection = new PostgreSqlServerConnection(npgsqlConnectionStringBuilder.ConnectionString))
         {
             string checkDbSql = $"SELECT 1 FROM pg_database WHERE datname = '{databaseName}'";
-            DataTable dbCheckResult = tempConnection.Execute(checkDbSql);
+            DataTable dbCheckResult = tempConnection.Execute(checkDbSql).Result;
 
             // If database doesn't exist, return early
             if (dbCheckResult.Rows.Count == 0)
@@ -58,14 +58,14 @@ internal class PostgreTestHelper : IDataUnitTestHelper
         using PostgreSqlServerConnection pConnection = new PostgreSqlServerConnection(npgsqlConnectionStringBuilder.ConnectionString);
 
 
-        DataTable schemas = pConnection.Execute(schemasSql);
+        DataTable schemas = pConnection.Execute(schemasSql).Result;
         foreach (DataRow row in schemas.Rows)
         {
             string schemaName = row["schema_name"].ToString();
             string sql1 = $"ALTER SCHEMA \"{schemaName}\" OWNER TO {npgsqlConnectionStringBuilder.Username}";
-            pConnection.Execute(sql1);
+            pConnection.Execute(sql1).Wait();
             string sql2 = $"DROP SCHEMA \"{schemaName}\" CASCADE";
-            pConnection.Execute(sql2);
+            pConnection.Execute(sql2).Wait();
         }
     }
 }

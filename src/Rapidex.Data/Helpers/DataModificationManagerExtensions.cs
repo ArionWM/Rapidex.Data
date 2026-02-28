@@ -151,6 +151,9 @@ public static class DataModificationManagerExtensions
 
         if (dmm.IsFinalized)
             throw new WorkScopeNotAvailableException(null, "This scope is finalized");
+
+        if (dmm.IsFinalizing)
+            throw new InvalidOperationException("This scope already finalizing");
     }
 
     /// <summary>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Threading.Tasks;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -197,14 +198,14 @@ internal static class PostgreHelper
         return $"{em.Name.AbbrFromFirstLetters()}{RandomHelper.RandomNumeric(6)}";
     }
 
-    public static void Execute(this NpgsqlConnection connection, string sql)
+    public static async Task Execute(this NpgsqlConnection connection, string sql)
     {
         if (connection == null) throw new ArgumentNullException(nameof(connection));
         if (string.IsNullOrWhiteSpace(sql)) throw new ArgumentException("SQL command cannot be null or empty.", nameof(sql));
         using (var command = connection.CreateCommand())
         {
             command.CommandText = sql;
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
         }
     }
 

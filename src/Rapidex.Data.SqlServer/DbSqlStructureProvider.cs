@@ -64,11 +64,8 @@ public class DbSqlStructureProvider : IDbStructureProvider
 
     protected void CloseConnection()
     {
-        if (this.Connection != null)
-        {
-            this.Connection.Dispose();
-            this.Connection = null;
-        }
+        this.Connection?.Dispose();
+        this.Connection = null;
     }
 
     //dbName parametrelerine gerek yok? Zaten parent'dan alınabilir.
@@ -121,7 +118,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
         }
 
         string sql = this.DdlGenerator.SwitchDatabase(dbName);
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
     }
 
 
@@ -130,7 +127,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
         this.Checkinitialized();
         bool directTargetDatabase = this.CheckConnection(true);
         string sql = this.DdlGenerator.IsDatabaseAvailable(dbName);
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
         bool isAvail = dataTable.Rows.Count > 0 && dataTable.Rows[0]["DatabaseId"] != DBNull.Value;
         return isAvail;
     }
@@ -141,7 +138,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
         this.CheckConnection();
         string sql = this.DdlGenerator.IsTableAvailable(schemaName, entityName);
         //TODO: Daha hızlı bir yol? tüm exists'ler için ...
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
         bool isAvail = dataTable.Rows.Count > 0 && dataTable.Rows[0]["TableId"] != DBNull.Value;
         return isAvail;
     }
@@ -151,7 +148,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
         this.Checkinitialized();
         this.CheckConnection();
         string sql = this.DdlGenerator.IsColumnAvailable(schemaName, entityName, cm.Name);
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
         bool isAvail = dataTable.Rows.Count > 0 && dataTable.Rows[0]["TableId"] != DBNull.Value;
         return isAvail;
     }
@@ -161,7 +158,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
         this.Checkinitialized();
         this.CheckConnection();
         string sql = this.DdlGenerator.IsSchemaAvailable(schemaName);
-        DataTable dataTable = this.Connection.Execute(sql);
+        DataTable dataTable = this.Connection.Execute(sql).Result;
         bool isAvail = dataTable.Rows.Count > 0 && dataTable.Rows[0]["SchemaId"] != DBNull.Value;
         return isAvail;
     }
@@ -178,16 +175,16 @@ public class DbSqlStructureProvider : IDbStructureProvider
             this.ParentDbProvider.CanCreateDatabase();
 
             string sql1 = this.DdlGenerator.CreateDatabase01(dbName, this.Connectionbuilder.UserID);
-            this.Connection.Execute(sql1);
+            this.Connection.Execute(sql1).Wait();
 
             string sql2 = this.DdlGenerator.CreateDatabase02(dbName, this.Connectionbuilder.UserID);
-            this.Connection.Execute(sql2);
+            this.Connection.Execute(sql2).Wait();
 
             this.SwitchDatabase(dbName);
         }
         catch (SqlException sex) when (sex.Number == 2714)
         {
-            throw sex;
+            throw;
             //Common.DefaultLogger?.LogWarn($"Table {entityMetadata.TableName} already exists");
         }
         catch (SqlException sex) when (DbSqlServerHelper.SQL_Errors_Permission.Contains(sex.Number))
@@ -219,11 +216,11 @@ public class DbSqlStructureProvider : IDbStructureProvider
             this.ParentDbProvider.CanCreateSchema();
 
             string sql = this.DdlGenerator.CreateSchema(schemaName);
-            this.Connection.Execute(sql);
+            this.Connection.Execute(sql).GetAwaiter().GetResult();
         }
         catch (SqlException sex) when (sex.Number == 2714)
         {
-            throw sex;
+            throw;
             //Common.DefaultLogger?.LogWarn($"Table {entityMetadata.Name} already exists");
         }
         catch (SqlException sex) when (DbSqlServerHelper.SQL_Errors_Permission.Contains(sex.Number))
@@ -325,7 +322,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
 
         this.CheckConnection();
         string sql = this.DdlGenerator.GetTableStructure(this.ParentDbProvider.ParentScope.SchemaName, em);
-        DataTable table = this.Connection.Execute(sql);
+        DataTable table = this.Connection.Execute(sql).Result;
         foreach (DataRow row in table.Rows)
         {
             string columnName = row["COLUMN_NAME"].ToString();
@@ -449,7 +446,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
                 DbVariableType cmOnTable = tableMetadata.Get(fm.Name);
                 if (cmOnTable != null)
                 {
-                    if (IsChangeRequired(cmOnMetadata, cmOnTable))
+                    if (this.IsChangeRequired(cmOnMetadata, cmOnTable))
                     {
                         //DropIndexesAndConstraintsIsRequired(tableName, columnName);
 
@@ -457,7 +454,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
                         alterColumnSql.Append($"alter table {tableName} alter column ");
                         alterColumnSql.Append($"[{fm.Name}] {typeName}");
 
-                        this.Connection.Execute(alterColumnSql.ToString());
+                        this.Connection.Execute(alterColumnSql.ToString()).GetAwaiter().GetResult();
                     }
                 }
                 else
@@ -468,7 +465,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
                     addColumnSql.Append($"alter table {tableName} add ");
                     addColumnSql.Append($"[{fm.Name}] {typeName}");
 
-                    this.Connection.Execute(addColumnSql.ToString());
+                    this.Connection.Execute(addColumnSql.ToString()).GetAwaiter().GetResult();
 
                     //if (fm.IsUniqueOnAllDb /*|| pm.IsUnique*/ /*WARN: Sadece tek kiracılı modelde!?*/)
                     //     this.Connection.Execute($"alter table {tableName} add  CONSTRAINT {uniqueConstraintName} UNIQUE({columnName}) ");
@@ -491,7 +488,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
     {
         em.NotNull();
 
-        this.logger.LogDebug($"Applying structure for entity: {em.Name}"); 
+        this.logger.LogDebug($"Applying structure for entity: {em.Name}");
 
         if (em.IsPremature)
             throw new InvalidOperationException($"Entity metadata '{this.ParentDbProvider.ParentScope.SchemaName}/{em.Name}' is premature");
@@ -505,7 +502,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
         {
             //Update type ...
             string typeSql = this.DdlGenerator.CreateTableTypeDeclaration(this.ParentDbProvider.ParentScope.SchemaName, em);
-            this.Connection.Execute(typeSql);
+            this.Connection.Execute(typeSql).GetAwaiter().GetResult();
 
             if (this.IsExists(this.ParentDbProvider.ParentScope.SchemaName, em.TableName))
             {
@@ -514,7 +511,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
             else
             {
                 string sql = this.DdlGenerator.CreateTable(this.ParentDbProvider.ParentScope.SchemaName, em);
-                this.Connection.Execute(sql);
+                this.Connection.Execute(sql).GetAwaiter().GetResult();
             }
 
             if (bres.AddedItems.Any())
@@ -602,7 +599,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
         if (this.IsExists(this.ParentDbProvider.ParentScope.SchemaName, em.TableName))
         {
             string sql = this.DdlGenerator.DropTable(this.ParentDbProvider.ParentScope.SchemaName, em.TableName);
-            this.Connection.Execute(sql);
+            this.Connection.Execute(sql).GetAwaiter().GetResult();
         }
     }
 
@@ -616,10 +613,10 @@ public class DbSqlStructureProvider : IDbStructureProvider
         try
         {
             string sql1 = this.DdlGenerator.DropDatabase01(dbName);
-            this.Connection.Execute(sql1);
+            this.Connection.Execute(sql1).GetAwaiter().GetResult();
 
             string sql2 = this.DdlGenerator.DropDatabase02(dbName);
-            this.Connection.Execute(sql2);
+            this.Connection.Execute(sql2).GetAwaiter().GetResult();
         }
         catch (SqlException sex) when (sex.Number == 2714)
         {
@@ -643,7 +640,7 @@ public class DbSqlStructureProvider : IDbStructureProvider
     {
         this.Checkinitialized();
         string sql1 = this.DdlGenerator.DropSchema(schemaName);
-        this.Connection.Execute(sql1);
+        this.Connection.Execute(sql1).GetAwaiter().GetResult();
     }
 
     public void CreateSequenceIfNotExists(string name, int minValue = -1, int startValue = -1)

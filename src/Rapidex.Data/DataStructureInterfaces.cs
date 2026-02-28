@@ -83,15 +83,15 @@ public interface IIntSequence
     long CurrentValue { get; }
 
 
-    long Relocate(long startAt);
+    Task<long> Relocate(long startAt);
 
     /// <summary>
     /// Sequence'lar transaction'dan bağımsız çalışırlar. (mı?)
     /// </summary>
     /// <returns></returns>
-    long GetNext();
+    Task<long> GetNext();
 
-    long[] GetNextN(int count);
+    Task<long[]> GetNextN(int count);
 
     //void ScanAndLocateLast();
 }
@@ -438,7 +438,7 @@ public interface IDbChangesCollection : IEmptyCheckObject
 
     IReadOnlyCollection<IQueryUpdater> BulkUpdates { get; }
 
-    void PrepareCommit();
+    Task PrepareCommit();
 
     IDbChangesCollection[] SplitForTypesAndDependencies();
 
@@ -524,20 +524,20 @@ public interface IDbEntityLoader
     IDbSchemaScope ParentScope { get; }
     void Setup(IDbSchemaScope schema, IDbDataModificationPovider baseDmProvider);
 
-    IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids);
+    Task<IEntityLoadResult> Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids);
 
-    IEntityLoadResult Load(IQueryLoader loader);
+    Task<IEntityLoadResult> Load(IQueryLoader loader);
 
-    IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql);
+    Task<IEntityLoadResult> Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql);
 
-    ILoadResult<DataRow> LoadRaw(IQueryLoader loader);
+    Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader);
 }
 
 public interface IDbEntityUpdater
 {
-    IEntityUpdateResult InsertOrUpdate(IDbEntityMetadata em, IEnumerable<IEntity> entities);
-    IEntityUpdateResult Delete(IDbEntityMetadata em, IEnumerable<long> ids);
-    IEntityUpdateResult BulkUpdate(IDbEntityMetadata em, IQueryUpdater query);
+    Task<IEntityUpdateResult> InsertOrUpdate(IDbEntityMetadata em, IEnumerable<IEntity> entities);
+    Task<IEntityUpdateResult> Delete(IDbEntityMetadata em, IEnumerable<long> ids);
+    Task<IEntityUpdateResult> BulkUpdate(IDbEntityMetadata em, IQueryUpdater query);
 
 }
 
@@ -560,9 +560,9 @@ public interface IDbInternalTransactionScope : IDisposable
 {
     bool Live { get; }
 
-    void Commit();
+    Task Commit();
 
-    void Rollback();
+    Task Rollback();
 
     void IDisposable.Dispose()
     {
@@ -619,6 +619,7 @@ public interface IDbDataModificationScope : IDbDataReadScope, IDisposable
 {
     IDbDataModificationStaticHost Parent { get; }
     bool IsFinalized { get; }
+    bool IsFinalizing { get; }
     IEntity New(IDbEntityMetadata em);
 
     void Attach(IEntity entity, bool checkIntegrity = true);
@@ -632,11 +633,17 @@ public interface IDbDataModificationScope : IDbDataReadScope, IDisposable
 
     void Delete(IEntity entity);
 
+
+    IEntityUpdateResult CommitChanges();
+
     /// <summary>
     /// Write changes to database and commit transaction
     /// </summary>
-    IEntityUpdateResult CommitChanges();
+    Task<IEntityUpdateResult> CommitChangesAsync();
+
     void Rollback();
+
+    Task RollbackAsync();
 
     internal (bool Found, string? Desc) FindAndAnalyse(IDbEntityMetadata em, long id);
 }
@@ -920,9 +927,9 @@ public class PagingInfo : IPaging
 
     public PagingInfo(long pageSize, long pageIndex)
     {
-        PageSize = pageSize;
-        PageIndex = pageIndex;
-        StartIndex = pageSize * pageIndex;
+        this.PageSize = pageSize;
+        this.PageIndex = pageIndex;
+        this.StartIndex = pageSize * pageIndex;
     }
 }
 

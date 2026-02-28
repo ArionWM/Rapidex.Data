@@ -14,7 +14,7 @@ namespace Rapidex.Data.Cache;
 
 internal class HybridCacheSerializer<T> : IHybridCacheSerializer<T>
 {
-    private const byte CurrentVersion = 1;
+    private const byte CURRENTVERSION = 1;
     
     private readonly CompressionLevel compressionLevel;
     private readonly int compressionThreshold;
@@ -53,7 +53,7 @@ internal class HybridCacheSerializer<T> : IHybridCacheSerializer<T>
 
             // Header oluştur
             var flags = shouldCompress ? CachePackageFlags.Compressed : CachePackageFlags.None;
-            var header = new CachePackageHeader(CurrentVersion, flags);
+            var header = new CachePackageHeader(CURRENTVERSION, flags);
 
             // Header'ı yaz
             target.Write(header.ToBytes());

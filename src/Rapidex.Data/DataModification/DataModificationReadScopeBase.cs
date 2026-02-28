@@ -62,7 +62,7 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
 
         IDbEntityLoader entityLoader = this.SelectLoader(em);
 
-        IEntityLoadResult loadedResult = entityLoader.Load(queryLoader);
+        IEntityLoadResult loadedResult = entityLoader.Load(queryLoader).Result;
 
         if (queryLoader.Paging.IsPagingSet())
         {
@@ -87,7 +87,7 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
 
     public ILoadResult<DataRow> LoadRaw(IQueryLoader queryLoader)
     {
-        return this.DmProvider.LoadRaw(queryLoader);
+        return this.DmProvider.LoadRaw(queryLoader).Result;
     }
 
 
@@ -98,7 +98,7 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
 
         DbEntityId eid = new DbEntityId(id, -1);
         IDbEntityLoader loader = this.SelectLoader(em);
-        IEntityLoadResult result = loader.Load(em, new DbEntityId[] { eid });
+        IEntityLoadResult result = loader.Load(em, new DbEntityId[] { eid }).Result;
         return result.FirstOrDefault();
     }
 
@@ -110,7 +110,7 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
         var dbEntityIds = ids.Select(id => new DbEntityId(id, -1)).ToArray();
 
         IDbEntityLoader loader = this.SelectLoader(em);
-        IEntityLoadResult result = loader.Load(em, dbEntityIds);
+        IEntityLoadResult result = loader.Load(em, dbEntityIds).Result;
         return result.ToArray();
     }
 

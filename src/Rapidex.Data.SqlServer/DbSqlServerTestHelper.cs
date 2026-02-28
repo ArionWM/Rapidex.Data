@@ -13,10 +13,10 @@ internal class DbSqlServerTestHelper : IDataUnitTestHelper
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(connectionString);
         using DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
         
-        connection.Execute($"USE [master]");
-        connection.Execute($"IF EXISTS(select * FROM master..sysdatabases where [name] ='{sqlConnectionStringBuilder.InitialCatalog}') ALTER DATABASE [{sqlConnectionStringBuilder.InitialCatalog}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE ");
-        connection.Execute($"IF EXISTS(select * FROM master..sysdatabases where [name] ='{sqlConnectionStringBuilder.InitialCatalog}') DROP DATABASE [{sqlConnectionStringBuilder.InitialCatalog}]");
-        connection.Execute($"IF NOT EXISTS(select * FROM master..sysdatabases where [name] ='{sqlConnectionStringBuilder.InitialCatalog}') CREATE DATABASE [{sqlConnectionStringBuilder.InitialCatalog}]");
+        connection.Execute($"USE [master]").Wait();
+        connection.Execute($"IF EXISTS(select * FROM master..sysdatabases where [name] ='{sqlConnectionStringBuilder.InitialCatalog}') ALTER DATABASE [{sqlConnectionStringBuilder.InitialCatalog}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE ").Wait();
+        connection.Execute($"IF EXISTS(select * FROM master..sysdatabases where [name] ='{sqlConnectionStringBuilder.InitialCatalog}') DROP DATABASE [{sqlConnectionStringBuilder.InitialCatalog}]").Wait();
+        connection.Execute($"IF NOT EXISTS(select * FROM master..sysdatabases where [name] ='{sqlConnectionStringBuilder.InitialCatalog}') CREATE DATABASE [{sqlConnectionStringBuilder.InitialCatalog}]").Wait();
         //ALTER DATABASE [databasename] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
     }
 
@@ -26,9 +26,9 @@ internal class DbSqlServerTestHelper : IDataUnitTestHelper
         using DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
         string sql1 = $"IF EXISTS(select * FROM master..sysdatabases where [name] ='{sqlConnectionStringBuilder.InitialCatalog}') EXEC sp_msforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"";
-        connection.Execute(sql1);
+        connection.Execute(sql1).Wait();
 
         string sql2 = $"IF EXISTS(select * FROM master..sysdatabases where [name] ='{sqlConnectionStringBuilder.InitialCatalog}') EXEC sp_msforeachtable \"DROP TABLE ?\"";
-        connection.Execute(sql2);
+        connection.Execute(sql2).Wait();
     }
 }

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 using SqlKata;
 using SqlKata.Compilers;
 
@@ -20,7 +21,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
     }
 
 
-    protected abstract IEntity FindWithCacheInternal(IDbEntityMetadata em, DbEntityId id);
+    protected abstract Task<IEntity> FindWithCacheInternal(IDbEntityMetadata em, DbEntityId id);
 
     public void Setup(IDbSchemaScope schema, IDbDataModificationPovider baseDmProvider)
     {
@@ -29,14 +30,14 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
         this.SqlKataCompiler = this.BaseDmProvider.GetCompiler();
     }
 
-    protected virtual IEntity[] LoadWithCacheInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
+    protected virtual async Task<IEntity[]> LoadWithCacheInternal(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
         List<IEntity> available = new List<IEntity>();
         List<DbEntityId> notAvailable = new List<DbEntityId>();
 
         foreach (var id in ids)
         {
-            var entity = this.FindWithCacheInternal(em, id);
+            var entity = await this.FindWithCacheInternal(em, id);
             if (entity == null)
                 notAvailable.Add(id);
             else
@@ -45,7 +46,7 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
 
         if (notAvailable.Any())
         {
-            var loadResult = this.BaseDmProvider.Load(em, notAvailable); //TODO: Multiple load with multiple ids
+            var loadResult = await this.BaseDmProvider.Load(em, notAvailable); //TODO: Multiple load with multiple ids
             if (loadResult.Any())
             {
                 available.AddRange(loadResult);
@@ -61,18 +62,18 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
     }
 
 
-    public virtual IEntityLoadResult Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
+    public virtual async Task<IEntityLoadResult> Load(IDbEntityMetadata em, IEnumerable<DbEntityId> ids)
     {
-        IEntity[] loaded = this.LoadWithCacheInternal(em, ids);
+        IEntity[] loaded = await this.LoadWithCacheInternal(em, ids);
         EntityLoadResult values = new EntityLoadResult(loaded);
         return values;
     }
 
-    public abstract ILoadResult<DataRow> LoadRawInternal(IQueryLoader loader);
+    public abstract Task<ILoadResult<DataRow>> LoadRawInternal(IQueryLoader loader);
 
-    public virtual ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
+    public virtual async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader)
     {
-        return this.LoadRawInternal(loader);
+        return await this.LoadRawInternal(loader);
     }
 
 
@@ -80,12 +81,12 @@ public abstract class DbEntityLoaderBase : IDbEntityLoader
     //DbEntityWithCacheLoader içerisinde ayrıca SqlResult result = this.SqlKataCompiler.NotNull().Compile(loader.Query); kullan
     //IQueryLoader içerisinde "UseQueryCache" + "DontUseQueryCache"
 
-    public abstract IEntityLoadResult Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql);
+    public abstract Task<IEntityLoadResult> Load(IDbEntityMetadata em, IQueryLoader loader, SqlResult compiledSql);
 
-    public virtual IEntityLoadResult Load(IQueryLoader loader)
+    public virtual async Task<IEntityLoadResult> Load(IQueryLoader loader)
     {
         SqlResult result = this.SqlKataCompiler.NotNull().Compile(loader.Query);
-        return this.Load(loader.EntityMetadata, loader, result);
+        return await this.Load(loader.EntityMetadata, loader, result);
     }
 
 

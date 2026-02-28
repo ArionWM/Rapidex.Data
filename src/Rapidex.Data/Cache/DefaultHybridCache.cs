@@ -21,12 +21,12 @@ internal class DefaultHybridCache : ICache
         this.defaultLocalExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo?.Distributed?.LocalExpiration ?? 600);
     }
 
-    public T GetOrSet<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public T GetOrSet<T>(string key, Func<T> valueFactory)
     {
         HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
         {
-            Expiration = expiration ?? this.defaultExpiration,
-            LocalCacheExpiration = localCacheExpiration ?? this.defaultLocalExpiration
+            Expiration = this.defaultExpiration,
+            LocalCacheExpiration = this.defaultLocalExpiration
         };
 
         var task = this.cache.GetOrCreateAsync(
@@ -38,12 +38,12 @@ internal class DefaultHybridCache : ICache
         return task.AsTask().GetAwaiter().GetResult();
     }
 
-    public async Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public async Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory)
     {
         HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
         {
-            Expiration = expiration ?? this.defaultExpiration,
-            LocalCacheExpiration = localCacheExpiration ?? this.defaultLocalExpiration
+            Expiration = this.defaultExpiration,
+            LocalCacheExpiration = this.defaultLocalExpiration
         };
 
         return await this.cache.GetOrCreateAsync(
@@ -54,35 +54,35 @@ internal class DefaultHybridCache : ICache
         );
     }
 
-    public void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public void Set<T>(string key, T value)
     {
         HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
         {
-            Expiration = expiration ?? this.defaultExpiration,
-            LocalCacheExpiration = localCacheExpiration ?? this.defaultLocalExpiration
+            Expiration = this.defaultExpiration,
+            LocalCacheExpiration = this.defaultLocalExpiration
         };
 
         this.cache.SetAsync(key, value, opt, CacheExtensions.TagContext).AsTask().GetAwaiter().GetResult();
     }
 
-    public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? localCacheExpiration = null)
+    public async Task SetAsync<T>(string key, T value)
     {
         HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
         {
-            Expiration = expiration ?? this.defaultExpiration,
-            LocalCacheExpiration = localCacheExpiration ?? this.defaultLocalExpiration
+            Expiration = this.defaultExpiration,
+            LocalCacheExpiration = this.defaultLocalExpiration
         };
 
         await this.cache.SetAsync(key, value, opt, CacheExtensions.TagContext);
     }
 
-    public void Remove(string key)
+    public async Task Remove(string key)
     {
-        this.cache.RemoveAsync(key).AsTask().GetAwaiter().GetResult();
+        await this.cache.RemoveAsync(key);
     }
 
-    public void RemoveByTag(string tag)
+    public async Task RemoveByTag(string tag)
     {
-        this.cache.RemoveByTagAsync(tag).AsTask().GetAwaiter().GetResult();
+        await this.cache.RemoveByTagAsync(tag);
     }
 }

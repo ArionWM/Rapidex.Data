@@ -150,12 +150,10 @@ public class DbEntityFactory
 
         if (forNew)
         {
-            //dbScope.NotNull("Scope required for new entitites");
-
             TemplateInfo templateInfo = this.GetTemplate(em, dbScope);
 
             newEntity._IsNew = true;
-            long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext(); //TODO: Slow, much faster tech needed (with GetNextN)
+            long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext().Result; //TODO: Slow, much faster tech needed (with GetNextN)
             id = id * -1;
             newEntity.SetId(id);
         }
@@ -163,11 +161,6 @@ public class DbEntityFactory
         {
             newEntity._IsNew = false;
         }
-
-        //if (forDeleted.HasValue && forDeleted.Value)
-        //{
-        //    newEntity._IsDeleted = true;
-        //}
 
         newEntity._TypeName = em.Name;
         newEntity.EnsureDataTypeInitialization();
@@ -198,7 +191,7 @@ public class DbEntityFactory
             TemplateInfo templateInfo = this.GetTemplate(em, dbScope);
 
             newEntity._IsNew = true;
-            long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext();
+            long id = dbScope.Data.Sequence(templateInfo.PrematureSequence).GetNext().Result;
             id = id * -1;
             newEntity.SetId(id);
         }

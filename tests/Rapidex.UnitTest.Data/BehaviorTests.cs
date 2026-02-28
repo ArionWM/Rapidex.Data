@@ -49,7 +49,7 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
 
 
     [Fact]
-    public void Behaviors_02_BasicAddFields()
+    public async Task Behaviors_02_BasicAddFields()
     {
         //this.Fixture.ClearCaches();
 
@@ -65,9 +65,9 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
         SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(dbc.ConnectionString);
         using DbSqlServerConnection connection = new DbSqlServerConnection(sqlConnectionStringBuilder.ConnectionString);
 
-        connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
+        await connection.Execute($"USE [{Database.Dbs.Db().DatabaseName}]");
 
-        DataTable table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntityWithoutBehavior01'");
+        DataTable table = await connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntityWithoutBehavior01'");
         Assert.Equal(1, table.Rows.Count);
 
 
@@ -77,10 +77,10 @@ public class BehaviorTests : DbDependedTestsBase<DbSqlServerProvider>
         dbScope.Structure.ApplyEntityStructure(bem);
 
 
-        table = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntityWithoutBehavior01'");
+        table = await connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntityWithoutBehavior01'");
         Assert.Equal(1, table.Rows.Count);
 
-        DataTable columnsTable = connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntityWithoutBehavior01'");
+        DataTable columnsTable = await connection.Execute($"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'base' AND TABLE_NAME = 'utest_ConcreteEntityWithoutBehavior01'");
         DataView dv = new DataView(columnsTable);
 
         dv.RowFilter = "COLUMN_NAME = 'IsArchived'";

@@ -44,7 +44,7 @@ namespace Rapidex.UnitTest.Data.TestBase
                 {
                     ConcreteEntity03 detailEntity = work.New<ConcreteEntity03>();
                     detailEntity.Name = "Detail " + scopeId.ToString("00") + " " + i.ToString("00");
-                    detailEntity.Save();
+                    //detailEntity.Save();
 
                     details.Add(detailEntity);
                 }

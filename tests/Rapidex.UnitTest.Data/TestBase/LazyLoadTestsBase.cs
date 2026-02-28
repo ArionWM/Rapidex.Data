@@ -112,6 +112,14 @@ public abstract class LazyLoadTestsBase<T> : DbDependedTestsBase<T> where T : ID
         work1.CommitChanges();
 
 
+        Assert.False(myUnattachedEntity0._IsNew);
+        Assert.False(myUnattachedEntity0.Id.IsPrematureOrEmptyId());
+
+        Assert.False(myUnattachedEntity1._IsNew);
+        Assert.False(myUnattachedEntity1.Id.IsPrematureOrEmptyId());
+        Assert.False(myUnattachedEntity1.MyReference.TargetId.IsPrematureOrEmptyId());
+
+
         //Unattached one2n
         //Unattached n2n
 
