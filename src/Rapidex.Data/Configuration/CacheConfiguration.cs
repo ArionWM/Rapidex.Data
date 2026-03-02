@@ -81,10 +81,8 @@ public class CacheConfigurationManager
         services.AddSingleton<DefaultInMemoryCache, DefaultInMemoryCache>();
         services.AddSingleton<ICache, DefaultInMemoryCache>(sp => sp.GetRequiredService<DefaultInMemoryCache>());
 
-
         services.AddSingleton<DefaultEntityInMemoryCache, DefaultEntityInMemoryCache>();
         services.AddSingleton<IEntityCache, DefaultEntityInMemoryCache>(sp => sp.GetRequiredService<DefaultEntityInMemoryCache>());
-        
     }
 
 

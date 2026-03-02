@@ -201,6 +201,13 @@ Each database can have its own set of entities (tables) and may have **different
 See: [Multiple Database Management](MultiDatabaseManagement.md)
 
 ---
+### Entity and query cache for improved performance
+
+Memory or distributed cache (Memory + Redis) support for entities and queries to improve performance.
+
+See: [Caching](Caching.md)
+
+---
 
 ## Other Features
 

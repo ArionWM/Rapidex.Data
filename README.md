@@ -24,6 +24,7 @@ Multiple database connections can be used within a single application instance.
 - Multiple database support in same application (multi tenant)
 - Multiple schema (workspaces) support
 - Different metadata customization for each database connection (each tenant can have different configuration)
+- Entity and query cache for improved performance
 
 See: [Features](/docs/Features-detailed.md) for more details.
 

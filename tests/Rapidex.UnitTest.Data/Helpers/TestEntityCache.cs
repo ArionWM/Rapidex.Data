@@ -19,20 +19,20 @@ internal class TestEntityCache : IEntityCache
 
     public TestEntityCache(IServiceProvider serviceProvider)
     {
-        this.EntityMemoryCache = serviceProvider.GetRequiredService<DefaultEntityInMemoryCache>();
-        this.EntityHybridCache = serviceProvider.GetRequiredService<DefaultEntityHybridCache>();
+        this.EntityMemoryCache = serviceProvider.GetService<DefaultEntityInMemoryCache>();
+        this.EntityHybridCache = serviceProvider.GetService<DefaultEntityHybridCache>();
     }
 
     public async Task<T> Get<T>(IDbSchemaScope dbSchema, IDbEntityMetadata em, object id) where T : IEntity
     {
         if (MemoryCacheEnabled)
         {
-            return await this.EntityMemoryCache.Get<T>(dbSchema, em, id);
+            return await this.EntityMemoryCache.NotNull().Get<T>(dbSchema, em, id);
         }
 
         if (HybridCacheEnabled)
         {
-            return await this.EntityHybridCache.Get<T>(dbSchema, em, id);
+            return await this.EntityHybridCache.NotNull().Get<T>(dbSchema, em, id);
         }
 
         return default;
@@ -42,12 +42,12 @@ internal class TestEntityCache : IEntityCache
     {
         if (MemoryCacheEnabled)
         {
-            return await this.EntityMemoryCache.GetMultiple<T>(dbSchema, em, hash);
+            return await this.EntityMemoryCache.NotNull().GetMultiple<T>(dbSchema, em, hash);
         }
 
         if (HybridCacheEnabled)
         {
-            return await this.EntityHybridCache.GetMultiple<T>(dbSchema, em, hash);
+            return await this.EntityHybridCache.NotNull().GetMultiple<T>(dbSchema, em, hash);
         }
         return default;
     }
@@ -56,12 +56,12 @@ internal class TestEntityCache : IEntityCache
     {
         if (MemoryCacheEnabled)
         {
-            await this.EntityMemoryCache.Set(entity);
+            await this.EntityMemoryCache.NotNull().Set(entity);
         }
 
         if (HybridCacheEnabled)
         {
-            await this.EntityHybridCache.Set(entity);
+            await this.EntityHybridCache.NotNull().Set(entity);
         }
     }
 
@@ -69,12 +69,12 @@ internal class TestEntityCache : IEntityCache
     {
         if (MemoryCacheEnabled)
         {
-            await this.EntityMemoryCache.Set(dbSchema, em, hash, entities);
+            await this.EntityMemoryCache.NotNull().Set(dbSchema, em, hash, entities);
         }
 
         if (HybridCacheEnabled)
         {
-            await this.EntityHybridCache.Set(dbSchema, em, hash, entities);
+            await this.EntityHybridCache.NotNull().Set(dbSchema, em, hash, entities);
         }
     }
 
@@ -82,12 +82,12 @@ internal class TestEntityCache : IEntityCache
     {
         if (MemoryCacheEnabled)
         {
-            await this.EntityMemoryCache.Remove(entity);
+            await this.EntityMemoryCache.NotNull().Remove(entity);
         }
 
         if (HybridCacheEnabled)
         {
-            await this.EntityHybridCache.Remove(entity);
+            await this.EntityHybridCache.NotNull().Remove(entity);
         }
     }
 
@@ -95,12 +95,12 @@ internal class TestEntityCache : IEntityCache
     {
         if (MemoryCacheEnabled)
         {
-            await this.EntityMemoryCache.Remove(key);
+            await this.EntityMemoryCache.NotNull().Remove(key);
         }
 
         if (HybridCacheEnabled)
         {
-            await this.EntityHybridCache.Remove(key);
+            await this.EntityHybridCache.NotNull().Remove(key);
         }
 
     }
@@ -109,12 +109,12 @@ internal class TestEntityCache : IEntityCache
     {
         if (MemoryCacheEnabled)
         {
-            await this.EntityMemoryCache.RemoveByTag(tag);
+            await this.EntityMemoryCache.NotNull().RemoveByTag(tag);
         }
 
         if (HybridCacheEnabled)
         {
-            await this.EntityHybridCache.RemoveByTag(tag);
+            await this.EntityHybridCache.NotNull().RemoveByTag(tag);
         }
     }
 }

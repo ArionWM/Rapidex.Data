@@ -29,8 +29,11 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
     protected void AddCaches(IServiceCollection services)
     {
         CacheConfigurationManager ccm = new CacheConfigurationManager();
-        ccm.AddMemoryCache(Database.Configuration?.CacheConfigurationInfo, services);
-        ccm.AddHybridCache(Database.Configuration?.CacheConfigurationInfo, services);
+        if (Database.Configuration?.CacheConfigurationInfo?.InMemory != null)
+            ccm.AddMemoryCache(Database.Configuration?.CacheConfigurationInfo, services);
+
+        if (Database.Configuration?.CacheConfigurationInfo?.Distributed?.ConnectionString?.IsNOTNullOrEmpty() ?? false)
+            ccm.AddHybridCache(Database.Configuration?.CacheConfigurationInfo, services);
         services.AddSingleton<IEntityCache, TestEntityCache>();
     }
 
