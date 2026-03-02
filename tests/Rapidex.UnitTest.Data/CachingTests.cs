@@ -146,6 +146,29 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         }
     }
 
+    protected async Task Common_IdCache02()
+    {
+        var db = Database.Dbs.Db();
+
+        db.Metadata.AddIfNotExist<Contact>();
+        var em = db.ReAddReCreate<ConcreteEntityForUpdateTests01>();
+
+        using var work = db.BeginWork();
+        ConcreteEntityForUpdateTests01 entity = work.New<ConcreteEntityForUpdateTests01>();
+        entity.Title = "Title 01";
+        entity.ByteData = new byte[] { 1, 2, 3, 5, 1 };
+        entity.Save();
+        work.CommitChanges();
+
+        await Database.Cache.Set(entity);
+
+        var cachedEntity = await Database.Cache.Get<ConcreteEntityForUpdateTests01>(db, em, entity.Id);
+
+        Assert.Equal(entity.Id, cachedEntity.Id);
+        Assert.Equal(entity.Title, cachedEntity.Title);
+        Assert.True(entity.ByteData.SequenceEqual(cachedEntity.ByteData));
+
+    }
 
 
 
@@ -212,10 +235,26 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         }
     }
 
+
+    [Fact]
+    public async Task InMemory_IdCache02()
+    {
+        TestEntityCache.MemoryCacheEnabled = true;
+        try
+        {
+            await this.Common_IdCache02();
+
+        }
+        finally
+        {
+            TestEntityCache.MemoryCacheEnabled = false;
+        }
+    }
+
+
     [Fact]
     public void Hybrid_IdCache01()
     {
-        return;
         TestEntityCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");
         CacheExtensions.SetTagContext(null, "test");
@@ -231,6 +270,26 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
             CacheExtensions.ClearTagContext(null);
         }
     }
+
+    [Fact]
+    public async Task Hybrid_IdCache02()
+    {
+        TestEntityCache.HybridCacheEnabled = true;
+        await cache.RemoveByTag("test");
+        CacheExtensions.SetTagContext(null, "test");
+        try
+        {
+            await this.Common_IdCache02();
+
+        }
+        finally
+        {
+            await cache.RemoveByTag("test");
+            TestEntityCache.HybridCacheEnabled = false;
+            CacheExtensions.ClearTagContext(null);
+        }
+    }
+
 
 
     [Fact]
@@ -253,7 +312,6 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Hybrid_QueryCache01()
     {
-        return;
         CacheExtensions.SetTagContext(null, "test");
         TestEntityCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");
@@ -287,7 +345,6 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void Hybrid_QueryCache02()
     {
-        return;
         CacheExtensions.SetTagContext(null, "test");
         TestEntityCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");

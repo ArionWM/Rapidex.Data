@@ -21,7 +21,7 @@ public class EntityMapper
         public List<IDbFieldMetadata> AdvancedFields { get; } = new();
 
         public ConcurrentDictionary<string, string> TableFieldMappings { get; } = new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase); //TODO: ConcurrentDict
-        
+
         /// <summary>
         /// Maintains the count of TableFieldMappings to avoid the locking overhead of ConcurrentDictionary.Count
         /// </summary>
@@ -232,7 +232,16 @@ public class EntityMapper
 
         if (value is JsonElement jelement)
         {
-            value = jelement.GetValueAsOriginalType();
+            object jConvValue1 = jelement.GetValueWithOriginalType(e => fm.Type);
+            bool directSupport = jConvValue1.IsSupportTo(fm.Type) || jConvValue1.IsSupportTo(fm.BaseType);
+            if (!directSupport)
+            {
+                object jConvValue2;
+
+                if(Common.Converter.TryConvert(jConvValue1, fm.Type, out jConvValue2) || Common.Converter.TryConvert(jConvValue1, fm.BaseType, out jConvValue2))
+                    jConvValue1 = jConvValue2;
+            }
+            value = jConvValue1;
         }
 
         if (fm.Type.IsSupportTo<IDataType>())
@@ -240,7 +249,6 @@ public class EntityMapper
             IDataType dt = CreateDataTypeField(fm, parent);
             dt.SetValue(parent, fm.Name, value, applyToEntity);
             return dt;
-
         }
         else
         {
@@ -441,6 +449,8 @@ public class EntityMapper
             if (Convert.IsDBNull(value))
                 value = null;
 
+            //Json element ise !!
+
             value = EnsureValueType(fm, fillTo, value);
 
             fillTo.SetValue(fm.Name, value);
@@ -497,14 +507,18 @@ public class EntityMapper
         return this.Map(em, from, instance, set);
     }
 
-    public IEntity Map(IDbEntityMetadata em, IDictionary<string, object> from, Action<IEntity> set = null)
+    public IEntity Map(IDbSchemaScope schema, IDbEntityMetadata em, IDictionary<string, object> from, Action<IEntity> set = null)
     {
-        IEntity instance = Database.EntityFactory.Create(em, this.Parent, false);
+        IEntity instance = Database.EntityFactory.Create(em, schema, false);
         return this.Map(em, from, instance, set);
     }
 
+    public IEntity Map(IDbEntityMetadata em, IDictionary<string, object> from, Action<IEntity> set = null)
+    {
+        return this.Map(this.Parent, em, from, set);
+    }
 
-    public static ObjDictionary MapToDict(IDbEntityMetadata em, IEntity entity)
+    public static ObjDictionary MapToDict(IDbEntityMetadata em, IEntity entity, bool withSimpleValues = false)
     {
         ObjDictionary dict = new ObjDictionary();
 
@@ -516,7 +530,10 @@ public class EntityMapper
             object value = entity.GetValue(fm.Name);
             if (value is IDataType dt)
             {
-                value = dt.Clone();
+                if (withSimpleValues)
+                    value = dt.GetValueLower();
+                else
+                    value = dt.Clone();
             }
 
             dict.Add(fm.Name, value);
@@ -524,14 +541,14 @@ public class EntityMapper
         return dict;
     }
 
-    public static IDictionary<string, object> MapToDict(IEntity entity)
+    public static IDictionary<string, object> MapToDict(IEntity entity, bool withSimpleValues = false)
     {
         var em = entity.GetMetadata() ?? entity._Schema.ParentDbScope.Metadata.Get(entity.GetType().Name);
         em.NotNull();
-        return EntityMapper.MapToDict(em, entity);
+        return EntityMapper.MapToDict(em, entity, withSimpleValues);
     }
 
-    public static IEnumerable<IDictionary<string, object>> MapToDict(IEnumerable<IEntity> entities)
+    public static IEnumerable<IDictionary<string, object>> MapToDict(IEnumerable<IEntity> entities, bool withSimpleValues = false)
     {
         if (entities.IsNullOrEmpty())
         {
@@ -539,7 +556,7 @@ public class EntityMapper
         }
 
         var em = entities.First().GetMetadata();
-        return entities.Select(e => EntityMapper.MapToDict(em, e));
+        return entities.Select(e => EntityMapper.MapToDict(em, e, withSimpleValues));
     }
 
     public T Map<T>(IEntity source) where T : IConcreteEntity

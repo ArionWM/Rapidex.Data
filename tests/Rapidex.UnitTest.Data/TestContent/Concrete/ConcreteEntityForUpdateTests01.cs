@@ -38,5 +38,7 @@ namespace Rapidex.UnitTest.Data.TestContent
 
         public Enumeration<SeverityLevel> Severity { get; set; } = SeverityLevel.Normal;
 
+        public byte[] ByteData { get; set; }
+
     }
 }

@@ -30,7 +30,7 @@ public static class CacheExtensions
         entity.NotNull();
 
         IDbSchemaScope dbSchema = entity._Schema;
-        string dbName = entity._DbName ?? entity._Schema?.ParentDbScope?.DatabaseName;
+        string dbName = entity._DbName ?? entity._Schema?.ParentDbScope?.Name;
         dbName.NotEmpty();
 
         string schemaName = entity._SchemaName ?? entity._Schema?.SchemaName;
@@ -119,7 +119,7 @@ public static class CacheExtensions
         em.NotNull();
         hash.NotEmpty();
 
-        string dbName = dbSchema.ParentDbScope.DatabaseName;
+        string dbName = dbSchema.ParentDbScope.Name;
         string schemaName = dbSchema.SchemaName;
         string typeName = em.Name;
         string key = $"{dbName}:{schemaName}:{typeName}:QUERY:{hash}";

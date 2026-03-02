@@ -44,7 +44,7 @@ public static class TypeHelper
         if (type == null)
             throw new BaseArgumentNullException("type");
 
-        return targetType.IsAssignableFrom(type);
+        return targetType == type || targetType.IsAssignableFrom(type);
     }
 
     public static bool IsSupportTo(this object obj, Type targetType)
@@ -53,7 +53,7 @@ public static class TypeHelper
         if (type == null)
             throw new BaseArgumentNullException("type");
 
-        return targetType.IsAssignableFrom(type);
+        return targetType == type || targetType.IsAssignableFrom(type);
     }
 
     public static bool IsSupportTo<T>(this object obj)

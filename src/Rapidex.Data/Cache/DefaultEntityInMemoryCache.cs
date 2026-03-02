@@ -25,7 +25,12 @@ internal class DefaultEntityInMemoryCache : IEntityCache
         string key = CacheExtensions.GetEntityCacheKey(dbSchema, em, id);
 
         var retValue = await this.cache.GetOrSet<T>(key, () => default(T));
-        retValue?._loadSource = LoadSource.Cache;
+        if (retValue != null)
+        {
+            retValue._Schema = dbSchema;
+            retValue._SchemaName = dbSchema.SchemaName;
+            retValue._loadSource = LoadSource.Cache;
+        }
         return retValue;
     }
 
@@ -68,6 +73,8 @@ internal class DefaultEntityInMemoryCache : IEntityCache
         {
             foreach (var entity in retValue)
             {
+                entity._Schema = dbSchema;
+                entity._SchemaName = dbSchema.SchemaName;
                 entity._loadSource = LoadSource.Cache;
             }
         }

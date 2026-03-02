@@ -24,7 +24,7 @@ internal class DefaultEntityHybridCache : IEntityCache
         switch (value)
         {
             case IEntity entity:
-                Dictionary<string, object> rvalue = (Dictionary<string, object>)EntityMapper.MapToDict(entity);
+                Dictionary<string, object> rvalue = (Dictionary<string, object>)EntityMapper.MapToDict(entity, true);
                 return rvalue;
             default:
                 return value;
@@ -34,7 +34,13 @@ internal class DefaultEntityHybridCache : IEntityCache
     protected object CheckEntityValueForRetrieve(IDbSchemaScope dbSchema, string typeName, Dictionary<string, object> value)
     {
         var em = dbSchema.ParentDbScope.Metadata.Get(typeName);
-        IEntity entity = this.unattachedMapper.Map(em, value);
+        IEntity entity = this.unattachedMapper.Map(dbSchema, em, value);
+        if (entity != null)
+        {
+            entity._loadSource = LoadSource.Cache;
+            entity._Schema = dbSchema;
+            entity._SchemaName = dbSchema.SchemaName;
+        }
         return entity;
     }
 
@@ -44,9 +50,11 @@ internal class DefaultEntityHybridCache : IEntityCache
         string key = CacheExtensions.GetEntityCacheKey(dbSchema, em, id);
 
         var retValue = await this.cache.GetOrSet<Dictionary<string, object>>(key, () => null);
+        if (retValue == null)
+            return default(T);
+        
         var cValue = this.CheckEntityValueForRetrieve(dbSchema, em.Name, retValue);
         T eValue = (T)cValue;
-        eValue?._loadSource = LoadSource.Cache;
         return (T)cValue;
     }
 
@@ -78,7 +86,6 @@ internal class DefaultEntityHybridCache : IEntityCache
             {
                 var cValue = this.CheckEntityValueForRetrieve(dbSchema, em.Name, dict);
                 T eValue = (T)cValue;
-                eValue._loadSource = LoadSource.Cache;
                 entities.Add(eValue);
             }
 

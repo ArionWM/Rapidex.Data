@@ -30,7 +30,7 @@ namespace Rapidex
 
             if (value is JsonElement jelement)
             {
-                value = jelement.GetValueAsOriginalType();
+                value = jelement.GetValueAs(typeof(T));
             }
 
             Type targetType = typeof(T);
@@ -42,10 +42,23 @@ namespace Rapidex
         {
             if (value is JsonElement jelement)
             {
-                value = jelement.GetValueAsOriginalType();
+                value = jelement.GetValueAs(targetType);
             }
 
-            return Common.Converter.NotNull("Common.Converter is not initialized").Convert(value, targetType);
+            var outValue = Common.Converter
+                  .NotNull("Common.Converter is not initialized")
+                  .Convert(value, targetType);
+            return outValue;
+
+            //object outValue;
+            //bool converted = Common.Converter
+            //    .NotNull("Common.Converter is not initialized")
+            //    .TryConvert(value, targetType, out outValue);
+
+            //if(!converted)
+            //    throw new ArgumentException($"Cannot convert value '{value}' of type {value.GetType().Name} to type {targetType.Name}");
+
+            //return outValue;
         }
 
 
@@ -91,6 +104,58 @@ namespace Rapidex
                 default:
                     throw new NotSupportedException($"Usupported value format: {jsonElement.ValueKind}"); //Try?? JsonSerializer.Deserialize<object>(fieldElement.GetRawText(), options)
             }
+        }
+
+        public static object GetValueWithOriginalType(this JsonElement jsonElement, Func<JsonElement, Type> typeSelector)
+        {
+            switch (jsonElement.ValueKind)
+            {
+                case JsonValueKind.Undefined:
+                case JsonValueKind.Null:
+                    return null;
+                case JsonValueKind.True:
+                    return true;
+                case JsonValueKind.False:
+                    return false;
+                case JsonValueKind.Number:
+                    return jsonElement.GetDecimal();
+                case JsonValueKind.String:
+                    return jsonElement.GetString();
+                case JsonValueKind.Object:
+                    JsonElement valueElement;
+
+                    if (jsonElement.GetPropertyCount() == 1)
+                    {
+                        if (jsonElement.TryGetProperty("value", out valueElement))
+                        {
+                            return GetValueAsOriginalType(valueElement);
+                        }
+                        else
+                        {
+                            goto case default;
+                        }
+                    }
+                    else
+                    {
+                        Type type = typeSelector.NotNull().Invoke(jsonElement);
+                        object ds = jsonElement.Deserialize(type, JsonHelper.DefaultJsonSerializerOptions);
+                        return ds;
+
+                    }
+                case JsonValueKind.Array:
+                    return jsonElement.EnumerateArray().Select(GetValueAsOriginalType).ToArray();
+
+
+                default:
+                    throw new NotSupportedException($"Usupported value format: {jsonElement.ValueKind}"); //Try?? JsonSerializer.Deserialize<object>(fieldElement.GetRawText(), options)
+            }
+        }
+
+
+
+        public static object GetValueAs(this JsonElement jsonElement, Type targetType)
+        {
+            return jsonElement.Deserialize(targetType, JsonHelper.DefaultJsonSerializerOptions);
         }
 
         public static object GetValueAsOriginalType(this JsonNode jsonNode)

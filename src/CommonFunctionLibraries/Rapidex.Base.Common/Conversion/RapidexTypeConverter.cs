@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using Rapidex.Conversion.Converters;
 
 namespace Rapidex;
 
@@ -20,6 +21,7 @@ public class RapidexTypeConverter : IManager
         RapidexTypeConverter.RegisterInternal<DateTimeOffsetToDateTimeConverter>();
         RapidexTypeConverter.RegisterInternal<DateTimeOffsetNullableToDateTimeNullableConverter>();
         RapidexTypeConverter.RegisterInternal<DateTimeOffsetStrConverter>();
+        RapidexTypeConverter.RegisterInternal<StringToByteArrayConverter>();
     }
 
     internal static void RegisterInternal(IDirectConverter converter)
@@ -64,7 +66,7 @@ public class RapidexTypeConverter : IManager
 
         foreach (var converter in CustomTypeConverters)
         {
-            if (converter.CanConvert(fromType, toType) )
+            if (converter.CanConvert(fromType, toType))
             {
                 CustomTypeConvertersCache.Set(fromType, toType, converter);
                 TypeConverter res = converter.ShouldSupportTo<TypeConverter>();
@@ -179,12 +181,14 @@ public class RapidexTypeConverter : IManager
         if (value.IsSupportTo(targetType))
         {
             convertedValue = value;
+            return true;
         }
 
         if (targetType.IsSupportTo<string>())
         {
             string strVal = (string)value;
-            value = strVal;
+            convertedValue = value = strVal;
+            return true;
         }
 
         convertedValue = null;
@@ -227,16 +231,24 @@ public class RapidexTypeConverter : IManager
             {
                 conv = TypeDescriptor.GetConverter(value);
 
-
                 if (conv.CanConvertTo(targetType))
                 {
                     convertedValue = conv.ConvertTo(value, targetType);
+                    return true;
                 }
                 else
                 {
-                    convertedValue = System.Convert.ChangeType(value, targetType);
+                    try
+                    {
+                        convertedValue = System.Convert.ChangeType(value, targetType);
+                        return true;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
                 }
-                return true;
+                
             }
 
         }
@@ -247,6 +259,8 @@ public class RapidexTypeConverter : IManager
             //string message = $"Invalid cast from {value.GetType().Name} to {targetType.Name}";
             //throw new InvalidCastException(message, ice);
         }
+
+        
     }
 
 

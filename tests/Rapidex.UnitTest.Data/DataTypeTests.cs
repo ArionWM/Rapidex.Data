@@ -416,7 +416,6 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         db.ReAddReCreate<ConcreteEntityForUpdateTests01>();
 
         using var work = db.BeginWork();
-
         ConcreteEntityForUpdateTests01 entity = work.New<ConcreteEntityForUpdateTests01>();
 
         entity.PlannedDate.Start = new DateTimeOffset(2021, 02, 03, 04, 05, 06, TimeSpan.Zero);
