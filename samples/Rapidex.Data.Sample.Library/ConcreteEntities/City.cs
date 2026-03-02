@@ -19,5 +19,6 @@ public class CityImplementer : IConcreteEntityImplementer<City>
     {
         var cityEm = metadata;
         cityEm.MarkOnlyBaseSchema();
+        cityEm.CacheOptions.IsIdCacheEnabled = true;
     }
 }
