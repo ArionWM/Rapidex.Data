@@ -36,7 +36,7 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         EntityDataJsonConverter.SetContext(this.ParentScope);
         try
         {
-            var entity = await Database.Cache.GetEntity(this.ParentScope, em.Name, id.Id);
+            var entity = await Database.Cache.Get<IEntity>(this.ParentScope, em, id.Id);
 
             if (id.Version > -1 && (entity == null || entity.DbVersion != id.Version))
             {
@@ -58,7 +58,7 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         {
             var uncachedEntities = result.Where(e => e._loadSource == LoadSource.Database);
             if (uncachedEntities.Any())
-               await Database.Cache.SetEntities(uncachedEntities);
+               await Database.Cache.Set(uncachedEntities);
         }
 
         return result;
@@ -82,12 +82,12 @@ internal class DbEntityWithCacheLoader : DbEntityLoaderBase, IDbEntityLoader
         lastLoadResult = await this.BaseDmProvider.Load(em, loader, compiledSql);
         if (lastLoadResult.IsNOTNullOrEmpty())
         {
-           await Database.Cache.SetEntities(lastLoadResult);
+           await Database.Cache.Set(lastLoadResult);
 
             if (useQueryCache)
             {
                 //this.StoreQuery(Database.Cache, em, this.ParentScope, compiledSql, lastLoadResult);
-                await Database.Cache.StoreQuery(em, this.ParentScope, compiledSql, lastLoadResult);
+                await Database.Cache.SetQuery(em, this.ParentScope, compiledSql, lastLoadResult);
             }
 
             return lastLoadResult;

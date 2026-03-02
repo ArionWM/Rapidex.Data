@@ -9,15 +9,15 @@ namespace Rapidex.Data.Cache;
 
 internal class CacheSignalImplementer
 {
-    public ISignalHandlingResult AfterCommitCallback(IEntityReleatedMessageArguments args)
+    public async Task<ISignalHandlingResult> AfterCommitCallback(IEntityReleatedMessageArguments args)
     {
         try
         {
             var entity = args.Entity;
-            Database.Cache.SetEntity(entity);
+            await Database.Cache.Set(entity);
             return args.CreateHandlingResult(null);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             ex.Log();
             //Do nothing (yet)

@@ -6,12 +6,12 @@ namespace Rapidex.UnitTest.Data;
 
 public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
 {
-    ICache cache;
+    IEntityCache cache;
 
     public CachedLoadingTests(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<DbSqlServerProvider>> factory) : base(factory)
     {
-        this.cache = this.Fixture.ServiceProvider.GetRequiredService<ICache>()
-             .ShouldSupportTo<TestCache>();
+        this.cache = this.Fixture.ServiceProvider.GetRequiredService<IEntityCache>()
+             .ShouldSupportTo<TestEntityCache>();
     }
 
 
@@ -65,6 +65,8 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
 
         long id = cent01.Id;
 
+        //Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update
+
         var cent01_02 = db.Find<ConcreteEntity01>(id); //<- Load to cache
 
         Assert.NotNull(cent01_02);
@@ -77,7 +79,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
 
         work2.CommitChanges(); //<- After commit, already saved to cache
 
-        Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update
+        //Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update
 
         var cent01_03 = db.Find<ConcreteEntity01>(id); //<- Load from cache
         Assert.NotNull(cent01_03);
@@ -198,7 +200,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void InMemory_IdCache01()
     {
-        TestCache.MemoryCacheEnabled = true;
+        TestEntityCache.MemoryCacheEnabled = true;
         try
         {
             this.Common_IdCache01();
@@ -206,7 +208,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         }
         finally
         {
-            TestCache.MemoryCacheEnabled = false;
+            TestEntityCache.MemoryCacheEnabled = false;
         }
     }
 
@@ -214,7 +216,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     public void Hybrid_IdCache01()
     {
         return;
-        TestCache.HybridCacheEnabled = true;
+        TestEntityCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");
         CacheExtensions.SetTagContext(null, "test");
         try
@@ -225,7 +227,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         finally
         {
             cache.RemoveByTag("test");
-            TestCache.HybridCacheEnabled = false;
+            TestEntityCache.HybridCacheEnabled = false;
             CacheExtensions.ClearTagContext(null);
         }
     }
@@ -236,14 +238,14 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     {
 
 
-        TestCache.MemoryCacheEnabled = true;
+        TestEntityCache.MemoryCacheEnabled = true;
         try
         {
             this.Common_QueryCache01();
         }
         finally
         {
-            TestCache.MemoryCacheEnabled = false;
+            TestEntityCache.MemoryCacheEnabled = false;
         }
 
     }
@@ -253,7 +255,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         return;
         CacheExtensions.SetTagContext(null, "test");
-        TestCache.HybridCacheEnabled = true;
+        TestEntityCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");
         try
         {
@@ -262,7 +264,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         finally
         {
             cache.RemoveByTag("test");
-            TestCache.HybridCacheEnabled = false;
+            TestEntityCache.HybridCacheEnabled = false;
             CacheExtensions.ClearTagContext(null);
         }
 
@@ -271,14 +273,14 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     [Fact]
     public void InMemory_QueryCache02()
     {
-        TestCache.MemoryCacheEnabled = true;
+        TestEntityCache.MemoryCacheEnabled = true;
         try
         {
             this.Commmon_QueryCache02();
         }
         finally
         {
-            TestCache.MemoryCacheEnabled = false;
+            TestEntityCache.MemoryCacheEnabled = false;
         }
     }
 
@@ -287,7 +289,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
     {
         return;
         CacheExtensions.SetTagContext(null, "test");
-        TestCache.HybridCacheEnabled = true;
+        TestEntityCache.HybridCacheEnabled = true;
         cache.RemoveByTag("test");
         try
         {
@@ -296,7 +298,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         finally
         {
             cache.RemoveByTag("test");
-            TestCache.HybridCacheEnabled = false;
+            TestEntityCache.HybridCacheEnabled = false;
             CacheExtensions.ClearTagContext(null);
         }
 

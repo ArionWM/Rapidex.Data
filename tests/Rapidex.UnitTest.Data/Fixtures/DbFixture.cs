@@ -25,10 +25,19 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
         this.Init();
     }
 
+
+    protected void AddCaches(IServiceCollection services)
+    {
+        CacheConfigurationManager ccm = new CacheConfigurationManager();
+        ccm.AddMemoryCache(Database.Configuration?.CacheConfigurationInfo, services);
+        ccm.AddHybridCache(Database.Configuration?.CacheConfigurationInfo, services);
+        services.AddSingleton<IEntityCache, TestEntityCache>();
+    }
+
     protected override void Setup(IServiceCollection services)
     {
-        services.AddSingleton<ICache, TestCache>();
         services.AddRapidexDataLevel();
+        this.AddCaches(services);
 
         services.AddSingleton<ISignalHub, TestSignalHub>(sp =>
         {
@@ -68,8 +77,8 @@ public class DbFixture : DefaultEmptyFixture, ICoreTestFixture
     {
         base.CheckInit();
 
-        this.ServiceProvider.GetRequiredService<ICache>()
-            .ShouldSupportTo<TestCache>();
+        this.ServiceProvider.GetRequiredService<IEntityCache>()
+            .ShouldSupportTo<TestEntityCache>();
     }
 
     public override void Init()

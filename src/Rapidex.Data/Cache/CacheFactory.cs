@@ -1,43 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Hybrid;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
+//using Microsoft.Extensions.Caching.Hybrid;
 
-namespace Rapidex.Data.Cache;
+//namespace Rapidex.Data.Cache;
 
-internal class CacheFactory
-{
-    private ICache availableCache;
-    private HybridCache keyedHybridCache;
-    private HybridCache genericHybridCache;
-    private CacheSignalImplementer signalImplementer;
+//internal class CacheFactory
+//{
+//    private ICache availableCache;
+//    private HybridCache keyedHybridCache;
+//    private HybridCache genericHybridCache;
+//    private CacheSignalImplementer signalImplementer;
 
-    public CacheFactory(IServiceProvider serviceProvider)
-    {
-        // CacheSignalImplementer signalImplementer, ICache availableCache, [FromKeyedServices("rdata")] HybridCache hcache, HybridCache genericHCcache
+//    XEntityCache'ler için bu yapı değişecek, servis enjeksiyonu? 
 
-        this.signalImplementer = serviceProvider.GetRequiredService<CacheSignalImplementer>();
-        this.availableCache = serviceProvider.GetService<ICache>();
-        this.keyedHybridCache = serviceProvider.GetKeyedService<HybridCache>("rdata");
-        this.genericHybridCache = serviceProvider.GetService<HybridCache>(); 
-    }
+//    public CacheFactory(IServiceProvider serviceProvider)
+//    {
+//        // CacheSignalImplementer signalImplementer, ICache availableCache, [FromKeyedServices("rdata")] HybridCache hcache, HybridCache genericHCcache
 
-    public ICache Create()
-    {
-        if (this.availableCache != null)
-            return this.availableCache;
+//        this.signalImplementer = serviceProvider.GetRequiredService<CacheSignalImplementer>();
+//        this.availableCache = serviceProvider.GetService<ICache>();
+//        this.keyedHybridCache = serviceProvider.GetKeyedService<HybridCache>("rdata");
+//        this.genericHybridCache = serviceProvider.GetService<HybridCache>(); 
+//    }
 
-        //Check hybrid cache first
-        if (this.keyedHybridCache != null)
-            return new DefaultHybridCache(this.keyedHybridCache);
+//    public ICache Create()
+//    {
+//        if (this.availableCache != null)
+//            return this.availableCache;
 
-        //Fallback to generic hybrid cache
-        if (this.genericHybridCache != null)
-            return new DefaultHybridCache(this.genericHybridCache);
+//        //Check hybrid cache first
+//        if (this.keyedHybridCache != null)
+//            return new DefaultHybridCache(this.keyedHybridCache);
 
-        Rapidex.Common.DefaultLogger.LogWarning("using DefaultInMemoryCache (No another cache is configured) See: abc");
-        return new DefaultInMemoryCache();
-    }
-}
+//        //Fallback to generic hybrid cache
+//        if (this.genericHybridCache != null)
+//            return new DefaultHybridCache(this.genericHybridCache);
+
+//        Rapidex.Common.DefaultLogger.LogWarning("using DefaultInMemoryCache (No another cache is configured) See: abc");
+//        return new DefaultInMemoryCache();
+//    }
+//}

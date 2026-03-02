@@ -24,7 +24,6 @@ public static class DependencyInjectionExtensions
                 binaryFolder = AppContext.BaseDirectory;
 
             services.AddSingleton(typeof(IHybridCacheSerializer<>), typeof(HybridCacheSerializer<>));
-            services.AddTransient<CacheFactory>();
 
             Rapidex.Common.Setup(rootFolder, binaryFolder, services, configuration, defaultLogger);
             Rapidex.Common.Assembly.SetupAssemblyServices(services);

@@ -104,6 +104,10 @@ public class EntityMapper
 
     protected ReaderWriterLockSlim Lock { get; } = new ReaderWriterLockSlim();
 
+    public EntityMapper()
+    {
+    }
+
     public EntityMapper(IDbSchemaScope parent)
     {
         this.Parent = parent;
@@ -526,6 +530,7 @@ public class EntityMapper
         em.NotNull();
         return EntityMapper.MapToDict(em, entity);
     }
+
     public static IEnumerable<IDictionary<string, object>> MapToDict(IEnumerable<IEntity> entities)
     {
         if (entities.IsNullOrEmpty())
@@ -554,4 +559,5 @@ public class EntityMapper
 
         return concEntity;
     }
+
 }

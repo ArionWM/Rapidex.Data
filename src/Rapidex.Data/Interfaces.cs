@@ -46,13 +46,21 @@ public interface IRapidexMetadataReleatedAssemblyDefinition : IRapidexAssemblyDe
 
 public interface ICache
 {
-    Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory);
-    Task SetAsync<T>(string key, T value);
-
+    Task<T> GetOrSet<T>(string key, Func<T> valueFactory);
+    Task Set<T>(string key, T value);
     Task Remove(string key);
-
     Task RemoveByTag(string tag);
-
 }
 
 
+public interface IEntityCache
+{
+    Task<T> Get<T>(IDbSchemaScope dbSchema, IDbEntityMetadata em, object id) where T : IEntity;
+    Task<T[]> GetMultiple<T>(IDbSchemaScope dbSchema, IDbEntityMetadata em, string hash) where T : IEntity;
+    Task Set<T>(T entity) where T : IEntity;
+    Task Set<T>(IDbSchemaScope dbSchema, IDbEntityMetadata em, string hash, IEnumerable<T> entities) where T : IEntity;
+
+    Task Remove<T>(T entity) where T : IEntity;
+    Task Remove(string key);
+    Task RemoveByTag(string tag);
+}

@@ -280,7 +280,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
         this.ChangesCollection.Delete(entity);
 
-        Database.Cache.RemoveEntity(entity).Wait();
+        Database.Cache.Remove(entity).Wait();
     }
 
     public void Delete(IEntity entity)

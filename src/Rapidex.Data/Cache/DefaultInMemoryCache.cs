@@ -9,11 +9,11 @@ namespace Rapidex.Data.Cache;
 
 internal class DefaultInMemoryCache : ICache
 {
-    MemoryCache Cache { get; }
+    IMemoryCache Cache { get; }
     TimeSpan? DefaultAbsoluteExpiration { get; }
     TimeSpan? DefaultSlidingExpiration { get; }
 
-    public DefaultInMemoryCache()
+    public DefaultInMemoryCache(IMemoryCache mcache)
     {
         if ((Database.Configuration.CacheConfigurationInfo?.InMemory?.AbsoluteExpiration ?? 0) > 0)
         {
@@ -27,9 +27,11 @@ internal class DefaultInMemoryCache : ICache
 
         var mcOptions = new MemoryCacheOptions();
         if (Database.Configuration.CacheConfigurationInfo?.InMemory?.ItemLimit.HasValue ?? false)
+        {
             mcOptions.SizeLimit = Database.Configuration.CacheConfigurationInfo.InMemory.ItemLimit.Value;
-
-        this.Cache = new MemoryCache(mcOptions);
+        }
+        
+        this.Cache = mcache ?? new MemoryCache(mcOptions);
     }
 
     protected MemoryCacheEntryOptions GetOptions()
@@ -44,17 +46,8 @@ internal class DefaultInMemoryCache : ICache
         return opt;
     }
 
-    public virtual T GetOrSet<T>(string key, Func<T> valueFactory)
-    {
-        if (!this.Cache.TryGetValue(key, out T value))
-        {
-            value = valueFactory();
-            this.Cache.Set(key, value, this.GetOptions());
-        }
-        return value;
-    }
 
-    public virtual async Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory)
+    public virtual async Task<T> GetOrSet<T>(string key, Func<T> valueFactory)
     {
         if (!this.Cache.TryGetValue(key, out T value))
         {
@@ -70,12 +63,7 @@ internal class DefaultInMemoryCache : ICache
         return Task.CompletedTask;
     }
 
-    public virtual void Set<T>(string key, T value)
-    {
-        this.Cache.Set(key, value, this.GetOptions());
-    }
-
-    public virtual Task SetAsync<T>(string key, T value)
+    public virtual Task Set<T>(string key, T value)
     {
 
 

@@ -114,7 +114,7 @@ public class PredefinedDataCollection
 
     public void Apply(IDbSchemaScope targetSchema)
     {
-        foreach (var em in Repository.Keys)
+        foreach (var em in this.Repository.Keys)
         {
             this.Apply(targetSchema, em);
         }

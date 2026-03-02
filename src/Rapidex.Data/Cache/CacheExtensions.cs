@@ -15,54 +15,34 @@ public static class CacheExtensions
     /// </summary>
     internal static List<string> TagContext { get; set; } = new List<string>();
 
+
+
+    public static string GetEntityCacheKey(IDbSchemaScope dbSchema, IDbEntityMetadata em, object id)
+    {
+        string dbName = dbSchema.ParentDbScope.Name;
+        string schemaName = dbSchema.SchemaName;
+        string key = $"{dbName}:{schemaName}:{em.Name}:{id}";
+        return key;
+    }
+
     public static string GetEntityCacheKey(IEntity entity)
     {
+        entity.NotNull();
+
         IDbSchemaScope dbSchema = entity._Schema;
-        string dbName = dbSchema.ParentDbScope.Name;
-        string schemaName = dbSchema.SchemaName;
-        var typeName = entity._TypeName;
+        string dbName = entity._DbName ?? entity._Schema?.ParentDbScope?.DatabaseName;
+        dbName.NotEmpty();
+
+        string schemaName = entity._SchemaName ?? entity._Schema?.SchemaName;
+        schemaName.NotEmpty();
+
+        string typeName = entity._TypeName ?? entity.GetMetadata()?.Name;
+        typeName.NotEmpty();
+
         var id = entity.GetId();
 
-        return $"{dbName}:{schemaName}:{typeName}:{id}";
-    }
-
-    public static async Task SetEntity(this ICache cache, IEntity entity)
-    {
-        if (entity.HasPrematureOrEmptyId())
-            return;
-
-        string key = GetEntityCacheKey(entity);
-        await cache.SetAsync(key, entity);
-    }
-
-    public static async Task SetEntities(this ICache cache, IEnumerable<IEntity> entities)
-    {
-        foreach (var entity in entities)
-        {
-            await cache.SetEntity(entity);
-        }
-    }
-
-    public static async Task<IEntity> GetEntity(this ICache cache, IDbSchemaScope dbSchema, string typeName, long id)
-    {
-        if (id.IsPrematureOrEmptyId())
-            return null;
-
-        string dbName = dbSchema.ParentDbScope.Name;
-        string schemaName = dbSchema.SchemaName;
         string key = $"{dbName}:{schemaName}:{typeName}:{id}";
-        var entity = await cache.GetOrSetAsync<IEntity>(key, () => null);
-        entity?._loadSource = LoadSource.Cache;
-        return entity;
-    }
-
-    public static async Task RemoveEntity(this ICache cache, IEntity entity)
-    {
-        if (entity.HasPrematureOrEmptyId())
-            return;
-
-        string key = GetEntityCacheKey(entity);
-        await cache.Remove(key);
+        return key;
     }
 
     public static string GetCacheKeyHash(this SqlResult result)
@@ -133,36 +113,56 @@ public static class CacheExtensions
 
     }
 
+    public static string GetQueryCacheKey(IDbEntityMetadata em, IDbSchemaScope dbSchema, string hash)
+    {
+        dbSchema.NotNull();
+        em.NotNull();
+        hash.NotEmpty();
+
+        string dbName = dbSchema.ParentDbScope.DatabaseName;
+        string schemaName = dbSchema.SchemaName;
+        string typeName = em.Name;
+        string key = $"{dbName}:{schemaName}:{typeName}:QUERY:{hash}";
+        return key;
+    }
+
     public static string GetQueryCacheKey(IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result)
     {
-        string dbName = dbSchema.ParentDbScope.Name;
-        string schemaName = dbSchema.SchemaName;
-        var typeName = em.Name;
         var queryHash = result.GetCacheKeyHash();
-        return $"{dbName}:{schemaName}:{typeName}:QUERY:{queryHash}";
+        return GetQueryCacheKey(em, dbSchema, queryHash);
     }
 
-    public static async Task StoreQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result, IEntityLoadResult loadResult)
+    public static async Task<IEntity> Get(this IEntityCache cache, IDbSchemaScope dbSchema, string typeName, long id)
     {
-        string key = GetQueryCacheKey(em, dbSchema, result);
+        if (id.IsPrematureOrEmptyId())
+            return null;
 
-        //Rapidex.Common.DefaultLogger?.LogDebug($"QueryCacheSet: {key}"); 
+        var em = dbSchema.ParentDbScope.Metadata.Get(typeName).NotNull();
+
+        var entity = await cache.Get<IEntity>(dbSchema, em, id);
+        entity?._loadSource = LoadSource.Cache;
+        return entity;
+    }
+
+    public static async Task Set(this IEntityCache cache, IEnumerable<IEntity> entities)
+    {
+        foreach (var entity in entities)
+            await cache.Set(entity);
+    }
+
+
+    public static async Task SetQuery(this IEntityCache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result, IEntityLoadResult loadResult)
+    {
+        var queryHash = result.GetCacheKeyHash();
 
         IEntity[] entities = loadResult.ToArray(); //WARN: Wrong
-        await cache.SetAsync(key, entities);
+        await cache.Set(dbSchema, em, queryHash, entities);
     }
 
-    public static async Task<IEntityLoadResult> GetQuery(this ICache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result)
+    public static async Task<IEntityLoadResult> GetQuery(this IEntityCache cache, IDbEntityMetadata em, IDbSchemaScope dbSchema, SqlResult result)
     {
-        string key = GetQueryCacheKey(em, dbSchema, result);
-        var items = await cache.GetOrSetAsync<IEntity[]>(key, () => null);
-        if (items != null)
-        {
-            foreach (var entity in items)
-            {
-                entity._loadSource = LoadSource.Cache;
-            }
-        }
+        var queryHash = result.GetCacheKeyHash();
+        var items = await cache.GetMultiple<IEntity>(dbSchema, em, queryHash).NotNull();
 
         if (items.IsNullOrEmpty())
             return null;
@@ -171,12 +171,12 @@ public static class CacheExtensions
         return lres;
     }
 
-    internal static void SetTagContext(this ICache cache, params string[] tags)
+    internal static void SetTagContext(this IEntityCache cache, params string[] tags)
     {
         TagContext.AddRange(tags);
     }
 
-    internal static void ClearTagContext(this ICache cache)
+    internal static void ClearTagContext(this IEntityCache cache)
     {
         TagContext.Clear();
     }

@@ -8,72 +8,71 @@ namespace Rapidex.Data.Cache;
 
 internal class DefaultHybridCache : ICache
 {
-    private const string TAG = "entity";
     private readonly HybridCache cache;
     private TimeSpan defaultExpiration;
     private TimeSpan defaultLocalExpiration;
 
 
-    public DefaultHybridCache([FromKeyedServices("rdata")] HybridCache hcache)
+    public DefaultHybridCache(HybridCache hcache)
     {
         this.cache = hcache;
         this.defaultExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo?.Distributed?.Expiration ?? 6000);
         this.defaultLocalExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo?.Distributed?.LocalExpiration ?? 600);
     }
 
-    public T GetOrSet<T>(string key, Func<T> valueFactory)
+    protected T InternalValueFactory<T>(Func<T> valueFactory)
     {
-        HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
-        {
-            Expiration = this.defaultExpiration,
-            LocalCacheExpiration = this.defaultLocalExpiration
-        };
+        if (valueFactory == null)
+            return default(T);
 
-        var task = this.cache.GetOrCreateAsync(
-            key,
-            ct => new ValueTask<T>(valueFactory()),
-            opt,
-            CacheExtensions.TagContext
-        );
-        return task.AsTask().GetAwaiter().GetResult();
+        T val = valueFactory.Invoke();
+        return val;
     }
 
-    public async Task<T> GetOrSetAsync<T>(string key, Func<T> valueFactory)
+    public async Task<T> GetOrSet<T>(string key, Func<T> valueFactory)
     {
-        HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
+        try
         {
-            Expiration = this.defaultExpiration,
-            LocalCacheExpiration = this.defaultLocalExpiration
-        };
+            HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
+            {
+                Expiration = this.defaultExpiration,
+                LocalCacheExpiration = this.defaultLocalExpiration
+            };
 
-        return await this.cache.GetOrCreateAsync(
-            key,
-            ct => new ValueTask<T>(valueFactory()),
-            opt,
-            CacheExtensions.TagContext
-        );
+            var result = await this.cache.GetOrCreateAsync(
+                key,
+                ct => new ValueTask<T>(this.InternalValueFactory(valueFactory)),
+                opt,
+                CacheExtensions.TagContext
+            );
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            ex.Log("Key: " + key);
+            throw;
+        }
     }
 
-    public void Set<T>(string key, T value)
+    public async Task Set<T>(string key, T value)
     {
-        HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
+        try
         {
-            Expiration = this.defaultExpiration,
-            LocalCacheExpiration = this.defaultLocalExpiration
-        };
+            HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
+            {
+                Expiration = this.defaultExpiration,
+                LocalCacheExpiration = this.defaultLocalExpiration
+            };
 
-        this.cache.SetAsync(key, value, opt, CacheExtensions.TagContext).AsTask().GetAwaiter().GetResult();
-    }
-
-    public async Task SetAsync<T>(string key, T value)
-    {
-        HybridCacheEntryOptions opt = new HybridCacheEntryOptions()
+            await this.cache.SetAsync(key, value, opt, CacheExtensions.TagContext);
+        }
+        catch (Exception ex)
         {
-            Expiration = this.defaultExpiration,
-            LocalCacheExpiration = this.defaultLocalExpiration
-        };
+            ex.Log("Key: " + key);
+            throw;
+        }
 
-        await this.cache.SetAsync(key, value, opt, CacheExtensions.TagContext);
     }
 
     public async Task Remove(string key)

@@ -44,14 +44,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexMetadataReleatedAssembl
         services.AddTransientForProd<IMetadataImplementHost, DefaultMetadataImplementHost>();
 
 
-        services.AddSingleton<CacheSignalImplementer>((sp) =>
-        {
-            CacheSignalImplementer csi = new();
-            csi.Start();
-            return csi;
-        });
-
-        services.AddTransient<CacheFactory, CacheFactory>();
+        
 
         RapidexTypeConverter.RegisterTypeConverter<ConcreteEnumTypeConverter>();
 

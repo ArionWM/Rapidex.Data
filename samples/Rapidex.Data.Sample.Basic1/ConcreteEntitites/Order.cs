@@ -21,7 +21,7 @@ public class Order : DbConcreteEntityBase
 
 internal class OrderImplementer : IConcreteEntityImplementer<Order>
 {
-    protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
+    protected static async Task<ISignalHandlingResult> BeforeSave(IEntityReleatedMessageArguments args)
     {
         Order order = args.Entity.As<Order>();
 

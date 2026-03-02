@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
+using Rapidex.Data.Cache;
 using Rapidex.Data.Scopes;
 using StackExchange.Redis;
 
@@ -10,8 +11,6 @@ namespace Rapidex.Data;
 
 public class DbConfigurationManager
 {
-    [Obsolete("", true)]
-    public string DefaultDatabaseNamePrefix { get; set; } = "prox";
 
     /// <summary>
     /// For test purposes, different master database configuration for different provider
@@ -68,31 +67,8 @@ public class DbConfigurationManager
             this.CacheConfigurationInfo = cacheConfigSection.Get<CacheConfigurationInfo>();
         }
 
-        if (this.CacheConfigurationInfo?.Distributed?.ConnectionString.IsNOTNullOrEmpty() ?? false)
-        {
-            services.AddMemoryCache(options =>
-            {
-                if ((this.CacheConfigurationInfo.InMemory?.ItemLimit ?? 0) > 0)
-                {
-                    options.SizeLimit = this.CacheConfigurationInfo.InMemory!.ItemLimit;
-                }
-            });
-
-            services.AddHybridCache(options =>
-            {
-                options.DefaultEntryOptions = new HybridCacheEntryOptions()
-                {
-                    Expiration = this.CacheConfigurationInfo?.Distributed?.Expiration == null ? null: TimeSpan.FromSeconds(this.CacheConfigurationInfo!.Distributed!.Expiration.Value),
-                    LocalCacheExpiration = this.CacheConfigurationInfo?.Distributed?.LocalExpiration == null ? null : TimeSpan.FromSeconds(this.CacheConfigurationInfo!.Distributed!.LocalExpiration.Value)
-                };
-            });
-
-            services.AddStackExchangeRedisCache(options =>
-            {
-                options.ConfigurationOptions = ConfigurationOptions.Parse(this.CacheConfigurationInfo!.Distributed!.ConnectionString);
-                options.ConfigurationOptions.ReconnectRetryPolicy = new ExponentialRetry(5000);
-            });
-        }
+        CacheConfigurationManager ccm = new CacheConfigurationManager();
+        ccm.ApplyCacheConfiguration(this.CacheConfigurationInfo, services);
     }
 
     public void Setup(IServiceCollection services)
@@ -142,7 +118,6 @@ public class DbConfigurationManager
 
         //    this.LoadDbScopeDefinition(dbName);
         //}
-
     }
 
 }

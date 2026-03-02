@@ -38,7 +38,7 @@ internal class OrderLineImplementer : IConcreteEntityImplementer<OrderLine>
 
     }
 
-    protected static ISignalHandlingResult ExecLogic(IEntityReleatedMessageArguments args)
+    protected static async Task<ISignalHandlingResult> ExecLogic(IEntityReleatedMessageArguments args)
     {
         OrderLine entity = (OrderLine)args.Entity.EnsureForActualEntity();
 
@@ -46,14 +46,14 @@ internal class OrderLineImplementer : IConcreteEntityImplementer<OrderLine>
         return args.CreateHandlingResult(entity);
     }
 
-    protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
+    protected static async Task<ISignalHandlingResult> BeforeSave(IEntityReleatedMessageArguments args)
     {
         OrderLine orderLine = (OrderLine)args.Entity.EnsureForActualEntity();
         CalculateOrderLineValues(orderLine);
         return args.CreateHandlingResult();
     }
 
-    protected static ISignalHandlingResult Validate(IEntityReleatedMessageArguments args)
+    protected static async Task<ISignalHandlingResult> Validate(IEntityReleatedMessageArguments args)
     {
         OrderLine orderLine = (OrderLine)args.Entity.EnsureForActualEntity();
         IValidationResult validationResult = new ValidationResult();

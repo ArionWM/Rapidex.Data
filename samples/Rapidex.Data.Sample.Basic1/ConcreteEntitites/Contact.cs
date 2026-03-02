@@ -41,7 +41,7 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
         }
     }
 
-    protected static ISignalHandlingResult Validate(IEntityReleatedMessageArguments args)
+    protected static async Task<ISignalHandlingResult> Validate(IEntityReleatedMessageArguments args)
     {
         Contact contact = (Contact)args.Entity.EnsureForActualEntity();
         IValidationResult validationResult = new ValidationResult();
@@ -54,7 +54,7 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
         return args.CreateHandlingValidationResult(contact, validationResult);
     }
 
-    protected static ISignalHandlingResult ExecLogic(IEntityReleatedMessageArguments args)
+    protected static async Task<ISignalHandlingResult> ExecLogic(IEntityReleatedMessageArguments args)
     {
         Contact contact = (Contact)args.Entity.EnsureForActualEntity();
 
@@ -62,7 +62,7 @@ internal class ContactImplementer : IConcreteEntityImplementer<Contact>
         return args.CreateHandlingResult(contact);
     }
 
-    protected static ISignalHandlingResult BeforeSave(IEntityReleatedMessageArguments args)
+    protected static async Task<ISignalHandlingResult> BeforeSave(IEntityReleatedMessageArguments args)
     {
         Contact contact = (Contact)args.Entity.EnsureForActualEntity();
         CalculateContactValues(contact);
