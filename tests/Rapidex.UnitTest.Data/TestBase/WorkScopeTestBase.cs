@@ -20,7 +20,7 @@ public abstract class WorkScopeTestBase<T> : DbDependedTestsBase<T> where T : ID
         db.ReAddReCreate<ConcreteEntity01>();
         db.ReAddReCreate<ConcreteEntity02>();
 
-        long count = db.GetQuery<ConcreteEntity01>().Count();
+        long count = db.GetQuery<ConcreteEntity01>().Count().Result;
         Assert.Equal(0, count);
 
         using var work = db.BeginWork();
@@ -30,7 +30,7 @@ public abstract class WorkScopeTestBase<T> : DbDependedTestsBase<T> where T : ID
         ent1.Save();
 
         work.CommitChanges();
-        count = db.GetQuery<ConcreteEntity01>().Count();
+        count = db.GetQuery<ConcreteEntity01>().Count().Result;
         Assert.Equal(1, count);
 
         var tran1 = db.BeginWork();
@@ -41,7 +41,7 @@ public abstract class WorkScopeTestBase<T> : DbDependedTestsBase<T> where T : ID
 
         tran1.Rollback();
 
-        count = db.GetQuery<ConcreteEntity01>().Count();
+        count = db.GetQuery<ConcreteEntity01>().Count().Result;
         Assert.Equal(1, count);
 
         using (var tran2 = db.BeginWork())
@@ -51,7 +51,7 @@ public abstract class WorkScopeTestBase<T> : DbDependedTestsBase<T> where T : ID
             ent3.Save();
         }
 
-        count = db.GetQuery<ConcreteEntity01>().Count();
+        count = db.GetQuery<ConcreteEntity01>().Count().Result;
         Assert.Equal(2, count);
     }
 

@@ -606,13 +606,13 @@ public interface IDbDataReadScope
 
     IQuery<T> GetQuery<T>() where T : IConcreteEntity;
 
-    IEntity Find(IDbEntityMetadata em, long id);
+    Task<IEntity> Find(IDbEntityMetadata em, long id);
 
-    IEntity[] Find(IDbEntityMetadata em, params long[] ids);
+    Task<IEntity[]> Find(IDbEntityMetadata em, params long[] ids);
 
-    IEntityLoadResult Load(IQueryLoader loader);
+    Task<IEntityLoadResult> Load(IQueryLoader loader);
 
-    ILoadResult<DataRow> LoadRaw(IQueryLoader loader);
+    Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader);
 }
 
 public interface IDbDataModificationScope : IDbDataReadScope, IDisposable
@@ -727,7 +727,7 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
 
 
     IDbStructureProvider Structure { get; }
-    IBlobRepository Blobs { get; }
+    //IBlobRepository Blobs { get; }
     IDbDataModificationStaticHost Data { get; }
 
     EntityMapper Mapper { get; }
@@ -760,22 +760,22 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
     }
 
 
-    IEntityLoadResult IDbDataReadScope.Load(IQueryLoader queryLoader)
+    Task<IEntityLoadResult> IDbDataReadScope.Load(IQueryLoader queryLoader)
     {
         return this.Data.Load(queryLoader);
     }
 
-    ILoadResult<DataRow> IDbDataReadScope.LoadRaw(IQueryLoader queryLoader)
+    Task<ILoadResult<DataRow>> IDbDataReadScope.LoadRaw(IQueryLoader queryLoader)
     {
         return this.Data.LoadRaw(queryLoader);
     }
 
-    IEntity IDbDataReadScope.Find(IDbEntityMetadata em, long id)
+    Task<IEntity> IDbDataReadScope.Find(IDbEntityMetadata em, long id)
     {
         return this.Data.Find(em, id);
     }
 
-    IEntity[] IDbDataReadScope.Find(IDbEntityMetadata em, params long[] ids)
+    Task<IEntity[]> IDbDataReadScope.Find(IDbEntityMetadata em, params long[] ids)
     {
         return this.Data.Find(em, ids);
     }

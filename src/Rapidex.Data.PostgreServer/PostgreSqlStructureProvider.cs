@@ -290,7 +290,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
             this.ApplyStructureInternal(applyRequiredMetadatas, true);
 
             //Apply predefined data ...
-            scope.ParentDbScope.Metadata.Data.Apply(scope);
+            scope.ParentDbScope.Metadata.Data.Apply(scope).GetAwaiter().GetResult();
 
             foreach (var em in allEms)
             {

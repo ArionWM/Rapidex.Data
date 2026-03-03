@@ -139,7 +139,7 @@ public class RelationN2N : RelationBase, ILazy
         if (!parentEntity.IsAttached())
             throw new InvalidOperationException("Entity must be attached for load relations");
 
-        IEntityLoadResult loadResult = JunctionHelper.GetEntities(parentEntity._Schema, fm, parentEntity, additionalCriteria);
+        IEntityLoadResult loadResult = JunctionHelper.GetEntities(parentEntity._Schema, fm, parentEntity, additionalCriteria).GetAwaiter().GetResult();
         List<IEntity> entities = loadResult.ToList();
         entities.AddRange(this.addedEntities);
         foreach (var entity in this.removedEntities)
@@ -206,7 +206,7 @@ public class RelationN2N : RelationBase, ILazy
             case DataUpdateType.Update:
                 foreach (var detailEntity in this.addedEntities)
                 {
-                    IEntity junctionEntity = JunctionHelper.AddRelation(parentDms.ParentSchema, fm, parent, detailEntity, false);
+                    IEntity junctionEntity = JunctionHelper.AddRelation(parentDms.ParentSchema, fm, parent, detailEntity, false).GetAwaiter().GetResult();
                     parentDms.Save(junctionEntity);
                     parentDms.Save(detailEntity);
                 }

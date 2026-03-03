@@ -126,7 +126,7 @@ public class RelationOne2N : RelationBase, ILazy
         {
             crit.Eq(detailFm.Name, parentEntity.GetId());
             additionalCriteria?.Invoke(crit);
-        });
+        }).GetAwaiter().GetResult();
 
         List<IEntity> entities = loadResult.ToList();
         entities.AddRange(this.addedEntities);

@@ -175,7 +175,7 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
         //TODO: local cache
 
         IDbSchemaScope scope = parent._Schema;
-        IEntity entity = scope.Find(this.ReferencedEntity, this.TargetId);
+        IEntity entity = scope.Find(this.ReferencedEntity, this.TargetId).GetAwaiter().GetResult();
         return entity;
     }
 

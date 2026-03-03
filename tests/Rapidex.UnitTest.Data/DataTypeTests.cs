@@ -47,7 +47,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         db.Metadata.ReAdd<ConcreteEntity01>();
 
         using var work2 = db.BeginWork();
-        ConcreteEntity01 ent01 = db.GetQuery<ConcreteEntity01>().First();
+        ConcreteEntity01 ent01 = db.GetQuery<ConcreteEntity01>().First().Result;
 
         long blobId01 = ent01.Picture.TargetId;
 
@@ -97,13 +97,13 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         long entityId01 = entity.Id;
 
         long blobRecId01 = entity.Picture.TargetId;
-        BlobRecord br = db.Find<BlobRecord>(blobRecId01);
+        BlobRecord br = db.Find<BlobRecord>(blobRecId01).Result;
         Assert.NotNull(br);
 
         int hash01_check = HashHelper.GetStableHashCode(br.Data);
         Assert.Equal(hash01, hash01_check);
 
-        entity = db.Find<ConcreteEntity01>(entityId01);
+        entity = db.Find<ConcreteEntity01>(entityId01).Result;
         entity.Picture.SetEmpty();
         entity.Save();
 
@@ -111,7 +111,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         Assert.Equal(DatabaseConstants.DEFAULT_EMPTY_ID, entity.Picture.TargetId);
 
-        br = db.Find<BlobRecord>(blobRecId01);
+        br = db.Find<BlobRecord>(blobRecId01).Result;
         Assert.Null(br);
 
 
@@ -147,10 +147,10 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         db = Database.Dbs.Db();
         db.Metadata.ReAdd<ConcreteEntity01>();
 
-        ConcreteEntity01 ent01_check = db.Find<ConcreteEntity01>(id01);
+        ConcreteEntity01 ent01_check = db.Find<ConcreteEntity01>(id01).Result;
         Assert.Equal(ContactType.Corporate, (ContactType)ent01_check.ContactType);
 
-        ConcreteEntity01 ent02_check = db.Find<ConcreteEntity01>(id02);
+        ConcreteEntity01 ent02_check = db.Find<ConcreteEntity01>(id02).Result;
         Assert.Equal(ContactType.Corporate, (ContactType)ent02_check.ContactType);
 
     }
@@ -167,11 +167,11 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         var emCT = db.Metadata.AddEnum<ContactType>();
         db.Structure.DropEntity("ContactType");
         db.Structure.ApplyEntityStructure(emCT);
-        db.Metadata.Data.Apply(db);
+        db.Metadata.Data.Apply(db).GetAwaiter().GetResult();
 
         using var work = db.BeginWork();
 
-        var lresult = db.GetQuery("ContactType").Asc(DatabaseConstants.FIELD_ID).Load();
+        var lresult = db.GetQuery("ContactType").Asc(DatabaseConstants.FIELD_ID).Load().Result;
         Assert.Equal(5, lresult.ItemCount);
 
         IEntity ct01 = lresult.First();
@@ -206,8 +206,8 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         using var work = db.BeginWork();
 
-        Assert.Equal(0, db.GetQuery<ConcreteEntityForTagTest>().Count());
-        Assert.Equal(0, db.GetQuery<TagRecord>().Count());
+        Assert.Equal(0, db.GetQuery<ConcreteEntityForTagTest>().Count().Result);
+        Assert.Equal(0, db.GetQuery<TagRecord>().Count().Result);
 
         ConcreteEntityForTagTest ent01 = work.New<ConcreteEntityForTagTest>();
         ent01.Name = "Entity 01";
@@ -229,7 +229,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
         Thread.Sleep(1000);
 
 
-        var tagRecords = db.GetQuery<TagRecord>().Load();
+        var tagRecords = db.GetQuery<TagRecord>().Load().Result;
         Assert.Equal(2, tagRecords.ItemCount);
 
         TagRecord rec01 = tagRecords.First();
@@ -255,7 +255,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         long id = ent01.Id;
 
-        ConcreteEntity01 ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id);
+        ConcreteEntity01 ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id).Result;
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
         using var work2 = db.BeginWork();
@@ -268,7 +268,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         id = ent01.Id;
 
-        ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id);
+        ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id).Result;
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
         dtoWithOffset = dtoRef.ToOffset(-1 * TimeSpan.FromHours(3));
@@ -281,7 +281,7 @@ public class DataTypeTests : DbDependedTestsBase<DbSqlServerProvider>
 
         id = ent01.Id;
 
-        ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id);
+        ent01Loaded = db.GetQuery<ConcreteEntity01>().Find(id).Result;
         Assert.Equal(dtoRef, ent01Loaded.BirthDate);
 
         //ConcreteEntity01 ent02 = scope.New<ConcreteEntity01>();

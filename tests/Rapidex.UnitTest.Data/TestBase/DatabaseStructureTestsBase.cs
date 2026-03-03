@@ -44,15 +44,15 @@ namespace Rapidex.UnitTest.Data.TestBase
             var em = db.Metadata.Get("myJsonEntity07");
             Assert.NotNull(em);
 
-            var predefinedValues =  db.Load("myJsonEntity07");
+            var predefinedValues =  db.Load("myJsonEntity07").Result;
             Assert.Equal(2, predefinedValues.ItemCount);
 
-            IEntity ent01 =  db.Find("myJsonEntity07", 1);
+            IEntity ent01 =  db.Find("myJsonEntity07", 1).Result;
             Assert.NotNull(ent01);
             Assert.Equal("Meeting 1", ent01["Subject"]);
 
 
-            IEntity ent03 =  db.Find("myJsonEntity07", 3);
+            IEntity ent03 =  db.Find("myJsonEntity07", 3).Result;
             Assert.NotNull(ent03);
             Assert.Equal("Meeting 2", ent03["Subject"]);
             Assert.Equal(333, ent03["Price"].As<Currency>().Value);

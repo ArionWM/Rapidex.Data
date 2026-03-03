@@ -17,18 +17,19 @@ namespace Rapidex.Data.Query
         }
 
 
-        public IEntity First()
+        public async Task<IEntity> First()
         {
             this.Query.Skip(0).Take(1);
-            return this.Load().FirstOrDefault();
+            var res = await this.Load();
+            return res.FirstOrDefault();
         }
 
-        public ILoadResult<DbEntityId> GetIds()
+        public async Task<ILoadResult<DbEntityId>> GetIds()
         {
             //this.Query.Select(this.GetFieldName(this.EntityMetadata.PrimaryKey.Name), this.GetFieldName(DatabaseConstants.FIELD_VERSION));
             //string idFieldName = this.GetFieldName(this.EntityMetadata.PrimaryKey.Name);
             //string versionFieldName = this.GetFieldName(DatabaseConstants.FIELD_VERSION);
-            var rawResult = this.LoadPartial(this.EntityMetadata.PrimaryKey.Name, DatabaseConstants.FIELD_VERSION);
+            var rawResult = await this.LoadPartial(this.EntityMetadata.PrimaryKey.Name, DatabaseConstants.FIELD_VERSION);
 
             List<DbEntityId> result = new List<DbEntityId>();
             foreach (DataRow row in rawResult)
@@ -39,12 +40,12 @@ namespace Rapidex.Data.Query
             return new LoadResult<DbEntityId>(result);
         }
 
-        public IEntityLoadResult Load()
+        public async Task<IEntityLoadResult> Load()
         {
-            return this.Schema.Data.Load(this);
+            return await this.Schema.Data.Load(this);
         }
 
-        public ILoadResult<DataRow> LoadPartial(params string[] fields)
+        public async Task<ILoadResult<DataRow>> LoadPartial(params string[] fields)
         {
             //Clone Query?
             this.Query.Select(this.GetFieldName(DatabaseConstants.FIELD_ID));
@@ -55,7 +56,7 @@ namespace Rapidex.Data.Query
 
             this.Query.Select(this.GetFieldName(DatabaseConstants.FIELD_VERSION));
 
-            return this.Schema.Data.LoadRaw(this);
+            return await this.Schema.Data.LoadRaw(this);
         }
 
         public virtual object Clone()

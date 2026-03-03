@@ -45,7 +45,7 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         db.Metadata.AddIfNotExist<ConcreteEntity01>();
 
-        var result = db.Load<ConcreteEntity01>();
+        var result = db.Load<ConcreteEntity01>().Result;
         Assert.Equal(10, result.ItemCount);
 
         foreach (var item in result)
@@ -165,63 +165,63 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         this.Load_03_GenerateEntities(scope, em);
 
         //1. IsActive == true olanları getir
-        long count = scope.GetQuery(em).Eq("IsActive", true).Count();
+        long count = scope.GetQuery(em).Eq("IsActive", true).Count().Result;
         Assert.Equal(50, count);
 
         //2. IsActive == false olanları getir
-        count = scope.GetQuery(em).Eq("IsActive", false).Count();
+        count = scope.GetQuery(em).Eq("IsActive", false).Count().Result;
         Assert.Equal(50, count);
 
         //3. Amount == 5 olanları getir
-        count = scope.GetQuery(em).Eq("Amount", 5).Count();
+        count = scope.GetQuery(em).Eq("Amount", 5).Count().Result;
         Assert.Equal(10, count);
 
         //4. Amount > 5 olanları getir
-        count = scope.GetQuery(em).Gt("Amount", 5).Count();
+        count = scope.GetQuery(em).Gt("Amount", 5).Count().Result;
         Assert.Equal(40, count);
 
         //5. Amount < 5 olanları getir
-        count = scope.GetQuery(em).Lt("Amount", 5).Count();
+        count = scope.GetQuery(em).Lt("Amount", 5).Count().Result;
         Assert.Equal(50, count);
 
         //6. Amount >= 5 olanları getir
-        count = scope.GetQuery(em).GtEq("Amount", 5).Count();
+        count = scope.GetQuery(em).GtEq("Amount", 5).Count().Result;
         Assert.Equal(50, count);
 
         //7. Amount <= 5 olanları getir
-        count = scope.GetQuery(em).LtEq("Amount", 5).Count();
+        count = scope.GetQuery(em).LtEq("Amount", 5).Count().Result;
         Assert.Equal(60, count);
 
         //8. Amount between 3 and 7 olanları getir
-        count = scope.GetQuery(em).Between("Amount", 3, 7).Count();
+        count = scope.GetQuery(em).Between("Amount", 3, 7).Count().Result;
         Assert.Equal(50, count);
 
         //9. Name like "Entity Name 005" olanları getir
-        count = scope.GetQuery(em).Like("Name", "Entity Name 005").Count();
+        count = scope.GetQuery(em).Like("Name", "Entity Name 005").Count().Result;
         Assert.Equal(1, count);
 
         //10. Name like "Entity Name *" olanları getir
-        count = scope.GetQuery(em).Like("Name", "Entity Name 00*").Count();
+        count = scope.GetQuery(em).Like("Name", "Entity Name 00*").Count().Result;
         Assert.Equal(9, count);
 
         //11. Phone like "5336722205" olanları getir
-        count = scope.GetQuery(em).Like("Phone", "5336722205").Count();
+        count = scope.GetQuery(em).Like("Phone", "5336722205").Count().Result;
         Assert.Equal(1, count);
 
         //12. Value > 50000 olanları getir
-        count = scope.GetQuery(em).Gt("Value", 50000).Count();
+        count = scope.GetQuery(em).Gt("Value", 50000).Count().Result;
         Assert.Equal(95, count);
 
         //13. BirthDate > 20.01.2000 olanları getir
-        count = scope.GetQuery(em).Gt("BirthDate", new DateTimeOffset(2000, 1, 20, 0, 0, 0, TimeSpan.Zero)).Count();
+        count = scope.GetQuery(em).Gt("BirthDate", new DateTimeOffset(2000, 1, 20, 0, 0, 0, TimeSpan.Zero)).Count().Result;
         Assert.Equal(80, count);
 
         //14. BirthDate < 20.01.2000 olanları getir
-        count = scope.GetQuery(em).Lt("BirthDate", new DateTimeOffset(2000, 1, 20, 0, 0, 0, TimeSpan.Zero)).Count();
+        count = scope.GetQuery(em).Lt("BirthDate", new DateTimeOffset(2000, 1, 20, 0, 0, 0, TimeSpan.Zero)).Count().Result;
         Assert.Equal(19, count);
 
         //15. Reference ilişkisindeki kayıtın adı "Entity Name 001" olanları getir
-        count = scope.GetQuery(em).Nested("Reference01", q => q.Eq(nameof(ConcreteEntity01.Name), "Entity Name 001")).Count();
+        count = scope.GetQuery(em).Nested("Reference01", q => q.Eq(nameof(ConcreteEntity01.Name), "Entity Name 001")).Count().Result;
         Assert.Equal(10, count);
 
 
@@ -281,7 +281,8 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         var loadResult01 = db.GetQuery<ConcreteEntity02>()
               .Nested(nameof(ConcreteEntity02.MyReference), q => q.Eq(nameof(ConcreteEntity01.Name), "Ent 01"))
-              .Load();
+              .Load()
+              .Result;
 
         Assert.Single(loadResult01);
 
@@ -354,7 +355,8 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         var loadResult01 = schema02.GetQuery<ConcreteOnlyBaseReferencedEntity02>()
               .Nested(nameof(ConcreteOnlyBaseReferencedEntity02.Reference), q => q.Eq(nameof(ConcreteOnlyBaseEntity01.Name), "Nest Test 01 CEnt 01"))
-              .Load();
+              .Load()
+              .Result;
 
         Assert.Single(loadResult01);
 
@@ -396,13 +398,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         long count01 = db.GetQuery<ConcreteEntity01>()
              .Like("Phone", "533672220*")
-             .Count();
+             .Count().Result;
 
         Assert.Equal(2, count01);
 
         long count02 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
-            .Count();
+            .Count().Result;
 
         Assert.Equal(1, count02);
 
@@ -420,19 +422,19 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         long count03 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
-            .Count();
+            .Count().Result;
 
         Assert.Equal(1, count03);
 
         long count04 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 01")
-            .Count();
+            .Count().Result;
 
         Assert.Equal(0, count04);
 
         long count05 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Updated Address")
-            .Count();
+            .Count().Result;
 
         Assert.Equal(2, count05);
 
@@ -448,13 +450,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         long count06 = db.GetQuery<ConcreteEntity01>()
             .Eq("Address", "Address 03")
-            .Count();
+            .Count().Result;
 
         Assert.Equal(0, count06);
 
         long count07 = db.GetQuery<ConcreteEntity01>()
         .Eq("Address", "Updated Address")
-        .Count();
+        .Count().Result;
 
         Assert.Equal(2, count07);
 
@@ -518,13 +520,13 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
 
         long count01 = db.GetQuery<ConcreteEntityForN2NTest02>()
               .Related(master01, nameof(ConcreteEntityForN2NTest01.Relation01))
-              .Count();
+              .Count().Result;
 
         Assert.Equal(1, count01);
 
         long count02 = db.GetQuery<ConcreteEntityForN2NTest02>()
               .Related(master02, nameof(ConcreteEntityForN2NTest01.Relation01))
-              .Count();
+              .Count().Result;
 
         Assert.Equal(2, count02);
 
@@ -558,10 +560,10 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         long id1 = entity1.Id;
         long id2 = entity2.Id;
 
-        ConcreteEntity01 loadedEntity1 = db.Find<ConcreteEntity01>(id1);
+        ConcreteEntity01 loadedEntity1 = db.Find<ConcreteEntity01>(id1).Result;
         Assert.Equal(new DateTimeOffset(2024, 6, 15, 10, 30, 0, TimeSpan.Zero), loadedEntity1.BirthDate);
 
-        ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id2);
+        ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id2).Result;
         Assert.Equal(new DateTimeOffset(2024, 2, 17, 09, 21, 0, TimeSpan.FromHours(2)), loadedEntity2.BirthDate);
         //Load with native
 

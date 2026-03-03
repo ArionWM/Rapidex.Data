@@ -166,7 +166,7 @@ namespace Rapidex.UnitTest.Data
 
             //Clear entity cache
 
-            ConcreteEntity02 entity02_1 = db.Find<ConcreteEntity02>(id2);
+            ConcreteEntity02 entity02_1 = db.Find<ConcreteEntity02>(id2).Result;
             Assert.Equal(id1, (long)entity02_1.MyReference.TargetId);
         }
 
@@ -197,10 +197,10 @@ namespace Rapidex.UnitTest.Data
 
             //Clear entity cache
 
-            ConcreteEntity01 entity01_1 = db.Find<ConcreteEntity01>(id1);
+            ConcreteEntity01 entity01_1 = db.Find<ConcreteEntity01>(id1).Result;
             entity01_1.CheckIDataTypeAssignments();
 
-            ConcreteEntity01 entity01_2 = db.Find<ConcreteEntity01>(id1);
+            ConcreteEntity01 entity01_2 = db.Find<ConcreteEntity01>(id1).Result;
             entity01_2.CheckIDataTypeAssignments();
 
             //entity01_1 ve entity01_2 farklı referanslara sahip olmalı (aynı bilgiyi tutan farklı nesneler)
@@ -258,10 +258,10 @@ namespace Rapidex.UnitTest.Data
             long id1 = (long)jsonEntity01.GetId();
             //Clear entity cache
 
-            IEntity entity01_1 = db.Find("myJsonEntity05", id1);
+            IEntity entity01_1 = db.Find("myJsonEntity05", id1).Result;
             entity01_1.CheckIDataTypeAssignments();
 
-            IEntity entity01_2 = db.Find("myJsonEntity05", id1);
+            IEntity entity01_2 = db.Find("myJsonEntity05", id1).Result;
             entity01_2.CheckIDataTypeAssignments();
 
             //entity01_1 ve entity01_2 farklı referanslara sahip olmalı (aynı bilgiyi tutan farklı nesneler)
@@ -376,7 +376,7 @@ namespace Rapidex.UnitTest.Data
             db.Metadata.AddIfNotExist<ConcreteOnlyBaseEntity01>().MarkOnlyBaseSchema();
             db.Metadata.AddIfNotExist<ConcreteOnlyBaseReferencedEntity02>();
 
-            ConcreteOnlyBaseReferencedEntity02 refEnt01_02 = schema02.GetQuery<ConcreteOnlyBaseReferencedEntity02>().Find(refId01);
+            ConcreteOnlyBaseReferencedEntity02 refEnt01_02 = schema02.GetQuery<ConcreteOnlyBaseReferencedEntity02>().Find(refId01).Result;
             Assert.NotNull(refEnt01_02);
             Assert.Equal(baseId01, refEnt01_02.Reference.TargetId);
             ConcreteOnlyBaseEntity01 referencedEntity = refEnt01_02.Reference.GetContent();

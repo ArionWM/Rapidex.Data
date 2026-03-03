@@ -14,7 +14,7 @@ namespace Rapidex.Data;
 
 internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
 {
-  
+
     public bool IsYours(string filterOrSqlClause)
     {
         return true;
@@ -63,7 +63,7 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
                 string rVal2 = fce.Right.Trim();
                 if (rVal2.ToLower() == "null")
                     rVal2 = null;
-                query.Not(q=> q.Eq(fieldName, this.CheckValue(rVal2, fm))); //TODO: q.Eq with `not`  flag
+                query.Not(q => q.Eq(fieldName, this.CheckValue(rVal2, fm))); //TODO: q.Eq with `not`  flag
                 break;
             case FilterTokens.NotIn:
                 query.Not(q => q.In(fieldName, fce.RightArray)); //TODO: q.In with `not`  flag
@@ -148,7 +148,7 @@ internal class FilterTextParser : FilterParserBase, IDbCriteriaParser
         var fm = em.Fields.Get(fieldName, false);
         fm.NotNull($"Field '{fieldName}' not found in '{entityName}' metadata");
 
-        IEntity parentEntity = query.Schema.Find(em, entityId.As<long>());
+        IEntity parentEntity = query.Schema.Find(em, entityId.As<long>()).GetAwaiter().GetResult();
         parentEntity.NotNull($"Entity '{entityName}' with id '{entityId}' not found");
 
         query.Related(parentEntity, fieldName);

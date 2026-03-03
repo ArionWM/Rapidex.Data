@@ -51,7 +51,7 @@ namespace Rapidex.Data.Scopes
 
         public EntityMapper Mapper => baseScope.Mapper;
 
-        public IBlobRepository Blobs => baseScope.Blobs;
+        //public IBlobRepository Blobs => baseScope.Blobs;
 
         public IDbSchemaScope Base => baseScope;
 
@@ -102,7 +102,7 @@ namespace Rapidex.Data.Scopes
             siEm.NotNull("SchemaInfo metadata not found");
             this.baseScope.Structure.ApplyEntityStructure(siEm, false);
 
-            var schemas = this.baseScope.Data.Load<SchemaInfo>();
+            var schemas = this.baseScope.Data.Load<SchemaInfo>().GetAwaiter().GetResult();
             foreach (var schema in schemas)
             {
                 this.AddSchema(schema.Name);

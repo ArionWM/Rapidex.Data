@@ -3,6 +3,7 @@ using Rapidex.Data.Sample.App1.ConcreteEntities;
 using Rapidex.Data.Sample.App1.Models;
 
 namespace Rapidex.Data.Sample.App1.Services;
+
 public class SampleServiceA
 {
     private readonly IEnumerable<IDbCriteriaParser> parsers;
@@ -33,7 +34,7 @@ public class SampleServiceA
     }
 
 
-    internal IEntityLoadResult<Contact> ListContacts(IDbSchemaScope db, string? filter)
+    internal async Task<IEntityLoadResult<Contact>> ListContacts(IDbSchemaScope db, string? filter)
     {
         var query = db.GetQuery<Contact>()
             .OrderBy(OrderDirection.Asc, nameof(Contact.FullName))
@@ -46,18 +47,18 @@ public class SampleServiceA
                 .Parse(query, filter);
         }
 
-        return query.Load();
+        return await query.Load();
     }
 
-    internal Contact GetContact(IDbSchemaScope db, long id)
+    internal async Task<Contact> GetContact(IDbSchemaScope db, long id)
     {
         var contact = db.Find<Contact>(id);
-        return contact;
+        return await contact;
     }
 
 
 
-    public IEntityLoadResult<Order> ListOrders(IDbSchemaScope schema, string? filter)
+    public async Task<IEntityLoadResult<Order>> ListOrders(IDbSchemaScope schema, string? filter)
     {
         var query = schema.GetQuery<Order>()
             .OrderBy(OrderDirection.Desc, nameof(Order.OrderDate))
@@ -70,19 +71,19 @@ public class SampleServiceA
                 .Parse(query, filter);
         }
 
-        return query.Load();
+        return await query.Load();
     }
 
 
 
 
-    internal Order GetOrder(IDbSchemaScope db, long id)
+    internal async Task<Order> GetOrder(IDbSchemaScope db, long id)
     {
-        var order = db.Find<Order>(id);
+        var order = await db.Find<Order>(id);
         return order;
     }
 
-    internal IEntityLoadResult<Item> ListItems(IDbSchemaScope db, string? filter)
+    internal async Task<IEntityLoadResult<Item>> ListItems(IDbSchemaScope db, string? filter)
     {
         var query = db.GetQuery<Item>()
             .OrderBy(OrderDirection.Asc, nameof(Item.Name));
@@ -94,16 +95,16 @@ public class SampleServiceA
                 .Parse(query, filter);
         }
 
-        return query.Load();
+        return await query.Load();
     }
 
-    internal Item GetItem(IDbSchemaScope db, long id)
+    internal async Task<Item> GetItem(IDbSchemaScope db, long id)
     {
-        var item = db.Find<Item>(id);
+        var item = await db.Find<Item>(id);
         return item;
     }
 
-    internal IEntityLoadResult<IEntity> GetAny(IDbSchemaScope db, string entityName, string? filter)
+    internal async Task<IEntityLoadResult<IEntity>> GetAny(IDbSchemaScope db, string entityName, string? filter)
     {
         var em = db.ParentDbScope.Metadata.Get(entityName);
         em.NotNull($"Entity not found: {entityName}");
@@ -117,7 +118,7 @@ public class SampleServiceA
                 .Parse(query, filter);
         }
 
-        return query.Load();
+        return await query.Load();
     }
 
     internal void XXX()

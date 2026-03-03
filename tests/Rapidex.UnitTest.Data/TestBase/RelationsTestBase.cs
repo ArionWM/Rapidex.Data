@@ -156,11 +156,11 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             //Clear cache
 
-            var entity1 = db.Find<ConcreteEntityForN2NTest01>(entity1Id);
+            var entity1 = db.Find<ConcreteEntityForN2NTest01>(entity1Id).Result;
             var relations01 = entity1.Relation01.GetContent();
             Assert.Equal(2, relations01.Length);
 
-            var entity2 = db.Find<ConcreteEntityForN2NTest01>(entity2Id);
+            var entity2 = db.Find<ConcreteEntityForN2NTest01>(entity2Id).Result;
             var relations02 = entity2.Relation01.GetContent();
             Assert.Empty(relations02);
 

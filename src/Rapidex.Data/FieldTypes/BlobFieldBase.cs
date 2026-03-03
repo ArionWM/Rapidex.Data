@@ -62,36 +62,6 @@ public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILa
         throw new NotImplementedException();
     }
 
-    //public virtual BlobRecord SetContent(Stream stream, string name, string contentType)
-    //{
-    //    IDataType _this = this;
-    //    IEntity _parent = this.GetParent().NotNull("Parent not set");
-    //    BlobRecord blobRec = null;
-
-
-
-    //    //Doğrudan kaydediliyor !!!
-    //    long blobId = this.TargetId;
-    //    if (stream == null)
-    //    {
-    //        if (blobId > 0)
-    //        {
-    //            //Sil ..
-    //            _parent._Schema.Blobs.Delete(blobId);
-    //        }
-    //        this.TargetId = DatabaseConstants.DEFAULT_EMPTY_ID;
-    //    }
-    //    else
-    //    {
-    //        //güncelle ya da ekle
-    //        IResult<BlobRecord> bres = _parent._Schema.Blobs.Set(stream, name, contentType, this.TargetId);
-    //        blobRec = bres.Content;
-    //        this.TargetId = blobRec.Id;
-    //    }
-
-    //    return blobRec;
-    //}
-
     public new virtual ByteArrayContent GetContent()
     {
         if (this.UnAttachedData.IsNOTNullOrEmpty())
@@ -106,7 +76,7 @@ public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILa
         if (!_parent.IsAttached())
             throw new InvalidOperationException("Cannot get content of a blob field when the parent entity is not attached to a schema.");
 
-        this.AttachedData = this.AttachedData ?? _parent._Schema.Find<BlobRecord>(this.TargetId);
+        this.AttachedData = this.AttachedData ?? _parent._Schema.Find<BlobRecord>(this.TargetId).GetAwaiter().GetResult();
         if (this.AttachedData == null)
             throw new InvalidOperationException($"Blob record with id {this.TargetId} not found in the schema {_parent._Schema.SchemaName}");
 
@@ -161,7 +131,7 @@ public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILa
                         //Delete blob if exists and set TargetId to empty
                         if (this.TargetId.IsPersistedRecordId())
                         {
-                            BlobRecord brec = schemaScope.Find<BlobRecord>(this.TargetId);
+                            BlobRecord brec = schemaScope.Find<BlobRecord>(this.TargetId).GetAwaiter().GetResult();
                             brec.NotNull();
 
                             parentDms.Delete(brec);
@@ -178,7 +148,7 @@ public abstract class BlobFieldBase<TThis> : ReferenceBase, IDataType<long>, ILa
                         }
                         else
                         {
-                            brec = schemaScope.Find<BlobRecord>(this.TargetId);
+                            brec = schemaScope.Find<BlobRecord>(this.TargetId).GetAwaiter().GetResult();
                             brec.NotNull();
                         }
 

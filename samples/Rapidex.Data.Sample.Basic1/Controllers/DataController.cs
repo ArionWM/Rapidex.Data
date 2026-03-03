@@ -61,9 +61,9 @@ public class DataController : ControllerBase
     /// <response code="200">Returns the list of contacts</response>
     [HttpGet("contacts")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult ListContacts([FromQuery] string? filter)
+    public async Task<IActionResult> ListContacts([FromQuery] string? filter)
     {
-        var contacts = this.SampleService.ListContacts(this.db, filter);
+        var contacts = await this.SampleService.ListContacts(this.db, filter);
         string json = EntityDataJsonConverter.Serialize(contacts);
         return this.Content(json, "application/json");
     }
@@ -78,9 +78,9 @@ public class DataController : ControllerBase
     [HttpGet("contacts/{id:long}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetContact([FromRoute] long id)
+    public async Task<IActionResult> GetContact([FromRoute] long id)
     {
-        var contact = this.SampleService.GetContact(this.db, id);
+        var contact = await this.SampleService.GetContact(this.db, id);
         if (contact == null)
             return this.NotFound($"Contact with ID {id} not found");
 
@@ -98,9 +98,9 @@ public class DataController : ControllerBase
     /// <response code="200">Returns the list of orders</response>
     [HttpGet("orders")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult ListOrders([FromQuery] string? filter)
+    public async Task<IActionResult> ListOrders([FromQuery] string? filter)
     {
-        var orders = this.SampleService.ListOrders(this.db, filter);
+        var orders = await this.SampleService.ListOrders(this.db, filter);
         string json = EntityDataJsonConverter.Serialize(orders);
         return this.Content(json, "application/json");
     }
@@ -115,9 +115,9 @@ public class DataController : ControllerBase
     [HttpGet("orders/{id:long}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetOrder([FromRoute] long id)
+    public async Task<IActionResult> GetOrder([FromRoute] long id)
     {
-        var order = this.SampleService.GetOrder(this.db, id);
+        var order = await this.SampleService.GetOrder(this.db, id);
         if (order == null)
             return this.NotFound($"Order with ID {id} not found");
 
@@ -133,9 +133,9 @@ public class DataController : ControllerBase
     /// <response code="200">Returns the list of items</response>
     [HttpGet("items")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult ListItems([FromQuery] string? filter)
+    public async Task<IActionResult> ListItems([FromQuery] string? filter)
     {
-        var items = this.SampleService.ListItems(this.db, filter);
+        var items = await this.SampleService.ListItems(this.db, filter);
         string json = EntityDataJsonConverter.Serialize(items);
         return this.Content(json, "application/json");
     }
@@ -150,9 +150,9 @@ public class DataController : ControllerBase
     [HttpGet("items/{id:long}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetItem([FromRoute] long id)
+    public async Task<IActionResult> GetItem([FromRoute] long id)
     {
-        var item = this.SampleService.GetItem(this.db, id);
+        var item = await this.SampleService.GetItem(this.db, id);
         if (item == null)
             return this.NotFound($"Item with ID {id} not found");
 
@@ -182,9 +182,9 @@ public class DataController : ControllerBase
     /// <param name="filter"></param>
     /// <returns></returns>
     [HttpGet("{entityName}")]
-    public IActionResult GetAny([FromRoute] string entityName, [FromQuery] string? filter)
+    public async Task<IActionResult> GetAny([FromRoute] string entityName, [FromQuery] string? filter)
     {
-        var result = this.SampleService.GetAny(this.db, entityName, filter);
+        var result = await this.SampleService.GetAny(this.db, entityName, filter);
         string json = EntityDataJsonConverter.Serialize(result);
         return this.Content(json, "application/json");
     }

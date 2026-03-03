@@ -64,7 +64,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             double val02 = db.GetQuery<AggrTestEntity01>().Sum<double>(nameof(AggrTestEntity01.Value));
             Assert.Equal(50500000, val02);
 
-            long val03 = db.GetQuery<AggrTestEntity01>().Count();
+            long val03 = db.GetQuery<AggrTestEntity01>().Count().Result;
             Assert.Equal(100, val03);
 
             DateTimeOffset val04 = db.GetQuery<AggrTestEntity01>().Min<DateTimeOffset>(nameof(AggrTestEntity01.BirthDate));

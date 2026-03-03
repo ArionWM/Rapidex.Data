@@ -521,14 +521,14 @@ public class FilterProcessingTests : DbDependedTestsBase<DbSqlServerProvider>
 		var query01 = db.GetQuery<ConcreteEntityForN2NTest02>();
 		string filter01 = $"related = ConcreteEntityForN2NTest01/{masterId01}/Relation01";
 		this.CriteriaParser.Parse(query01, filter01);
-		IEntityLoadResult<ConcreteEntityForN2NTest02> result01 = query01.Load();
+		IEntityLoadResult<ConcreteEntityForN2NTest02> result01 = query01.Load().Result;
 		Assert.Equal(1, result01.Count());
 
 
 		var query02 = db.GetQuery<ConcreteEntityForN2NTest02>();
 		string filter02 = $"related = ConcreteEntityForN2NTest01/{masterId02}/Relation01";
 		this.CriteriaParser.Parse(query02, filter02);
-		IEntityLoadResult<ConcreteEntityForN2NTest02> result02 = query02.Load();
+		IEntityLoadResult<ConcreteEntityForN2NTest02> result02 = query02.Load().Result;
 		Assert.Equal(2, result02.Count());
 
 	}

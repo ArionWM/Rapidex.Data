@@ -69,7 +69,7 @@ public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
         entities.Save();
         work2.CommitChanges();
 
-        var entUpdated = db.Find<ConcreteEntity01>(entityId);
+        var entUpdated = db.Find<ConcreteEntity01>(entityId).Result;
         Assert.NotNull(entUpdated);
         Assert.Equal("Updated 1", entUpdated.Name);
         Assert.Equal(address, entUpdated.Address);
@@ -149,18 +149,18 @@ public class DataUpdateWithJsonTests : DbDependedTestsBase<DbSqlServerProvider>
         var resItemMyEntity7 = updateResult.AddedItems.FirstOrDefault(itm => itm.Name == "myEntity7");
         Assert.NotNull(resItemMyEntity7);
 
-        var ent01 = db.Find<ConcreteEntity01>(resItemConcreteEntity01.Id);
+        var ent01 = db.Find<ConcreteEntity01>(resItemConcreteEntity01.Id).Result;
         Assert.NotNull(ent01);
         Assert.Equal("New 1", ent01.Name);
         Assert.Equal(32, (long)ent01.ContactType);
         Assert.Equal("1234567890", ent01.Phone);
 
-        var ent02 = db.Find<ConcreteEntity02>(resItemConcreteConcreteEntity02.Id);
+        var ent02 = db.Find<ConcreteEntity02>(resItemConcreteConcreteEntity02.Id).Result;
         Assert.NotNull(ent02);
         Assert.False(ent02.MyReference.IsEmpty);
         Assert.Equal(ent01.Id, ent02.MyReference.TargetId);
 
-        var ent07 = db.Find("myEntity7", resItemMyEntity7.Id);
+        var ent07 = db.Find("myEntity7", resItemMyEntity7.Id).Result;
         Assert.NotNull(ent07);
         Assert.Equal(ent01.Id, ((Reference)ent07["Ref02"]).TargetId);
     }

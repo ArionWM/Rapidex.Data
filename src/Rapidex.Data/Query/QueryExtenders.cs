@@ -68,10 +68,10 @@ namespace Rapidex.Data
         //    return (Entity)qc.Eq(DatabaseConstants.FIELD_ID, id).First();
         //}
 
-        public static IEntity Find<T>(this T qc, long id)
+        public static async Task<IEntity> Find<T>(this T qc, long id)
                 where T : IQuery
         {
-            return qc.Eq(DatabaseConstants.FIELD_ID, id).First();
+            return await qc.Eq(DatabaseConstants.FIELD_ID, id).First();
 
         }
 

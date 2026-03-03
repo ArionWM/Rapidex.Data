@@ -50,7 +50,7 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
         return new Rapidex.Data.Query.Query<T>(this.ParentSchema);
     }
 
-    public IEntityLoadResult Load(IQueryLoader queryLoader)
+    public async Task<IEntityLoadResult> Load(IQueryLoader queryLoader)
     {
         var em = queryLoader.EntityMetadata;
 
@@ -62,7 +62,7 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
 
         IDbEntityLoader entityLoader = this.SelectLoader(em);
 
-        IEntityLoadResult loadedResult = entityLoader.Load(queryLoader).GetAwaiter().GetResult();
+        IEntityLoadResult loadedResult = await entityLoader.Load(queryLoader);
 
         if (queryLoader.Paging.IsPagingSet())
         {
@@ -75,7 +75,7 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
                 IQueryAggregate totalCounter = (IQueryAggregate)queryLoader.Clone();
                 totalCounter.Alias = queryLoader.Alias;
                 totalCounter.ClearPagingAndLimit();
-                loadedResult.TotalItemCount = totalCounter.Count();
+                loadedResult.TotalItemCount =await totalCounter.Count();
                 loadedResult.IncludeTotalItemCount = true;
                 loadedResult.PageCount = (long)Math.Ceiling(Convert.ToDecimal(loadedResult.TotalItemCount) / Convert.ToDecimal(loadedResult.PageSize.Value));
             }
@@ -85,32 +85,32 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
 
     }
 
-    public ILoadResult<DataRow> LoadRaw(IQueryLoader queryLoader)
+    public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader queryLoader)
     {
-        return this.DmProvider.LoadRaw(queryLoader).GetAwaiter().GetResult();
+        return await this.DmProvider.LoadRaw(queryLoader);
     }
 
 
-    public IEntity Find(IDbEntityMetadata em, long id)
+    public async Task<IEntity> Find(IDbEntityMetadata em, long id)
     {
         if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return this.ParentSchema.ParentDbScope.Find(em, id);
+            return await this.ParentSchema.ParentDbScope.Find(em, id);
 
         DbEntityId eid = new DbEntityId(id, -1);
         IDbEntityLoader loader = this.SelectLoader(em);
-        IEntityLoadResult result = loader.Load(em, new DbEntityId[] { eid }).GetAwaiter().GetResult();
+        IEntityLoadResult result = await loader.Load(em, new DbEntityId[] { eid });
         return result.FirstOrDefault();
     }
 
-    public IEntity[] Find(IDbEntityMetadata em, params long[] ids)
+    public async Task<IEntity[]> Find(IDbEntityMetadata em, params long[] ids)
     {
         if (em.OnlyBaseSchema && this.ParentSchema.SchemaName != DatabaseConstants.DEFAULT_SCHEMA_NAME)
-            return this.ParentSchema.ParentDbScope.Find(em, ids);
+            return await this.ParentSchema.ParentDbScope.Find(em, ids);
 
         var dbEntityIds = ids.Select(id => new DbEntityId(id, -1)).ToArray();
 
         IDbEntityLoader loader = this.SelectLoader(em);
-        IEntityLoadResult result = loader.Load(em, dbEntityIds).GetAwaiter().GetResult();
+        IEntityLoadResult result = await loader.Load(em, dbEntityIds);
         return result.ToArray();
     }
 

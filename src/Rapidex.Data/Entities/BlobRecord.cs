@@ -53,7 +53,7 @@ namespace Rapidex.Data.Entities
     {
         //See: GetFileDescriptorIdForFieldFile
 
-        public static IEntity GetBlobRecordOwner(IDbSchemaScope dbScope, string blobIdOrInfo)
+        public static async Task<IEntity> GetBlobRecordOwner(IDbSchemaScope dbScope, string blobIdOrInfo)
         {
 
             BlobInfo binfo = ParseBlobId(null, blobIdOrInfo);
@@ -61,7 +61,7 @@ namespace Rapidex.Data.Entities
                 throw new InvalidOperationException($"Blob info invalid: {blobIdOrInfo}");
 
             dbScope.NotNull();
-            var parentEntity = dbScope.Find(binfo.OwnerName, binfo.Id.As<long>());
+            var parentEntity = await dbScope.Find(binfo.OwnerName, binfo.Id.As<long>());
             return parentEntity;
 
             //var parts = blobIdOrInfo.Replace('/', '.').Split('.');
@@ -148,11 +148,11 @@ namespace Rapidex.Data.Entities
             return blobInfo;
         }
 
-        public static BlobRecord GetBlobRecord(IDbSchemaScope dbScope, IEntity parentEntity, string blobIdOrInfo)
+        public static async Task<BlobRecord> GetBlobRecord(IDbSchemaScope dbScope, IEntity parentEntity, string blobIdOrInfo)
         {
             if (long.TryParse(blobIdOrInfo, out long blobId))
             {
-                return dbScope.Find<BlobRecord>(blobId);
+                return await dbScope.Find<BlobRecord>(blobId);
             }
 
             var parts = blobIdOrInfo.Replace('/', '.').Split('.');
@@ -166,7 +166,7 @@ namespace Rapidex.Data.Entities
                 throw new InvalidOperationException($"Blob id invalid");
             }
 
-            return dbScope.Find<BlobRecord>(id);
+            return await dbScope.Find<BlobRecord>(id);
 
         }
     }

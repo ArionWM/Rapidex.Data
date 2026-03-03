@@ -83,7 +83,7 @@ public class HasTags : EntityBehaviorBase<HasTags>
         {
             var availableTags = dbScope.GetQuery<TagRecord>()
                 .Eq(nameof(TagRecord.Entity), entityName)
-                .Load();
+                .Load().GetAwaiter().GetResult();
 
             foreach (var tag in availableTags)
             {
@@ -135,7 +135,7 @@ public class HasTags : EntityBehaviorBase<HasTags>
         if (tagNames.IsNOTNullOrEmpty() && tagNames.Count > 0)
             query = query.In(nameof(TagRecord.Name), tagNames);
 
-        var availableTags = query.Load();
+        var availableTags = query.Load().GetAwaiter().GetResult();
 
         using var work = dbScope.BeginWork();
 
@@ -209,7 +209,8 @@ public class HasTags : EntityBehaviorBase<HasTags>
         //TODO: From cache
         return dbScope.GetQuery<TagRecord>()
             .Eq(nameof(TagRecord.Entity), em.Name)
-            .Load();
+            .Load()
+            .GetAwaiter().GetResult();
     }
 
     public static TagInfo[] GetTagInfo(IDbSchemaScope dbScope, IDbEntityMetadata em, params string[] tags)

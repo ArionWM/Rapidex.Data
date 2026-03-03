@@ -44,11 +44,11 @@ public abstract class MultiDatabaseAndSchemaTestsBase<T> : DbDependedTestsBase<T
 
         workOnTestSchema.CommitChanges();
 
-        long countOnTestSchema = workOnTestSchema.GetQuery<ConcreteEntity01>().Count();
+        long countOnTestSchema = workOnTestSchema.GetQuery<ConcreteEntity01>().Count().Result;
         Assert.Equal(1, countOnTestSchema);
 
         var workOnBaseSchema = db.BeginWork();
-        long countOnBaseSchema = workOnBaseSchema.GetQuery<ConcreteEntity01>().Count();
+        long countOnBaseSchema = workOnBaseSchema.GetQuery<ConcreteEntity01>().Count().Result;
         Assert.Equal(0, countOnBaseSchema);
 
     }

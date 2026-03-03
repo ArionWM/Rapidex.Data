@@ -144,7 +144,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             //TODO: Cache'ler temizlenecek !!
 
             using var work2 = db.BeginWork();
-            ConcreteEntity01 loadedEntity = db.Find<ConcreteEntity01>(id);
+            ConcreteEntity01 loadedEntity = db.Find<ConcreteEntity01>(id).Result;
             loadedEntity.CheckIDataTypeAssignments();
 
             Assert.False(loadedEntity._IsNew);
@@ -158,7 +158,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             //TODO: Cache'ler temizlenecek !!
 
-            ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id);
+            ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id).Result;
             Assert.NotNull(loadedEntity2);
             loadedEntity2.CheckIDataTypeAssignments();
             Assert.Equal(name2, loadedEntity2.Name);
@@ -202,7 +202,7 @@ namespace Rapidex.UnitTest.Data.TestBase
             //TODO: Cache'ler temizlenecek !!
 
             using var work2 = db.BeginWork();
-            IEntity loadedEntity = db.Find("myJsonEntity03", id);
+            IEntity loadedEntity = db.Find("myJsonEntity03", id).Result;
             Assert.NotNull(loadedEntity);
             Assert.True((string)loadedEntity["Subject"] == name);
 
@@ -215,7 +215,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             //TODO: Cache'ler temizlenecek !!
 
-            IEntity loadedEntity2 = db.Find("myJsonEntity03", id);
+            IEntity loadedEntity2 = db.Find("myJsonEntity03", id).Result;
             loadedEntity2.CheckIDataTypeAssignments();
 
             Assert.NotNull(loadedEntity2);
@@ -248,25 +248,25 @@ namespace Rapidex.UnitTest.Data.TestBase
             work1.CommitChanges();
 
             using var work2 = db.BeginWork();
-            var entCount = db.GetQuery<ConcreteEntity01>().Count();
+            var entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(2, entCount);
 
             work2.Delete(entity01);
 
             //Henüz commit olmadı, veritabanında duruyor
-            entCount = db.GetQuery<ConcreteEntity01>().Count();
+            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(2, entCount);
 
             work2.CommitChanges();
 
             using var work3 = db.BeginWork();
-            entCount = db.GetQuery<ConcreteEntity01>().Count();
+            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(1, entCount);
 
             work3.Delete(entity02);
             work3.CommitChanges();
 
-            entCount = db.GetQuery<ConcreteEntity01>().Count();
+            entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(0, entCount);
         }
 
@@ -304,7 +304,7 @@ namespace Rapidex.UnitTest.Data.TestBase
 
             work1.CommitChanges();
 
-            var entCount = db.GetQuery<ConcreteEntity01>().Count();
+            var entCount = db.GetQuery<ConcreteEntity01>().Count().Result;
             Assert.Equal(2, entCount);
         }
 

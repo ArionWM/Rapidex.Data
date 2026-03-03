@@ -7,6 +7,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Rapidex;
 using YamlDotNet.Serialization;
 
@@ -29,7 +30,7 @@ namespace Rapidex.Data
             {
                 var results = scope.GetQuery(rfm.ReferencedEntityMetadata.EnsureIsNotPremature(scope.ParentDbScope))
                       .Eq(FIELD_IS_ARCHIVED, false)
-                      .Load();
+                      .Load().GetAwaiter().GetResult();
 
                 foreach (IEntity entity in results)
                 {
@@ -164,8 +165,10 @@ namespace Rapidex.Data
                     if (toType.IsEnum && genA != null && genA == toType)
                         return true;
                 }
+            }
 
-
+            if (toType.IsGenericType)
+            {
                 Type toGenTypeDef = toType.GetGenericTypeDefinition();
                 if (toGenTypeDef == supportedGenTypeDef)
                 {

@@ -34,19 +34,19 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
             ent2.Save();
         }
 
-        long count = work1.GetQuery<ConcreteEntity03>().Count();
+        long count = work1.GetQuery<ConcreteEntity03>().Count().Result;
         Assert.Equal(1, count);
 
-        var all = db.Load<ConcreteEntity03>();
+        var all = db.Load<ConcreteEntity03>().Result;
         Assert.Single(all);
         Assert.Equal("test 2", all.First().Name);
 
         work1.CommitChanges();
 
-        count = db.GetQuery<ConcreteEntity03>().Count();
+        count = db.GetQuery<ConcreteEntity03>().Count().Result;
         Assert.Equal(2, count);
 
-        all = db.Load<ConcreteEntity03>();
+        all = db.Load<ConcreteEntity03>().Result;
         Assert.Equal(2, all.Count());
     }
 
@@ -145,7 +145,7 @@ public class OtherTests : DbDependedTestsBase<DbSqlServerProvider>
             //WorkScope is finalized...
             long entityId01 = entity.Id;
 
-            entity = db.Find<ConcreteEntity01>(entityId01);
+            entity = db.Find<ConcreteEntity01>(entityId01).Result;
             entity.Picture.SetEmpty(); // <- BOOM!
             entity.Save();
 

@@ -92,8 +92,8 @@ public class OrderInfo
 
     public OrderInfo(string fieldOrExpression, OrderDirection direction)
     {
-        FieldOrExpression = fieldOrExpression;
-        Direction = direction;
+        this.FieldOrExpression = fieldOrExpression;
+        this.Direction = direction;
     }
 }
 
@@ -132,35 +132,35 @@ public interface IQueryLoader : IQueryOrder, ICloneable
     IQueryLoader SkipQueryCache();
 
 
-    IEntityLoadResult Load();
+    Task<IEntityLoadResult> Load();
 
-    ILoadResult<DataRow> LoadPartial(params string[] fields); //Şimdilik DataRow dönsün
+    Task<ILoadResult<DataRow>> LoadPartial(params string[] fields); //Şimdilik DataRow dönsün
 
-    IEntity First();
+    Task<IEntity> First();
 
-    //IEntity Last();
-    ILoadResult<DbEntityId> GetIds();
+
+    Task<ILoadResult<DbEntityId>> GetIds();
 }
 
 public interface IQueryLoader<T> : IQueryLoader, IQueryBase where T : IConcreteEntity
 {
 
-    new IEntityLoadResult<T> Load();
+    new Task<IEntityLoadResult<T>> Load();
 
-    T Find(long id);
+    new Task<T> Find(long id);
 
-    new T First();
+    new Task<T> First();
 
 }
 
 public interface IQueryAggregate : IQueryLoader
 {
-    bool Exist();
-    long Count();
-    object Sum(string field);
-    object Min(string field);
-    object Max(string field);
-    object Avg(string field);
+    Task<bool> Exist();
+    Task<long> Count();
+    Task<object> Sum(string field);
+    Task<object> Min(string field);
+    Task<object> Max(string field);
+    Task<object> Avg(string field);
 }
 
 public interface IQueryUpdater : IQueryCriteria

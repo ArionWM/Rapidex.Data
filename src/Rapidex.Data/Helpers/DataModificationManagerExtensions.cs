@@ -68,69 +68,69 @@ public static class DataModificationManagerExtensions
         return concEntity;
     }
 
-    public static IEntityLoadResult Load(this IDbDataReadScope dmm, IDbEntityMetadata em, Action<IQueryCriteria> act = null)
+    public static async Task<IEntityLoadResult> Load(this IDbDataReadScope dmm, IDbEntityMetadata em, Action<IQueryCriteria> act = null)
     {
         dmm.NotNull();
 
         var query = dmm.ParentSchema.GetQuery(em);
         act?.Invoke(query);
 
-        var loadResult = dmm.Load(query);
+        var loadResult = await dmm.Load(query);
         return loadResult;
     }
 
 
-    public static IEntityLoadResult Load(this IDbDataReadScope dmm, string entityName, Action<IQueryCriteria> act = null)
+    public static async Task<IEntityLoadResult> Load(this IDbDataReadScope dmm, string entityName, Action<IQueryCriteria> act = null)
     {
         dmm.NotNull();
 
         var em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName);
-        return dmm.Load(em, act);
+        return await dmm.Load(em, act);
     }
 
 
 
-    public static IEntityLoadResult<TEntity> Load<TEntity>(this IDbDataReadScope dmm, Action<IQueryCriteria> act = null) where TEntity : IConcreteEntity
+    public static async Task<IEntityLoadResult<TEntity>> Load<TEntity>(this IDbDataReadScope dmm, Action<IQueryCriteria> act = null) where TEntity : IConcreteEntity
     {
         dmm.NotNull();
 
         var em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
         em.NotNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
-        var loadResult = dmm.Load(em, act);
+        var loadResult = await dmm.Load(em, act);
         return loadResult.CastTo<TEntity>();
     }
 
-    public static IEntity Find(this IDbDataReadScope dmm, string entityName, long id)
+    public static async Task<IEntity> Find(this IDbDataReadScope dmm, string entityName, long id)
     {
         dmm.NotNull();
 
         var em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName);
         em.NotNull($"Entity metadata not found for '{entityName}'");
 
-        return dmm.Find(em, id);
+        return await dmm.Find(em, id);
     }
 
 
-    public static TEntity Find<TEntity>(this IDbDataReadScope dmm, long id) where TEntity : IConcreteEntity
+    public static async Task<TEntity> Find<TEntity>(this IDbDataReadScope dmm, long id) where TEntity : IConcreteEntity
     {
         dmm.NotNull();
 
         var em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
         em.NotNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
-        var result = dmm.Find(em, id);
+        var result = await dmm.Find(em, id);
         return (TEntity)result;
     }
 
-    public static TEntity[] Find<TEntity>(this IDbDataReadScope dmm, params long[] ids) where TEntity : IConcreteEntity
+    public static async Task<TEntity[]> Find<TEntity>(this IDbDataReadScope dmm, params long[] ids) where TEntity : IConcreteEntity
     {
         dmm.NotNull();
 
         var em = dmm.ParentSchema.ParentDbScope.Metadata.Get<TEntity>();
         em.NotNull($"Entity metadata not found for {typeof(TEntity).Name}");
 
-        var result = dmm.Find(em, ids);
+        var result = await dmm.Find(em, ids);
         return result.Cast<TEntity>().ToArray();
     }
 
@@ -178,7 +178,7 @@ public static class DataModificationManagerExtensions
         }
         else
         {
-            actualEnt = pentity._Schema.Find(em, pentity.GetId().As<long>());
+            actualEnt = pentity._Schema.Find(em, pentity.GetId().As<long>()).GetAwaiter().GetResult();
         }
 
         pentity._Schema.Mapper.Map(em, pentity, actualEnt);

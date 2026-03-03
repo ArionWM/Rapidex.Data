@@ -88,25 +88,25 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             return this.scope.GetQuery<T>();
         }
 
-        public IEntity Find(IDbEntityMetadata em, long id)
+        public async Task<IEntity> Find(IDbEntityMetadata em, long id)
         {
-            return this.scope.Find(em, id);
+            return await this.scope.Find(em, id);
 
         }
 
-        public IEntity[] Find(IDbEntityMetadata em, params long[] ids)
+        public async Task<IEntity[]> Find(IDbEntityMetadata em, params long[] ids)
         {
-            return this.scope.Find(em, ids);
+            return await this.scope.Find(em, ids);
         }
 
-        public IEntityLoadResult Load(IQueryLoader loader)
+        public async Task<IEntityLoadResult> Load(IQueryLoader loader)
         {
-            return this.scope.Load(loader);
+            return await this.scope.Load(loader);
         }
 
-        public ILoadResult<DataRow> LoadRaw(IQueryLoader loader)
+        public async Task<ILoadResult<DataRow>> LoadRaw(IQueryLoader loader)
         {
-            return this.scope.LoadRaw(loader);
+            return await this.scope.LoadRaw(loader);
         }
 
         public void Dispose()
