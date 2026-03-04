@@ -23,9 +23,9 @@ public class DbConfigurationManager
     public IConfigurationSection? Root { get; protected set; }
     public IDictionary<string, DbConnectionInfo> ConnectionInfo { get; set; } = new Dictionary<string, DbConnectionInfo>();
     public CacheConfigurationInfo CacheConfigurationInfo { get; set; } = new CacheConfigurationInfo();
+    public PoliciesInfo PoliciesInfo { get; set; } = new PoliciesInfo();
 
-
-    public IDictionary<string, DbConnectionInfo> ReadConnectionInfo()
+    protected IDictionary<string, DbConnectionInfo> ReadConnectionInfo()
     {
         var dbConfigRoot = this.Root;
         if (this.DatabaseSectionParentName.IsNOTNullOrEmpty())
@@ -59,7 +59,7 @@ public class DbConfigurationManager
         return connections;
     }
 
-    public void ReadCacheConfiguration(IServiceCollection services)
+    protected void ReadCacheConfiguration(IServiceCollection services)
     {
         var cacheConfigSection = this.Root.GetSection("Cache");
         if (cacheConfigSection != null)
@@ -69,6 +69,15 @@ public class DbConfigurationManager
 
         CacheConfigurationManager ccm = new CacheConfigurationManager();
         ccm.ApplyCacheConfiguration(this.CacheConfigurationInfo, services);
+    }
+
+    protected void ReadPoliciesConfiguration()
+    {
+        var policiesConfigSection = this.Root.GetSection("Policies");
+        if (policiesConfigSection != null)
+        {
+            this.PoliciesInfo = policiesConfigSection.Get<PoliciesInfo>();
+        }
     }
 
     public void Setup(IServiceCollection services)

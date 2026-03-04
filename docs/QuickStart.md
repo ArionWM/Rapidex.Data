@@ -19,27 +19,65 @@ Install-Package Rapidex.Data.SqlServer
 First, you need to configure the database connection (`appsettings.json`)
 
 ```json
-"Rapidex": {
+{
+  "Rapidex": {
     "Databases": {
-        "Master": {
-          "Provider": "Rapidex.Data.SqlServer.DbSqlServerProvider",
-          "ConnectionString": "Data Source=databaseServer;Initial Catalog=databaseName;User Id=username;Password=userPassword;MultipleActiveResultSets=true;Pooling=true;Min Pool Size=10; Max Pool Size=500;TrustServerCertificate=True"
-        }
-     }
+      "Master": {
+        "Provider": "Rapidex.Data.SqlServer.DbSqlServerProvider",
+        "ConnectionString": "Data Source=databaseServer;Initial Catalog=databaseName;User Id=username;Password=userPassword;MultipleActiveResultSets=true;Pooling=true;Min Pool Size=10; Max Pool Size=500;TrustServerCertificate=True"
+      }
+    },
+    "Policies": {
+      "MaxRetryCount": 5,
+      "WaitForRetryMs": 1000
+    },
+    "Cache": {
+      "InMemory": {
+        "ItemLimit": 5000,
+        "AbsoluteExpiration": 600, //seconds 
+        "SlidingExpiration": 500
+      },
+      "Distributed": { //Remove if not used.
+        "Type": "Redis",
+        "ConnectionString": "redisConnectionString",
+        "Expiration": 6000, //seconds 
+        "LocalExpiration": 600 //seconds 
+      }
+    }
   }
+}
 ```
 
 or
 
 ```json
-"Rapidex": {
+{
+  "Rapidex": {
     "Databases": {
-        "Master": {
+      "Master": {
           "Provider": "Rapidex.Data.PostgreServer.PostgreSqlServerProvider",
           "ConnectionString": "User ID=username;Password=userPassword;Host=databaseServer;Port=5432;Database=databaseName;"
-        }
-     }
+      }
+    },
+    "Policies": {
+      "MaxRetryCount": 5,
+      "WaitForRetryMs": 1000
+    },
+    "Cache": {
+      "InMemory": {
+        "ItemLimit": 5000,
+        "AbsoluteExpiration": 600, //seconds 
+        "SlidingExpiration": 500
+      },
+      "Distributed": { //Remove if not used.
+        "Type": "Redis",
+        "ConnectionString": "redisConnectionString",
+        "Expiration": 6000, //seconds 
+        "LocalExpiration": 600 //seconds 
+      }
+    }
   }
+}
 ```
 
 ## Create Entity Definitions

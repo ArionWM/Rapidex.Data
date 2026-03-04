@@ -18,6 +18,8 @@
 
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" />
 
+		<PackageReference Include="Polly.Core" Version="8.6.5" />
+
 		<PackageReference Include="SqlKata" Version="4.0.1" />
 		<PackageReference Include="Superpower" Version="3.1.0" />
 		<PackageReference Include="System.Text.Json" Version="10.0.0" />

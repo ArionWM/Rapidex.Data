@@ -1,7 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
-using Rapidex.Data.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -9,6 +6,10 @@ using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
+using Polly;
+using Rapidex.Data.Helpers;
 
 namespace Rapidex.Data.SqlServer;
 
@@ -87,7 +88,71 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
         return command;
     }
 
+
+    protected async Task<DataTable> ExecuteInternal(string sql, params DbVariable[] parameters)
+    {
+        this.CheckConnectionState();
+        using (SqlCommand command = this.CreateCommand(parameters))
+            try
+            {
+#if DEBUG                    
+                Stopwatch sw = Stopwatch.StartNew();
+                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                Common.DefaultLogger?.LogDebug(logLine);
+#endif         
+
+                command.CommandText = sql;
+                using (SqlDataReader reader = await command.ExecuteReaderAsync(CommandBehavior.Default)) //Ne zaman CommandBehavior.SequentialAccess kullanalım?
+                {
+                    DataTable table = new DataTable();
+                    table.Load(reader);
+
+#if DEBUG
+                    sw.Stop();
+                    int slow = (sw.ElapsedMilliseconds > 1000 ? 2 : (sw.ElapsedMilliseconds > 100 ? 1 : 0));
+                    string desc = $"({this.DebugId}) {table.Rows.Count} row(s) returned (at {sw.ElapsedMilliseconds:#,#} ms {(sw.ElapsedMilliseconds > 500 ? "*" : "")}{(sw.ElapsedMilliseconds > 100 ? "*" : "")})";
+
+                    switch (slow)
+                    {
+                        case 2:
+                            Common.DefaultLogger?.LogWarning(desc);
+                            break;
+                        case 1:
+                            Common.DefaultLogger?.LogInformation(desc);
+                            break;
+                        case 0:
+                            Common.DefaultLogger?.LogDebug(desc);
+                            break;
+                    }
+
+#endif
+
+                    return table;
+                }
+            }
+            catch (Exception ex)
+            {
+                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                Common.DefaultLogger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
+                Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+                //var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
+                //tex.Log();
+                //throw tex;
+                throw;
+            }
+    }
+
     public async Task<DataTable> Execute(string sql, params DbVariable[] parameters)
+    {
+        ResilienceContext context = ResilienceContextPool.Shared.Get(CancellationToken.None);
+        var propKey = new ResiliencePropertyKey<string>("CorrelationId");
+        context.Properties.Set(propKey, Guid.NewGuid().ToString());
+
+        var result = await Policies.RetryPipeline.ExecuteAsync(async context => await this.ExecuteInternal(sql, parameters));
+        return result;
+    }
+
+    public async Task<DataTable> ExecuteObs(string sql, params DbVariable[] parameters)
     {
         this.CheckConnectionState();
         using (SqlCommand command = this.CreateCommand(parameters))
