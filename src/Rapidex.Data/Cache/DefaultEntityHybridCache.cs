@@ -2,24 +2,84 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Rapidex.Data.Cache;
 
-internal class DefaultEntityHybridCache : IEntityCache
+internal class DefaultEntityHybridCache : IEntityCache, IDisposable
 {
     private readonly DefaultHybridCache cache;
     private readonly ILogger<DefaultEntityHybridCache> logger;
     private readonly EntityMapper unattachedMapper;
+    private readonly Channel<CacheWriteItem> writeChannel;
+    private readonly CancellationTokenSource cts;
 
     public DefaultEntityHybridCache(IServiceProvider sp)
     {
         this.cache = sp.GetRequiredService<DefaultHybridCache>();
         this.logger = sp.GetService<ILogger<DefaultEntityHybridCache>>();
         this.unattachedMapper = new EntityMapper();
+
+        this.writeChannel = Channel.CreateBounded<CacheWriteItem>(
+            new BoundedChannelOptions(1024)
+            {
+                FullMode = BoundedChannelFullMode.DropOldest,
+                SingleReader = true,
+                SingleWriter = false
+            });
+
+        this.cts = new CancellationTokenSource();
+        _ = this.ConsumeWriteChannelAsync();
     }
 
-    protected object CheckFalueForStorage(object value)
+    protected sealed class CacheWriteItem
+    {
+        public string Key { get; init; }
+        public object Value { get; init; }
+        public bool IsMultiple { get; init; }
+    }
+
+    private async Task ConsumeWriteChannelAsync()
+    {
+        try
+        {
+            await foreach (var item in this.writeChannel.Reader.ReadAllAsync(this.cts.Token))
+            {
+                try
+                {
+                    switch (item.IsMultiple)
+                    {
+                        case false:
+                            var storageValue = this.CheckValueForStorage(item.Value);
+                            await this.cache.Set(item.Key, storageValue);
+                            break;
+                        case true:
+                            var entities = (List<IEntity>)item.Value;
+                            List<Dictionary<string, object>> values = new List<Dictionary<string, object>>();
+                            foreach (var e in entities)
+                            {
+                                var sv = this.CheckValueForStorage(e);
+                                values.Add((Dictionary<string, object>)sv);
+                            }
+                            await this.cache.Set(item.Key, values);
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.logger?.LogError(ex, "Cache write failed for key: {Key}", item.Key);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected during disposal
+        }
+    }
+
+    protected object CheckValueForStorage(object value)
     {
         switch (value)
         {
@@ -52,7 +112,7 @@ internal class DefaultEntityHybridCache : IEntityCache
         var retValue = await this.cache.GetOrSet<Dictionary<string, object>>(key, () => null);
         if (retValue == null)
             return default(T);
-        
+
         var cValue = this.CheckEntityValueForRetrieve(dbSchema, em.Name, retValue);
         T eValue = (T)cValue;
         return (T)cValue;
@@ -61,21 +121,10 @@ internal class DefaultEntityHybridCache : IEntityCache
 
 
 
-    public Task Set<T>(T entity) where T : IEntity
-    {
-        if (entity is IPartialEntity)
-            return Task.CompletedTask;
-
-        string key = CacheExtensions.GetEntityCacheKey(entity);
-
-        var storageValue = this.CheckFalueForStorage(entity);
-
-        return this.cache.Set(key, storageValue);
-    }
 
     public async Task<T[]> GetMultiple<T>(IDbSchemaScope dbSchema, IDbEntityMetadata em, string hash) where T : IEntity
     {
-        
+
         string key = CacheExtensions.GetQueryCacheKey(em, dbSchema, hash);
 
         var retValue = await this.cache.GetOrSet<Dictionary<string, object>[]>(key, () => default);
@@ -95,18 +144,38 @@ internal class DefaultEntityHybridCache : IEntityCache
         return null;
     }
 
-    public async Task Set<T>(IDbSchemaScope dbSchema, IDbEntityMetadata em, string hash, IEnumerable<T> entities) where T : IEntity
+    public Task Set<T>(T entity) where T : IEntity
+    {
+        if (entity is IPartialEntity)
+            return Task.CompletedTask;
+
+        string key = CacheExtensions.GetEntityCacheKey(entity);
+
+        this.writeChannel.Writer.TryWrite(new CacheWriteItem
+        {
+            Key = key,
+            Value = entity,
+            IsMultiple = false
+        });
+
+        return Task.CompletedTask;
+    }
+
+
+    public Task Set<T>(IDbSchemaScope dbSchema, IDbEntityMetadata em, string hash, IEnumerable<T> entities) where T : IEntity
     {
         string key = CacheExtensions.GetQueryCacheKey(em, dbSchema, hash);
 
-        List<Dictionary<string, object>> values = new List<Dictionary<string, object>>();
-        foreach (var e in entities)
-        {
-            var storageValue = this.CheckFalueForStorage(e);
-            values.Add((Dictionary<string, object>)storageValue);
-        }
+        var entityList = entities.Cast<IEntity>().ToList();
 
-        await this.cache.Set(key, values);
+        this.writeChannel.Writer.TryWrite(new CacheWriteItem
+        {
+            Key = key,
+            Value = entityList,
+            IsMultiple = true
+        });
+
+        return Task.CompletedTask;
     }
 
     public async Task Remove<T>(T entity) where T : IEntity
@@ -120,8 +189,6 @@ internal class DefaultEntityHybridCache : IEntityCache
 
     public async Task Remove(string key)
     {
-
-
         await this.cache.Remove(key);
     }
 
@@ -130,5 +197,10 @@ internal class DefaultEntityHybridCache : IEntityCache
         await this.cache.RemoveByTag(tag);
     }
 
-
+    public void Dispose()
+    {
+        this.cts.Cancel();
+        this.writeChannel.Writer.TryComplete();
+        this.cts.Dispose();
+    }
 }

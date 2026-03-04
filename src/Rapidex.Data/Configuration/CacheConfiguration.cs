@@ -52,6 +52,8 @@ public class DistributedCacheConfigurationInfo
     /// If null, uses InMemory / Expiration setting.
     /// </summary>
     public int? LocalExpiration { get; set; } = null;
+
+    public int? ReadTimeout { get; set; } = null;
 }
 
 public class CacheConfigurationInfo

@@ -11,13 +11,17 @@ internal class DefaultHybridCache : ICache
     private readonly HybridCache cache;
     private TimeSpan defaultExpiration;
     private TimeSpan defaultLocalExpiration;
+    private int readTimeoutMs;
+    private readonly ILogger<DefaultHybridCache> logger;
 
 
-    public DefaultHybridCache(HybridCache hcache)
+    public DefaultHybridCache(HybridCache hcache, ILogger<DefaultHybridCache> logger)
     {
         this.cache = hcache;
         this.defaultExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo?.Distributed?.Expiration ?? 6000);
         this.defaultLocalExpiration = TimeSpan.FromSeconds(Database.Configuration.CacheConfigurationInfo?.Distributed?.LocalExpiration ?? 600);
+        this.readTimeoutMs = Database.Configuration.CacheConfigurationInfo?.Distributed?.ReadTimeout ?? 60000;
+        this.logger = logger;
     }
 
     protected T InternalValueFactory<T>(Func<T> valueFactory)
@@ -39,12 +43,26 @@ internal class DefaultHybridCache : ICache
                 LocalCacheExpiration = this.defaultLocalExpiration
             };
 
-            var result = await this.cache.GetOrCreateAsync(
-                key,
-                ct => new ValueTask<T>(this.InternalValueFactory(valueFactory)),
-                opt,
-                CacheExtensions.TagContext
-            );
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromMilliseconds(this.readTimeoutMs));
+
+            T? result;
+            try
+            {
+                result = await this.cache.GetOrCreateAsync(
+                     key,
+                     ct => new ValueTask<T>(this.InternalValueFactory(valueFactory)),
+                     opt,
+                     CacheExtensions.TagContext, 
+                     cts.Token
+                 );
+            }
+            catch (OperationCanceledException)
+            {
+                // Timeout → cache'i atla, direkt factory'den al
+                logger.LogWarning("Cache timeout, bypassing: {Key}", key);
+                return valueFactory();
+            }
 
             return result;
         }

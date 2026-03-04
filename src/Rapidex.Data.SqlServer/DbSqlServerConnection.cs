@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -106,7 +107,22 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
 
 #if DEBUG
                     sw.Stop();
-                    Common.DefaultLogger?.LogDebug($"({this.DebugId}) {table.Rows.Count} row(s) returned (at {sw.ElapsedMilliseconds:#,#} ms {(sw.ElapsedMilliseconds > 500 ? "*" : "")}{(sw.ElapsedMilliseconds > 100 ? "*" : "")})");
+                    int slow = (sw.ElapsedMilliseconds > 1000 ? 2 : (sw.ElapsedMilliseconds > 100 ? 1 : 0));
+                    string desc = $"({this.DebugId}) {table.Rows.Count} row(s) returned (at {sw.ElapsedMilliseconds:#,#} ms {(sw.ElapsedMilliseconds > 500 ? "*" : "")}{(sw.ElapsedMilliseconds > 100 ? "*" : "")})";
+
+                    switch (slow)
+                    {
+                        case 2:
+                            Common.DefaultLogger?.LogWarning(desc);
+                            break;
+                        case 1:
+                            Common.DefaultLogger?.LogInformation(desc);
+                            break;
+                        case 0:
+                            Common.DefaultLogger?.LogDebug(desc);
+                            break;
+                    }
+
 #endif
 
                     return table;

@@ -65,7 +65,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
 
         long id = cent01.Id;
 
-        //Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update
+        Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update
 
         var cent01_02 = db.Find<ConcreteEntity01>(id).Result; //<- Load to cache
 
@@ -79,7 +79,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
 
         work2.CommitChanges(); //<- After commit, already saved to cache
 
-        //Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update
+        Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update
 
         var cent01_03 = db.Find<ConcreteEntity01>(id).Result; //<- Load from cache
         Assert.NotNull(cent01_03);
@@ -97,6 +97,8 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         em.CacheOptions.IsIdCacheEnabled = true;
         em.CacheOptions.IsQueryCacheEnabled = true;
 
+        //TODO: Clear cache
+
         try
         {
             using var work = db.BeginWork();
@@ -113,8 +115,6 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
 
             work.CommitChanges(); //<- After commit, already saved to cache
 
-
-
             var result1 = db.GetQuery<ConcreteEntity01>()
                  .GtEq(nameof(ConcreteEntity01.BirthDate), start.AddMonths(5))
                  .Load()
@@ -123,7 +123,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
             Assert.Equal(6, result1.Count);
             Assert.Equal(LoadSource.Database, result1[0]._loadSource);
 
-
+            Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update  
 
             var resultWithCache2 = db.GetQuery<ConcreteEntity01>()
                  .GtEq(nameof(ConcreteEntity01.BirthDate), start.AddMonths(5))
@@ -165,6 +165,8 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
 
         await Database.Cache.Set(entity);
 
+        Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update
+
         var cachedEntity = await Database.Cache.Get<ConcreteEntityForUpdateTests01>(db, em, entity.Id);
 
         Assert.Equal(entity.Id, cachedEntity.Id);
@@ -197,6 +199,8 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         }
         work.CommitChanges(); //<- After commit, not yet saved to query cache (IsQueryCacheEnabled: false)
 
+        Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update  
+
         var result1 = db.GetQuery<ConcreteEntity01>()
              .GtEq(nameof(ConcreteEntity01.BirthDate), start.AddMonths(5))
              .UseQueryCache()
@@ -206,7 +210,7 @@ public class CachedLoadingTests : DbDependedTestsBase<DbSqlServerProvider>
         Assert.Equal(6, result1.Count);
         Assert.Equal(LoadSource.Database, result1[0]._loadSource);
 
-
+        Task.Delay(100).Wait(); //<- Wait a bit to ensure cache update  
 
         var resultWithCache2 = db.GetQuery<ConcreteEntity01>()
              .GtEq(nameof(ConcreteEntity01.BirthDate), start.AddMonths(5))
