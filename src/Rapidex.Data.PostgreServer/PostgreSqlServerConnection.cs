@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Polly;
 using Rapidex.Data.Helpers;
 
 namespace Rapidex.Data.PostgreServer;
@@ -149,7 +150,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         return command;
     }
 
-    public async Task<DataTable> Execute(string sql, params DbVariable[] parameters)
+    protected async Task<DataTable> ExecuteInternal(string sql, params DbVariable[] parameters)
     {
         //PostgreSQL NpgsqlConnection is not support MARS
         try
@@ -193,9 +194,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                         string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
                         Common.DefaultLogger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
                         Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
-                        var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
-                        tex.Log();
-                        throw tex;
+                        throw;
                     }
                 }
             }
@@ -213,7 +212,29 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         }
     }
 
-    public async Task BulkUpdate(string schemaName, DataTable variableTable)
+    public async Task<DataTable> Execute(string sql, params DbVariable[] parameters)
+    {
+        try
+        {
+            ResilienceContext context = ResilienceContextPool.Shared.Get(CancellationToken.None);
+            var propKey = new ResiliencePropertyKey<string>("CorrelationId");
+            context.Properties.Set(propKey, Guid.NewGuid().ToString());
+
+            var result = await Policies.RetryPipeline.ExecuteAsync(async context => await this.ExecuteInternal(sql, parameters));
+            return result;
+        }
+        catch (Exception ex)
+        {
+            string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
+            Common.DefaultLogger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
+            Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+            var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
+            tex.Log();
+            throw tex;
+        }
+    }
+
+    protected async Task BulkUpdateInternal(string schemaName, DataTable variableTable)
     {
         //PostgreSQL NpgsqlConnection is not support MARS
         try
@@ -236,10 +257,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
             {
                 Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
                 Common.DefaultLogger?.LogError($"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
-
-                var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, schemaName + ", " + variableTable.TableName) ?? ex;
-                tex.Log();
-                throw tex;
+                throw;
             }
             finally
             {
@@ -252,6 +270,29 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         finally
         {
             this.lockObject.Release();
+        }
+    }
+
+    public async Task BulkUpdate(string schemaName, DataTable variableTable)
+    {
+        try
+        {
+            ResilienceContext context = ResilienceContextPool.Shared.Get(CancellationToken.None);
+            var propKey = new ResiliencePropertyKey<string>("CorrelationId");
+            context.Properties.Set(propKey, Guid.NewGuid().ToString());
+
+            await Policies.RetryPipeline.ExecuteAsync(async context =>
+            {
+                await this.BulkUpdateInternal(schemaName, variableTable);
+            });
+        }
+        catch (Exception ex)
+        {
+            Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+            Common.DefaultLogger?.LogError($"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
+            var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, schemaName + ", " + variableTable.TableName) ?? ex;
+            tex.Log();
+            throw tex;
         }
     }
 

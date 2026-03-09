@@ -91,13 +91,15 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
 
     protected async Task<DataTable> ExecuteInternal(string sql, params DbVariable[] parameters)
     {
+        int trackId = RandomHelper.Random(999999);
         this.CheckConnectionState();
         using (SqlCommand command = this.CreateCommand(parameters))
             try
             {
 #if DEBUG                    
                 Stopwatch sw = Stopwatch.StartNew();
-                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                
+                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, trackId, sql, parameters);
                 Common.DefaultLogger?.LogDebug(logLine);
 #endif         
 
@@ -110,7 +112,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
 #if DEBUG
                     sw.Stop();
                     int slow = (sw.ElapsedMilliseconds > 1000 ? 2 : (sw.ElapsedMilliseconds > 100 ? 1 : 0));
-                    string desc = $"({this.DebugId}) {table.Rows.Count} row(s) returned (at {sw.ElapsedMilliseconds:#,#} ms {(sw.ElapsedMilliseconds > 500 ? "*" : "")}{(sw.ElapsedMilliseconds > 100 ? "*" : "")})";
+                    string desc = $"({this.DebugId}, {trackId}) {table.Rows.Count} row(s) returned (at {sw.ElapsedMilliseconds:#,#} ms {(sw.ElapsedMilliseconds > 500 ? "*" : "")}{(sw.ElapsedMilliseconds > 100 ? "*" : "")})";
 
                     switch (slow)
                     {
@@ -132,7 +134,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
             }
             catch (Exception ex)
             {
-                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, trackId, sql, parameters);
                 Common.DefaultLogger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
                 Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
                 throw;
@@ -152,7 +154,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
         }
         catch (Exception ex)
         {
-            string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, sql, parameters);
+            string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, 0, sql, parameters);
             Common.DefaultLogger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
             Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
             var tex = DbSqlServerProvider.SqlServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;

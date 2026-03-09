@@ -88,6 +88,7 @@ public class DbConfigurationManager
         this.SoftDefinitionsBaseFolder = this.Root.GetValue<string>("SoftDefinitionsBaseFolder", this.SoftDefinitionsBaseFolder);
         this.ReadConnectionInfo();
         this.ReadCacheConfiguration(services);
+        this.ReadPoliciesConfiguration();
     }
 
     public void LoadDbScopeDefinition(string dbName)
