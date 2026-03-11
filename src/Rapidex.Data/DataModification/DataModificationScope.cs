@@ -209,7 +209,12 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
 
         //bool bulkOperationRequired = this.IsBulkOperationRequired(scope);
 
-        IDbEntityMetadata em = scope.ChangedEntities.FirstOrDefault()?.GetMetadata() ?? scope.DeletedEntities.FirstOrDefault()?.GetMetadata();
+        IDbEntityMetadata em = 
+            scope.ChangedEntities.FirstOrDefault()?.GetMetadata() ?? 
+            scope.DeletedEntities.FirstOrDefault()?.GetMetadata() ??
+            scope.BulkUpdates.FirstOrDefault()?.EntityMetadata;
+
+        em.NotNull();
 
         if (scope.ChangedEntities.Any())
         {
@@ -471,7 +476,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         try
         {
             var result = await this.CommitOrApplyChangesInternal();
-            await _its?.Commit();
+            await (_its?.Commit() ?? Task.CompletedTask);
 
             this.PublishAfterCommit(this.ChangesCollection);
 
@@ -482,7 +487,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
             var tex = Common.ExceptionManager.Translate(ex);
             tex.Log();
 
-            _its?.Rollback();
+            await (_its?.Rollback() ?? Task.CompletedTask);
 
             throw;
         }

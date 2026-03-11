@@ -505,6 +505,17 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
     {
         this.CheckConnection();
 
+        switch (query.BulkOperationMode)
+        {
+            case DataUpdateType.Delete:
+                return await this.BulkDeleteInternal(em, query);
+            default:
+                return await this.BulkUpdateInternal(em, query);
+        }
+    }
+
+    protected async Task<IEntityUpdateResult> BulkUpdateInternal(IDbEntityMetadata em, IQueryUpdater query)
+    {
         SqlKata.Query _updateQuery = query.Query.Clone();
         _updateQuery.ClearComponent("select");
         _updateQuery.AsUpdate(query.UpdateData);
@@ -538,6 +549,29 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         {
             long id = row.To<long>("Id");
             uResult.Modified(id);
+        }
+
+        return uResult;
+    }
+
+    protected async Task<IEntityUpdateResult> BulkDeleteInternal(IDbEntityMetadata em, IQueryUpdater query)
+    {
+        SqlKata.Query _deleteQuery = query.Query.Clone();
+        // Query already has AsDelete() set from DbQuery.Delete()
+
+        var compiler = this.GetCompiler();
+        SqlResult result = compiler.Compile(_deleteQuery);
+        string sql = result.ToString();
+
+        // Add RETURNING id for PostgreSQL
+        sql = sql + " RETURNING id";
+        DataTable table = await this.Connection.Execute(sql);
+
+        EntityUpdateResult uResult = new EntityUpdateResult();
+        foreach (DataRow row in table.Rows)
+        {
+            long id = row.To<long>("Id");
+            uResult.Deleted(em.Name, id);
         }
 
         return uResult;
