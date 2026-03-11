@@ -100,7 +100,7 @@ namespace Rapidex.Data.Query
 
         }
 
-        IQuery IQuery.Page(long pageSize, long skip, bool includeTotalCount = true)
+        IQuery IQuery.Page(long pageSize, long skip, bool includeTotalCount)
         {
             return (IQuery)base.Page(pageSize, skip, includeTotalCount);
         }
@@ -266,7 +266,7 @@ namespace Rapidex.Data.Query
 
         async Task<IEntityLoadResult<T>> IQueryLoader<T>.Load()
         {
-            IEntityLoadResult res =await base.Load();
+            IEntityLoadResult res = await base.Load();
             var lres = res.CastTo<T>();
             return lres;
         }

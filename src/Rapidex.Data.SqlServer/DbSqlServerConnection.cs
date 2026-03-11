@@ -89,7 +89,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
     }
 
 
-    protected async Task<DataTable> ExecuteInternal(string sql, params DbVariable[] parameters)
+    protected async Task<DataTable> ExecuteInternal(ResilienceContext context, string sql, params DbVariable[] parameters)
     {
         int trackId = RandomHelper.Random(999999);
         this.CheckConnectionState();
@@ -98,9 +98,9 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
             {
 #if DEBUG                    
                 Stopwatch sw = Stopwatch.StartNew();
-                
-                string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, trackId, sql, parameters);
-                Common.DefaultLogger?.LogDebug(logLine);
+
+                string sqlLogLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, trackId, sql, parameters);
+                Common.DefaultLogger?.LogDebug(sqlLogLine);
 #endif         
 
                 command.CommandText = sql;
@@ -117,10 +117,10 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
                     switch (slow)
                     {
                         case 2:
-                            Common.DefaultLogger?.LogWarning(desc);
+                            Common.DefaultLogger?.LogWarning(desc + "\r\n" + sqlLogLine);
                             break;
                         case 1:
-                            Common.DefaultLogger?.LogInformation(desc);
+                            Common.DefaultLogger?.LogInformation(desc + "\r\n" + sqlLogLine);
                             break;
                         case 0:
                             Common.DefaultLogger?.LogDebug(desc);
@@ -135,8 +135,18 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
             catch (Exception ex)
             {
                 string logLine = DbSqlServerHelper.CreateSqlLog(this.DebugId, trackId, sql, parameters);
-                Common.DefaultLogger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
-                Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+
+                var propKey = new ResiliencePropertyKey<string>("CorrelationId");
+                context.Properties.TryGetValue<string>(propKey, out string correlationId);
+
+                var propKey2 = new ResiliencePropertyKey<int>("AttemptNumber");
+                context.Properties.TryGetValue<int>(propKey2, out int attemptNumber);
+
+                var propKey3 = new ResiliencePropertyKey<int>("MaxRetryCount");
+                context.Properties.TryGetValue<int>(propKey3, out int maxRetryCount);
+
+                string htext = $"({this.DebugId}) CorrelationId: {correlationId}, Retry: {attemptNumber}/{maxRetryCount} \r\n";
+                Common.DefaultLogger?.LogError($"{htext}\r\n{ex.Message}\r\n{logLine}\r\n{sql}\r\n{Environment.StackTrace}");
                 throw;
             }
     }
@@ -149,7 +159,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
             var propKey = new ResiliencePropertyKey<string>("CorrelationId");
             context.Properties.Set(propKey, Guid.NewGuid().ToString());
 
-            var result = await Policies.RetryPipeline.ExecuteAsync(async context => await this.ExecuteInternal(sql, parameters));
+            var result = await Policies.RetryPipeline.ExecuteAsync(async context => await this.ExecuteInternal(context, sql, parameters), context);
             return result;
         }
         catch (Exception ex)
@@ -163,7 +173,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
         }
     }
 
-    protected async Task<DataTable> ExecuteInternal(string sql, DataTable variableTable)
+    protected async Task<DataTable> ExecuteInternal(ResilienceContext context, string sql, DataTable variableTable)
     {
         this.CheckConnectionState();
         using (SqlCommand command = this.CreateCommand())
@@ -180,8 +190,17 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
             }
             catch (Exception ex)
             {
-                Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
-                Common.DefaultLogger?.LogError($"{ex.Message}\r\n{sql}");
+                var propKey = new ResiliencePropertyKey<string>("CorrelationId");
+                context.Properties.TryGetValue<string>(propKey, out string correlationId);
+
+                var propKey2 = new ResiliencePropertyKey<int>("AttemptNumber");
+                context.Properties.TryGetValue<int>(propKey2, out int attemptNumber);
+
+                var propKey3 = new ResiliencePropertyKey<int>("MaxRetryCount");
+                context.Properties.TryGetValue<int>(propKey3, out int maxRetryCount);
+
+                string htext = $"({this.DebugId}) CorrelationId: {correlationId}, Retry: {attemptNumber}/{maxRetryCount} \r\n";
+                Common.DefaultLogger?.LogError($"{htext}\r\n{ex.Message}\r\n{sql}\r\n{Environment.StackTrace}");
                 throw;
             }
     }
@@ -195,7 +214,7 @@ internal class DbSqlServerConnection : IDisposable //TODO: convert to DI + initi
             var propKey = new ResiliencePropertyKey<string>("CorrelationId");
             context.Properties.Set(propKey, Guid.NewGuid().ToString());
 
-            var result = await Policies.RetryPipeline.ExecuteAsync(async context => await this.ExecuteInternal(sql, variableTable));
+            var result = await Policies.RetryPipeline.ExecuteAsync(async context => await this.ExecuteInternal(context, sql, variableTable), context);
             return result;
         }
         catch (Exception ex)

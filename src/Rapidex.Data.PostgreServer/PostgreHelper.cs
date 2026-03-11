@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Npgsql;
 using NpgsqlTypes;
+using Superpower.Model;
 
 namespace Rapidex.Data.PostgreServer;
 
@@ -256,9 +258,24 @@ internal static class PostgreHelper
         }
 
         sb.AppendLine($"-- SQL: ({debugId})");
-        sb.AppendLine(sql);
+
+        // @p0, @__p0__ gibi ifadeleri ${p0} formatına dönüştürür
+        string psql = Regex.Replace(sql, @"@_{0,2}(\w+)_{0,2}", m => "${" + m.Groups[1].Value + "}");
+
+        sb.AppendLine(psql);
 
         return sb.ToString();
+
+    }
+
+    public static void CheckConnection(this NpgsqlConnectionStringBuilder builder)
+    {
+        if (builder.Timeout < 30)
+            builder.Timeout = 30;
+
+        builder.CommandTimeout = 60;
+        if (builder.MaxPoolSize < 5)
+            builder.MaxPoolSize = 5;
 
     }
 }

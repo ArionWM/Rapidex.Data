@@ -213,24 +213,24 @@ namespace Rapidex.Data
             return ((IQueryCriteria)crit).Related(parentEntity, releatedField) as IQuery<T>;
         }
 
-        public static T Sum<T>(this IQueryAggregate query, string field)
+        public static async Task<T> Sum<T>(this IQueryAggregate query, string field)
         {
-            return query.Sum(field).As<T>();
+            return await query.Sum(field).ContinueWith(t => t.Result.As<T>());
         }
 
-        public static T Min<T>(this IQueryAggregate query, string field)
+        public static async Task<T> Min<T>(this IQueryAggregate query, string field)
         {
-            return query.Min(field).As<T>();
+            return await query.Min(field).ContinueWith(t => t.Result.As<T>());
         }
 
-        public static T Max<T>(this IQueryAggregate query, string field)
+        public static async Task<T> Max<T>(this IQueryAggregate query, string field)
         {
-            return query.Max(field).As<T>();
+            return await query.Max(field).ContinueWith(t => t.Result.As<T>());
         }
 
-        public static T Avg<T>(this IQueryAggregate query, string field)
+        public static async Task<T> Avg<T>(this IQueryAggregate query, string field)
         {
-            return query.Avg(field).As<T>();
+            return await query.Avg(field).ContinueWith(t => t.Result.As<T>());
         }
 
 

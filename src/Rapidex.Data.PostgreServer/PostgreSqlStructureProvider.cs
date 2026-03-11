@@ -49,11 +49,8 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
 
     protected void CloseConnection()
     {
-        if (this.Connection != null)
-        {
-            this.Connection.Dispose();
-            this.Connection = null;
-        }
+        this.Connection?.Dispose();
+        this.Connection = null;
     }
 
     protected bool CheckConnection(bool tryMaster = false)
@@ -453,7 +450,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
 
                         alterColumnSql.Append($"ALTER TABLE {tableName} ALTER COLUMN \"{columnName}\" TYPE {typeName}");
 
-                        this.Connection.Execute(alterColumnSql.ToString());
+                        this.Connection.Execute(alterColumnSql.ToString()).Wait();
                     }
                 }
                 else
@@ -463,7 +460,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
                     StringBuilder addColumnSql = new StringBuilder();
                     addColumnSql.Append($"ALTER TABLE {tableName} ADD COLUMN \"{columnName}\" {typeName}");
 
-                    this.Connection.Execute(addColumnSql.ToString());
+                    this.Connection.Execute(addColumnSql.ToString()).Wait();
                 }
             }
             catch (Exception ex)
@@ -500,7 +497,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
             else
             {
                 string sql = this.DdlGenerator.CreateTable(schemaName, em);
-                this.Connection.Execute(sql);
+                this.Connection.Execute(sql).Wait();
             }
 
             if (bres.AddedItems.Any())
@@ -584,7 +581,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
         if (this.IsExists(this.ParentDbProvider.ParentScope.SchemaName, em.TableName))
         {
             string sql = this.DdlGenerator.DropTable(this.ParentDbProvider.ParentScope.SchemaName, em.TableName);
-            this.Connection.Execute(sql);
+            this.Connection.Execute(sql).Wait();
         }
     }
 
@@ -599,10 +596,10 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
         try
         {
             string sql1 = this.DdlGenerator.DropDatabase01(dbName);
-            this.Connection.Execute(sql1);
+            this.Connection.Execute(sql1).Wait();
 
             string sql2 = this.DdlGenerator.DropDatabase02(dbName);
-            this.Connection.Execute(sql2);
+            this.Connection.Execute(sql2).Wait();
         }
         catch (PostgresException pex) when (pex.SqlState == "3D000") // invalid_catalog_name
         {
@@ -627,7 +624,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
         this.Checkinitialized();
 
         string sql1 = this.DdlGenerator.DropSchema(schemaName);
-        this.Connection.Execute(sql1);
+        this.Connection.Execute(sql1).Wait();
     }
 
     public void CreateSequenceIfNotExists(string name, int minValue = -1, int startValue = -1)
@@ -636,7 +633,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
 
         using var provider = (PostgreSqlServerDataModificationProvider)this.ParentDbProvider.GetDataModificationProvider();
         var seq = new PostgreSqlSequence(provider, name);
-        seq.CreateIfNotExists(minValue, startValue);
+        seq.CreateIfNotExists(minValue, startValue).Wait();
     }
 
     public string CheckObjectName(string name)

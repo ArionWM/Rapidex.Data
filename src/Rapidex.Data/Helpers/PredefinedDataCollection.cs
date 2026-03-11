@@ -95,7 +95,7 @@ public class PredefinedDataCollection
                 }
             }
         }
-        work.CommitChanges();
+       await work.CommitChangesAsync();
     }
 
     protected async Task Apply(IDbSchemaScope scope, IDbEntityMetadata em)

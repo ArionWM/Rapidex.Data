@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
 
@@ -9,15 +10,16 @@ namespace Rapidex.Data.PostgreServer;
 
 internal static class PostgreDataSourceProvider
 {
-    public static DictionaryA<NpgsqlDataSource> dataSources = new();
+    private static DictionaryA<ThrottledNpgsqlDataSourceWrapper> DataSources = new();
 
 
-    public static NpgsqlDataSource Get(string connectionString)
+    public static ThrottledNpgsqlDataSourceWrapper Get(string connectionString)
     {
-        var dataSource = dataSources.GetOr(connectionString, () =>
+        var dataSource = DataSources.GetOr(connectionString, () =>
           {
               var dataSource = NpgsqlDataSource.Create(connectionString);
-              return dataSource;
+              var throttledDataSource = new ThrottledNpgsqlDataSourceWrapper(dataSource);
+              return throttledDataSource;
           });
 
         return dataSource;

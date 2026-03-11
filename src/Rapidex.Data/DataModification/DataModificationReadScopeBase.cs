@@ -67,8 +67,8 @@ internal abstract class DataModificationReadScopeBase : IDbDataReadScope, IDispo
         if (queryLoader.Paging.IsPagingSet())
         {
             loadedResult.StartIndex = queryLoader.Paging.StartIndex;
-            loadedResult.PageSize = queryLoader.Paging.PageSize;
-            loadedResult.PageIndex = loadedResult.StartIndex / queryLoader.Paging.PageSize;
+            loadedResult.PageSize = queryLoader.Paging.PageSize ?? 0;
+            loadedResult.PageIndex = loadedResult.StartIndex / (queryLoader.Paging.PageSize ?? 1);
 
             if (queryLoader.Paging.IncludeTotalItemCount)
             {

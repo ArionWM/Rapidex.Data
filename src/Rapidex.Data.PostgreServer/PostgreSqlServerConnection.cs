@@ -13,14 +13,15 @@ namespace Rapidex.Data.PostgreServer;
 
 internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + initialize 
 {
-    private readonly SemaphoreSlim lockObject = new SemaphoreSlim(1, 1);
+    //private readonly SemaphoreSlim lockObject = new SemaphoreSlim(1, 1);
+
 
     private NpgsqlConnection connectionWithTransaction;
 
     protected int DebugId { get; }
     protected string ConnectionString { get; }
 
-    internal NpgsqlDataSource DataSource { get; private set; }
+    internal ThrottledNpgsqlDataSourceWrapper DataSource { get; private set; }
     internal NpgsqlConnection ConnectionWithTransaction { get => connectionWithTransaction; private set => connectionWithTransaction = value; }
     internal NpgsqlTransaction Transaction { get; private set; }
 
@@ -31,22 +32,12 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         this.DebugId = RandomHelper.Random(99999999);
 
         NpgsqlConnectionStringBuilder npgsqlConnectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
-        if (npgsqlConnectionStringBuilder.Timeout < 30)
-            npgsqlConnectionStringBuilder.Timeout = 30;
-
-        npgsqlConnectionStringBuilder.CommandTimeout = 60;
-        if (npgsqlConnectionStringBuilder.MaxPoolSize < 5)
-            npgsqlConnectionStringBuilder.MaxPoolSize = 5;
-
+        npgsqlConnectionStringBuilder.CheckConnection();
 
         this.ConnectionString = npgsqlConnectionStringBuilder.ConnectionString;
         this.ConnectionString.NotEmpty("ConnectionString can't be empty");
         if (this.DataSource == null)
             this.DataSource = PostgreDataSourceProvider.Get(this.ConnectionString);
-
-        //this.Connection = new NpgsqlConnection(this.ConnectionString);
-        //this.Connection.Open();
-        //Common.DefaultLogger?.LogDebug("Connection [{0}, {1}, {2}]: opened.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
     }
 
     protected async Task<NpgsqlConnection> GetNewConnection()
@@ -74,6 +65,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         }
 
         return connection;
+
     }
 
     protected void CloseConnection(ref NpgsqlConnection connection)
@@ -83,6 +75,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
             connection.Close();
             connection.Dispose();
             connection = null;
+            this.DataSource.ReleaseLock();
         }
     }
 
@@ -102,6 +95,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
             this.Transaction.Dispose();
             this.Transaction = null;
         }
+
         if (this.ConnectionWithTransaction != null)
         {
             this.CloseConnection(ref this.connectionWithTransaction);
@@ -114,7 +108,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         {
             if (this.Transaction != null)
             {
-               await this.Transaction.RollbackAsync();
+                await this.Transaction.RollbackAsync();
                 this.Transaction.Dispose();
                 this.Transaction = null;
             }
@@ -155,8 +149,6 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         //PostgreSQL NpgsqlConnection is not support MARS
         try
         {
-            await this.lockObject.WaitAsync();
-
             NpgsqlConnection connection = null;
             if (this.IsTransactionAvailable)
                 connection = this.ConnectionWithTransaction;
@@ -208,7 +200,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         }
         finally
         {
-            this.lockObject.Release();
+            
         }
     }
 
@@ -239,8 +231,6 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         //PostgreSQL NpgsqlConnection is not support MARS
         try
         {
-            await this.lockObject.WaitAsync();
-
             NpgsqlConnection connection = null;
             if (this.IsTransactionAvailable)
                 connection = this.ConnectionWithTransaction;
@@ -269,7 +259,6 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         }
         finally
         {
-            this.lockObject.Release();
         }
     }
 

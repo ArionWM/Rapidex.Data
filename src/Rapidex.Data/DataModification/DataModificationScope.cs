@@ -471,7 +471,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
         try
         {
             var result = await this.CommitOrApplyChangesInternal();
-            _its?.Commit();
+            await _its?.Commit();
 
             this.PublishAfterCommit(this.ChangesCollection);
 

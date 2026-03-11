@@ -568,7 +568,7 @@ public interface IDbInternalTransactionScope : IDisposable
     {
         try
         {
-            this.Commit();
+            this.Commit().Wait();
         }
         catch (Exception ex)
         {

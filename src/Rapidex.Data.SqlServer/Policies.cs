@@ -52,7 +52,14 @@ internal class Policies
             {
                 var propKey = new ResiliencePropertyKey<string>("CorrelationId");
                 args.Context.Properties.TryGetValue(propKey, out var correlationId);
-                Common.DefaultLogger?.LogWarning("{Key} Retrying due to exception: {Message}. Attempt {Attempt}/{MaxAttempts}", correlationId, null, args.AttemptNumber, policies.MaxRetryCount);
+
+                var propKey2 = new ResiliencePropertyKey<int>("AttemptNumber");
+                args.Context.Properties.Set(propKey2, args.AttemptNumber);
+
+                var propKey3 = new ResiliencePropertyKey<int>("MaxRetryCount");
+                args.Context.Properties.Set(propKey3, policies.MaxRetryCount.Value);
+
+                Common.DefaultLogger?.LogWarning("{Key} Retrying. Attempt {Attempt}/{MaxAttempts}", correlationId, args.AttemptNumber, policies.MaxRetryCount);
                 return default;
             }
         };
