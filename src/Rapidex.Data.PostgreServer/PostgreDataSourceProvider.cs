@@ -1,28 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 using Npgsql;
 
 namespace Rapidex.Data.PostgreServer;
 
 internal static class PostgreDataSourceProvider
 {
-    private static DictionaryA<ThrottledNpgsqlDataSourceWrapper> DataSources = new();
-
+    private static readonly ConcurrentDictionary<string, ThrottledNpgsqlDataSourceWrapper> DataSources =
+        new(StringComparer.InvariantCultureIgnoreCase);
 
     public static ThrottledNpgsqlDataSourceWrapper Get(string connectionString)
     {
-        var dataSource = DataSources.GetOr(connectionString, () =>
-          {
-              var dataSource = NpgsqlDataSource.Create(connectionString);
-              var throttledDataSource = new ThrottledNpgsqlDataSourceWrapper(dataSource);
-              return throttledDataSource;
-          });
-
-        return dataSource;
+        return DataSources.GetOrAdd(connectionString, static key =>
+        {
+            var dataSource = NpgsqlDataSource.Create(key);
+            return new ThrottledNpgsqlDataSourceWrapper(dataSource);
+        });
     }
-
 }

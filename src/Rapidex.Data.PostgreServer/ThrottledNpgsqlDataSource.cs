@@ -15,7 +15,9 @@ internal class ThrottledNpgsqlDataSourceWrapper
 
     public async Task AccuireLock()
     {
-        await this.lockObject.WaitAsync(TimeSpan.FromSeconds(30));
+        bool acquired = await this.lockObject.WaitAsync(TimeSpan.FromSeconds(30));
+        if (!acquired)
+            throw new TimeoutException($"Database connection semaphore could not be acquired within 30 seconds.");
     }
 
     public void ReleaseLock()
@@ -37,10 +39,14 @@ internal class ThrottledNpgsqlDataSourceWrapper
 
     public async ValueTask<NpgsqlConnection> OpenConnectionAsync()
     {
-        await this.AccuireLock();
         try
         {
+            await this.AccuireLock();
             return await this.dataSource.NotNull().OpenConnectionAsync();
+        }
+        catch (TimeoutException)
+        {
+            throw;
         }
         catch
         {

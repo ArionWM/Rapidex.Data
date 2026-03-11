@@ -14,9 +14,9 @@ public class PostgreSpecificTests : DbDependedTestsBase<PostgreSqlServerProvider
     }
 
     [Fact]
-    public void TryExhaust()
+    public async Task TryExhaust()
     {
-        Parallel.For(0, 100, async (i) =>
+        await Parallel.ForEachAsync(Enumerable.Range(0, 100), async (i, _) =>
         {
             try
             {
@@ -30,7 +30,7 @@ public class PostgreSpecificTests : DbDependedTestsBase<PostgreSqlServerProvider
 
                 for (int j = 0; j < 10; j++)
                 {
-                   await conn.Execute("SELECT pg_sleep(8)");
+                    await conn.Execute("SELECT pg_sleep(8)");
                 }
             }
             catch (Exception ex)
