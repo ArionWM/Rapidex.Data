@@ -18,7 +18,7 @@ internal class DataModificationScope : DataModificationReadScopeBase, IDbDataMod
     {
         private readonly DataModificationScope scope;
         public bool IsFinalized => this.scope.IsFinalized;
-        public bool IsFinalizing => this.scope.IsFinalizing;
+        public bool IsFinalizing => false; // this.scope.IsFinalizing;
         public IDbDataModificationStaticHost Parent => this.scope.Parent;
         public IDbInternalTransactionScope CurrentTransaction => this.scope.CurrentTransaction;
 

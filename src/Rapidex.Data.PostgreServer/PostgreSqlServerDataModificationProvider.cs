@@ -98,13 +98,38 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        string sqlLog = $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}";
+        Common.DefaultLogger?.LogDebug(sqlLog);
 #endif
 
         DataTable table = await this.Connection.Execute(sql, variables);
 
-        IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
-        return new EntityLoadResult(entities);
+        try
+        {
+            IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
+            return new EntityLoadResult(entities);
+        }
+        catch(ArgumentException)
+        {
+            StringBuilder sb = new();
+            sb.AppendLine("Mapper error");
+            sb.AppendLine("------------------------");
+            sb.AppendLine(sqlLog);
+            sb.AppendLine("------------------------");
+            List<string> columns = new();
+            foreach(DataColumn cl in table.Columns)
+            {
+                columns.Add(cl.ColumnName);
+            }
+            sb.AppendLine("Columns:" + columns.Join(", "));
+
+            Common.DefaultLogger?.LogError(sb.ToString());
+
+            throw;
+        }
+
+
+        
     }
 
     public async Task<IEntityLoadResult> Load(IQueryLoader loader)

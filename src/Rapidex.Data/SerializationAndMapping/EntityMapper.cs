@@ -238,7 +238,7 @@ public class EntityMapper
             {
                 object jConvValue2;
 
-                if(Common.Converter.TryConvert(jConvValue1, fm.Type, out jConvValue2) || Common.Converter.TryConvert(jConvValue1, fm.BaseType, out jConvValue2))
+                if (Common.Converter.TryConvert(jConvValue1, fm.Type, out jConvValue2) || Common.Converter.TryConvert(jConvValue1, fm.BaseType, out jConvValue2))
                     jConvValue1 = jConvValue2;
             }
             value = jConvValue1;
@@ -340,8 +340,10 @@ public class EntityMapper
         return to;
     }
 
-    public IEntity Map(IDbEntityMetadata em, EntityTypeMap map, DataRow from, IEntity fillTo, Action<IEntity> set = null)
+    public IEntity Map(IDbSchemaScope schema, IDbEntityMetadata em, EntityTypeMap map, DataRow from, IEntity fillTo, Action<IEntity> set = null)
     {
+        IDbProvider dbProvider = schema.DbProvider ?? em.Parent.DbScope.DbProvider;
+        var namingHelper = dbProvider.GetNamingHelper();
         foreach (IDbFieldMetadata fm in em.Fields.Values)
         {
             if (!fm.IsPersisted)
@@ -353,7 +355,7 @@ public class EntityMapper
             object value = null;
             string columnName = map.TableFieldMappings.Get(fm.Name) ?? fm.Name;
 
-            value = from[columnName];
+            value = from[namingHelper.CheckColumnName(columnName)];
             if (Convert.IsDBNull(value))
                 value = null;
 
@@ -373,7 +375,7 @@ public class EntityMapper
     public IEntity MapToNew(IDbEntityMetadata em, EntityTypeMap map, DataRow from, Action<IEntity> set = null)
     {
         IEntity instance = Database.EntityFactory.Create(em, this.Parent, false);
-        return this.Map(em, map, from, instance, set);
+        return this.Map(em.Parent.DbScope, em, map, from, instance, set);
     }
 
 

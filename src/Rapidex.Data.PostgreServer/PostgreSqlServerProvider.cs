@@ -16,6 +16,7 @@ public class PostgreSqlServerProvider : IDbProvider
     protected string _databaseName;
     protected bool isInitialized = false;
     protected ILogger logger;
+    protected IDbNamingHelper namingHelper = new PostgreSqlServerNamingHelper();
     protected IServiceProvider ServiceProvider { get; }
     protected NpgsqlConnectionStringBuilder Connectionbuilder { get; set; }
 
@@ -153,5 +154,10 @@ public class PostgreSqlServerProvider : IDbProvider
     {
         this.CheckInitialized();
         return new PostgreSqlServerAuthorizationChecker(this.ConnectionString);
+    }
+
+    public IDbNamingHelper GetNamingHelper()
+    {
+        return this.namingHelper;
     }
 }

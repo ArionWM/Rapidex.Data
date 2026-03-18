@@ -12,6 +12,7 @@ public class DbSqlServerProvider : IDbProvider
     protected bool isInitialized = false;
     protected ILogger logger;
     protected IServiceProvider ServiceProvider { get; }
+    protected IDbNamingHelper namingHelper = new DbSqlServerNamingHelper();
     protected SqlConnectionStringBuilder Connectionbuilder { get; set; }
 
     internal static IExceptionTranslator SqlServerExceptionTranslator { get; } = new DbSqlServerExceptionTranslator();
@@ -140,5 +141,10 @@ public class DbSqlServerProvider : IDbProvider
     {
         //this.CheckInitialized();
         return new DbSqlServerAuthorizationChecker(this.ConnectionString);
+    }
+
+    public IDbNamingHelper GetNamingHelper()
+    {
+        return this.namingHelper;
     }
 }

@@ -96,4 +96,19 @@ public static class ArchiveEntityExtensions
             qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, false),
             qo => qo.Eq(ArchiveEntity.FIELD_IS_ARCHIVED, null));
     }
+
+    public static T Archive<T>(this T ent, bool save = false) where T : IEntity
+    {
+        ent.B<ArchiveEntity>().Archive();
+        if (save)
+            ent.Save();
+        return ent;
+    }
+
+    public static IEnumerable<T> Archive<T>(this IEnumerable<T> ents, bool save = false) where T : IEntity
+    {
+        foreach (T ent in ents)
+            ent.Archive(save);
+        return ents;
+    }
 }

@@ -120,7 +120,8 @@ public class PostgreSqlDdlGenerator
     {
         schemaName = PostgreHelper.CheckObjectName(schemaName);
         sequenceName = PostgreHelper.CheckObjectName(sequenceName);
-        return $"DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.sequences WHERE sequence_schema = '{schemaName}' AND sequence_name = '{sequenceName}') THEN EXECUTE 'CREATE SEQUENCE {schemaName}.{sequenceName} START WITH {currentValue} INCREMENT BY 1 MINVALUE {minValue}'; END IF; END $$;";
+        //return $"DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.sequences WHERE sequence_schema = '{schemaName}' AND sequence_name = '{sequenceName}') THEN EXECUTE 'CREATE SEQUENCE {schemaName}.{sequenceName} START WITH {currentValue} INCREMENT BY 1 MINVALUE {minValue}'; END IF; END $$;";
+        return $"CREATE SEQUENCE IF NOT EXISTS {schemaName}.{sequenceName} START WITH 10000 INCREMENT BY 1 MINVALUE 1;";
     }
 
     public string GetNextSequenceValue(string schemaName, string sequenceName)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -22,6 +23,7 @@ public class DbEntity : IIntEntity, IJsonOnDeserialized
 
     public LoadSource _loadSource { get; set; } = LoadSource.Unknown;
 
+    [IndexerName("__thisValues")]
     public object this[string columnName]
     {
         get { return this.GetValue(columnName); }

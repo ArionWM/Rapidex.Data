@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace Rapidex
     {
         //ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
+        [IndexerName("__thisValues")]
         public TItem this[int index]
         {
             get => this.List[index];

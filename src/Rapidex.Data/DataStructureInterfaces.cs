@@ -418,7 +418,7 @@ public interface IDbProvider
     IDataUnitTestHelper GetTestHelper();
     IDbAuthorizationChecker GetAuthorizationChecker();
 
-
+    IDbNamingHelper GetNamingHelper();
 
 }
 
@@ -539,6 +539,13 @@ public interface IDbEntityUpdater
     Task<IEntityUpdateResult> Delete(IDbEntityMetadata em, IEnumerable<long> ids);
     Task<IEntityUpdateResult> BulkUpdate(IDbEntityMetadata em, IQueryUpdater query);
 
+}
+
+public interface IDbNamingHelper
+{
+    string CheckDatabaseName(string name);
+    string CheckTableName(string name);
+    string CheckColumnName(string name);
 }
 
 public interface IDataUnitTestHelper
