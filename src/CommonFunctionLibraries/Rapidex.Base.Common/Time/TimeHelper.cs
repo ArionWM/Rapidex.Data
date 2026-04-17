@@ -6,13 +6,7 @@ namespace Rapidex;
 
 public static class TimeHelper
 {
-    public static DateTimeOffset WithoutSeconds(this DateTimeOffset time)
-    {
-        if (time.Second > 0 || time.Millisecond > 0 || time.Microsecond > 0)
-            time = new DateTimeOffset(time.Year, time.Month, time.Day, time.Hour, time.Minute, 0, time.Offset);
 
-        return time;
-    }
 
     public static DateTimeOffset Day(this DateTimeOffset time)
     {
@@ -156,6 +150,29 @@ public static class TimeHelper
         DateTimeOffset date = new DateTimeOffset(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second, TimeSpan.Zero);
         return date;
     }
+
+    public static DateTimeOffset WithoutSeconds(this DateTimeOffset time)
+    {
+        if (time.Second > 0 || time.Millisecond > 0 || time.Microsecond > 0)
+            time = new DateTimeOffset(time.Year, time.Month, time.Day, time.Hour, time.Minute, 0, time.Offset);
+
+        return time;
+    }
+
+    public static DateTimeOffset WithoutMinutes(this DateTimeOffset time)
+    {
+        if (time.Minute > 0 || time.Second > 0 || time.Millisecond > 0 || time.Microsecond > 0)
+            time = new DateTimeOffset(time.Year, time.Month, time.Day, time.Hour, 0, 0, time.Offset);
+        return time;
+    }
+
+    public static DateTimeOffset WithoutHours(this DateTimeOffset time)
+    {
+        if (time.Hour > 0 || time.Minute > 0 || time.Second > 0 || time.Millisecond > 0 || time.Microsecond > 0)
+            time = new DateTimeOffset(time.Year, time.Month, time.Day, 0, 0, 0, time.Offset);
+        return time;
+    }
+
 
     public static DateTimeOffset WithoutZone(this DateTimeOffset time)
     {
@@ -398,5 +415,5 @@ public static class TimeHelper
 
         return result.ToArray();
     }
-    
+
 }

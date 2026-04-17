@@ -64,6 +64,8 @@ public static class TypeHelper
 
     public static object CreateInstance(Type type, params object[] parameters)
     {
+        //TODO: Remember choice and use future ...
+
         if (type.IsValueType)
         {
             return Activator.CreateInstance(type);
@@ -74,6 +76,9 @@ public static class TypeHelper
             //Henüz sistem ayağa kalkmamış
             return Activator.CreateInstance(type, parameters);
         }
+
+        if (!parameters.Any() && type.GetConstructors().Any(c => !c.GetParameters().Any()))
+            return Activator.CreateInstance(type); 
 
         if (type.ContainsGenericParameters)
         {

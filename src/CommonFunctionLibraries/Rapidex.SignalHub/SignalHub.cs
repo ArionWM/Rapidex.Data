@@ -39,9 +39,9 @@ internal class SignalHub : ISignalHub
         return this.lastId;
     }
 
-    protected async Task<ISignalHandlingResult> Invoke(SignalHubSubscriber subscriber, ISignalArguments args)
+    protected async Task<ISignalHandlingResult> Invoke(SignalHubSubscription subscription, ISignalArguments args)
     {
-        ISignalHandlingResult resultArgs = await subscriber.Handler.Invoke(args);
+        ISignalHandlingResult resultArgs = await subscription.Handler.Invoke(args);
         return resultArgs;
     }
 
@@ -58,7 +58,7 @@ internal class SignalHub : ISignalHub
     protected virtual async Task<ISignalProcessResult> PublishInternalSynchronous(SignalTopic topic, ISignalArguments args)
     {
 
-        SignalHubSubscriber[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
+        SignalHubSubscription[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
         if (subscribers.IsNullOrEmpty())
             return new SignalProcessResult(SignalProcessStatus.Completed, args);
 
@@ -66,7 +66,7 @@ internal class SignalHub : ISignalHub
 
         List<ISignalHandlingResult> returns = new List<ISignalHandlingResult>();
 
-        foreach (SignalHubSubscriber subs in subscribers)
+        foreach (SignalHubSubscription subs in subscribers)
             try
             {
                 ISignalArguments argsForInvoke = _input.CloneFor(subs.Id);
@@ -104,12 +104,12 @@ internal class SignalHub : ISignalHub
         {
             try
             {
-                SignalHubSubscriber[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
+                SignalHubSubscription[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
                 if (subscribers.IsNullOrEmpty())
                     return;
 
                 ISignalArguments _input = args.Clone<ISignalArguments>();
-                foreach (SignalHubSubscriber subs in subscribers)
+                foreach (SignalHubSubscription subs in subscribers)
                     try
                     {
                         ISignalArguments argsForInvoke = _input.CloneFor(subs.Id);

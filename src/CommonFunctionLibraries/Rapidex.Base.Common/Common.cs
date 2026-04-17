@@ -64,10 +64,19 @@ public class Common
     }
     public static void LoadConfiguration()
     {
+        // ASPNETCORE_ENVIRONMENT (örn. "DevelopmentTest") runtime'da okunur;
+        // Common.EnviromentCode ise derleme zamanı sabitidir (örn. "Development").
+        var runtimeEnv = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
         var cBuilder = new ConfigurationBuilder()
                          .SetBasePath(AppContext.BaseDirectory)
                          .AddJsonFile("appsettings.json", true, true)
                          .AddJsonFile($"appsettings.{Common.EnviromentCode}.json", true, true);
+
+        // Runtime ortamı, derleme zamanı ortamından farklıysa ek dosyayı yükle
+        // (örn. appsettings.DevelopmentTest.json veya appsettings.DevelopmentPrd.json)
+        if (runtimeEnv.IsNOTNullOrEmpty() && runtimeEnv != Common.EnviromentCode)
+            cBuilder.AddJsonFile($"appsettings.{runtimeEnv}.json", true, true);
 
         Common.Configuration = cBuilder.Build();
     }

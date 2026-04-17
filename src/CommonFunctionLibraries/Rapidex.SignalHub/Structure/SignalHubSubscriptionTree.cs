@@ -9,31 +9,31 @@ namespace Rapidex.SignalHub;
 internal class SignalHubSubscriptionTreeItem
 {
     public string Section { get; set; }
-    public List<SignalHubSubscriber> Subscribers { get; set; } = new List<SignalHubSubscriber>();
+    public List<SignalHubSubscription> Subscriptions { get; set; } = new List<SignalHubSubscription>();
     public DictionaryA<SignalHubSubscriptionTreeItem> Items { get; } = new DictionaryA<SignalHubSubscriptionTreeItem>();
 
     public SignalHubSubscriptionTreeItem(string section)
     {
-        Section = section;
+        this.Section = section;
     }
-    public virtual void Add(SignalHubSubscriber subscriber)
+    public virtual void Add(SignalHubSubscription subscription)
     {
         //`<tenantShortName>/<workspace>/<module>/<message>/<entityName>/<entityId>/<fieldName>`
         //Level0 / 1 / 2 / 3 / 4 / 5 / 6
         //# wildcard support after level 3
 
-        if (subscriber.TopicSectionsForLocate.Any())
+        if (subscription.TopicSectionsForLocate.Any())
         {
-            string section = subscriber.TopicSectionsForLocate[0].Trim();
-            subscriber.TopicSectionsForLocate.RemoveAt(0);
+            string section = subscription.TopicSectionsForLocate[0].Trim();
+            subscription.TopicSectionsForLocate.RemoveAt(0);
 
-            if (subscriber.TopicSectionLevelForLocate < 4 && section == "#")
+            if (subscription.TopicSectionLevelForLocate < 4 && section == "#")
             {
                 //Wildcard, but not allowed before level 4
                 throw new InvalidOperationException("Wildcard '#' is not allowed before level 4 in topic sections.");
             }
 
-            subscriber.TopicSectionLevelForLocate++;
+            subscription.TopicSectionLevelForLocate++;
 
             SignalHubSubscriptionTreeItem item = this.Items.GetOr(section, () =>
             {
@@ -42,15 +42,16 @@ internal class SignalHubSubscriptionTreeItem
                 return item;
             });
 
-            item.Add(subscriber);
+            item.Add(subscription);
         }
         else
         {
-            this.Subscribers.Add(subscriber);
+            subscription.LocatedItem = this;
+            this.Subscriptions.Add(subscription);
         }
     }
 
-    public SignalHubSubscriber[] GetSubscribers(string[] sections)
+    public SignalHubSubscription[] GetSubscribers(string[] sections)
     {
         //`<tenantShortName>/<workspace>/<module>/<message>/<entityName>/<entityId>/<fieldName>`
         //Level0 / 1 / 2 / 3 / 4 / 5 / 6
@@ -60,7 +61,7 @@ internal class SignalHubSubscriptionTreeItem
 
         List<string> _sections = new List<string>(sections);
 
-        List<SignalHubSubscriber> subscribers = new List<SignalHubSubscriber>();
+        List<SignalHubSubscription> subscribers = new List<SignalHubSubscription>();
 
         string section = _sections[0];
         _sections.RemoveAt(0);
@@ -77,7 +78,7 @@ internal class SignalHubSubscriptionTreeItem
                 {
                     //Tek seviye wildcard, alt section'lara inilmez
                     //Kısa kalanlar (+ yerine geçer)
-                    subscribers.AddRange(this.Subscribers);
+                    subscribers.AddRange(this.Subscriptions);
                 }
                 else
                 {
@@ -93,7 +94,7 @@ internal class SignalHubSubscriptionTreeItem
             {
                 //Tüm seviye wildcard, alt section'lara inilmez
                 //Kısa kalanlar (# yerine geçer)
-                subscribers.AddRange(this.Subscribers);
+                subscribers.AddRange(this.Subscriptions);
             }
 
         }
@@ -104,7 +105,7 @@ internal class SignalHubSubscriptionTreeItem
             if (subItemDirect != null)
             {
                 //Kısa kalanlar (# yerine geçer)
-                subscribers.AddRange(subItemDirect.Subscribers);
+                subscribers.AddRange(subItemDirect.Subscriptions);
 
                 //Alt section'lara abone olanlar
                 if (_sections.Any())
@@ -116,7 +117,7 @@ internal class SignalHubSubscriptionTreeItem
             if (subItemSectionWildcard != null)
             {
                 if (!_sections.Any())
-                    subscribers.AddRange(subItemSectionWildcard.Subscribers);
+                    subscribers.AddRange(subItemSectionWildcard.Subscriptions);
                 else
                     subscribers.AddRange(subItemSectionWildcard.GetSubscribers(_sections.ToArray()));
             }
@@ -124,7 +125,7 @@ internal class SignalHubSubscriptionTreeItem
             SignalHubSubscriptionTreeItem subItemAllWildcard = this.Items.Get("#");
             if (subItemAllWildcard != null)
             {
-                subscribers.AddRange(subItemAllWildcard.Subscribers);
+                subscribers.AddRange(subItemAllWildcard.Subscriptions);
             }
         }
 
@@ -132,7 +133,7 @@ internal class SignalHubSubscriptionTreeItem
     }
 
 
-    public SignalHubSubscriber[] GetSubscribers(SignalTopic topic)
+    public SignalHubSubscription[] GetSubscribers(SignalTopic topic)
     {
         return this.GetSubscribers(topic.Sections);
     }
@@ -140,23 +141,23 @@ internal class SignalHubSubscriptionTreeItem
 
 internal class SignalHubSubscriptionTree : SignalHubSubscriptionTreeItem
 {
-    protected Dictionary<int, SignalHubSubscriber> subscriberHandlerIndex = new Dictionary<int, SignalHubSubscriber>();
+    protected Dictionary<int, SignalHubSubscription> subscriptionHandlerIndex = new Dictionary<int, SignalHubSubscription>();
 
     public SignalHubSubscriptionTree() : base(null)
     {
     }
 
-    public override void Add(SignalHubSubscriber subscriber)
+    public override void Add(SignalHubSubscription subscription)
     {
-        subscriber.TopicSectionsForLocate.NotEmpty("Subscriber's topic sections cannot be empty.");
-        this.subscriberHandlerIndex.Set(subscriber.Id, subscriber);
-        base.Add(subscriber);
+        subscription.TopicSectionsForLocate.NotEmpty("Subscriber's topic sections cannot be empty.");
+        this.subscriptionHandlerIndex.Set(subscription.Id, subscription);
+        base.Add(subscription);
     }
 
     public virtual void Add(int handlerId, SignalTopic topic, Func<ISignalArguments, Task<ISignalHandlingResult>> handler)
     {
-        var subscriber = new SignalHubSubscriber(handlerId, topic, handler);
-        this.Add(subscriber);
+        var subscription = new SignalHubSubscription(handlerId, topic, handler);
+        this.Add(subscription);
     }
 
     //public void Remove(SignalHubSubscriber subscriber)
@@ -166,11 +167,13 @@ internal class SignalHubSubscriptionTree : SignalHubSubscriptionTreeItem
     //    base.Remove(subscriber);
     //}
 
-    public void Remove(int subscriberId)
+    public void Remove(int subscriptionId)
     {
-        if (this.subscriberHandlerIndex.TryGetValue(subscriberId, out var subscriber))
+        if (this.subscriptionHandlerIndex.TryGetValue(subscriptionId, out var subscription))
         {
-            this.subscriberHandlerIndex.Remove(subscriberId);
+            var item = subscription.LocatedItem.NotNull();
+            item.Subscriptions.Remove(subscription);
+            this.subscriptionHandlerIndex.Remove(subscriptionId);
         }
 
     }

@@ -98,8 +98,14 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 #if DEBUG
-        string sqlLog = $"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}";
-        Common.DefaultLogger?.LogDebug(sqlLog);
+        StringBuilder sb1 = new StringBuilder();
+        foreach (var v in variables)
+        {
+            sb1.AppendLine($"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})");
+        }
+
+        string sqlR = $"{sb1.ToString()} \r\n {sql}";
+        Common.DefaultLogger?.LogDebug(sqlR);
 #endif
 
         DataTable table = await this.Connection.Execute(sql, variables);
@@ -109,15 +115,15 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
             IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
             return new EntityLoadResult(entities);
         }
-        catch(ArgumentException)
+        catch (ArgumentException)
         {
             StringBuilder sb = new();
             sb.AppendLine("Mapper error");
             sb.AppendLine("------------------------");
-            sb.AppendLine(sqlLog);
+            sb.AppendLine(sqlR);
             sb.AppendLine("------------------------");
             List<string> columns = new();
-            foreach(DataColumn cl in table.Columns)
+            foreach (DataColumn cl in table.Columns)
             {
                 columns.Add(cl.ColumnName);
             }
@@ -129,7 +135,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         }
 
 
-        
+
     }
 
     public async Task<IEntityLoadResult> Load(IQueryLoader loader)
@@ -148,7 +154,14 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
+        StringBuilder sb = new StringBuilder();
+        foreach(var v in variables)
+        {
+            sb.AppendLine($"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})");
+        }
+
+        string sqlR = $"{sql} \r\n {sb.ToString()}";
+        Common.DefaultLogger?.LogDebug(sqlR);
 #endif
 
         DataTable table = await this.Connection.Execute(sql, variables);
