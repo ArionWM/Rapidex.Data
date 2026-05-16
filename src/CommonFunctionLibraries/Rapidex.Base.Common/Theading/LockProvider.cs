@@ -73,7 +73,23 @@ public class LockProvider<T>
     /// <param name="idToLock">the unique ID to perform the lock</param>
     public async Task WaitAsync(T idToLock)
     {
-        await LockDictionary.GetOrAdd(idToLock, new InnerSemaphore(1, 1)).WaitAsync();
+        while (true)
+        {
+            var semaphore = LockDictionary.GetOrAdd(idToLock, new InnerSemaphore(1, 1));
+
+            // Önce waiter olarak kayıt ol — artık Release bu semaphore'u dispose edemez
+            semaphore.IncrementWaiters();
+
+            // Hâlâ dictionary'deki aktif semaphore mu kontrol et
+            if (LockDictionary.TryGetValue(idToLock, out var current) && ReferenceEquals(current, semaphore))
+            {
+                await semaphore.WaitAsyncCore();
+                return;
+            }
+
+            // IncrementWaiters çağrılmadan önce zaten remove+dispose edilmişti, geri al ve tekrar dene
+            semaphore.DecrementWaiters();
+        }
     }
 
     /// <summary>
@@ -212,6 +228,12 @@ public class InnerSemaphore : IDisposable
         semaphore?.Dispose();
     }
     public bool HasWaiters => waiters > 0;
+    internal void IncrementWaiters() => Interlocked.Increment(ref waiters);
+    internal void DecrementWaiters() => Interlocked.Decrement(ref waiters);
+
+    // Waiter sayacına dokunmayan core wait metodları
+    internal void WaitCore() => semaphore.Wait();
+    internal async Task WaitAsyncCore() => await semaphore.WaitAsync();
 }
 
 
