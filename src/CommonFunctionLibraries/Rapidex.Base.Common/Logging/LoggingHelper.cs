@@ -15,7 +15,8 @@ public class LoggingHelper
         {
             if (logger != null)
             {
-                logger.LogInformation("{Application}", System.AppDomain.CurrentDomain.FriendlyName);
+                logger.LogInformation("SysInfo");
+                logger.LogInformation(System.AppDomain.CurrentDomain.FriendlyName);
                 logger.LogInformation("Logging system information...");
                 logger.LogInformation("Operating System: {OSDescription}", System.Runtime.InteropServices.RuntimeInformation.OSDescription);
                 logger.LogInformation("OS Architecture: {OSArchitecture}", System.Runtime.InteropServices.RuntimeInformation.OSArchitecture);
