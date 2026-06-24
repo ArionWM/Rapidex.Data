@@ -3,21 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Rapidex.SignalHub;
 
-internal class SignalHub : ISignalHub
+internal class SignalHub : ISignalHub //TODO: Add Stop / Dispose + channel.Complete
 {
 
-    int lastHandlerId = 1000000;
+    internal struct AsyncSignalItem
+    {
+        public SignalTopic Topic { get; }
+        public ISignalArguments Args { get; }
 
+        public AsyncSignalItem(SignalTopic topic, ISignalArguments args)
+        {
+            this.Topic = topic;
+            this.Args = args;
+        }
+    }
+
+    int lastHandlerId = 1000000;
     long lastSignalId = 0;
     const long MAX_SIGNAL_ID = 0x7fffffffffffffffL - 10000;
-
     SemaphoreSlim lastSignalIdLock = new SemaphoreSlim(1, 1);
-
     ITimeProvider timeProvider;
+    private readonly Channel<AsyncSignalItem> channel;
+    private readonly ILogger<SignalHub> logger;
 
 
 #if DEBUG
@@ -37,6 +49,13 @@ internal class SignalHub : ISignalHub
         this.DebugId = RandomHelper.Random(99999999);
 #endif
         this.timeProvider = serviceProvider.GetRequiredService<ITimeProvider>();
+        this.channel = Channel.CreateUnbounded<AsyncSignalItem>(new UnboundedChannelOptions()
+        {
+            SingleReader = true,
+            SingleWriter = false,
+            AllowSynchronousContinuations = false
+        });
+        this.logger = serviceProvider.GetRequiredService<ILogger<SignalHub>>();
     }
 
     protected int GetHandlerId()
@@ -51,7 +70,7 @@ internal class SignalHub : ISignalHub
         try
         {
             Interlocked.Increment(ref this.lastSignalId);
-            if(this.lastSignalId  > MAX_SIGNAL_ID)
+            if (this.lastSignalId > MAX_SIGNAL_ID)
                 this.lastSignalId = 0;
 
             return this.lastSignalId;
@@ -124,36 +143,39 @@ internal class SignalHub : ISignalHub
 
     protected virtual ISignalProcessResult PublishInternalAsynchronous(SignalTopic topic, ISignalArguments args)
     {
-        Task.Run(() =>
-        {
-            try
-            {
-                SignalHubSubscription[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
-                if (subscribers.IsNullOrEmpty())
-                    return;
-
-                ISignalArguments _input = args.Clone<ISignalArguments>();
-                foreach (SignalHubSubscription subs in subscribers)
-                    try
-                    {
-                        ISignalArguments argsForInvoke = _input.CloneFor(subs.Id);
-#pragma warning disable CS4014 
-                        this.Invoke(subs, argsForInvoke);
-#pragma warning restore CS4014 
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.Log();
-                    }
-            }
-            catch (Exception ex)
-            {
-                ex.Log();
-            }
-        });
-
-
+        _ = this.channel.Writer.WriteAsync(new AsyncSignalItem(topic, args));
         return new SignalProcessResult(SignalProcessStatus.Processing, args);
+    }
+
+    protected virtual void ProcessPublishInternalAsynchronous(AsyncSignalItem item)
+    {
+        SignalTopic topic = item.Topic;
+        ISignalArguments args = item.Args;
+
+        try
+        {
+            SignalHubSubscription[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
+            if (subscribers.IsNullOrEmpty())
+                return;
+
+            ISignalArguments _input = args.Clone<ISignalArguments>();
+            foreach (SignalHubSubscription subs in subscribers)
+                try
+                {
+                    ISignalArguments argsForInvoke = _input.CloneFor(subs.Id);
+#pragma warning disable CS4014
+                    this.Invoke(subs, argsForInvoke);
+#pragma warning restore CS4014
+                }
+                catch (Exception ex)
+                {
+                    ex.Log();
+                }
+        }
+        catch (Exception ex)
+        {
+            ex.Log();
+        }
     }
 
     protected virtual async Task<ISignalProcessResult> PublishInternal(SignalTopic topic, ISignalArguments args)
@@ -177,9 +199,13 @@ internal class SignalHub : ISignalHub
         args.Topic.NotNull();
 
         if (this.IsSynchronousSignal(topic, args))
+        {
             return await this.PublishInternalSynchronous(topic, args);
+        }
         else
+        {
             return this.PublishInternalAsynchronous(topic, args);
+        }
     }
 
     public async Task<ISignalProcessResult> PublishAsync(SignalTopic topic, ISignalArguments args)
@@ -219,8 +245,21 @@ internal class SignalHub : ISignalHub
         this.Definitions.Set(signalDefinition.SignalName, signalDefinition);
     }
 
-    public void Start(IServiceProvider serviceProvider)
+    public async Task Start(IServiceProvider serviceProvider)
     {
-
+        _ = Task.Run(async () =>
+        {
+            await foreach (var item in this.channel.Reader.ReadAllAsync(CancellationToken.None))
+            {
+                try
+                {
+                    this.ProcessPublishInternalAsynchronous(item);
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogError(ex, $"{item.Topic}, {item.Args.Id}");
+                }
+            }
+        });
     }
 }

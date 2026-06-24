@@ -42,19 +42,19 @@ public class RegistrationTests : IClassFixture<EachTestClassIsolatedFixtureFacto
         //`<tenantShortName>/<workspace>/<module>/<message>/<entityName>/<entityId>/<fieldName>`
         //Level0 / 1 / 2 / 3 / 4 / 5 / 6
 
-        SignalHubSubscriber[] subscribers0 = tree.GetSubscribers("tenant1/workspace1/module111/signal111/target1");
+        SignalHubSubscription[] subscribers0 = tree.GetSubscribers("tenant1/workspace1/module111/signal111/target1");
         Assert.Equal(2, subscribers0.Length);
         Assert.Contains(subscribers0, subs => subs.Id == 1);
         Assert.Contains(subscribers0, subs => subs.Id == 2);
 
-        SignalHubSubscriber[] subscribers1 = tree.GetSubscribers("tenant1/workspace1/module111/signal222/target1");
+        SignalHubSubscription[] subscribers1 = tree.GetSubscribers("tenant1/workspace1/module111/signal222/target1");
         Assert.Equal(3, subscribers1.Length);
         Assert.Contains(subscribers1, subs => subs.Id == 3);
         Assert.Contains(subscribers1, subs => subs.Id == 4);
         Assert.Contains(subscribers1, subs => subs.Id == 5);
 
 
-        SignalHubSubscriber[] subscribers2 = tree.GetSubscribers("tenant1/workspace1/module111/signal222/target1/123");
+        SignalHubSubscription[] subscribers2 = tree.GetSubscribers("tenant1/workspace1/module111/signal222/target1/123");
         Assert.Equal(2, subscribers2.Length);
         Assert.Contains(subscribers1, subs => subs.Id == 3);
         Assert.Contains(subscribers1, subs => subs.Id == 5);
@@ -109,11 +109,11 @@ public class RegistrationTests : IClassFixture<EachTestClassIsolatedFixtureFacto
         tree.Add(1, topic1, null);
         tree.Add(2, topic2, null);
 
-        SignalHubSubscriber[] subscribers0 = tree.GetSubscribers("tenant1/workspace1/module111/Editing/target1/id1");
+        SignalHubSubscription[] subscribers0 = tree.GetSubscribers("tenant1/workspace1/module111/Editing/target1/id1");
         Assert.Equal(1, subscribers0.Length);
         Assert.Contains(subscribers0, subs => subs.Id == 1);
 
-        SignalHubSubscriber[] subscribers1 = tree.GetSubscribers("tenant1/workspace1/module111/Importing/target1/id1");
+        SignalHubSubscription[] subscribers1 = tree.GetSubscribers("tenant1/workspace1/module111/Importing/target1/id1");
         Assert.Equal(1, subscribers1.Length);
         Assert.Contains(subscribers1, subs => subs.Id == 2);
 

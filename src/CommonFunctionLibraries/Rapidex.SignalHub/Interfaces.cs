@@ -78,7 +78,7 @@ public interface ISignalHub
     ISignalDefinitionCollection Definitions { get; }
 
 
-    void Start(IServiceProvider serviceProvider);
+    Task Start(IServiceProvider serviceProvider);
 
     /// <summary>
     ///     Subscribe to a signal.
