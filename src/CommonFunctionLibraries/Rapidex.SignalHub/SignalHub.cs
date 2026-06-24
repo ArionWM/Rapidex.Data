@@ -10,9 +10,15 @@ namespace Rapidex.SignalHub;
 internal class SignalHub : ISignalHub
 {
 
-    int lastId = 1000000;
+    int lastHandlerId = 1000000;
+
+    long lastSignalId = 0;
+    const long MAX_SIGNAL_ID = 0x7fffffffffffffffL - 10000;
+
+    SemaphoreSlim lastSignalIdLock = new SemaphoreSlim(1, 1);
+
     ITimeProvider timeProvider;
-    
+
 
 #if DEBUG
     public int DebugId { get; private set; }
@@ -20,7 +26,7 @@ internal class SignalHub : ISignalHub
 
     public ISignalDefinitionCollection Definitions { get; } = new SignalDefinitionCollection();
 
-    
+
 
     internal SignalHubSubscriptionTree Subscriptions { get; } = new SignalHubSubscriptionTree();
 
@@ -33,10 +39,28 @@ internal class SignalHub : ISignalHub
         this.timeProvider = serviceProvider.GetRequiredService<ITimeProvider>();
     }
 
-    protected int GetId()
+    protected int GetHandlerId()
     {
-        Interlocked.Increment(ref this.lastId);
-        return this.lastId;
+        Interlocked.Increment(ref this.lastHandlerId);
+        return this.lastHandlerId;
+    }
+
+    protected async Task<long> GetSignalId()
+    {
+        await lastSignalIdLock.WaitAsync();
+        try
+        {
+            Interlocked.Increment(ref this.lastSignalId);
+            if(this.lastSignalId  > MAX_SIGNAL_ID)
+                this.lastSignalId = 0;
+
+            return this.lastSignalId;
+        }
+        finally
+        {
+            lastSignalIdLock.Release();
+        }
+
     }
 
     protected async Task<ISignalHandlingResult> Invoke(SignalHubSubscription subscription, ISignalArguments args)
@@ -144,7 +168,7 @@ internal class SignalHub : ISignalHub
         topic.Check()
             .Sections.NotEmpty();
 
-        args.Id = Guid.NewGuid();
+        args.Id = await this.GetSignalId();
         args.Topic = topic;
         args.SignalName ??= topic.Event;
         args.Time = this.timeProvider.UtcNow;
@@ -169,7 +193,7 @@ internal class SignalHub : ISignalHub
         topic.Check()
             .Sections.NotEmpty();
 
-        int handlerId = this.GetId();
+        int handlerId = this.GetHandlerId();
         this.Subscriptions.Add(handlerId, topic,
             (args) => Task.FromResult(handler.Invoke(args)));
         return Result<int>.Ok(handlerId);
@@ -179,7 +203,7 @@ internal class SignalHub : ISignalHub
     {
         topic.Check()
             .Sections.NotEmpty();
-        int handlerId = this.GetId();
+        int handlerId = this.GetHandlerId();
         this.Subscriptions.Add(handlerId, topic, handler);
         return Result<int>.Ok(handlerId);
     }

@@ -36,7 +36,7 @@ public interface ISignalArguments : ICloneable
     /// <summary>
     /// Unique id of the message. 
     /// </summary>
-    Guid Id { get; set; }
+    long Id { get; set; }
     int HandlerId { get; set; }
     string SignalName { get; set; }
     bool? IsSynchronous { get; set; }

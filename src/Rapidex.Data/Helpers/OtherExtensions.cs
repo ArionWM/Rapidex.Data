@@ -65,7 +65,7 @@ public static class OtherExtensions
 
     public static bool IsPrematureOrEmptyId(this long id)
     {
-        return id <= DatabaseConstants.DEFAULT_EMPTY_ID;
+        return id <= DatabaseConstants.DEFAULT_EMPTY_ID || id == 0;
     }
 
     public static bool IsPersistedRecordId(this long id)

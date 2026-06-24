@@ -169,7 +169,7 @@ public static class ServiceExtensions
         // Console sink
         if (config.WriteToConsole)
         {
-            loggerConfig.WriteTo.Console(outputTemplate: config.OutputTemplate);
+            loggerConfig.WriteTo.Console(levelSwitch: new LoggingLevelSwitch(), outputTemplate: config.OutputTemplate);
         }
 
         // Serilog'u ayarla

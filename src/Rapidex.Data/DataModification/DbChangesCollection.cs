@@ -203,10 +203,12 @@ internal class DbChangesCollection : IDbChangesCollection
 
         if (entity._IsNew)
         {
-            bool isAvailForSamePrematureId = this.newEntities.Any(
-                e =>
-                    !object.Equals(entity.GetId(), DatabaseConstants.DEFAULT_EMPTY_ID) &&
-                    string.Equals(entity._TypeName, e._TypeName, StringComparison.OrdinalIgnoreCase) && object.Equals(entity.GetId(), e.GetId()));
+            var samePremIdsEntities = this.newEntities.Where(e =>
+                                !object.Equals(entity.GetId(), DatabaseConstants.DEFAULT_EMPTY_ID) &&
+                                string.Equals(entity._TypeName, e._TypeName, StringComparison.OrdinalIgnoreCase) && 
+                                object.Equals(entity.GetId(), e.GetId()));
+
+            bool isAvailForSamePrematureId = samePremIdsEntities.Any();
 
             if (isAvailForSamePrematureId)
                 throw new InvalidOperationException($"Same premature ID already exists {entity.GetId()}");

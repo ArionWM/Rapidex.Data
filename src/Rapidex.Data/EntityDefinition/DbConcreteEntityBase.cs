@@ -61,15 +61,36 @@ public abstract class DbConcreteEntityBase : IConcreteEntity, IIntEntity, IDbDef
 
     public void SetValue<T>(string fieldName, T value)
     {
+        //var prop = this._Type.GetPropertyCached(fieldName);
+        //if (prop == null)
+        //{
+        //    this._Values.Set(fieldName, value);
+        //}
+        //else
+        //{
+        //    if (prop.CanWrite)
+        //    {
+        //        //var evalue = EntityMapper.EnsureValueType(prop, this, value);
+        //        prop.SetValue(this, value);
+        //    }
+        //}
+
         var prop = this._Type.GetPropertyCached(fieldName);
         if (prop == null)
         {
-            this._Values.Set(fieldName, value);
+            var em = this.GetMetadata();
+            var fm = em.Fields[fieldName];
+
+            var evalue = EntityMapper.EnsureValueType(fm, this, value);
+            this._Values.Set(fieldName, evalue);
         }
         else
         {
             if (prop.CanWrite)
-                prop.SetValue(this, value);
+            {
+                var evalue = EntityMapper.EnsureValueType(prop, this, value);
+                prop.SetValue(this, evalue);
+            }
         }
     }
 

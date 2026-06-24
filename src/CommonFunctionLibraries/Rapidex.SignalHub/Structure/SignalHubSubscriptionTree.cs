@@ -9,7 +9,7 @@ namespace Rapidex.SignalHub;
 internal class SignalHubSubscriptionTreeItem
 {
     public string Section { get; set; }
-    public List<SignalHubSubscription> Subscriptions { get; set; } = new List<SignalHubSubscription>();
+    public List<SignalHubSubscription> Subscriptions { get; set; } = new List<SignalHubSubscription>(); //TODO: Add locker for manuplations
     public DictionaryA<SignalHubSubscriptionTreeItem> Items { get; } = new DictionaryA<SignalHubSubscriptionTreeItem>();
 
     public SignalHubSubscriptionTreeItem(string section)
@@ -27,10 +27,10 @@ internal class SignalHubSubscriptionTreeItem
             string section = subscription.TopicSectionsForLocate[0].Trim();
             subscription.TopicSectionsForLocate.RemoveAt(0);
 
-            if (subscription.TopicSectionLevelForLocate < 4 && section == "#")
+            if (subscription.TopicSectionLevelForLocate < 3 && section == "#")
             {
-                //Wildcard, but not allowed before level 4
-                throw new InvalidOperationException("Wildcard '#' is not allowed before level 4 in topic sections.");
+                //Wildcard, but not allowed before level 3
+                throw new InvalidOperationException("Wildcard '#' is not allowed before level 3 in topic sections.");
             }
 
             subscription.TopicSectionLevelForLocate++;

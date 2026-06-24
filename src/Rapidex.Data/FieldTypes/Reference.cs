@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading;
 using YamlDotNet.Serialization;
 
 namespace Rapidex.Data;
@@ -65,6 +66,24 @@ public class ReferenceDbFieldMetadata : DbFieldMetadata
 [TypeConverter(typeof(ReferenceBase.ReferenceTypeConverter))]
 public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference, IEmptyCheckObject
 {
+    const Int64 PREMATUREIDMINVALUE = -9000372036854775808;
+    static long PrematureIdIndex = 10000;
+    static object PrematureIdLock = new object();
+
+    static long GetPrematureId()
+    {
+        lock (PrematureIdLock)
+        {
+            PrematureIdIndex++;
+            long id = -1 * PrematureIdIndex;
+            if (id <PREMATUREIDMINVALUE)
+            {
+                PrematureIdIndex = 10000;
+            }
+            return id;
+        }
+    }
+
     public class ReferenceTypeConverter : System.ComponentModel.TypeConverter
     {
         static Type[] SUPPORTED_TYPES = new Type[]
@@ -195,10 +214,10 @@ public abstract class ReferenceBase : BasicBaseDataType<long>, ILazy, IReference
         if (value is IEntity targetEntity)
         {
             long targetId = (long)targetEntity.GetId();
-            if (targetId == DatabaseConstants.DEFAULT_EMPTY_ID)
+            if (targetId.IsEmptyId())
             {
                 //We need premature Id
-                targetId = -1 * RandomHelper.Random64(DatabaseConstants.MAX_ID_VALUE);
+                targetId = GetPrematureId();
                 targetEntity.SetId(targetId);
             }
 

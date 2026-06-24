@@ -12,7 +12,7 @@ namespace Rapidex;
 public class SignalArguments : ISignalArguments
 {
     public DateTimeOffset Time { get; set; } = DateTimeOffset.UtcNow;
-    public Guid Id { get; set; }
+    public long Id { get; set; }
     public SignalTopic Topic { get; set; }
     public int HandlerId { get; set; }
     public string SignalName { get; set; }
