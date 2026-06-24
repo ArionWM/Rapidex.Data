@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace Rapidex;
 
+public enum SignalPriority
+{
+    High = 10,
+    Normal = 20,
+    Low = 30,
+}
+
 public interface ISignalDefinition
 {
     string SignalName { get; }
@@ -32,6 +39,7 @@ public interface ISignalArguments : ICloneable
 {
     DateTimeOffset Time { get; set; }
     SignalTopic Topic { get; set; }
+    SignalPriority Priority { get; set; }
 
     /// <summary>
     /// Unique id of the message. 

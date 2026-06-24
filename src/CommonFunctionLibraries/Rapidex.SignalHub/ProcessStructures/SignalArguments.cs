@@ -14,6 +14,7 @@ public class SignalArguments : ISignalArguments
     public DateTimeOffset Time { get; set; } = DateTimeOffset.UtcNow;
     public long Id { get; set; }
     public SignalTopic Topic { get; set; }
+    public SignalPriority Priority { get; set; } = SignalPriority.Normal;
     public int HandlerId { get; set; }
     public string SignalName { get; set; }
     public bool? IsSynchronous { get; set; }
@@ -34,7 +35,7 @@ public class SignalArguments : ISignalArguments
         return clone;
     }
 
-    public static SignalArguments Create(object data, string? tags = null)
+    public static SignalArguments Create(object data, SignalPriority priority = SignalPriority.Normal, string? tags = null)
     {
         var args = new SignalArguments();
         if(data is  string strData)
@@ -48,6 +49,7 @@ public class SignalArguments : ISignalArguments
             //data.ToJson();
         }
 
+        args.Priority = priority;
         args.Tags = tags;
         return args;
     }

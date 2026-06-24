@@ -11,8 +11,9 @@ namespace Rapidex.SignalHub;
 internal class SignalHub : ISignalHub //TODO: Add Stop / Dispose + channel.Complete
 {
 
-    internal struct AsyncSignalItem
+    internal class AsyncSignalItem : IComparable<AsyncSignalItem>
     {
+
         public SignalTopic Topic { get; }
         public ISignalArguments Args { get; }
 
@@ -20,6 +21,13 @@ internal class SignalHub : ISignalHub //TODO: Add Stop / Dispose + channel.Compl
         {
             this.Topic = topic;
             this.Args = args;
+        }
+
+        public int CompareTo(AsyncSignalItem? other)
+        {
+            if (other is null) return -1;
+
+            return this.Args.Priority.CompareTo(other.Args.Priority);
         }
     }
 
@@ -49,7 +57,7 @@ internal class SignalHub : ISignalHub //TODO: Add Stop / Dispose + channel.Compl
         this.DebugId = RandomHelper.Random(99999999);
 #endif
         this.timeProvider = serviceProvider.GetRequiredService<ITimeProvider>();
-        this.channel = Channel.CreateUnbounded<AsyncSignalItem>(new UnboundedChannelOptions()
+        this.channel = Channel.CreateUnboundedPrioritized<AsyncSignalItem>(new UnboundedPrioritizedChannelOptions<AsyncSignalItem>()
         {
             SingleReader = true,
             SingleWriter = false,
