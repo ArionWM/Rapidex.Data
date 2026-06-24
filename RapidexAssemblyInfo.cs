@@ -16,7 +16,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 #pragma warning disable CS0436
 
-[assembly: AssemblyCompanyAttribute("ProE")]
+[assembly: AssemblyCompanyAttribute("ArionWm")]
 [assembly: AssemblyProductAttribute("Rapidex Application Framework")]
 [assembly: AssemblyVersion(RapidexAssembly.VERSION)]
 #pragma warning disable CS0436 // Type conflicts with imported type
@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyInformationalVersion(RapidexAssembly.VERSION)]
 #pragma warning restore CS0436 // Type conflicts with imported type
 
-[assembly: AssemblyCopyright("Copyright © ProE. 2024")]
+[assembly: AssemblyCopyright("Copyright © ArionWm. 2026")]
 
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
