@@ -201,7 +201,9 @@ internal class SignalHub : ISignalHub //TODO: Add Stop / Dispose + channel.Compl
         args.Id = await this.GetSignalId();
         args.Topic = topic;
         args.SignalName ??= topic.Event;
-        args.Time = this.timeProvider.UtcNow;
+
+        if (args.Time.IsNullOrEmpty())
+            args.Time = this.timeProvider.UtcNow;
 
         args.NotNull();
         args.Topic.NotNull();

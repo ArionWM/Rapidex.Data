@@ -11,7 +11,7 @@ namespace Rapidex;
 //[JsonDerivedBase]
 public class SignalArguments : ISignalArguments
 {
-    public DateTimeOffset Time { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset Time { get; set; } //= DateTimeOffset.UtcNow;
     public long Id { get; set; }
     public SignalTopic Topic { get; set; }
     public SignalPriority Priority { get; set; } = SignalPriority.Normal;
