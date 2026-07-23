@@ -8,18 +8,41 @@ namespace Rapidex.Data.PostgreServer;
 
 internal class PostgreSqlServerNamingHelper : IDbNamingHelper
 {
+    static Dictionary<string, string> cache = new Dictionary<string, string>();
+
     public string CheckColumnName(string name)
     {
-        return PostgreHelper.CheckObjectName(name);
+        if (cache.TryGetValue(name, out string cachedName))
+        {
+            return cachedName;
+        }
+
+        string checkedName = PostgreHelper.CheckObjectName(name);
+        cache[name] = checkedName;
+        return checkedName;
     }
 
     public string CheckDatabaseName(string name)
     {
-        return PostgreHelper.CheckObjectName(name);
+        if (cache.TryGetValue(name, out string cachedName))
+        {
+            return cachedName;
+        }
+
+        string checkedName = PostgreHelper.CheckObjectName(name);
+        cache[name] = checkedName;
+        return checkedName;
     }
 
     public string CheckTableName(string name)
     {
-        return PostgreHelper.CheckObjectName(name);
+        if (cache.TryGetValue(name, out string cachedName))
+        {
+            return cachedName;
+        }
+
+        string checkedName = PostgreHelper.CheckObjectName(name);
+        cache[name] = checkedName;
+        return checkedName;
     }
 }

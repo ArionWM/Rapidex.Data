@@ -8,18 +8,41 @@ namespace Rapidex.Data.SqlServer;
 
 internal class DbSqlServerNamingHelper : IDbNamingHelper
 {
+    static Dictionary<string, string> cache = new Dictionary<string, string>();
+
     public string CheckColumnName(string name)
     {
-        return name.ClearSpecials();
+        if (cache.TryGetValue(name, out string cachedName))
+        {
+            return cachedName;
+        }
+
+        string checkedName = name.ClearSpecials();
+        cache[name] = checkedName;
+        return checkedName;
     }
 
     public string CheckDatabaseName(string name)
     {
-        return name.ClearSpecials();
+        if (cache.TryGetValue(name, out string cachedName))
+        {
+            return cachedName;
+        }
+
+        string checkedName = name.ClearSpecials();
+        cache[name] = checkedName;
+        return checkedName;
     }
 
     public string CheckTableName(string name)
     {
-        return name.ClearSpecials();
+        if (cache.TryGetValue(name, out string cachedName))
+        {
+            return cachedName;
+        }
+
+        string checkedName = name.ClearSpecials();
+        cache[name] = checkedName;
+        return checkedName;
     }
 }

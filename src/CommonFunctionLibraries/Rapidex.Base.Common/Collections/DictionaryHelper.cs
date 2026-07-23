@@ -117,8 +117,6 @@ public static class DictionaryHelper
         dict.NotNull();
         key.NotNull();
 
-        //lock (dict)
-        //{
         if (dict.TryGetValue(key, out TValue value))
             return value;
 
@@ -126,13 +124,12 @@ public static class DictionaryHelper
             throw new InvalidOperationException($"value not found for: {key}");
 
         return default(TValue);
-        //}
     }
 
 
 
 
-    public static TValue GetOr<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> notAvailFunc )
+    public static TValue GetOr<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> notAvailFunc)
     {
         dict.NotNull();
 

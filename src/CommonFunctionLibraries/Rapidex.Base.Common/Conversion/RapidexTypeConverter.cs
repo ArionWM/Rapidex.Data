@@ -9,9 +9,9 @@ namespace Rapidex;
 
 public class RapidexTypeConverter : IManager
 {
-    private static readonly TwoLevelDictionary<Type, Type, IDirectConverter> DirectConverters = new();
+    private static readonly TwoLevelDictionary<Type, Type, IDirectConverter> DirectConverters = new(null);
     private static readonly ConcurrentBag<ICustomTypeConverter> CustomTypeConverters = new();
-    private static readonly TwoLevelDictionary<Type, Type, ICustomTypeConverter> CustomTypeConvertersCache = new();
+    private static readonly TwoLevelDictionary<Type, Type, ICustomTypeConverter> CustomTypeConvertersCache = new(null);
 
 
     static RapidexTypeConverter()

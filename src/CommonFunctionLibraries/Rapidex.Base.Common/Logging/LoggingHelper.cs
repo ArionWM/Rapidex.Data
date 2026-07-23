@@ -30,6 +30,9 @@ public class LoggingHelper
                 logger.LogInformation("User Domain Name: {UserDomainName}", Environment.UserDomainName);
                 logger.LogInformation("User Name: {UserName}", Environment.UserName);
                 logger.LogInformation("CLR Version: {CLRVersion}", Environment.Version.ToString());
+                logger.LogInformation("ENV/DOTNET_ENVIRONMENT: {DotNetEnvironment}", Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "(not set)");
+                logger.LogInformation("ENV/ASPNETCORE_ENVIRONMENT: {AspNetCoreEnvironment}", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "(not set)");
+
 
                 if (Rapidex.Common.Assembly != null)
                 {

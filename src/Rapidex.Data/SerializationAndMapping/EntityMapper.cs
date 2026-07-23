@@ -20,7 +20,7 @@ public class EntityMapper
         public IDbEntityMetadata EntityMetadata { get; set; }
         public List<IDbFieldMetadata> AdvancedFields { get; } = new();
 
-        public ConcurrentDictionary<string, string> TableFieldMappings { get; } = new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase); //TODO: ConcurrentDict
+        public ConcurrentDictionary<string, string> TableFieldMappings { get; } = new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         /// <summary>
         /// Maintains the count of TableFieldMappings to avoid the locking overhead of ConcurrentDictionary.Count
@@ -219,7 +219,7 @@ public class EntityMapper
 
     public static IDataType CreateDataTypeField(IDbFieldMetadata fm, IEntity parent)
     {
-        fm.Type.ShouldSupportTo<IDataType>($"Required data type {fm.Type} (for {fm.Name}) is not IDataType");
+        fm.Type.ShouldSupportTo<IDataType>(); //Remove for performance optimization: $"Required data type {fm.Type} (for {fm.Name}) is not IDataType"
         IDataType dt = TypeHelper.CreateInstance<IDataType>(fm.Type);
         dt.SetupInstance(parent, fm);
         return dt;
@@ -353,7 +353,8 @@ public class EntityMapper
                 continue;
 
             object value = null;
-            string columnName = map.TableFieldMappings.Get(fm.Name) ?? fm.Name;
+            map.TableFieldMappings.TryGetValue(fm.Name, out string columnName);
+            columnName = columnName ?? fm.Name;
 
             value = from[namingHelper.CheckColumnName(columnName)];
             if (Convert.IsDBNull(value))
@@ -412,7 +413,8 @@ public class EntityMapper
 
             object value = null;
 
-            string columnName = map.TableFieldMappings.Get(fm.Name) ?? fm.Name;
+            map.TableFieldMappings.TryGetValue(fm.Name, out string columnName);
+            columnName = columnName ?? fm.Name;
 
             value = from[columnName];
             if (Convert.IsDBNull(value))

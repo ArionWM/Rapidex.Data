@@ -1,17 +1,18 @@
-﻿using Rapidex.Base;
-using Rapidex.Base.Common.Assemblies;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Rapidex.Base;
+using Rapidex.Base.Common.Assemblies;
+using Rapidex.Collections;
 
 namespace Rapidex;
 
 public static class TypeHelper
 {
-
-    readonly static TwoLevelDictionary<Type, string, PropertyInfo> Properties = new TwoLevelDictionary<Type, string, PropertyInfo>();
+    readonly static TwoLevelDictionary2<Type, string, PropertyInfo> Properties = new TwoLevelDictionary2<Type, string, PropertyInfo>(null);
     readonly static TwoLevelList<Type, Type> BaseTypes = new TwoLevelList<Type, Type>();
+    readonly static TwoLevelDictionary2<Type, Type, bool?> SupportToCache = new TwoLevelDictionary2<Type, Type, bool?>(null);
 
     public readonly static Type Type_Int = typeof(int);
     public readonly static Type Type_String = typeof(string);
@@ -30,13 +31,34 @@ public static class TypeHelper
     public readonly static Type Type_XmlNode = typeof(System.Xml.XmlNode);
     public readonly static Type Type_FloatArray = typeof(float[]);
 
+    static TypeHelper()
+    {
+
+    }
+
 
     public static bool IsSupportTo<T>(this Type type)
     {
         if (type == null)
             throw new BaseArgumentNullException("type");
 
-        return typeof(T).IsAssignableFrom(type);
+        Type targetType = typeof(T);
+
+        if (targetType == type)
+        {
+            return true;
+        }
+
+        bool? cachedResult = SupportToCache?.Get(type, targetType);
+        if (cachedResult.HasValue)
+        {
+            return cachedResult.Value;
+        }
+
+        bool result = targetType.IsAssignableFrom(type);
+        SupportToCache?.Set(type, targetType, result);
+
+        return result;
     }
 
     public static bool IsSupportTo(this Type type, Type targetType)
@@ -44,7 +66,21 @@ public static class TypeHelper
         if (type == null)
             throw new BaseArgumentNullException("type");
 
-        return targetType == type || targetType.IsAssignableFrom(type);
+        if (targetType == type)
+        {
+            return true;
+        }
+
+        bool? cachedResult = SupportToCache?.Get(type, targetType);
+        if (cachedResult.HasValue)
+        {
+            return cachedResult.Value;
+        }
+
+        bool result = targetType.IsAssignableFrom(type);
+        SupportToCache?.Set(type, targetType, result);
+
+        return result;
     }
 
     public static bool IsSupportTo(this object obj, Type targetType)
@@ -53,12 +89,29 @@ public static class TypeHelper
         if (type == null)
             throw new BaseArgumentNullException("type");
 
-        return targetType == type || targetType.IsAssignableFrom(type);
+        if (targetType == type)
+        {
+            return true;
+        }
+
+        bool? cachedResult = SupportToCache?.Get(type, targetType);
+        if (cachedResult.HasValue)
+        {
+            return cachedResult.Value;
+        }
+
+        bool result = targetType.IsAssignableFrom(type);
+        SupportToCache?.Set(type, targetType, result);
+
+        return result;
     }
 
     public static bool IsSupportTo<T>(this object obj)
     {
-        return typeof(T).IsAssignableFrom(obj.GetType());
+        Type targetType = typeof(T);
+        Type type = obj?.GetType();
+
+        return IsSupportTo(type, targetType);
     }
 
 
@@ -78,7 +131,7 @@ public static class TypeHelper
         }
 
         if (!parameters.Any() && type.GetConstructors().Any(c => !c.GetParameters().Any()))
-            return Activator.CreateInstance(type); 
+            return Activator.CreateInstance(type);
 
         if (type.ContainsGenericParameters)
         {
@@ -148,13 +201,10 @@ public static class TypeHelper
     public static PropertyInfo GetPropertyCached(this Type type, string propertyName)
     {
         var propDict = Properties.Get(type);
-        var propInfo = propDict?.Get(propertyName);
 
+        propDict.TryGetValue(propertyName, out PropertyInfo propInfo);
         if (propInfo == null)
         {
-
-            //var props = type.GetProperties();
-
             propInfo = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
             if (propInfo != null)
                 Properties.Set(type, propertyName, propInfo);

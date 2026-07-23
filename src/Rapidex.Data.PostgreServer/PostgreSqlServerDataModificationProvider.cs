@@ -97,6 +97,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         string sql = compiledSql.Sql;
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
+        string sqlR = null;
 #if DEBUG
         StringBuilder sb1 = new StringBuilder();
         foreach (var v in variables)
@@ -104,7 +105,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
             sb1.AppendLine($"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})");
         }
 
-        string sqlR = $"{sb1.ToString()} \r\n {sql}";
+        sqlR = $"{sb1.ToString()} \r\n {sql}";
         Common.DefaultLogger?.LogDebug(sqlR);
 #endif
 

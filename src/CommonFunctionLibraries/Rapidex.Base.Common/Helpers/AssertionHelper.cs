@@ -112,12 +112,11 @@ public static class AssertionHelper
 
     public static TObj ShouldSupportTo<TObj>(this object obj, string? message = null)
     {
-        message = message ?? $"Object does not support to {typeof(TObj).Name}, obj type is '{obj?.GetType().Name}'";
-
         if (!obj.IsSupportTo(typeof(TObj)))
         {
+            message = message ?? $"Object does not support to {typeof(TObj).Name}, obj type is '{obj?.GetType().Name}'";
             DebugBreak();
-            throw new BaseValidationException(message ?? $"Object '{obj}' is not support to {typeof(TObj).Name}");
+            throw new BaseValidationException(message);
         }
 
         return (TObj)obj;
@@ -135,8 +134,6 @@ public static class AssertionHelper
 
     public static Type ShouldSupportTo(this Type type, Type desiredType, string? message = null)
     {
-        message = message ?? $"Type does not support to {desiredType.Name}, type is '{type.Name}'";
-
         if (!type.IsSupportTo(desiredType))
         {
             DebugBreak();
@@ -147,8 +144,6 @@ public static class AssertionHelper
 
     public static Type ShouldSupportTo<TType>(this Type type, string? message = null)
     {
-        message = message ?? $"Type does not support to {typeof(TType).Name}, type is '{type.Name}'";
-
         Type desiredType = typeof(TType);
         type.ShouldSupportTo(desiredType, message);
         return type;
@@ -156,10 +151,10 @@ public static class AssertionHelper
 
     public static void ShouldNotSupportTo<TObj>(this object obj, string? message = null)
     {
-        message = message ?? $"Object does support to {typeof(TObj).Name}, obj type is '{obj?.GetType().Name}'";
-
         if (obj.IsSupportTo(typeof(TObj)))
         {
+            message = message ?? $"Object does support to {typeof(TObj).Name}, obj type is '{obj?.GetType().Name}'";
+
             DebugBreak();
             throw new BaseValidationException(message);
         }
