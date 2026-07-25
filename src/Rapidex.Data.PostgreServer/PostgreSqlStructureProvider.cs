@@ -455,7 +455,7 @@ public class PostgreSqlStructureProvider : IDbStructureProvider
                 }
                 else
                 {
-                    Common.DefaultLogger?.LogDebug($"Add column: {fm.Name}");
+                    PostgreHelper.Logger?.LogDebug($"Add column: {fm.Name}");
 
                     StringBuilder addColumnSql = new StringBuilder();
                     addColumnSql.Append($"ALTER TABLE {tableName} ADD COLUMN \"{columnName}\" {typeName}");

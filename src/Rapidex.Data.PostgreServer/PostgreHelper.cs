@@ -244,26 +244,35 @@ internal static class PostgreHelper
     public static string CreateSqlLog(int debugId, string sql, params DbVariable[] parameters)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"-- Executing ({debugId})");
-        if (parameters.IsNOTNullOrEmpty())
+        //sb.AppendLine($"/* d ({debugId}) */ \r\n");
+        if (parameters.IsNullOrEmpty())
         {
-            sb.AppendLine("-- Parameters:");
-            foreach (var param in parameters)
-            {
-                if (NeedQuote(param))
-                    sb.AppendLine($" @set {param.ParameterName.TrimStart('@')} = '{param.Value}' -- ({param.DbType}, {param.Value?.GetType().Name})");
-                else
-                    sb.AppendLine($" @set {param.ParameterName.TrimStart('@')} = {param.Value} -- ({param.DbType}, {param.Value?.GetType().Name})");
-            }
+            sb.AppendLine(sql);
+            return sb.ToString();
         }
-
-        sb.AppendLine($"-- SQL: ({debugId})");
-
-        // @p0, @__p0__ gibi ifadeleri ${p0} formatına dönüştürür
-        string psql = Regex.Replace(sql, @"@_{0,2}(\w+)_{0,2}", m => "${" + m.Groups[1].Value + "}");
-
-        sb.AppendLine(psql);
-
+        string[] types = new string[parameters.Length];
+        string[] values = new string[parameters.Length];
+        Dictionary<string, int> positions = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            DbVariable param = parameters[i];
+            string name = param.ParameterName.TrimStart('@');
+            positions[name] = i + 1;
+            types[i] = GetDataTypeName(param);
+            if (param.Value == null || param.Value == DBNull.Value)
+                values[i] = "NULL";
+            else if (NeedQuote(param))
+                values[i] = $"'{param.Value}'";
+            else
+                values[i] = $"{param.Value}";
+        }
+        string preparedSql = Regex.Replace(sql, @"@(\w+)", m => positions.TryGetValue(m.Groups[1].Value, out int n) ? "$" + n : m.Value);
+        string stmt = $"q{debugId}";
+        sb.AppendLine($"PREPARE {stmt} ({string.Join(", ", types)}) AS");
+        sb.AppendLine(preparedSql.TrimEnd().TrimEnd(';') + ";");
+        sb.AppendLine(" -- EXPLAIN (ANALYZE, BUFFERS)");
+        sb.AppendLine($"EXECUTE {stmt}({string.Join(", ", values)});");
+        sb.AppendLine($"DEALLOCATE {stmt};");
         return sb.ToString();
 
     }
@@ -278,4 +287,24 @@ internal static class PostgreHelper
             builder.MaxPoolSize = 5;
 
     }
+
+
+
+    //For pivot,
+    //TODO: re-engineering required for logging, this is a temporary solution
+    public static ILogger Logger { get; private set; }
+
+    public static RapidexLoggingConfiguration LoggingConfiguration { get; private set; } 
+
+    public static void CheckLogger(IServiceProvider serviceProvider)
+    {
+        if (Logger == null)
+        {
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            Logger = loggerFactory?.CreateLogger("Rapidex.Data.PostgreServer");
+            LoggingConfiguration = serviceProvider.GetService<RapidexLoggingConfiguration>() ?? new RapidexLoggingConfiguration();
+        }
+
+    }
+
 }

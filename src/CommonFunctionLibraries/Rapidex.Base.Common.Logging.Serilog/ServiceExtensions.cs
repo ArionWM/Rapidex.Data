@@ -114,7 +114,7 @@ public static class ServiceExtensions
         configuration.GetSection("RapidexLogging").Bind(config);
         configureOptions?.Invoke(config);
 
-        services.AddSingleton<RapidexLoggingConfiguration>();
+        services.AddSingleton<RapidexLoggingConfiguration>(config);
 
         // Level switch'leri oluþtur
         var defaultMinLevel = ConvertToSerilogLevel(config.DefaultMinimumLevel);
@@ -309,6 +309,8 @@ public static class ServiceExtensions
         {
             var category = kvp.Key;
             var categoryLogPath = Path.Combine(logDir, $"{SanitizeFileName(category)}-.log");
+            var categoryLevel = config.CategoryMinimumLevels.TryGetValue(category, out var lvl)
+                    ? ConvertToSerilogLevel(lvl) : defaultMinLevel;
 
             loggerConfig.WriteTo.Map(
                 le => le.Properties.TryGetValue("SourceContext", out var sourceContext)
@@ -321,7 +323,7 @@ public static class ServiceExtensions
                     {
                         wt.File(
                             categoryLogPath,
-                            levelSwitch: new LoggingLevelSwitch(defaultMinLevel),
+                            levelSwitch: new LoggingLevelSwitch(categoryLevel),
                             rollingInterval: RollingInterval.Day,
                             outputTemplate: config.OutputTemplate,
                             fileSizeLimitBytes: config.MaxLogFileSize,

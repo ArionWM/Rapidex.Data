@@ -21,6 +21,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
     internal PostgreSqlServerConnection Connection { get; set; }
 
     internal string ConnectionString { get; set; }
+    internal int DebugId { get; set; } = new Random().Next(100000, 999999);
 
     public IDbSchemaScope ParentScope { get; }
 
@@ -97,17 +98,6 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         string sql = compiledSql.Sql;
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
-        string sqlR = null;
-#if DEBUG
-        StringBuilder sb1 = new StringBuilder();
-        foreach (var v in variables)
-        {
-            sb1.AppendLine($"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})");
-        }
-
-        sqlR = $"{sb1.ToString()} \r\n {sql}";
-        Common.DefaultLogger?.LogDebug(sqlR);
-#endif
 
         DataTable table = await this.Connection.Execute(sql, variables);
 
@@ -120,9 +110,6 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         {
             StringBuilder sb = new();
             sb.AppendLine("Mapper error");
-            sb.AppendLine("------------------------");
-            sb.AppendLine(sqlR);
-            sb.AppendLine("------------------------");
             List<string> columns = new();
             foreach (DataColumn cl in table.Columns)
             {
@@ -130,7 +117,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
             }
             sb.AppendLine("Columns:" + columns.Join(", "));
 
-            Common.DefaultLogger?.LogError(sb.ToString());
+            PostgreHelper.Logger?.LogError(sb.ToString());
 
             throw;
         }
@@ -152,17 +139,22 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         this.CheckConnection();
 
         string sql = compiledSql.Sql;
+
+#if DEBUG
+        int debugId = Math.Abs(sql.GetHashCode());
+        sql = $"/* d({debugId}) */ \r\n " + sql;
+#else
+        int debugId = this.DebugId;
+#endif
+
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 #if DEBUG
-        StringBuilder sb = new StringBuilder();
-        foreach(var v in variables)
+        if (PostgreHelper.LoggingConfiguration?.DetailedQueries == true)
         {
-            sb.AppendLine($"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})");
+            string logLine = PostgreHelper.CreateSqlLog(debugId, sql, variables);
+            PostgreHelper.Logger?.LogDebug(logLine);
         }
-
-        string sqlR = $"{sql} \r\n {sb.ToString()}";
-        Common.DefaultLogger?.LogDebug(sqlR);
 #endif
 
         DataTable table = await this.Connection.Execute(sql, variables);
@@ -202,7 +194,8 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         }
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug(dbVariables.ToLogStr());
+        if (dbVariables.Count > 0)
+            PostgreHelper.Logger?.LogDebug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();
@@ -261,7 +254,7 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         }
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug(dbVariables.ToLogStr());
+        PostgreHelper.Logger?.LogDebug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();

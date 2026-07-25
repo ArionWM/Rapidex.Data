@@ -51,7 +51,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
             retryCount++;
             if (retryCount > 200)
             {
-                Common.DefaultLogger?.LogError($"Connection is not established after 10 seconds. {this.DebugId}; ConnectionString: {this.ConnectionString}");
+                PostgreHelper.Logger?.LogError($"Connection is not established after 10 seconds. {this.DebugId}; ConnectionString: {this.ConnectionString}");
                 throw new InvalidOperationException("Connection is not established after 10 seconds.");
             }
         }
@@ -146,7 +146,15 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
 
     protected async Task<DataTable> ExecuteInternal(string sql, params DbVariable[] parameters)
     {
-        //PostgreSQL NpgsqlConnection is not support MARS
+        //Note: PostgreSQL NpgsqlConnection does not support MARS (Multiple Active Result Sets)
+
+#if DEBUG
+        int debugId = Math.Abs(sql.GetHashCode());
+        sql = $"/* d({debugId}) */ \r\n " + sql;
+#else
+        int debugId = this.DebugId;
+#endif
+
         try
         {
             NpgsqlConnection connection = null;
@@ -163,8 +171,11 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                     try
                     {
 #if DEBUG
-                        string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
-                        Common.DefaultLogger?.LogDebug(logLine);
+                        if (PostgreHelper.LoggingConfiguration?.DetailedQueries == true)
+                        {
+                            string logLine = PostgreHelper.CreateSqlLog(debugId, sql, parameters);
+                            PostgreHelper.Logger?.LogDebug(logLine);
+                        }
 #endif
 
                         command.CommandText = sql;
@@ -174,7 +185,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                             table.Load(reader);
 
 #if DEBUG
-                            Common.DefaultLogger?.LogDebug($"({this.DebugId}) {table.Rows.Count} row(s) returned");
+                            PostgreHelper.Logger?.LogDebug($"({debugId}) {table.Rows.Count} row(s) returned");
 #endif
 
                             table.CaseSensitive = false;
@@ -183,9 +194,12 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                     }
                     catch (Exception ex)
                     {
-                        string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
-                        Common.DefaultLogger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
-                        Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+                        if (PostgreHelper.LoggingConfiguration?.DetailedQueries == true)
+                        {
+                            string logLine = PostgreHelper.CreateSqlLog(debugId, sql, parameters);
+                            PostgreHelper.Logger?.LogError($"({debugId}) {ex.Message}\r\n{logLine}");
+                        }
+                        PostgreHelper.Logger?.LogWarning($"({debugId}) \r\n" + Environment.StackTrace);
                         throw;
                     }
                 }
@@ -200,7 +214,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         }
         finally
         {
-            
+
         }
     }
 
@@ -217,9 +231,12 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         }
         catch (Exception ex)
         {
-            string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
-            Common.DefaultLogger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
-            Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+            if (PostgreHelper.LoggingConfiguration?.DetailedQueries == true)
+            {
+                string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                PostgreHelper.Logger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
+            }
+            PostgreHelper.Logger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
             var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql) ?? ex;
             tex.Log();
             throw tex;
@@ -245,8 +262,8 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
             }
             catch (Exception ex)
             {
-                Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
-                Common.DefaultLogger?.LogError($"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
+                PostgreHelper.Logger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+                PostgreHelper.Logger?.LogError($"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
                 throw;
             }
             finally
@@ -277,8 +294,8 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         }
         catch (Exception ex)
         {
-            Common.DefaultLogger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
-            Common.DefaultLogger?.LogError($"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
+            PostgreHelper.Logger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+            PostgreHelper.Logger?.LogError($"{this.DebugId}; {ex.Message}\r\n{variableTable.TableName}");
             var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, schemaName + ", " + variableTable.TableName) ?? ex;
             tex.Log();
             throw tex;
@@ -289,7 +306,7 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
     {
         //TODO: Check https://github.com/npgsql/npgsql/issues/1201 NpgsqlConnection.ClearPool(NpgsqlConnection) ?
 
-        //Common.DefaultLogger?.LogDebug("Connection [{0}, {1}, {2}]: closed.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
+        //PostgreHelper.Logger?.LogDebug("Connection [{0}, {1}, {2}]: closed.", this.DebugId, Thread.CurrentThread.ManagedThreadId, this.Connection.ProcessID);
         if (this.connectionWithTransaction != null)
         {
             this.CloseConnection(ref this.connectionWithTransaction);

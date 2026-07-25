@@ -26,6 +26,7 @@ internal class Library : AssemblyDefinitionBase, IRapidexAssemblyDefinition
 
     public override void Initialize(IServiceProvider serviceProvider)
     {
+        PostgreHelper.CheckLogger(serviceProvider);
     }
 
     public override void Start(IServiceProvider serviceProvider)

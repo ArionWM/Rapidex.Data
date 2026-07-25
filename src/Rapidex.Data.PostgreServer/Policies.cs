@@ -61,7 +61,7 @@ internal class Policies
             {
                 var propKey = new ResiliencePropertyKey<string>("CorrelationId");
                 args.Context.Properties.TryGetValue(propKey, out var correlationId);
-                Common.DefaultLogger?.LogWarning("{Key} Retrying due to exception: {Message}. Attempt {Attempt}/{MaxAttempts}", correlationId, null, args.AttemptNumber, policies.MaxRetryCount);
+                PostgreHelper.Logger?.LogWarning("{Key} Retrying due to exception: {Message}. Attempt {Attempt}/{MaxAttempts}", correlationId, null, args.AttemptNumber, policies.MaxRetryCount);
                 return default;
             }
         };

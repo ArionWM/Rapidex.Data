@@ -60,6 +60,12 @@ public class RapidexLoggingConfiguration
     /// </summary>
     public int? RetainedFileCountLimit { get; set; } = 31;
 
+    
+    /// <summary>
+    /// If true, query and parameters logged for DEBUG builds
+    /// </summary>
+    public bool? DetailedQueries { get; set; } = false;
+
     /// <summary>
     /// Belirli kategoriler için özel loglama seviyeleri
     /// Örn: { "Microsoft.AspNetCore", LogLevel.Warning } -> Microsoft.AspNetCore için Warning seviyesi
