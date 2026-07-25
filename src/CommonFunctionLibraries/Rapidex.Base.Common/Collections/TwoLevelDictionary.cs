@@ -1,139 +1,122 @@
-﻿
-using System;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Threading;
 
 namespace Rapidex;
 
-//From ProCore
-public class TwoLevelDictionary<K1, K2, TValue> : Dictionary<K1, Dictionary<K2, TValue>>
+public class TwoLevelDictionary<K1, K2, TValue> where K1 : notnull where K2 : notnull
 {
-    ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim();
-    public TwoLevelDictionary()
-        : base(typeof(K1).IsSupportTo<string>() ? (IEqualityComparer<K1>)StringComparer.InvariantCultureIgnoreCase : null)
-    {
+    private readonly ConcurrentDictionary<K1, ConcurrentDictionary<K2, TValue>> innerDictionary;
+    private readonly IEqualityComparer<K2> k2Comparer;
 
+    public TwoLevelDictionary()
+    {
+        var k1Comparer = typeof(K1).IsSupportTo<string>() ? (IEqualityComparer<K1>)StringComparer.InvariantCultureIgnoreCase : null;
+        k2Comparer = typeof(K2).IsSupportTo<string>() ? (IEqualityComparer<K2>)StringComparer.InvariantCultureIgnoreCase : null;
+        innerDictionary = new ConcurrentDictionary<K1, ConcurrentDictionary<K2, TValue>>(k1Comparer);
     }
 
-    public TwoLevelDictionary(IEqualityComparer<K1> equalityComparer): base(equalityComparer) {
-    
+    public TwoLevelDictionary(IEqualityComparer<K1> equalityComparer)
+    {
+        k2Comparer = typeof(K2).IsSupportTo<string>() ? (IEqualityComparer<K2>)StringComparer.InvariantCultureIgnoreCase : null;
+        innerDictionary = new ConcurrentDictionary<K1, ConcurrentDictionary<K2, TValue>>(equalityComparer);
+    }
 
+    /// <summary>
+    /// key1 için alt sözlüğü döndürür. Mevcutsa hiçbir tahsis yapmaz;
+    /// yoksa static factory ile oluşturur (closure tahsisi olmaz).
+    /// </summary>
+    /// <param name="key1">Birinci seviye anahtar</param>
+    protected ConcurrentDictionary<K2, TValue> GetSubDictionary(K1 key1)
+    {
+        if (innerDictionary.TryGetValue(key1, out var subDict))
+            return subDict;
+
+        return innerDictionary.GetOrAdd(key1, static (_, comparer) => new ConcurrentDictionary<K2, TValue>(comparer), k2Comparer);
     }
 
     protected void SetInternal(K1 key1, K2 key2, TValue value)
     {
-        try
-        {
-            if (!this.ContainsKey(key1))
-            {
-                //StringComparer.InvariantCultureIgnoreCase
-
-                Dictionary<K2, TValue> subDict = null;
-
-                if (typeof(K2).IsSupportTo<string>())
-                    subDict = new Dictionary<K2, TValue>((IEqualityComparer<K2>)StringComparer.InvariantCultureIgnoreCase);
-                else
-                    subDict = new Dictionary<K2, TValue>();
-
-                this.Add(key1, subDict);
-            }
-
-            this[key1].Set(key2, value);
-        }
-        finally
-        {
-
-        }
+        var subDict = this.GetSubDictionary(key1);
+        subDict[key2] = value;
     }
 
     public void Set(K1 key1, K2 key2, TValue value)
     {
-        rwLock.EnterWriteLock();
-
-        try
-        {
-            this.SetInternal(key1, key2, value);
-        }
-        finally
-        {
-            rwLock.ExitWriteLock();
-        }
+        this.SetInternal(key1, key2, value);
     }
 
     protected TValue GetInternal(K1 key1, K2 key2)
     {
-        Dictionary<K2, TValue> dict = this.Get(key1);
-        if (dict == null)
-            return default(TValue);
+        if (innerDictionary.TryGetValue(key1, out var dict))
+        {
+            if (dict.TryGetValue(key2, out var value))
+                return value;
+        }
 
-        return dict.Get(key2);
+        return default;
     }
 
     public TValue Get(K1 key1, K2 key2)
     {
-        rwLock.EnterReadLock();
-        try
+        return this.GetInternal(key1, key2);
+    }
+
+    /// <summary>
+    /// Kayıt yoksa false döndürür. Get(K1,K2) ile farkı; null olarak saklanmış
+    /// bir değeri "kayıt yok" durumundan ayırt edebilmesidir.
+    /// </summary>
+    /// <param name="key1">Birinci seviye anahtar</param>
+    /// <param name="key2">İkinci seviye anahtar</param>
+    /// <param name="value">Bulunan değer</param>
+    public bool TryGetValue(K1 key1, K2 key2, out TValue value)
+    {
+        if (innerDictionary.TryGetValue(key1, out var dict))
         {
-            return this.GetInternal(key1, key2);
+            return dict.TryGetValue(key2, out value);
         }
-        finally
-        {
-            rwLock.ExitReadLock();
-        }
+
+        value = default;
+        return false;
     }
 
     public TValue GetOr(K1 key1, K2 key2, Func<K1, K2, TValue> nofunc)
     {
-        rwLock.EnterUpgradeableReadLock();
-        try
-        {
-            TValue val = this.GetInternal(key1, key2);
-            if (val == null)
-            {
-                rwLock.EnterWriteLock();
-                try
-                {
-                    val = nofunc(key1, key2);
-                    this.SetInternal(key1, key2, val);
-                }
-                finally
-                {
-                    rwLock.ExitWriteLock();
-                }
-            }
-            return val;
-        }
-        finally
-        {
-            rwLock.ExitUpgradeableReadLock();
-        }
+        var subDict = this.GetSubDictionary(key1);
+
+        return subDict.GetOrAdd(key2, _ => nofunc(key1, key2));
     }
 
     public TValue GetOr(K1 key1, K2 key2, Func<TValue> nofunc)
     {
-        rwLock.EnterUpgradeableReadLock();
-        try
+        var subDict = this.GetSubDictionary(key1);
+
+        return subDict.GetOrAdd(key2, _ => nofunc());
+    }
+
+    public ConcurrentDictionary<K2, TValue> Get(K1 key1)
+    {
+        return this.GetSubDictionary(key1);
+    }
+
+    public void Clear()
+    {
+        innerDictionary.Clear();
+    }
+
+    public bool ContainsKey(K1 key1)
+    {
+        return innerDictionary.ContainsKey(key1);
+    }
+
+    public bool ContainsKey(K1 key1, K2 key2)
+    {
+        if (innerDictionary.TryGetValue(key1, out var dict))
         {
-            TValue val = this.GetInternal(key1, key2);
-            if (val == null)
-            {
-                rwLock.EnterWriteLock();
-                try
-                {
-                    val = nofunc();
-                    this.SetInternal(key1, key2, val);
-                }
-                finally
-                {
-                    rwLock.ExitWriteLock();
-                }
-            }
-            return val;
+            return dict.ContainsKey(key2);
         }
-        finally
-        {
-            rwLock.ExitUpgradeableReadLock();
-        }
+        return false;
     }
 }

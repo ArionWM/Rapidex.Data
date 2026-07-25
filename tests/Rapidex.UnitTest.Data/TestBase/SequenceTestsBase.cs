@@ -24,14 +24,14 @@ namespace Rapidex.UnitTest.Data.TestBase
             string sequenceName = "s" + RandomHelper.RandomText(10);
             dbScope.Structure.CreateSequenceIfNotExists(sequenceName, 1);
             var sequence = dbScope.Data.Sequence(sequenceName);
-
-            Assert.True(dbScope.Data.Sequence(sequenceName).CurrentValue == 1);
+            var currentVal = dbScope.Data.Sequence(sequenceName).CurrentValue;
+            Assert.True(currentVal == 1);
 
             sequenceName = "s" + RandomHelper.RandomText(10);
             dbScope.Structure.CreateSequenceIfNotExists(sequenceName, 10000);
             sequence = dbScope.Data.Sequence(sequenceName);
-
-            Assert.True(dbScope.Data.Sequence(sequenceName).CurrentValue == 10000);
+            currentVal = dbScope.Data.Sequence(sequenceName).CurrentValue;
+            Assert.True(currentVal == 10000);
         }
 
         [Fact]

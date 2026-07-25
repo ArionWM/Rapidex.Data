@@ -92,9 +92,13 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         Common.DefaultLogger?.LogDebug($"{sql} \r\n {variables.Select(v => $"{v.ParameterName}: {v.Value} ({v.Value?.GetType()})")}");
 #endif
 
-        DataTable table = await this.Connection.Execute(sql, variables);
+        //Satırlar reader üzerinden doğrudan entity'lere yazılır; ara DataTable üretilmez
+        EntityMapper mapper = this.ParentScope.Mapper;
+        IEntity[] entities = await this.Connection.ExecuteReader(
+            sql,
+            reader => mapper.MapToNew(em, reader, ent => { ent._loadSource = LoadSource.Database; }),
+            variables);
 
-        IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
         return new EntityLoadResult(entities);
     }
 

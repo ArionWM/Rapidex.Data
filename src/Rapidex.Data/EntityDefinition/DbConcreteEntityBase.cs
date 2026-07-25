@@ -76,7 +76,7 @@ public abstract class DbConcreteEntityBase : IConcreteEntity, IIntEntity, IDbDef
         //}
 
         var prop = this._Type.GetPropertyCached(fieldName);
-        if (prop == null)
+        if (prop is null)
         {
             var em = this.GetMetadata();
             var fm = em.Fields[fieldName];
@@ -98,7 +98,7 @@ public abstract class DbConcreteEntityBase : IConcreteEntity, IIntEntity, IDbDef
     {
         //TODO: EntityMetadata'daki setter'lar?
         var prop = this._Type.GetPropertyCached(fieldName);
-        if (prop == null)
+        if (prop is null)
             return this._Values.Get(fieldName);
 
         return prop.GetValue(this, null);
@@ -107,7 +107,7 @@ public abstract class DbConcreteEntityBase : IConcreteEntity, IIntEntity, IDbDef
     public void SetValue(string fieldName, object value)
     {
         var prop = this._Type.GetPropertyCached(fieldName);
-        if (prop == null)
+        if (prop is null)
         {
             var em = this.GetMetadata();
             var fm = em.Fields[fieldName];

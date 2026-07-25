@@ -55,6 +55,10 @@ public class DbFieldMetadata : IDbFieldMetadata
 
     [System.Text.Json.Serialization.JsonIgnore]
     [YamlIgnore]
+    public bool IsAdvancedDataType { get; protected set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [YamlIgnore]
     public virtual Type BaseType { get; set; }
 
     [YamlIgnore]
@@ -105,6 +109,7 @@ public class DbFieldMetadata : IDbFieldMetadata
     protected void SetType(Type type)
     {
         this.type = type;
+        this.IsAdvancedDataType = type != null && type.IsSupportTo<IDataType>();
 
         if (this.BaseType == null)
             this.BaseType = type;

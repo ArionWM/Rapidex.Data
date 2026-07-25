@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -215,6 +216,104 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
         finally
         {
 
+        }
+    }
+
+    /// <summary>
+    /// Sorguyu çalıştırır ve sonucu ara bir DataTable üretmeden reader üzerinden okutur
+    /// </summary>
+    /// <param name="sql">Çalıştırılacak sorgu</param>
+    /// <param name="read">Reader'ı tüketip sonucu üreten işlem</param>
+    /// <param name="parameters">Sorgu parametreleri</param>
+    protected async Task<T> ExecuteReaderInternal<T>(string sql, Func<DbDataReader, T> read, params DbVariable[] parameters)
+    {
+        //Note: PostgreSQL NpgsqlConnection does not support MARS (Multiple Active Result Sets)
+
+#if DEBUG
+        int debugId = Math.Abs(sql.GetHashCode());
+        sql = $"/* d({debugId}) */ \r\n " + sql;
+#else
+        int debugId = this.DebugId;
+#endif
+
+        NpgsqlConnection connection = null;
+        if (this.IsTransactionAvailable)
+            connection = this.ConnectionWithTransaction;
+        else
+            connection = await this.GetNewConnection();
+
+        try
+        {
+            using (var command = this.CreateCommand(connection, parameters))
+            {
+                try
+                {
+#if DEBUG
+                    if (PostgreHelper.LoggingConfiguration?.DetailedQueries == true)
+                    {
+                        string logLine = PostgreHelper.CreateSqlLog(debugId, sql, parameters);
+                        PostgreHelper.Logger?.LogDebug(logLine);
+                    }
+#endif
+
+                    command.CommandText = sql;
+
+                    //Reader, connection kapanmadan önce (finally'den önce) tamamen tüketilir
+                    using (var reader = await command.ExecuteReaderAsync(CommandBehavior.Default))
+                    {
+                        return read(reader);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (PostgreHelper.LoggingConfiguration?.DetailedQueries == true)
+                    {
+                        string logLine = PostgreHelper.CreateSqlLog(debugId, sql, parameters);
+                        PostgreHelper.Logger?.LogError($"({debugId}) {ex.Message}\r\n{logLine}");
+                    }
+                    PostgreHelper.Logger?.LogWarning($"({debugId}) \r\n" + Environment.StackTrace);
+                    throw;
+                }
+            }
+        }
+        finally
+        {
+            if (!this.IsTransactionAvailable && connection != null)
+            {
+                this.CloseConnection(ref connection);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Sorguyu çalıştırır ve sonucu reader üzerinden okutur. <paramref name="read"/> yeniden
+    /// denemede tekrar çağrılabileceği için yan etkisiz olmalıdır.
+    /// </summary>
+    /// <param name="sql">Çalıştırılacak sorgu</param>
+    /// <param name="read">Reader'ı tüketip sonucu üreten işlem</param>
+    /// <param name="parameters">Sorgu parametreleri</param>
+    public async Task<T> ExecuteReader<T>(string sql, Func<DbDataReader, T> read, params DbVariable[] parameters)
+    {
+        try
+        {
+            return await Policies.RetryPipeline.ExecuteAsync(async _ => await this.ExecuteReaderInternal(sql, read, parameters));
+        }
+        catch (Exception ex)
+        {
+            if (PostgreHelper.LoggingConfiguration?.DetailedQueries == true)
+            {
+                string logLine = PostgreHelper.CreateSqlLog(this.DebugId, sql, parameters);
+                PostgreHelper.Logger?.LogError($"({this.DebugId}) {ex.Message}\r\n{logLine}");
+            }
+            PostgreHelper.Logger?.LogWarning($"({this.DebugId}) \r\n" + Environment.StackTrace);
+
+            //Veritabanı kaynaklı olmayan hatalar (örn; mapper) olduğu gibi, yığın izi korunarak yükselir
+            var tex = PostgreSqlServerProvider.PostgreServerExceptionTranslator.Translate(ex, "See details in error logs; \r\n" + sql);
+            if (tex == null)
+                throw;
+
+            tex.Log();
+            throw tex;
         }
     }
 

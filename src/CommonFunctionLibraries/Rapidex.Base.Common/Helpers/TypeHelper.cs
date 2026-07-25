@@ -1,18 +1,30 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Rapidex.Base;
 using Rapidex.Base.Common.Assemblies;
-using Rapidex.Collections;
 
 namespace Rapidex;
 
 public static class TypeHelper
 {
-    readonly static TwoLevelDictionary2<Type, string, PropertyInfo> Properties = new TwoLevelDictionary2<Type, string, PropertyInfo>(null);
+    readonly static TwoLevelDictionary<Type, string, PropertyInfo> Properties = new TwoLevelDictionary<Type, string, PropertyInfo>(null);
     readonly static TwoLevelList<Type, Type> BaseTypes = new TwoLevelList<Type, Type>();
-    readonly static TwoLevelDictionary2<Type, Type, bool?> SupportToCache = new TwoLevelDictionary2<Type, Type, bool?>(null);
+    readonly static TwoLevelDictionary<Type, Type, bool?> SupportToCache = new TwoLevelDictionary<Type, Type, bool?>(null);
+
+    /// <summary>
+    /// Parametresiz public ctor'ı olan tipler için derlenmiş factory'ler.
+    /// Ctor'ı olmayan tipler için null saklanır (negatif cache).
+    /// </summary>
+    readonly static ConcurrentDictionary<Type, Func<object>> ParameterlessFactories = new ConcurrentDictionary<Type, Func<object>>();
+
+    /// <summary>
+    /// Derlenmiş property setter'ları. Public setter'ı olmayan property'ler için null saklanır.
+    /// </summary>
+    readonly static ConcurrentDictionary<PropertyInfo, Action<object, object>> PropertySetters = new ConcurrentDictionary<PropertyInfo, Action<object, object>>();
 
     public readonly static Type Type_Int = typeof(int);
     public readonly static Type Type_String = typeof(string);
@@ -115,13 +127,39 @@ public static class TypeHelper
     }
 
 
+    /// <summary>
+    /// Tipin tek public ctor'ı parametresizse, onun için derlenmiş factory'yi döndürür.
+    /// Aksi halde null döner ve örnekleme DI'a bırakılır. Sonuç (null dahil) cache'lenir.
+    /// </summary>
+    /// <param name="type">Örneği oluşturulacak tip</param>
+    static Func<object> GetParameterlessFactory(Type type)
+    {
+        return ParameterlessFactories.GetOrAdd(type, static t =>
+        {
+            //Birden fazla ctor varsa ctor seçimi ActivatorUtilities'e (DI) bırakılır;
+            //aksi halde enjeksiyonlu ctor'lar sessizce atlanır.
+            ConstructorInfo[] ctors = t.GetConstructors();
+            if (ctors.Length != 1 || ctors[0].GetParameters().Length != 0)
+                return null;
+
+            return Expression.Lambda<Func<object>>(Expression.Convert(Expression.New(ctors[0]), typeof(object))).Compile();
+        });
+    }
+
     public static object CreateInstance(Type type, params object[] parameters)
     {
-        //TODO: Remember choice and use future ...
-
         if (type.IsValueType)
         {
             return Activator.CreateInstance(type);
+        }
+
+        //Parametresiz ctor varsa derlenmiş factory ile oluştur. Reflection ile ctor arama
+        //maliyeti (GetConstructors + GetParameters tahsisleri) her çağrıda tekrarlanmaz.
+        if ((parameters == null || parameters.Length == 0) && !type.IsAbstract && !type.ContainsGenericParameters)
+        {
+            Func<object> factory = GetParameterlessFactory(type);
+            if (factory != null)
+                return factory();
         }
 
         if (Rapidex.Common.InternalServiceProvider == null)
@@ -129,9 +167,6 @@ public static class TypeHelper
             //Henüz sistem ayağa kalkmamış
             return Activator.CreateInstance(type, parameters);
         }
-
-        if (!parameters.Any() && type.GetConstructors().Any(c => !c.GetParameters().Any()))
-            return Activator.CreateInstance(type);
 
         if (type.ContainsGenericParameters)
         {
@@ -198,18 +233,40 @@ public static class TypeHelper
         return (T)CreateInstanceWithDI(Common.ServiceProvider, typeof(T), parameters);
     }
 
+    /// <summary>
+    /// Property için derlenmiş setter döndürür. Public setter yoksa null döner;
+    /// çağıran taraf bu durumda reflection'a düşmelidir (erişim semantiği korunur).
+    /// </summary>
+    /// <param name="property">Setter'ı üretilecek property</param>
+    public static Action<object, object> GetPropertySetterCached(this PropertyInfo property)
+    {
+        return PropertySetters.GetOrAdd(property, static p =>
+        {
+            MethodInfo setMethod = p.GetSetMethod(false);
+            if (setMethod == null)
+                return null;
+
+            ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
+            ParameterExpression value = Expression.Parameter(typeof(object), "value");
+
+            MethodCallExpression body = Expression.Call(
+                Expression.Convert(instance, p.DeclaringType),
+                setMethod,
+                Expression.Convert(value, p.PropertyType));
+
+            return Expression.Lambda<Action<object, object>>(body, instance, value).Compile();
+        });
+    }
+
     public static PropertyInfo GetPropertyCached(this Type type, string propertyName)
     {
-        var propDict = Properties.Get(type);
+        //Not: "property yok" sonucu da cache'lenir. Aksi halde property karşılığı olmayan
+        //alanlar (dictionary tabanlı entity alanları) her erişimde reflection'a gider.
+        if (Properties.TryGetValue(type, propertyName, out PropertyInfo propInfo))
+            return propInfo;
 
-        propDict.TryGetValue(propertyName, out PropertyInfo propInfo);
-        if (propInfo == null)
-        {
-            propInfo = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
-            if (propInfo != null)
-                Properties.Set(type, propertyName, propInfo);
-
-        }
+        propInfo = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
+        Properties.Set(type, propertyName, propInfo);
 
         return propInfo;
     }

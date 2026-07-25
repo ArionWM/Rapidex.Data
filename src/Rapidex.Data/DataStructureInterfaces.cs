@@ -116,6 +116,14 @@ public interface IDbFieldMetadata : IImplementTarget, IComponent
     [JsonIgnore]
     Type Type { get; set; }
 
+    /// <summary>
+    /// Type'ın IDataType olup olmadığı. Sıcak yollarda (mapping) satır başına
+    /// tip kontrolü yapılmaması için Type atanırken bir kez hesaplanır.
+    /// </summary>
+    [YamlIgnore]
+    [JsonIgnore]
+    bool IsAdvancedDataType { get; }
+
     [JsonPropertyName("type")]
     [YamlMember(Alias = "type", Order = -9998)]
     [JsonPropertyOrder(-9998)]

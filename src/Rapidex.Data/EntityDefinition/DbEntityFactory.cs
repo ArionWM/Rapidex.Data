@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -20,6 +21,11 @@ public class DbEntityFactory
 
     protected Dictionary<string, TemplateInfo> Templates { get; set; } = new Dictionary<string, TemplateInfo>();
     protected ReaderWriterLockSlim _templateLock = new ReaderWriterLockSlim();
+
+    /// <summary>
+    /// Çözümlenmiş concrete tipler. Entity başına assembly taraması ve tip doğrulaması yapılmaması için.
+    /// </summary>
+    readonly static ConcurrentDictionary<string, Type> ConcreteTypes = new ConcurrentDictionary<string, Type>(StringComparer.Ordinal);
 
 
 
@@ -50,10 +56,24 @@ public class DbEntityFactory
     }
 
 
+    /// <summary>
+    /// Metadata'daki concrete tip adını çözer. Tip doğrulaması yalnızca ilk çözümlemede yapılır.
+    /// </summary>
+    /// <param name="concreteTypeName">Metadata'da tanımlı concrete tip adı</param>
+    internal static Type ResolveConcreteType(string concreteTypeName)
+    {
+        if (ConcreteTypes.TryGetValue(concreteTypeName, out Type cached))
+            return cached;
+
+        Type concreteType = Common.Assembly.FindType(concreteTypeName);
+        concreteType.ShouldSupportTo<IEntity>($"Concrete type '{concreteTypeName}' must implement IEntity interface.");
+        ConcreteTypes[concreteTypeName] = concreteType;
+        return concreteType;
+    }
+
     protected IEntity CreateConcrete(IDbEntityMetadata entityMetadata, IDbSchemaScope? scope)
     {
-        Type concreteType = Common.Assembly.FindType(entityMetadata.ConcreteTypeName); //TODO: Cache / Dictionary<string,type> for performance 
-        concreteType.ShouldSupportTo<IEntity>($"Concrete type '{entityMetadata.ConcreteTypeName}' must implement IEntity interface.");
+        Type concreteType = ResolveConcreteType(entityMetadata.ConcreteTypeName);
 
         IEntity dbEntity = TypeHelper.CreateInstance<IEntity>(concreteType);
 
@@ -61,7 +81,10 @@ public class DbEntityFactory
         dbEntity._TypeName = entityMetadata.Name;
         dbEntity._DbName = scope?.ParentDbScope.Name;
         dbEntity._SchemaName = scope?.SchemaName;
-        dbEntity.SetId(0L);
+        if (dbEntity is IIntEntity intEntity)
+            intEntity.Id = 0L;
+        else
+            dbEntity.SetId(0L);
         dbEntity.ExternalId = null;
         dbEntity.DbVersion = 0;
         return dbEntity;
@@ -132,6 +155,21 @@ public class DbEntityFactory
 
     public IEntity Create(IDbEntityMetadata em, IDbSchemaScope dbScope, bool forNew)
     {
+        return this.Create(em, dbScope, forNew, true);
+    }
+
+    /// <summary>
+    /// Entity örneği oluşturur
+    /// </summary>
+    /// <param name="em">Entity metadata'sı</param>
+    /// <param name="dbScope">Entity'nin bağlanacağı şema kapsamı</param>
+    /// <param name="forNew">Yeni kayıt için mi oluşturuluyor (premature id alır)</param>
+    /// <param name="ensureDataTypes">
+    /// IDataType alanları burada ilklendirilsin mi. Yükleme yolunda mapper bu alanları
+    /// zaten dolduracağı için false verilir; aksi halde her alan için gereksiz bir örnek üretilir.
+    /// </param>
+    public IEntity Create(IDbEntityMetadata em, IDbSchemaScope dbScope, bool forNew, bool ensureDataTypes)
+    {
         em.NotNull();
         dbScope.NotNull();
 
@@ -163,7 +201,9 @@ public class DbEntityFactory
         }
 
         newEntity._TypeName = em.Name;
-        newEntity.EnsureDataTypeInitialization();
+
+        if (ensureDataTypes)
+            newEntity.EnsureDataTypeInitialization();
 
         return newEntity;
     }
@@ -213,6 +253,8 @@ public class DbEntityFactory
 
     public void Clear()
     {
+        ConcreteTypes.Clear();
+
         _templateLock.EnterWriteLock();
         try
         {

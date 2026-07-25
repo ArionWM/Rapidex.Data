@@ -99,31 +99,24 @@ internal class PostgreSqlServerDataModificationProvider : IDbDataModificationPov
         DbVariable[] variables = DbVariable.Get(compiledSql.NamedBindings);
 
 
-        DataTable table = await this.Connection.Execute(sql, variables);
+        //Satırlar reader üzerinden doğrudan entity'lere yazılır; ara DataTable üretilmez
+        EntityMapper mapper = this.ParentScope.Mapper;
 
         try
         {
-            IEntity[] entities = this.ParentScope.Mapper.MapToNew(em, table, ent => { ent._loadSource = LoadSource.Database; });
+            IEntity[] entities = await this.Connection.ExecuteReader(
+                sql,
+                reader => mapper.MapToNew(em, reader, ent => { ent._loadSource = LoadSource.Database; }),
+                variables);
+
             return new EntityLoadResult(entities);
         }
-        catch (ArgumentException)
+        catch (ArgumentException ex)
         {
-            StringBuilder sb = new();
-            sb.AppendLine("Mapper error");
-            List<string> columns = new();
-            foreach (DataColumn cl in table.Columns)
-            {
-                columns.Add(cl.ColumnName);
-            }
-            sb.AppendLine("Columns:" + columns.Join(", "));
-
-            PostgreHelper.Logger?.LogError(sb.ToString());
-
+            //Eksik alan ve mevcut kolonlar hata mesajında yer alır
+            PostgreHelper.Logger?.LogError("Mapper error\r\n" + ex.Message);
             throw;
         }
-
-
-
     }
 
     public async Task<IEntityLoadResult> Load(IQueryLoader loader)
