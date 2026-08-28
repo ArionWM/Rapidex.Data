@@ -159,7 +159,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         }
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug(dbVariables.ToLogStr());
+        //Common.DefaultLogger?.LogDebug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();
@@ -213,7 +213,7 @@ internal class DbSqlServerDataModificationProvider : IDbDataModificationPovider,
         }
 
 #if DEBUG
-        Common.DefaultLogger?.LogDebug(dbVariables.ToLogStr());
+        //Common.DefaultLogger?.LogDebug(dbVariables.ToLogStr());
 #endif
 
         return dbVariables.ToArray();

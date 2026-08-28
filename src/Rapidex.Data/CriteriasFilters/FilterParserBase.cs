@@ -91,6 +91,7 @@ internal class FilterParserBase
         .Or(Character.EqualTo('*'))
         .Or(Character.EqualTo('/'))
         .Or(Character.EqualTo('-'))
+        .Or(Character.EqualTo('_'))
         .Or(Character.EqualTo('%'))
         .AtLeastOnce(), FilterTokens.String)
     //.Match(Span.MatchedBy(Character.AnyChar), MyTokens.String)
