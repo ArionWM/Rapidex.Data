@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -249,10 +250,12 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                 try
                 {
 #if DEBUG
+                    Stopwatch sw = null;
                     if (PostgreHelper.LoggingConfiguration?.DetailedQueries == true)
                     {
                         string logLine = PostgreHelper.CreateSqlLog(debugId, sql, parameters);
                         PostgreHelper.Logger?.LogDebug(logLine);
+                        sw = Stopwatch.StartNew();
                     }
 #endif
 
@@ -261,8 +264,23 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                     //Reader, connection kapanmadan önce (finally'den önce) tamamen tüketilir
                     using (var reader = await command.ExecuteReaderAsync(CommandBehavior.Default))
                     {
+#if DEBUG
+                        sw?.Stop();
+                        if (sw != null)
+                            if (sw.ElapsedMilliseconds > 500)
+                            {
+                                PostgreHelper.Logger?.LogWarning($"({debugId}) took {sw.ElapsedMilliseconds} ms!!");
+                            }
+                            else
+                            {
+                                PostgreHelper.Logger?.LogDebug($"({debugId}) took {sw.ElapsedMilliseconds} ms.");
+                            }
+#endif
+
                         return read(reader);
                     }
+
+
                 }
                 catch (Exception ex)
                 {
@@ -273,6 +291,10 @@ internal class PostgreSqlServerConnection : IDisposable //TODO: convert to DI + 
                     }
                     PostgreHelper.Logger?.LogWarning($"({debugId}) \r\n" + Environment.StackTrace);
                     throw;
+                }
+                finally
+                {
+
                 }
             }
         }

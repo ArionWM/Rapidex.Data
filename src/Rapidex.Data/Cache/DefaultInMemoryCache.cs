@@ -30,7 +30,7 @@ internal class DefaultInMemoryCache : ICache
         {
             mcOptions.SizeLimit = Database.Configuration.CacheConfigurationInfo.InMemory.ItemLimit.Value;
         }
-        
+
         this.Cache = mcache ?? new MemoryCache(mcOptions);
     }
 
@@ -49,25 +49,39 @@ internal class DefaultInMemoryCache : ICache
 
     public virtual async Task<T> GetOrSet<T>(string key, Func<T> valueFactory)
     {
-        if (!this.Cache.TryGetValue(key, out T value))
+        try
         {
-            value = await Task.Run(valueFactory);
-            this.Cache.Set(key, value, this.GetOptions());
+            if (!this.Cache.TryGetValue(key, out T value))
+            {
+                value = await Task.Run(valueFactory);
+                this.Cache.Set(key, value, this.GetOptions());
+            }
+            return value;
         }
-        return value;
+        catch (ObjectDisposedException)
+        {
+            return default(T);
+        }
     }
 
     public virtual Task Remove(string key)
     {
-        this.Cache.Remove(key);
+        try
+        {
+            this.Cache.Remove(key);
+        }
+        catch (ObjectDisposedException) { }
         return Task.CompletedTask;
     }
 
     public virtual Task Set<T>(string key, T value)
     {
+        try
+        {
 
-
-        this.Cache.Set(key, value, this.GetOptions());
+            this.Cache.Set(key, value, this.GetOptions());
+        }
+        catch (ObjectDisposedException) { }
         return Task.CompletedTask;
     }
 
