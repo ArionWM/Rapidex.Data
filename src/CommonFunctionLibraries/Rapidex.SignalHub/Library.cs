@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.SignalHub")]
 [assembly: InternalsVisibleTo("Rapidex.UnitTest.Data")]
-[assembly: InternalsVisibleTo("Rapidex.UnitTest.Data")]
 
 
 namespace Rapidex.SignalHub;

@@ -15,7 +15,7 @@ public class DbConfigurationManager
     /// <summary>
     /// For test purposes, different master database configuration for different provider
     /// </summary>
-    internal string DatabaseSectionParentName { get; set; } = null;
+    public string DatabaseSectionParentName { get; set; } = null;
     public string RapidexSectionName { get; set; } = "Rapidex";
     public string DatabaseSectionName { get; set; } = "Databases";
     public string SoftDefinitionsBaseFolder { get; set; } = "App_Content";

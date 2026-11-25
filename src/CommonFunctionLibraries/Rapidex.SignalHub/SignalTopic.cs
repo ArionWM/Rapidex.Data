@@ -122,7 +122,7 @@ public class SignalTopic : ICloneable, IComparable<SignalTopic>, IEquatable<Sign
     protected void Validate()
     {
         if (this.DatabaseOrTenant.IsNullOrEmpty())
-            throw new ArgumentException("Tenant is required for SignalTopic");
+            throw new ArgumentException("DatabaseOrTenant is required for SignalTopic");
         if (this.Workspace.IsNullOrEmpty())
             throw new ArgumentException("Workspace is required for SignalTopic");
         if (this.Module.IsNullOrEmpty())
