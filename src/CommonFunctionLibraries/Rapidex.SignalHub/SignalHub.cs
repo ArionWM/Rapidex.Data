@@ -160,6 +160,10 @@ internal class SignalHub : ISignalHub //TODO: Add Stop / Dispose + channel.Compl
         SignalTopic topic = item.Topic;
         ISignalArguments args = item.Args;
 
+#if DEBUG
+        string topicForDebug = topic;
+#endif
+
         try
         {
             SignalHubSubscription[] subscribers = this.Subscriptions.GetSubscribers(topic.Sections.ToArray());
@@ -188,6 +192,10 @@ internal class SignalHub : ISignalHub //TODO: Add Stop / Dispose + channel.Compl
 
     protected virtual async Task<ISignalProcessResult> PublishInternal(SignalTopic topic, ISignalArguments args)
     {
+#if DEBUG
+        string topicForDebug = topic;
+#endif
+
         if (topic.SignalDefinition == null)
         {
             topic.SignalDefinition = this.Definitions.Get(topic.Event);

@@ -17,7 +17,7 @@ internal class ThrottledNpgsqlDataSourceWrapper
     {
         bool acquired = await this.lockObject.WaitAsync(TimeSpan.FromSeconds(60));
         if (!acquired)
-            throw new TimeoutException($"Database connection semaphore could not be acquired within 30 seconds.");
+            throw new TimeoutException($"(Rapidex) Database connection semaphore could not be acquired within 30 seconds (check pool sizes).");
     }
 
     public void ReleaseLock()
