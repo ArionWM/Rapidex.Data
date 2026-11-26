@@ -14,6 +14,7 @@ namespace Rapidex.Data.Query
 
         public async Task<object> Avg(string field)
         {
+            this.CheckFilters();
             field = this.Schema.Structure.CheckObjectName(field);
 
             this.Query.ClearComponent("select");
@@ -30,6 +31,7 @@ namespace Rapidex.Data.Query
 
         public async Task<long> Count()
         {
+            this.CheckFilters();
             this.Query.ClearComponent("select");
             this.Query.AsCount(new string[] { this.GetFieldName(this.EntityMetadata.PrimaryKey.Name) });
             //this.Query.AsCount(new string[] { this.EntityMetadata.PrimaryKey.Name });
@@ -45,6 +47,7 @@ namespace Rapidex.Data.Query
 
         public async Task<bool> Exist()
         {
+            this.CheckFilters();
             SqlKata.Query _query = this.Query.Clone();
             _query.ClearComponent("select");
             _query.Select(this.GetFieldName(this.EntityMetadata.PrimaryKey.Name));
@@ -61,6 +64,7 @@ namespace Rapidex.Data.Query
 
         public async Task<object> Max(string field)
         {
+            this.CheckFilters();
             field = this.Schema.Structure.CheckObjectName(field);
 
             this.Query.ClearComponent("select");
@@ -77,6 +81,7 @@ namespace Rapidex.Data.Query
 
         public async Task<object> Min(string field)
         {
+            this.CheckFilters();
             field = this.Schema.Structure.CheckObjectName(field);
 
             this.Query.ClearComponent("select");
@@ -93,6 +98,7 @@ namespace Rapidex.Data.Query
 
         public async Task<object> Sum(string field)
         {
+            this.CheckFilters();
             field = this.Schema.Structure.CheckObjectName(field);
 
             this.Query.ClearComponent("select");

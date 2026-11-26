@@ -12,6 +12,11 @@ internal class DbQueryLoader : DbQueryOrder, IQueryLoader
     public virtual bool ForceUseQueryCache { get; protected set; }
     public virtual bool ForceSkipQueryCache { get; protected set; }
 
+    /// <summary>
+    /// Load / aggregate yollarında ve Clone sonrası çift uygulamayı önlemek için.
+    /// </summary>
+    protected bool filtersChecked;
+
     public DbQueryLoader(IDbSchemaScope schema, IDbEntityMetadata em, int aliasNo) : base(schema, em, aliasNo)
     {
     }
@@ -68,6 +73,8 @@ internal class DbQueryLoader : DbQueryOrder, IQueryLoader
         newLoader.Paging = this.Paging;
         newLoader.Order = this.Order;
         newLoader.Alias = this.Alias;
+        if (newLoader is DbQueryLoader typed)
+            typed.filtersChecked = this.filtersChecked;
         return newLoader;
     }
 
@@ -89,10 +96,15 @@ internal class DbQueryLoader : DbQueryOrder, IQueryLoader
 
     public IQueryLoader CheckFilters()
     {
-       foreach (var provider in this.Schema.ParentDbScope.CriteriaProviders)
-       {
-           provider.Check(this);
-       }
-       return this;
+        if (this.filtersChecked)
+            return this;
+
+        foreach (var provider in this.Schema.ParentDbScope.CriteriaProviders)
+        {
+            provider.Check(this);
+        }
+
+        this.filtersChecked = true;
+        return this;
     }
 }

@@ -9,288 +9,287 @@ using System.Threading.Tasks;
 using static Rapidex.Data.RelationN2N;
 using static Rapidex.Data.RelationOne2N;
 
-namespace Rapidex.Data
+namespace Rapidex.Data;
+
+public static class QueryExtenders
 {
-    public static class QueryExtenders
+    public static T Map<T>(this T qc, string entityName) where T : IQueryCriteria
     {
-        public static T Map<T>(this T qc, string entityName) where T : IQueryCriteria
-        {
-            var em = qc.Schema.ParentDbScope.Metadata.Get(entityName);
-            qc.Map(em);
-            return qc;
-        }
+        var em = qc.Schema.ParentDbScope.Metadata.Get(entityName);
+        qc.Map(em);
+        return qc;
+    }
 
-        public static T Map<T, Entity>(this T qc)
-            where Entity : IConcreteEntity
-            where T : IQueryCriteria
-        {
-            var em = qc.Schema.ParentDbScope.Metadata.Get<Entity>();
-            qc.Map(em);
-            return qc;
-        }
+    public static T Map<T, Entity>(this T qc)
+        where Entity : IConcreteEntity
+        where T : IQueryCriteria
+    {
+        var em = qc.Schema.ParentDbScope.Metadata.Get<Entity>();
+        qc.Map(em);
+        return qc;
+    }
 
-        public static T NotEq<T>(this T qc, string field, object value) where T : IQueryCriteria
-        {
-            return (T)qc.Not(q => q.Eq(field, value));
+    public static T NotEq<T>(this T qc, string field, object value) where T : IQueryCriteria
+    {
+        return (T)qc.Not(q => q.Eq(field, value));
 
-
-        }
-
-        public static T NotLike<T>(this T qc, string field, object value) where T : IQueryCriteria
-        {
-            return (T)qc.Not(q => q.Like(field, value));
-        }
-
-        public static T NotIn<T>(this T qc, string field, params object[] values) where T : IQueryCriteria
-        {
-            return (T)qc.Not(q => q.In(field, values));
-        }
-
-        public static T NotBetween<T>(this T qc, string field, object value1, object value2) where T : IQueryCriteria
-        {
-            return (T)qc.Not(q => q.Between(field, value1, value2));
-        }
-
-        public static T Native<T>(this T qc, string native) where T : IQueryCriteria
-        {
-            throw new NotImplementedException();
-        }
-
-        public static T Kata<T>(this T qc, Action<SqlKata.Query> kataQuery) where T : IQueryCriteria
-        {
-            throw new NotImplementedException();
-        }
-
-        //public static Entity FindA<T>(this T qc, long id) 
-        //    where T : IQuery<Entity> 
-        //    where Entity :IConcreteEntity
-        //{
-        //    return (Entity)qc.Eq(DatabaseConstants.FIELD_ID, id).First();
-        //}
-
-        public static async Task<IEntity> Find<T>(this T qc, long id)
-                where T : IQuery
-        {
-            return await qc.Eq(DatabaseConstants.FIELD_ID, id).First();
-
-        }
-
-
-        public static IQuery IdEq(this IQuery qo, long id)
-        {
-            return qo.Eq(DatabaseConstants.FIELD_ID, id);
-        }
-
-        public static IQuery<T> IdEq<T>(this IQuery<T> qo, long id) where T : IConcreteEntity
-        {
-            return qo.Eq(DatabaseConstants.FIELD_ID, id);
-        }
-
-
-        public static IQueryOrder Asc(this IQueryOrder qo, params string[] fields)
-        {
-            return qo.OrderBy(OrderDirection.Asc, fields);
-        }
-
-        public static IQueryOrder Desc(this IQueryOrder qo, params string[] fields)
-        {
-            return qo.OrderBy(OrderDirection.Desc, fields);
-        }
-
-
-        public static IQuery Asc(this IQuery qo, params string[] fields)
-        {
-            return qo.OrderBy(OrderDirection.Asc, fields);
-        }
-
-        public static IQuery Desc(this IQuery qo, params string[] fields)
-        {
-            return qo.OrderBy(OrderDirection.Desc, fields);
-        }
-
-        public static IQuery<T> Asc<T>(this IQuery<T> qo, params string[] fields) where T : IConcreteEntity
-        {
-            return qo.OrderBy(OrderDirection.Asc, fields);
-        }
-
-        public static IQuery<T> Desc<T>(this IQuery<T> qo, params string[] fields) where T : IConcreteEntity
-        {
-            return qo.OrderBy(OrderDirection.Desc, fields);
-        }
-
-
-        //IsActive
-
-
-        public static IQuery GetQuery(this IDbDataReadScope dmm, string entityName)
-        {
-            var em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName)
-                .NotNull($"Metadata for '{entityName}' not found");
-            return dmm.GetQuery(em);
-        }
-
-
-        public static IDbCriteriaParser FindParser(this IEnumerable<IDbCriteriaParser> parsers, string filter)
-        {
-            foreach (var parser in parsers)
-            {
-                if (parser.IsYours(filter))
-                    return parser;
-            }
-
-            throw new InvalidOperationException($"No parser found for filter '{filter}'");
-
-        }
-
-        public static IQueryCriteria ReleatedN2N(this IQueryCriteria crit, IEntity parentEntity, string releatedField)
-        {
-            var parentEm = parentEntity.GetMetadata();
-            var parentFm = parentEm.Fields.Get(releatedField);
-            var relFm = parentFm as VirtualRelationN2NDbFieldMetadata;
-            relFm.NotNull($"{parentEm.Name} / {releatedField} is not available or not N2N relation");
-
-            var targetEm = crit.Schema.ParentDbScope.Metadata.Get(relFm.TargetEntityName)
-                .NotNull($"Metadata for '{relFm.TargetEntityName}' not found");
-
-            //if (crit.EntityMetadata != relFm.TargetEntityMetadata)
-            //    throw new InvalidOperationException($"Field '{releatedField}' parent metadata different ('{crit.EntityMetadata.Name}')");
-
-            JunctionHelper.SetEntitiesCriteria(crit.Schema, relFm, parentEntity, crit);
-
-            return crit;
-        }
-
-        public static IQuery<T> ReleatedN2N<T>(this IQuery<T> crit, IEntity parentEntity, string releatedField) where T : IConcreteEntity
-        {
-            return ((IQueryCriteria)crit).ReleatedN2N(parentEntity, releatedField) as IQuery<T>;
-        }
-
-        public static IQueryCriteria ReleatedOne2N(this IQueryCriteria crit, IEntity parentEntity, string releatedField)
-        {
-
-            var parentEm = parentEntity.GetMetadata();
-            var parentFm = parentEm.Fields.Get(releatedField);
-            var relFm = parentFm as VirtualRelationOne2NDbFieldMetadata;
-            relFm.NotNull($"{parentEm.Name} / {releatedField} is not available or not One2N relation");
-
-            var detailFm = crit.EntityMetadata.Fields.Get(relFm.DetailParentFieldName);
-
-            if (crit.EntityMetadata != relFm.ReferencedEntityMetadata)
-                throw new InvalidOperationException($"Field '{releatedField}' is not a reference field in entity '{crit.EntityMetadata.Name}'");
-
-            crit.Eq(detailFm.Name, parentEntity.GetId());
-
-            return crit;
-        }
-
-        public static IQuery<T> ReleatedOne2N<T>(this IQuery<T> crit, IEntity parentEntity, string releatedField) where T : IConcreteEntity
-        {
-            return ((IQueryCriteria)crit).ReleatedOne2N(parentEntity, releatedField) as IQuery<T>;
-        }
-
-        public static IQueryCriteria Related(this IQueryCriteria crit, IEntity parentEntity, string releatedField)
-        {
-            var parentEm = parentEntity.GetMetadata();
-            var parentFm = parentEm.Fields.Get(releatedField);
-
-            switch (parentFm)
-            {
-                case VirtualRelationOne2NDbFieldMetadata relFm:
-                    crit.ReleatedOne2N(parentEntity, releatedField);
-                    break;
-                case VirtualRelationN2NDbFieldMetadata relFm:
-                    crit.ReleatedN2N(parentEntity, releatedField);
-                    break;
-                default:
-                    throw new InvalidOperationException($"Field '{releatedField}' is not a reference field in entity '{crit.EntityMetadata.Name}'");
-            }
-
-            return crit;
-        }
-
-        public static IQuery<T> Related<T>(this IQuery<T> crit, IEntity parentEntity, string releatedField) where T : IConcreteEntity
-        {
-            return ((IQueryCriteria)crit).Related(parentEntity, releatedField) as IQuery<T>;
-        }
-
-        public static async Task<T> Sum<T>(this IQueryAggregate query, string field)
-        {
-            return await query.Sum(field).ContinueWith(t => t.Result.As<T>());
-        }
-
-        public static async Task<T> Min<T>(this IQueryAggregate query, string field)
-        {
-            return await query.Min(field).ContinueWith(t => t.Result.As<T>());
-        }
-
-        public static async Task<T> Max<T>(this IQueryAggregate query, string field)
-        {
-            return await query.Max(field).ContinueWith(t => t.Result.As<T>());
-        }
-
-        public static async Task<T> Avg<T>(this IQueryAggregate query, string field)
-        {
-            return await query.Avg(field).ContinueWith(t => t.Result.As<T>());
-        }
-
-
-        public static void AndOverExisting(this SqlKata.Query query, Action<SqlKata.Query> additional)
-        {
-            var existing = query.GetComponents("where");
-            query.ClearComponent("where");
-            query.Where(combined =>
-            {
-                if (existing.Count > 0)
-                {
-                    combined.Where(branch =>
-                    {
-                        foreach (var clause in existing)
-                            branch.AddComponent("where", clause.Clone());
-                        return branch;
-                    });
-                }
-
-                combined.Where(branch =>
-                {
-                    additional(branch);
-                    return branch;
-                });
-                return combined;
-            });
-        }
-
-        public static T AndOverExisting<T>(this T target, Action<IQueryCriteria> additional) where T : IQueryCriteria
-        {
-            additional.NotNull();
-            var kata = target.Query;
-            var existing = kata.GetComponents("where");
-            kata.ClearComponent("where");
-            // And/Or ile aynı: alias alt indeksi + aynı Alias
-            var host = (DbQueryBase)(object)target;
-            kata.Where(combined =>
-            {
-                // Dal 1: daha önce yazılmış where'ler
-                if (existing.Count > 0)
-                {
-                    combined.Where(branch =>
-                    {
-                        foreach (var clause in existing)
-                            branch.AddComponent("where", clause.Clone());
-                        return branch;
-                    });
-                }
-                // Dal 2: Rapidex Action → DbQueryCriteria → NestedCondition
-                var auth = new DbQueryCriteria(
-                    target.Schema,
-                    target.EntityMetadata,
-                    host.GetAliasSubIndex());
-                auth.Alias = target.Alias;
-                additional(auth);
-                combined.Where(_ => auth.Query);
-                return combined;
-            });
-            return target;
-        }
 
     }
+
+    public static T NotLike<T>(this T qc, string field, object value) where T : IQueryCriteria
+    {
+        return (T)qc.Not(q => q.Like(field, value));
+    }
+
+    public static T NotIn<T>(this T qc, string field, params object[] values) where T : IQueryCriteria
+    {
+        return (T)qc.Not(q => q.In(field, values));
+    }
+
+    public static T NotBetween<T>(this T qc, string field, object value1, object value2) where T : IQueryCriteria
+    {
+        return (T)qc.Not(q => q.Between(field, value1, value2));
+    }
+
+    public static T Native<T>(this T qc, string native) where T : IQueryCriteria
+    {
+        throw new NotImplementedException();
+    }
+
+    public static T Kata<T>(this T qc, Action<SqlKata.Query> kataQuery) where T : IQueryCriteria
+    {
+        throw new NotImplementedException();
+    }
+
+    //public static Entity FindA<T>(this T qc, long id) 
+    //    where T : IQuery<Entity> 
+    //    where Entity :IConcreteEntity
+    //{
+    //    return (Entity)qc.Eq(DatabaseConstants.FIELD_ID, id).First();
+    //}
+
+    public static async Task<IEntity> Find<T>(this T qc, long id)
+            where T : IQuery
+    {
+        return await qc.Eq(DatabaseConstants.FIELD_ID, id).First();
+
+    }
+
+
+    public static IQuery IdEq(this IQuery qo, long id)
+    {
+        return qo.Eq(DatabaseConstants.FIELD_ID, id);
+    }
+
+    public static IQuery<T> IdEq<T>(this IQuery<T> qo, long id) where T : IConcreteEntity
+    {
+        return qo.Eq(DatabaseConstants.FIELD_ID, id);
+    }
+
+
+    public static IQueryOrder Asc(this IQueryOrder qo, params string[] fields)
+    {
+        return qo.OrderBy(OrderDirection.Asc, fields);
+    }
+
+    public static IQueryOrder Desc(this IQueryOrder qo, params string[] fields)
+    {
+        return qo.OrderBy(OrderDirection.Desc, fields);
+    }
+
+
+    public static IQuery Asc(this IQuery qo, params string[] fields)
+    {
+        return qo.OrderBy(OrderDirection.Asc, fields);
+    }
+
+    public static IQuery Desc(this IQuery qo, params string[] fields)
+    {
+        return qo.OrderBy(OrderDirection.Desc, fields);
+    }
+
+    public static IQuery<T> Asc<T>(this IQuery<T> qo, params string[] fields) where T : IConcreteEntity
+    {
+        return qo.OrderBy(OrderDirection.Asc, fields);
+    }
+
+    public static IQuery<T> Desc<T>(this IQuery<T> qo, params string[] fields) where T : IConcreteEntity
+    {
+        return qo.OrderBy(OrderDirection.Desc, fields);
+    }
+
+
+    //IsActive
+
+
+    public static IQuery GetQuery(this IDbDataReadScope dmm, string entityName)
+    {
+        var em = dmm.ParentSchema.ParentDbScope.Metadata.Get(entityName)
+            .NotNull($"Metadata for '{entityName}' not found");
+        return dmm.GetQuery(em);
+    }
+
+
+    public static IDbCriteriaParser FindParser(this IEnumerable<IDbCriteriaParser> parsers, string filter)
+    {
+        foreach (var parser in parsers)
+        {
+            if (parser.IsYours(filter))
+                return parser;
+        }
+
+        throw new InvalidOperationException($"No parser found for filter '{filter}'");
+
+    }
+
+    public static IQueryCriteria ReleatedN2N(this IQueryCriteria crit, IEntity parentEntity, string releatedField)
+    {
+        var parentEm = parentEntity.GetMetadata();
+        var parentFm = parentEm.Fields.Get(releatedField);
+        var relFm = parentFm as VirtualRelationN2NDbFieldMetadata;
+        relFm.NotNull($"{parentEm.Name} / {releatedField} is not available or not N2N relation");
+
+        var targetEm = crit.Schema.ParentDbScope.Metadata.Get(relFm.TargetEntityName)
+            .NotNull($"Metadata for '{relFm.TargetEntityName}' not found");
+
+        //if (crit.EntityMetadata != relFm.TargetEntityMetadata)
+        //    throw new InvalidOperationException($"Field '{releatedField}' parent metadata different ('{crit.EntityMetadata.Name}')");
+
+        JunctionHelper.SetEntitiesCriteria(crit.Schema, relFm, parentEntity, crit);
+
+        return crit;
+    }
+
+    public static IQuery<T> ReleatedN2N<T>(this IQuery<T> crit, IEntity parentEntity, string releatedField) where T : IConcreteEntity
+    {
+        return ((IQueryCriteria)crit).ReleatedN2N(parentEntity, releatedField) as IQuery<T>;
+    }
+
+    public static IQueryCriteria ReleatedOne2N(this IQueryCriteria crit, IEntity parentEntity, string releatedField)
+    {
+
+        var parentEm = parentEntity.GetMetadata();
+        var parentFm = parentEm.Fields.Get(releatedField);
+        var relFm = parentFm as VirtualRelationOne2NDbFieldMetadata;
+        relFm.NotNull($"{parentEm.Name} / {releatedField} is not available or not One2N relation");
+
+        var detailFm = crit.EntityMetadata.Fields.Get(relFm.DetailParentFieldName);
+
+        if (crit.EntityMetadata != relFm.ReferencedEntityMetadata)
+            throw new InvalidOperationException($"Field '{releatedField}' is not a reference field in entity '{crit.EntityMetadata.Name}'");
+
+        crit.Eq(detailFm.Name, parentEntity.GetId());
+
+        return crit;
+    }
+
+    public static IQuery<T> ReleatedOne2N<T>(this IQuery<T> crit, IEntity parentEntity, string releatedField) where T : IConcreteEntity
+    {
+        return ((IQueryCriteria)crit).ReleatedOne2N(parentEntity, releatedField) as IQuery<T>;
+    }
+
+    public static IQueryCriteria Related(this IQueryCriteria crit, IEntity parentEntity, string releatedField)
+    {
+        var parentEm = parentEntity.GetMetadata();
+        var parentFm = parentEm.Fields.Get(releatedField);
+
+        switch (parentFm)
+        {
+            case VirtualRelationOne2NDbFieldMetadata relFm:
+                crit.ReleatedOne2N(parentEntity, releatedField);
+                break;
+            case VirtualRelationN2NDbFieldMetadata relFm:
+                crit.ReleatedN2N(parentEntity, releatedField);
+                break;
+            default:
+                throw new InvalidOperationException($"Field '{releatedField}' is not a reference field in entity '{crit.EntityMetadata.Name}'");
+        }
+
+        return crit;
+    }
+
+    public static IQuery<T> Related<T>(this IQuery<T> crit, IEntity parentEntity, string releatedField) where T : IConcreteEntity
+    {
+        return ((IQueryCriteria)crit).Related(parentEntity, releatedField) as IQuery<T>;
+    }
+
+    public static async Task<T> Sum<T>(this IQueryAggregate query, string field)
+    {
+        return await query.Sum(field).ContinueWith(t => t.Result.As<T>());
+    }
+
+    public static async Task<T> Min<T>(this IQueryAggregate query, string field)
+    {
+        return await query.Min(field).ContinueWith(t => t.Result.As<T>());
+    }
+
+    public static async Task<T> Max<T>(this IQueryAggregate query, string field)
+    {
+        return await query.Max(field).ContinueWith(t => t.Result.As<T>());
+    }
+
+    public static async Task<T> Avg<T>(this IQueryAggregate query, string field)
+    {
+        return await query.Avg(field).ContinueWith(t => t.Result.As<T>());
+    }
+
+
+    public static void AndOverExisting(this SqlKata.Query query, Action<SqlKata.Query> additional)
+    {
+        var existing = query.GetComponents("where");
+        query.ClearComponent("where");
+        query.Where(combined =>
+        {
+            if (existing.Count > 0)
+            {
+                combined.Where(branch =>
+                {
+                    foreach (var clause in existing)
+                        branch.AddComponent("where", clause.Clone());
+                    return branch;
+                });
+            }
+
+            combined.Where(branch =>
+            {
+                additional(branch);
+                return branch;
+            });
+            return combined;
+        });
+    }
+
+    public static T AndOverExisting<T>(this T target, Action<IQueryCriteria> additional) where T : IQueryCriteria
+    {
+        additional.NotNull();
+        var kata = target.Query;
+        var existing = kata.GetComponents("where");
+        kata.ClearComponent("where");
+        // And/Or ile aynı: alias alt indeksi + aynı Alias
+        var host = (DbQueryBase)(object)target;
+        kata.Where(combined =>
+        {
+            // Dal 1: daha önce yazılmış where'ler
+            if (existing.Count > 0)
+            {
+                combined.Where(branch =>
+                {
+                    foreach (var clause in existing)
+                        branch.AddComponent("where", clause.Clone());
+                    return branch;
+                });
+            }
+            // Dal 2: Rapidex Action → DbQueryCriteria → NestedCondition
+            var auth = new DbQueryCriteria(
+                target.Schema,
+                target.EntityMetadata,
+                host.GetAliasSubIndex());
+            auth.Alias = target.Alias;
+            additional(auth);
+            combined.Where(_ => auth.Query);
+            return combined;
+        });
+        return target;
+    }
+
 }

@@ -10,6 +10,7 @@ using Rapidex.UnitTest.Data.TestContent;
 
 namespace Rapidex.UnitTest.Data.TestBase;
 
+
 public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbProvider
 {
     public QueryTestsBase(EachTestClassIsolatedFixtureFactory<DbWithProviderFixture<T>> factory) : base(factory)
@@ -566,13 +567,279 @@ public abstract class QueryTestsBase<T> : DbDependedTestsBase<T> where T : IDbPr
         ConcreteEntity01 loadedEntity2 = db.Find<ConcreteEntity01>(id2).Result;
         Assert.Equal(new DateTimeOffset(2024, 2, 17, 09, 21, 0, TimeSpan.FromHours(2)), loadedEntity2.BirthDate);
         //Load with native
+    }
 
+    [Fact]
+    public virtual void Load_08_CriteriaProvider_InjectsFilterOnLoad()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.ReAddReCreate<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
 
+        using (var work = db.BeginWork())
+        {
+            ConcreteEntity01 e1 = work.New<ConcreteEntity01>();
+            e1.Name = "Allowed-01";
+            e1.Address = "A";
+            e1.Save();
 
+            ConcreteEntity01 e2 = work.New<ConcreteEntity01>();
+            e2.Name = "Allowed-02";
+            e2.Address = "B";
+            e2.Save();
 
+            ConcreteEntity01 e3 = work.New<ConcreteEntity01>();
+            e3.Name = "Denied-01";
+            e3.Address = "A";
+            e3.Save();
 
+            ConcreteEntity01 e4 = work.New<ConcreteEntity01>();
+            e4.Name = "Denied-02";
+            e4.Address = "B";
+            e4.Save();
+
+            work.CommitChanges();
+        }
+
+        Assert.Equal(4, db.GetQuery<ConcreteEntity01>().Count().Result);
+
+        var provider = new TestCriteriaProvider(q => q.Like(nameof(ConcreteEntity01.Name), "Allowed*"));
+        db.AddCriteriaProvider(provider);
+        try
+        {
+            var loaded = db.GetQuery<ConcreteEntity01>().Load().Result;
+            Assert.Equal(2, loaded.ItemCount);
+            Assert.All(loaded, e => Assert.StartsWith("Allowed", ((ConcreteEntity01)e).Name));
+            Assert.True(provider.CheckCallCount >= 1);
+
+            var first = db.GetQuery<ConcreteEntity01>()
+                .Eq(nameof(ConcreteEntity01.Name), "Denied-01")
+                .First().Result;
+            Assert.Null(first);
+        }
+        finally
+        {
+            db.CriteriaProviders.Remove(provider);
+        }
+    }
+
+    [Fact]
+    public virtual void Load_09_CriteriaProvider_AndOverExisting_CombinesWithUserCriteria()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.ReAddReCreate<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+
+        using (var work = db.BeginWork())
+        {
+            ConcreteEntity01 e1 = work.New<ConcreteEntity01>();
+            e1.Name = "Allowed-01";
+            e1.Address = "Office";
+            e1.Save();
+
+            ConcreteEntity01 e2 = work.New<ConcreteEntity01>();
+            e2.Name = "Allowed-02";
+            e2.Address = "Home";
+            e2.Save();
+
+            ConcreteEntity01 e3 = work.New<ConcreteEntity01>();
+            e3.Name = "Denied-01";
+            e3.Address = "Office";
+            e3.Save();
+
+            ConcreteEntity01 e4 = work.New<ConcreteEntity01>();
+            e4.Name = "Denied-02";
+            e4.Address = "Home";
+            e4.Save();
+
+            work.CommitChanges();
+        }
+
+        var provider = new TestCriteriaProvider(q => q.Like(nameof(ConcreteEntity01.Name), "Allowed*"));
+        db.AddCriteriaProvider(provider);
+        try
+        {
+            var loaded = db.GetQuery<ConcreteEntity01>()
+                .Eq(nameof(ConcreteEntity01.Address), "Office")
+                .Load().Result;
+
+            Assert.Single(loaded);
+            Assert.Equal("Allowed-01", ((ConcreteEntity01)loaded.First()).Name);
+        }
+        finally
+        {
+            db.CriteriaProviders.Remove(provider);
+        }
+    }
+
+    [Fact]
+    public virtual void Load_10_CriteriaProvider_AndOverExisting_PreservesOrGroup()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.ReAddReCreate<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+
+        using (var work = db.BeginWork())
+        {
+            ConcreteEntity01 e1 = work.New<ConcreteEntity01>();
+            e1.Name = "Allowed-Office";
+            e1.Address = "Office";
+            e1.Save();
+
+            ConcreteEntity01 e2 = work.New<ConcreteEntity01>();
+            e2.Name = "Allowed-Home";
+            e2.Address = "Home";
+            e2.Save();
+
+            ConcreteEntity01 e3 = work.New<ConcreteEntity01>();
+            e3.Name = "Allowed-Other";
+            e3.Address = "Other";
+            e3.Save();
+
+            ConcreteEntity01 e4 = work.New<ConcreteEntity01>();
+            e4.Name = "Denied-Office";
+            e4.Address = "Office";
+            e4.Save();
+
+            ConcreteEntity01 e5 = work.New<ConcreteEntity01>();
+            e5.Name = "Denied-Home";
+            e5.Address = "Home";
+            e5.Save();
+
+            work.CommitChanges();
+        }
+
+        var provider = new TestCriteriaProvider(q => q.Like(nameof(ConcreteEntity01.Name), "Allowed*"));
+        db.AddCriteriaProvider(provider);
+        try
+        {
+            // (Address = Office OR Address = Home) AND (Name like Allowed*)
+            // AndOverExisting sayesinde OR grubu tek dalda kalır; yetki koşulu dış AND olur.
+            var loaded = db.GetQuery<ConcreteEntity01>()
+                .Or(
+                    q => q.Eq(nameof(ConcreteEntity01.Address), "Office"),
+                    q => q.Eq(nameof(ConcreteEntity01.Address), "Home"))
+                .Load().Result;
+
+            Assert.Equal(2, loaded.ItemCount);
+            var names = loaded.Select(e => ((ConcreteEntity01)e).Name).OrderBy(n => n).ToArray();
+            Assert.Equal(new[] { "Allowed-Home", "Allowed-Office" }, names);
+        }
+        finally
+        {
+            db.CriteriaProviders.Remove(provider);
+        }
+    }
+
+    [Fact]
+    public virtual void Load_11_CheckFilters_AppliesProvidersExplicitly()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.ReAddReCreate<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+
+        using (var work = db.BeginWork())
+        {
+            ConcreteEntity01 e1 = work.New<ConcreteEntity01>();
+            e1.Name = "Allowed-01";
+            e1.Save();
+
+            ConcreteEntity01 e2 = work.New<ConcreteEntity01>();
+            e2.Name = "Denied-01";
+            e2.Save();
+
+            work.CommitChanges();
+        }
+
+        var provider = new TestCriteriaProvider(q => q.Like(nameof(ConcreteEntity01.Name), "Allowed*"));
+        db.AddCriteriaProvider(provider);
+        try
+        {
+            var query = db.GetQuery<ConcreteEntity01>();
+            int before = provider.CheckCallCount;
+            query.CheckFilters();
+            Assert.Equal(before + 1, provider.CheckCallCount);
+
+            // İkinci çağrı idempotent; provider tekrar çalışmaz
+            query.CheckFilters();
+            Assert.Equal(before + 1, provider.CheckCallCount);
+
+            long count = query.Count().Result;
+            Assert.Equal(1, count);
+            Assert.Equal(before + 1, provider.CheckCallCount);
+        }
+        finally
+        {
+            db.CriteriaProviders.Remove(provider);
+        }
+    }
+
+    [Fact]
+    public virtual void Load_12_CriteriaProvider_AppliesOnAggregatePaths()
+    {
+        var db = Database.Dbs.AddMainDbIfNotExists();
+        db.ReAddReCreate<ConcreteEntity01>();
+        db.Structure.ApplyEntityStructure<ConcreteEntity01>();
+
+        using (var work = db.BeginWork())
+        {
+            ConcreteEntity01 e1 = work.New<ConcreteEntity01>();
+            e1.Name = "Allowed-01";
+            e1.Number = 10;
+            e1.Save();
+
+            ConcreteEntity01 e2 = work.New<ConcreteEntity01>();
+            e2.Name = "Allowed-02";
+            e2.Number = 20;
+            e2.Save();
+
+            ConcreteEntity01 e3 = work.New<ConcreteEntity01>();
+            e3.Name = "Denied-01";
+            e3.Number = 100;
+            e3.Save();
+
+            work.CommitChanges();
+        }
+
+        var provider = new TestCriteriaProvider(q => q.Like(nameof(ConcreteEntity01.Name), "Allowed*"));
+        db.AddCriteriaProvider(provider);
+        try
+        {
+            long count = db.GetQuery<ConcreteEntity01>().Count().Result;
+            Assert.Equal(2, count);
+            Assert.True(provider.CheckCallCount >= 1);
+
+            bool existsAllowed = db.GetQuery<ConcreteEntity01>()
+                .Eq(nameof(ConcreteEntity01.Name), "Allowed-01")
+                .Exist().Result;
+            Assert.True(existsAllowed);
+
+            bool existsDenied = db.GetQuery<ConcreteEntity01>()
+                .Eq(nameof(ConcreteEntity01.Name), "Denied-01")
+                .Exist().Result;
+            Assert.False(existsDenied);
+
+            long sum = db.GetQuery<ConcreteEntity01>()
+                .Sum<long>(nameof(ConcreteEntity01.Number)).Result;
+            Assert.Equal(30, sum);
+
+            long min = db.GetQuery<ConcreteEntity01>()
+                .Min<long>(nameof(ConcreteEntity01.Number)).Result;
+            Assert.Equal(10, min);
+
+            long max = db.GetQuery<ConcreteEntity01>()
+                .Max<long>(nameof(ConcreteEntity01.Number)).Result;
+            Assert.Equal(20, max);
+        }
+        finally
+        {
+            db.CriteriaProviders.Remove(provider);
+        }
     }
 }
+
+
+
 
 
 
