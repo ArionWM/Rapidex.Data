@@ -1,0 +1,11 @@
+﻿using Rapidex.Data;
+using Rapidex.UnitTest.Data.TestContent;
+using System;
+using System.Linq.Expressions;
+class T {
+  void M() {
+    Expression<Func<ConcreteEntity01, bool>> a = e => e.ContactType == ContactType.Employee;
+    Expression<Func<ConcreteEntity02, bool>> b = e => ((ConcreteEntity01)e.MyReference).Name == "x";
+    Expression<Func<ConcreteEntity02, bool>> c = e => e.MyReference.TargetId == 1L;
+  }
+}

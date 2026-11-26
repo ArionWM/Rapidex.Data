@@ -18,11 +18,10 @@ namespace Rapidex.Data.Scopes
         protected readonly IServiceProvider serviceProvider;
         protected bool isInitialized = false;
         protected ILogger logger;
-
-
         protected string name;
         protected string defaultSchemaName;
         protected long id;
+        protected List<IDbCriteriaProvider> criteriaProviders = new List<IDbCriteriaProvider>();
 
         protected IDbSchemaScope baseScope;
         protected IDbProvider dbProvider;
@@ -50,10 +49,8 @@ namespace Rapidex.Data.Scopes
         public IDbDataModificationStaticHost Data => baseScope.Data;
 
         public EntityMapper Mapper => baseScope.Mapper;
-
-        //public IBlobRepository Blobs => baseScope.Blobs;
-
         public IDbSchemaScope Base => baseScope;
+        public List<IDbCriteriaProvider> CriteriaProviders => criteriaProviders;
 
 
 

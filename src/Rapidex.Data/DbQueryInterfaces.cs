@@ -17,8 +17,11 @@ public interface IDbCriteriaParser
     bool IsYours(string filterOrSqlClause);
 
     IQueryCriteria Parse(IQueryCriteria query, string filterOrSqlClause);
+}
 
-
+public interface IDbCriteriaProvider
+{
+    void Check<T>(T query) where T : IQueryCriteria;
 }
 
 
@@ -130,16 +133,11 @@ public interface IQueryLoader : IQueryOrder, ICloneable
     IQueryLoader UseQueryCache();
 
     IQueryLoader SkipQueryCache();
-
-
     Task<IEntityLoadResult> Load();
-
     Task<ILoadResult<DataRow>> LoadPartial(params string[] fields); //Şimdilik DataRow dönsün
-
     Task<IEntity> First();
-
-
     Task<ILoadResult<DbEntityId>> GetIds();
+    IQueryLoader CheckFilters();
 }
 
 public interface IQueryLoader<T> : IQueryLoader, IQueryBase where T : IConcreteEntity
@@ -277,5 +275,4 @@ public interface IQuery<T> : IQuery, IQueryLoader<T> where T : IConcreteEntity
     new IQuery<T> EnterUpdateMode();
     new IQuery<T> UseQueryCache();
     new IQuery<T> SkipQueryCache();
-
 }

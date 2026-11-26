@@ -735,16 +735,10 @@ public interface IDbSchemaScope : IDbDataModificationStaticHost//TODO: Rename: I
 {
     IDbScope ParentDbScope { get; }
     IDbProvider DbProvider { get; }
-
-    //Cache?
-
     string SchemaName { get; }
 
-
     IDbStructureProvider Structure { get; }
-    //IBlobRepository Blobs { get; }
     IDbDataModificationStaticHost Data { get; }
-
     EntityMapper Mapper { get; }
 
     IDbSchemaScope IDbDataReadScope.ParentSchema => this.Data.ParentSchema;
@@ -821,7 +815,6 @@ public interface IDbScope : IDbSchemaScope //TODO: Rename: IDb
     string Name { get; }
     string DatabaseName { get; }
     string DefaultSchemaName { get; }
-
     string[] Schemas { get; }
 
 
@@ -830,15 +823,20 @@ public interface IDbScope : IDbSchemaScope //TODO: Rename: IDb
 
     IDbMetadataContainer Metadata { get; }
 
+    List<IDbCriteriaProvider> CriteriaProviders { get; }
+
+
     IDbSchemaScope AddSchemaIfNotExists(string schemaName = null, long id = DatabaseConstants.DEFAULT_EMPTY_ID);
 
     IDbSchemaScope Schema(string schemaName = null);
 
     void Initialize(long databaseId, string dbName, IDbProvider dbProvider);
 
-    void IDbSchemaScope.Initialize(string schemaName, IDbScope parentDbScope, IDbProvider provider)
-    {
+    void IDbSchemaScope.Initialize(string schemaName, IDbScope parentDbScope, IDbProvider provider) { }
 
+    void AddCriteriaProvider(IDbCriteriaProvider provider)
+    {
+        this.CriteriaProviders.Add(provider);
     }
 
 }

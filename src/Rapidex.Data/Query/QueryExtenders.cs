@@ -234,6 +234,63 @@ namespace Rapidex.Data
         }
 
 
+        public static void AndOverExisting(this SqlKata.Query query, Action<SqlKata.Query> additional)
+        {
+            var existing = query.GetComponents("where");
+            query.ClearComponent("where");
+            query.Where(combined =>
+            {
+                if (existing.Count > 0)
+                {
+                    combined.Where(branch =>
+                    {
+                        foreach (var clause in existing)
+                            branch.AddComponent("where", clause.Clone());
+                        return branch;
+                    });
+                }
+
+                combined.Where(branch =>
+                {
+                    additional(branch);
+                    return branch;
+                });
+                return combined;
+            });
+        }
+
+        public static T AndOverExisting<T>(this T target, Action<IQueryCriteria> additional) where T : IQueryCriteria
+        {
+            additional.NotNull();
+            var kata = target.Query;
+            var existing = kata.GetComponents("where");
+            kata.ClearComponent("where");
+            // And/Or ile aynı: alias alt indeksi + aynı Alias
+            var host = (DbQueryBase)(object)target;
+            kata.Where(combined =>
+            {
+                // Dal 1: daha önce yazılmış where'ler
+                if (existing.Count > 0)
+                {
+                    combined.Where(branch =>
+                    {
+                        foreach (var clause in existing)
+                            branch.AddComponent("where", clause.Clone());
+                        return branch;
+                    });
+                }
+                // Dal 2: Rapidex Action → DbQueryCriteria → NestedCondition
+                var auth = new DbQueryCriteria(
+                    target.Schema,
+                    target.EntityMetadata,
+                    host.GetAliasSubIndex());
+                auth.Alias = target.Alias;
+                additional(auth);
+                combined.Where(_ => auth.Query);
+                return combined;
+            });
+            return target;
+        }
 
     }
 }
